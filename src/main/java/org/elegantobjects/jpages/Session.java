@@ -43,16 +43,22 @@ public class Session {
     final Page with(final String request) {
         final Map<String, String> pairs = new HashMap<>(0);
         final String[] lines = request.split("\r\n");
+
+        // Put all headers into the map
         for (int idx = 1; idx < lines.length; ++idx) {
             final String[] parts = lines[idx].split(":");
             pairs.put(parts[0].trim(), parts[1].trim());
         }
+
+        // Define the method, path, query, and protocol
         final String[] parts = lines[0].split(" ");
         pairs.put("X-Method", parts[0]);
         final String[] qparts = parts[1].split("\\?", 2);
         pairs.put("X-Path", qparts[0]);
         pairs.put("X-Query", qparts.length < 2 ? "" : qparts[1]);
         pairs.put("X-Protocol", parts[2]);
+
+        // Define the body
         Page target = this.page;
         for (final Map.Entry<String, String> pair : pairs.entrySet()) {
             target = target.with(pair.getKey(), pair.getValue());
