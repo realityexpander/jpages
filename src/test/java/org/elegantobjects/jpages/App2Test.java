@@ -36,6 +36,8 @@ public class App2Test extends TestCase {
 
 
         final Thread thread = new Thread( () -> {
+
+                // Create the app with the session
                 final App2 app = new App2(
                     session
                 );
