@@ -16,7 +16,7 @@ public final class App2 extends IOException {
 
     interface Resource {
         Resource define(String name, String value);
-        void print(Output output) throws IOException;
+        void printTo(Output output) throws IOException;
     }
 
     interface Output {
@@ -29,7 +29,7 @@ public final class App2 extends IOException {
         this.session = session;
     }
 
-    public static class Session {
+    static class Session {
 
         Resource resource;
 
@@ -38,28 +38,12 @@ public final class App2 extends IOException {
         }
 
         String request(String request) {
-            Map<String, String> params = new HashMap<>();
-            Resource resource = this.resource;
-
-            // Parse request into params map
+            Map<String, String> params;
             String[] lines = request.split("\r\n");
-            for(String line: lines) {
-                String[] parts = line.split(":");
-                if(parts.length == 2) {
-                    params.put(parts[0].trim(), parts[1].trim());
-                }
-            }
 
-            // Extract method, query, protocol
-            String[] parts = lines[0].split(" ");
-            params.put("X-Method", parts[0]);
-            params.put("X-Query", parts[1]);
-            params.put("X-Protocol", parts[2]);
-
-            // Populate request into KV pairs
-            for(Map.Entry<String, String> entry : params.entrySet()) {
-                this.resource.define(entry.getKey(), entry.getValue());
-            }
+            params = parseRequest(lines);
+            parseRequestMethodQueryAndProtocol(lines, params);
+            populateResource(params);
 
             // Make the request & return the response
             try {
@@ -68,13 +52,42 @@ public final class App2 extends IOException {
                 final StringOutput output = new StringOutput("");
 
                 // Make the request
-                resource.print(output);
+                resource.printTo(output);
 
                 //return builder.toString();
                 return output.toString();
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
+        }
+
+        private void populateResource(Map<String, String> params) {
+            for(Map.Entry<String, String> entry : params.entrySet()) {
+                resource.define(entry.getKey(), entry.getValue());
+            }
+        }
+
+        private void parseRequestMethodQueryAndProtocol(
+        String[] lines,
+        Map<String, String> params
+        ) {
+            String[] parts = lines[0].split(" ");
+            params.put("X-Method", parts[0]);
+            params.put("X-Query", parts[1]);
+            params.put("X-Protocol", parts[2]);
+        }
+
+        private Map<String, String> parseRequest(String[] lines) {
+            Map<String, String> params = new HashMap<>();
+
+            for(String line: lines) {
+                String[] parts = line.split(":");
+                if(parts.length == 2) {
+                    params.put(parts[0].trim(), parts[1].trim());
+                }
+            }
+
+            return params;
         }
     }
 

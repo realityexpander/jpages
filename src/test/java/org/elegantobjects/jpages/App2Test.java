@@ -9,6 +9,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class App2Test extends TestCase {
 
@@ -20,16 +22,22 @@ public class App2Test extends TestCase {
         // Create the session with the resource to be served
         final App2.Session session = new App2.Session(
             new App2.Resource() {
+                Map<String, String> params = new HashMap<>();
+
                 @Override
                 public App2.Resource define(String name, String value) {
+                    params.put(name, value);
                     return this;
                 }
 
                 @Override
-                public void print(final App2.Output output) throws IOException {
+                public void printTo(final App2.Output output) throws IOException {
+                    String outputString = "Hello, world! " +
+                            params.getOrDefault("X-Query", "no-query");
+
                     output.print("Content-Type", "text/plain");
-                    output.print("Content-Length", "13");
-                    output.print("X-Body", "Hello, world!");
+                    output.print("Content-Length", String.valueOf(outputString.length()));
+                    output.print("X-Body", outputString);
                 }
             }
         );
@@ -55,7 +63,7 @@ public class App2Test extends TestCase {
 
         // Send 10 requests to the server
         for (int attempt = 0; attempt < 10; ++attempt) {
-            final String response = new JdkRequest("http://localhost:" + port)
+            final String response = new JdkRequest("http://localhost:" + port + "/hello")
                     .fetch()
                     .as(RestResponse.class)
                     .body();
