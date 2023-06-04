@@ -64,12 +64,14 @@ public final class App2 extends IOException {
             // Make the request & return the response
             try {
                 final StringBuilder builder = new StringBuilder();
-                final StringBuilderOutput output = new StringBuilderOutput(builder);
+                final StringBuilderOutput output1 = new StringBuilderOutput(builder);
+                final StringOutput output = new StringOutput("");
 
                 // Make the request
                 resource.print(output);
 
-                return builder.toString();
+                //return builder.toString();
+                return output.toString();
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -81,6 +83,10 @@ public final class App2 extends IOException {
 
         public StringBuilderOutput(StringBuilder builder) {
             this.builder = builder;
+        }
+
+        public String toString() {
+            return this.builder.toString();
         }
 
         @Override
@@ -104,6 +110,35 @@ public final class App2 extends IOException {
         }
     }
 
+    static class StringOutput implements Output {
+        private String string = "";
+
+        public StringOutput(String string) {
+            this.string = string;
+        }
+
+
+        public String toString() {
+            return this.string;
+        }
+
+        @Override
+        public void print(final String name, final String value) {
+            // For first line, add the status
+            if(string.length() == 0) {
+                string += "HTTP/1.1 200 OK\r\n";
+            }
+
+            // If body, add blank line
+            if(name.equals("X-Body")) {
+                string += "\r\n" + value;
+            } else {
+                // add a header
+                string += name + ": " + value + "\r\n";
+            }
+        }
+    }
+
 
     // Start the server
     void start(int port) throws IOException {
@@ -122,10 +157,14 @@ public final class App2 extends IOException {
                     OutputStream output = socket.getOutputStream();
                     final byte[] buffer = new byte[1024];
 
+                    // Get the request
                     int length = input.read(buffer);
                     String request = new String(Arrays.copyOfRange(buffer, 0, length));
 
+                    // Make the request
                     String response = this.session.request(request);
+
+                    // Send the response
                     output.write(response.getBytes());
 
                 } catch (final SocketTimeoutException ex) {
@@ -139,41 +178,4 @@ public final class App2 extends IOException {
             }
         }
     }
-
-//    public static void main() {
-//        final App2 app = new App2(
-//            new Resource() {
-//                private String name;
-//                private String value;
-//
-//                @Override
-//                public Resource define(String name, String value) {
-//                    this.name = name;
-//                    this.value = value;
-//                    return this;
-//                }
-//
-//                @Override
-//                public void print() throws IOException {
-//                    final Output2 output = new Output2() {
-//                        @Override
-//                        public void print(String name, String value) throws IOException {
-//                            output.write(name);
-//                            output.write(": ");
-//                            output.write(value);
-//                            output.write("\r\n");
-//                        }
-//                    };
-//                    output.print(this.name, this.value);
-//                }
-//            }
-//        );
-//
-//        try {
-//            app.start(8080);
-//        } catch (IOException e) {
-//            throw new IllegalStateException(e);
-//        }
-//    }
-
 }
