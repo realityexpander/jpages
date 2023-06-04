@@ -32,11 +32,11 @@ import java.io.OutputStream;
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class SimpleOutput implements Output {
+public final class SimpleTextOutput implements Output {
 
     private final String before;
 
-    SimpleOutput(final String txt) {
+    SimpleTextOutput(final String txt) {
         this.before = txt;
     }
 
@@ -56,7 +56,7 @@ public final class SimpleOutput implements Output {
         } else {
             after.append(name).append(": ").append(value).append("\r\n");
         }
-        return new SimpleOutput(after.toString());
+        return new SimpleTextOutput(after.toString());
     }
 
     @Override

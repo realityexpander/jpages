@@ -44,7 +44,7 @@ public final class SessionTest {
                     return this;
                 }
                 @Override
-                public Output via(final Output output) {
+                public Output printTo(final Output output) {
                     return output.with("Content-Type", "text/plain")
                         .with("Content-Length", "13")
                         .with("X-Body", "Hello, world!");
@@ -52,7 +52,7 @@ public final class SessionTest {
             }
         );
         final Page page = session.with("GET / HTTP/1.1\r\n");
-        final Output output = page.via(new SimpleOutput(""));
+        final Output output = page.printTo(new SimpleTextOutput(""));
         MatcherAssert.assertThat(
             output.toString(),
             Matchers.containsString("HTTP/1.1 200 OK\r\n")

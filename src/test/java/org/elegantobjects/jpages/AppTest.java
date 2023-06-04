@@ -44,28 +44,39 @@ public final class AppTest {
     @Ignore
     public void testWorks() throws Exception {
         final int port = 12345;
+
         final Thread thread = new Thread(
             () -> {
                 final App app = new App(
                     new Page() {
                         @Override
-                        public Page with(final String name, final String value) {
-                            if (!"X-Path".equals(name)) {
+                        public Page with(final String key, final String value) {
+                            // Guard - Accepts only X-Path header
+                            if (!"X-Path".equals(key)) {
                                 return this;
                             }
+
+                            ////////////////
+                            // Dispatcher //
+                            ////////////////
+
                             if ("/".equals(value)) {
-                                return new TextPage("Hello, world!").with(name, value);
+                                return new TextPage("Hello, world!")
+                                    .with(key, value);
                             }
                             if ("/balance".equals(value)) {
-                                return new TextPage("256").with(name, value);
+                                return new TextPage("256")
+                                    .with(key, value);
                             }
                             if ("/id".equals(value)) {
-                                return new TextPage("yegor").with(name, value);
+                                return new TextPage("yegor")
+                                    .with(key, value);
                             }
-                            return new TextPage("Not found!").with(name, value);
+                            return new TextPage("Not found!")
+                                    .with(key, value);
                         }
                         @Override
-                        public Output via(final Output output) {
+                        public Output printTo(final Output output) {
                             return output.with("X-Body", "Not found");
                         }
                     }
@@ -161,10 +172,10 @@ public final class AppTest {
                                         return this;
                                     }
                                     @Override
-                                    public Output via(final Output output) {
+                                    public Output printTo(final Output output) {
                                         return new TextPage(
                                             LocalDateTime.now().toString()
-                                        ).via(output);
+                                        ).printTo(output);
                                     }
                                 },
                                 new PageWithType(

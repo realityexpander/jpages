@@ -48,11 +48,11 @@ public final class VerbosePage implements Page {
     }
 
     @Override
-    public Output via(final Output output) {
+    public Output printTo(final Output output) {
         return new TextPage(
             this.args.entrySet().stream()
                 .map(e -> e.getKey() + ": " + e.getValue())
                 .collect(Collectors.joining("\n"))
-        ).via(output);
+        ).printTo(output);
     }
 }

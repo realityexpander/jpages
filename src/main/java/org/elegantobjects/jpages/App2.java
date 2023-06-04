@@ -31,19 +31,19 @@ public final class App2 extends IOException {
 
     static class Session {
 
-        Resource resource;
+        private Resource resource;
+        private Map<String, String> params;
 
         public Session(Resource resource) {
             this.resource = resource;
         }
 
         String request(String request) {
-            Map<String, String> params;
             String[] lines = request.split("\r\n");
 
             params = parseRequest(lines);
             parseRequestMethodQueryAndProtocol(lines, params);
-            populateResource(params);
+            populateResourceWith(params);
 
             // Make the request & return the response
             try {
@@ -61,20 +61,11 @@ public final class App2 extends IOException {
             }
         }
 
-        private void populateResource(Map<String, String> params) {
-            for(Map.Entry<String, String> entry : params.entrySet()) {
-                resource.define(entry.getKey(), entry.getValue());
-            }
-        }
-
-        private void parseRequestMethodQueryAndProtocol(
-        String[] lines,
-        Map<String, String> params
-        ) {
-            String[] parts = lines[0].split(" ");
-            params.put("X-Method", parts[0]);
-            params.put("X-Query", parts[1]);
-            params.put("X-Protocol", parts[2]);
+        public String toString() {
+            return params.entrySet().stream()
+                    .map(entry ->
+                            entry.getKey() + "=" + entry.getValue())
+                    .reduce("", (a, b) -> a + "\n" + b);
         }
 
         private Map<String, String> parseRequest(String[] lines) {
@@ -88,6 +79,22 @@ public final class App2 extends IOException {
             }
 
             return params;
+        }
+
+        private void parseRequestMethodQueryAndProtocol(
+        String[] lines,
+        Map<String, String> params
+        ) {
+            String[] parts = lines[0].split(" ");
+            params.put("X-Method", parts[0]);
+            params.put("X-Query", parts[1]);
+            params.put("X-Protocol", parts[2]);
+        }
+
+        private void populateResourceWith(Map<String, String> params) {
+            for(Map.Entry<String, String> entry : params.entrySet()) {
+                resource.define(entry.getKey(), entry.getValue());
+            }
         }
     }
 

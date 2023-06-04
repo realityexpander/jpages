@@ -55,7 +55,7 @@ public final class PageWithRoutes implements Page {
     }
 
     @Override
-    public Output via(final Output output) {
+    public Output printTo(final Output output) {
         return output;
     }
 }

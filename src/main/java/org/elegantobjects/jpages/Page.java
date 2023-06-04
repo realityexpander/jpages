@@ -31,5 +31,5 @@ package org.elegantobjects.jpages;
  */
 interface Page {
     Page with(String key, String value);
-    Output via(Output output);
+    Output printTo(Output output);
 }

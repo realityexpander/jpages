@@ -43,7 +43,7 @@ public final class TextPage implements Page {
     }
 
     @Override
-    public Output via(final Output output) {
+    public Output printTo(final Output output) {
         return output
             .with("Content-Type", "text/plain")
             .with("Content-Length", Integer.toString(this.body.length()))

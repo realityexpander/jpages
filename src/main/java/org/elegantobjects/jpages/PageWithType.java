@@ -46,7 +46,7 @@ public final class PageWithType implements Page {
     }
 
     @Override
-    public Output via(final Output output) {
-        return this.origin.via(output.with("Content-Type", this.type));
+    public Output printTo(final Output output) {
+        return this.origin.printTo(output.with("Content-Type", this.type));
     }
 }

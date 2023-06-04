@@ -43,23 +43,23 @@ public final class App {
 
     private final Page page;
 
-    public App(final Page pge) {
-        this.page = pge;
+    public App(final Page page) {
+        this.page = page;
     }
 
     public void start(final int port) throws IOException, InterruptedException {
         final List<Thread> pool = new ArrayList<>(0);
+
         try (final ServerSocket server = new ServerSocket(port)) {
             server.setSoTimeout(1000);
+
             for (int i = 0; i < 10; ++i) {
                 final Thread t = new Thread(
                     () -> {
                         try {
                             while (true) {
-                                if (Thread.currentThread().isInterrupted()) {
-                                    Thread.currentThread().interrupt();
-                                    break;
-                                }
+                                if (isInterrupted()) break;
+
                                 try (final Socket socket = server.accept()) {
                                     this.process(socket);
                                 } catch (final SocketTimeoutException ex) {
@@ -82,14 +82,26 @@ public final class App {
         }
     }
 
+    private boolean isInterrupted() {
+        if (Thread.currentThread().isInterrupted()) {
+            Thread.currentThread().interrupt();
+            return true;
+        }
+        return false;
+    }
+
     private void process(final Socket socket) throws IOException {
         try (final InputStream input = socket.getInputStream();
              final OutputStream output = socket.getOutputStream()) {
             final byte[] buffer = new byte[10000];
+
             final int total = input.read(buffer);
-            new Session(this.page).with(
-                new String(Arrays.copyOfRange(buffer, 0, total))
-            ).via(new SimpleOutput("")).writeTo(output);
+            final String request = new String(Arrays.copyOfRange(buffer, 0, total));
+
+            new Session(this.page)
+                .with(request)
+                .printTo(new SimpleTextOutput(""))
+                .writeTo(output);
         }
     }
 

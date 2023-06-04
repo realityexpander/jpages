@@ -43,7 +43,7 @@ public final class TextPageTest {
         );
         page.with("X-Path", "/user/account")
             .with("Accept", "text/html");
-        final Output output = page.via(new SimpleOutput(""));
+        final Output output = page.printTo(new SimpleTextOutput(""));
         MatcherAssert.assertThat(
             output.toString(),
             Matchers.containsString("")
