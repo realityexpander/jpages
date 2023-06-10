@@ -360,14 +360,14 @@ class API implements IAPI {
 
 interface IRepo {
 
-    interface Book {
+    interface Book extends IRepo {
         Result<Domain.Book> getBookInfo(UUID id);
         Result<Domain.Book> updateBookInfo(Domain.Book bookInfo);
     }
 }
 
-// Repo uses Domain Models, and internally converts to/from DTOs/Entities
-class Repo {
+// Repo uses Domain Models, and internally converts to/from DTOs/Entities/Domains
+class Repo implements IRepo {
     static class Book implements IRepo.Book {
         private final API api;
         private final DB database;
@@ -696,11 +696,11 @@ class XApp2 {
         }
 
         System.out.printf("\n");
-        System.out.println("DB");
+        System.out.println("DB Dump");
         this.context.getBookRepo().printDB();
 
         System.out.printf("\n");
-        System.out.println("API");
+        System.out.println("API Dump");
         this.context.getBookRepo().printAPI();
     }
 
