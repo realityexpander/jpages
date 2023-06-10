@@ -231,6 +231,10 @@ class Result<T> {
         public T getValue() {
             return value;
         }
+
+        public String toString() {
+            return value.toString();
+        }
     }
 
     static class Failure<T> extends Result<T> {
@@ -242,6 +246,10 @@ class Result<T> {
 
         public Exception getException() {
             return exception;
+        }
+
+        public String toString() {
+            return exception.getLocalizedMessage();
         }
     }
 }
@@ -290,8 +298,10 @@ class DB implements IDB {
 }
 
 interface IAPI {
-    DTO.Book getBook(UUID id);
+    Result<DTO.Book> getBook(UUID id);
+    Result<DTO.Book> getBook(String id);
     Result<DTO.Book> updateBook(DTO.Book bookInfo);
+    Result<DTO.Book> addBook(DTO.Book book);
 }
 
 // API uses DTOs
@@ -299,36 +309,66 @@ class API implements IAPI {
     private final URL url;
     private final HttpClient client;
 
+    // Simulate an API database
+    private final HashMap<String, DTO.Book> database = new HashMap<>();
+
     API(URL url, HttpClient client) {
         this.url = url;
         this.client = client;
     }
 
-    public DTO.Book getBook(UUID id) {
-        // Simulate the request
-        return new DTO.Book(id.toString(), "Title", "Author", "Description");
+    @Override
+    public Result<DTO.Book> getBook(UUID id) {
+        return getBook(id.toString());
     }
 
+    @Override
+    public Result<DTO.Book> getBook(String id) {
+        // Simulate the request
+        if(!database.containsKey(id)) {
+            return new Result.Failure<>(new Exception("Book not found"));
+        }
+
+        return new Result.Success<>(database.get(id));
+    }
+
+    @Override
     public Result<DTO.Book> updateBook(DTO.Book bookInfo) {
         // Simulate the request
+        if(database.put(bookInfo.id, bookInfo) == null) {
+            return new Result.Failure<>(new Exception("Failed to update book"));
+        }
+
         return new Result.Success<>(bookInfo);
-        //return new Result.Failure<DTO.Book>(new Exception("Failed to set book"));
+    }
+
+    @Override
+    public Result<DTO.Book> addBook(DTO.Book book) {
+        if(database.containsKey(book.id)) {
+            return new Result.Failure<>(new Exception("Book already exists"));
+        }
+
+        database.put(book.id, book);
+
+        return new Result.Success<>(book);
+    }
+
+    public Map<String, DTO.Book> getAllBooks() {
+        return new HashMap<>(database);
     }
 }
 
 interface IRepo {
-    API api = null;
-    DB database = null;
 
     interface Book {
-        Domain.Book getBookInfo(UUID id);
+        Result<Domain.Book> getBookInfo(UUID id);
         Result<Domain.Book> updateBookInfo(Domain.Book bookInfo);
     }
 }
 
 // Repo uses Domain Models, and internally converts to/from DTOs/Entities
 class Repo {
-    static class Book implements IRepo, IRepo.Book {
+    static class Book implements IRepo.Book {
         private final API api;
         private final DB database;
 
@@ -337,11 +377,25 @@ class Repo {
             this.database = database;
         }
 
-        public Domain.Book getBookInfo(UUID id) {
+        public Result<Domain.Book> getBookInfo(UUID id) {
             // Make the request
-            DTO.Book bookInfo = api.getBook(id);
+            Result<DTO.Book> bookInfo = api.getBook(id);
+            if(bookInfo instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<DTO.Book>) bookInfo).getException();
+                return new Result.Failure<Domain.Book>(exception);
+            }
 
-            return bookInfo.toDomain();
+            // Convert to Domain Model
+            Domain.Book book = ((Result.Success<DTO.Book>) bookInfo).getValue().toDomain();
+
+            // Save to Local DB
+            Result<Entity.Book> resultDB = database.updateBook(book.toEntity());
+            if(resultDB instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<Entity.Book>) resultDB).getException();
+                return new Result.Failure<Domain.Book>(exception);
+            }
+
+            return new Result.Success<Domain.Book>(book);
         }
 
         public Result<Domain.Book> updateBookInfo(Domain.Book bookInfo) {
@@ -355,7 +409,7 @@ class Repo {
             // Convert to Domain Model
             Domain.Book book = ((Result.Success<DTO.Book>) resultApi).getValue().toDomain();
 
-            // Save to DB
+            // Save to Local DB
             Result<Entity.Book> resultDB = database.updateBook(book.toEntity());
             if(resultDB instanceof Result.Failure) {
                 Exception exception = ((Result.Failure<Entity.Book>) resultDB).getException();
@@ -369,16 +423,38 @@ class Repo {
             for(int i = 0; i < 10; i++) {
                 database.addBook(
                     new Entity.Book(UUID.fromString(
-                            "00000000-0000-0000-0000-00000000000" + i),
-                            "Title " + i,
-                            "Author " + i,
-                            "Description " + i)
+                        "00000000-0000-0000-0000-00000000000" + i),
+                    "Title " + i,
+                    "Author " + i,
+                    "Description " + i)
                 );
+            }
+        }
+
+        public void populateAPI() {
+            for(int i = 0; i < 10; i++) {
+                Result<DTO.Book> result = api.addBook(
+                        new DTO.Book("00000000-0000-0000-0000-00000000000" + i,
+                        "Title " + i,
+                        "Author " + i,
+                        "Description " + i)
+                    );
+
+                if(result instanceof Result.Failure) {
+                    Exception exception = ((Result.Failure<DTO.Book>) result).getException();
+                    System.out.println(exception.getMessage());
+                }
             }
         }
 
         public void printDB() {
             for (Map.Entry<UUID, Entity.Book> entry : database.getAllBooks().entrySet()) {
+                System.out.println(entry.getKey() + " = " + entry.getValue());
+            }
+        }
+
+        public void printAPI() {
+            for (Map.Entry<String, DTO.Book> entry : api.getAllBooks().entrySet()) {
                 System.out.println(entry.getKey() + " = " + entry.getValue());
             }
         }
@@ -409,16 +485,6 @@ class Context implements IContext {
     }
 }
 
-interface ToDomain<T extends Domain> {
-    T toDomain();
-}
-interface ToEntity<T extends Entity> {
-    T toEntity();
-}
-interface ToDTO<T extends DTO> {
-    T toDTO();
-}
-
 // Domain Models
 class Domain {
     static class Book extends Domain implements ToEntity<Entity.Book>, ToDTO<DTO.Book> {
@@ -429,6 +495,12 @@ class Domain {
 
         Book(String id, String title, String author, String description) {
             this.id = UUID.fromString(id);
+            this.title = title;
+            this.author = author;
+            this.description = description;
+        }
+        Book(UUID id, String title, String author, String description) {
+            this.id = id;
             this.title = title;
             this.author = author;
             this.description = description;
@@ -451,13 +523,13 @@ class Domain {
 // Data Transfer Objects for API
 class DTO {
     static class Book extends DTO implements ToDomain<Domain.Book> {
-        final UUID id;
+        final String id;
         final String title;
         final String author;
         final String description;
 
         Book(String id, String title, String author, String description) {
-            this.id = UUID.fromString(id);
+            this.id = id;
             this.title = title;
             this.author = author;
             this.description = description;
@@ -468,7 +540,7 @@ class DTO {
         }
 
         public Domain.Book toDomain() {
-            return new Domain.Book(this.id.toString(), this.title, this.author, this.description);
+            return new Domain.Book(this.id, this.title, this.author, this.description);
         }
     }
 }
@@ -498,8 +570,18 @@ class Entity {
     }
 }
 
+interface ToDomain<T extends Domain> {
+    T toDomain();
+}
+interface ToEntity<T extends Entity> {
+    T toEntity();
+}
+interface ToDTO<T extends DTO> {
+    T toDTO();
+}
+
 class Book {
-    private final UUID id;
+    final UUID id;
     private Domain.Book info = null;
     private Repo.Book repo = Context.INSTANCE.getBookRepo();
 
@@ -515,13 +597,16 @@ class Book {
         this(UUID.randomUUID());
     }
 
-    public Domain.Book getInfo() {
-        if (this.info != null) return this.info;
+    public Result<Domain.Book> getInfo() {
+        if (this.info != null) return new Result.Success<>(this.info);
 
-        Domain.Book bookInfo = repo.getBookInfo(this.id);
-        this.info = bookInfo;
+        Result<Domain.Book> result = this.repo.getBookInfo(this.id);
+        if(result instanceof Result.Failure) {
+            return result;
+        }
 
-        return bookInfo;
+        this.info = ((Result.Success<Domain.Book>) result).getValue();
+        return result;
     }
 
     public void updateInfo(Domain.Book info) throws Exception {
@@ -540,6 +625,11 @@ class Book {
         this.info = ((Result.Success<Domain.Book>) result).getValue();
 
         return;
+    }
+
+    public void refreshInfo() {
+        this.info = null;
+        this.getInfo();
     }
 
     public String toString() {
@@ -569,17 +659,19 @@ class XApp2 {
             this.context.setBookRepo((Repo.Book) this.repo);
         }
 
+        // Populate the databases
         this.context.getBookRepo().populateDB();
+        this.context.getBookRepo().populateAPI();
 
         // Get the book info
         Book book = new Book(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         System.out.println(book.getInfo().toString());
 
-        // Update the book info
+        // Update info for a book
         try {
             book.updateInfo(new Domain.Book(
                 "00000000-0000-0000-0000-000000000001",
-                "The Updated Book",
+                "The Updated Title",
                 "The Updated Author",
                 "The Updated Description"
             ));
@@ -590,7 +682,26 @@ class XApp2 {
         // Get the book info
         System.out.println(book.getInfo().toString());
 
+        // Try to get a book id that doesn't exist
+        Book book2 = new Book(UUID.fromString("00000000-0000-0000-0000-000000000099"));
+        if(book2.getInfo() instanceof Result.Failure) {
+            System.out.println("OH NO! --> " +
+                    "book id: " + book2.id + " >> " +
+                ((Result.Failure<Domain.Book>) book2.getInfo())
+            );
+        } else {
+            System.out.println("YAY! --> " +
+                ((Result.Success<Domain.Book>) book2.getInfo()).getValue()
+            );
+        }
+
+        System.out.printf("\n");
+        System.out.println("DB");
         this.context.getBookRepo().printDB();
+
+        System.out.printf("\n");
+        System.out.println("API");
+        this.context.getBookRepo().printAPI();
     }
 
     public static void main(final String... args) {
