@@ -23,36 +23,29 @@
  */
 package org.elegantobjects.jpages;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 /**
  * The page.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class VerbosePage implements Page {
+public final class HtmlTextPage implements Page {
 
-    private final Map<String, String> args;
+    private final String html;
 
-    VerbosePage() {
-        this.args = new HashMap<>(0);
+    HtmlTextPage(final String html) {
+        this.html = html;
     }
 
     @Override
     public Page with(final String key, final String value) {
-        this.args.put(key, value);
         return this;
     }
 
     @Override
     public Output printTo(final Output output) {
-        return new TextPage(
-            this.args.entrySet().stream()
-                .map(e -> e.getKey() + ": " + e.getValue())
-                .collect(Collectors.joining("\n"))
-        ).printTo(output);
+        return output
+            .with("Content-Length", Integer.toString(this.html.length()))
+            .with("X-Body", this.html);
     }
 }

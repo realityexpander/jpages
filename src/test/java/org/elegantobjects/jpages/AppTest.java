@@ -157,35 +157,39 @@ public final class AppTest {
         final int port = 8080;
         final Thread thread = new Thread(
             () -> {
+                final Page timePage = new Page() {
+                    @Override
+                    public Page with(final String key, final String value) {
+                        return this;
+                    }
+
+                    @Override
+                    public Output printTo(final Output output) {
+                        return new TextPage(
+                                LocalDateTime.now().toString()
+                        ).printTo(output);
+                    }
+                };
+
                 final App app = new App(
                     new PageWithRoutes(
                         "/robots.txt",
-                        new TextPage("Kill all humans!"),
-                        new PageWithRoutes(
+                        new TextPage("Kill all humans!"), // success
+                        new PageWithRoutes(               // failure
                             "/debug",
-                            new VerbosePage(),
-                            new PageWithRoutes(
+                            new KeyValuePage(),           // success
+                            new PageWithRoutes(           // failure
                                 "/time",
-                                new Page() {
-                                    @Override
-                                    public Page with(final String key, final String value) {
-                                        return this;
-                                    }
-                                    @Override
-                                    public Output printTo(final Output output) {
-                                        return new TextPage(
-                                            LocalDateTime.now().toString()
-                                        ).printTo(output);
-                                    }
-                                },
-                                new PageWithType(
-                                    new SimplePage("Hi, <b>Bobby</b>!"),
+                                timePage,                 // success
+                                new PageWithContentType(  // failure
+                                    new HtmlTextPage("Hi, <b>Bobby</b>!"),
                                     "text/html"
                                 )
                             )
                         )
                     )
                 );
+
                 try {
                     app.start(port);
                 } catch (Exception ex) {

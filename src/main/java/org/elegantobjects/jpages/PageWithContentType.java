@@ -29,15 +29,14 @@ package org.elegantobjects.jpages;
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class PageWithType implements Page {
+public final class PageWithContentType implements Page {
 
-    private final Page origin;
-
+    private final Page page;
     private final String type;
 
-    PageWithType(final Page page, final String ctype) {
-        this.origin = page;
-        this.type = ctype;
+    PageWithContentType(final Page page, final String contentType) {
+        this.page = page;
+        this.type = contentType;
     }
 
     @Override
@@ -47,6 +46,8 @@ public final class PageWithType implements Page {
 
     @Override
     public Output printTo(final Output output) {
-        return this.origin.printTo(output.with("Content-Type", this.type));
+        return this.page.printTo(
+            output.with("Content-Type", this.type)
+        );
     }
 }

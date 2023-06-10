@@ -23,29 +23,38 @@
  */
 package org.elegantobjects.jpages;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * The page.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class SimplePage implements Page {
+public final class KeyValuePage implements Page {
 
-    private final String body;
+    private final Map<String, String> args;
 
-    SimplePage(final String text) {
-        this.body = text;
+    KeyValuePage() {
+        this.args = new HashMap<>(0);
     }
 
     @Override
     public Page with(final String key, final String value) {
+        this.args.put(key, value);
         return this;
     }
 
     @Override
     public Output printTo(final Output output) {
-        return output
-            .with("Content-Length", Integer.toString(this.body.length()))
-            .with("X-Body", this.body);
+        return new TextPage(
+            this.args
+                .entrySet()
+                .stream()
+                .map(e -> e.getKey() + ": " + e.getValue())
+                .collect(Collectors.joining("\n"))
+        ).printTo(output);
     }
 }

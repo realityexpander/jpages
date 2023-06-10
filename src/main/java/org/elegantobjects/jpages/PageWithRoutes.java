@@ -33,24 +33,25 @@ public final class PageWithRoutes implements Page {
 
     private final String path;
 
-    private final Page right;
+    private final Page success;
+    private final Page error;
 
-    private final Page wrong;
-
-    PageWithRoutes(final String pth, final Page rght, final Page wrng) {
-        this.path = pth;
-        this.right = rght;
-        this.wrong = wrng;
+    PageWithRoutes(final String path, final Page success, final Page error) {
+        this.path = path;
+        this.success = success;
+        this.error = error;
     }
 
     @Override
     public Page with(final String key, final String value) {
         if (key.equals("X-Path")) {
             if (value.equals(this.path)) {
-                return this.right.with(key, value);
+                return this.success.with(key, value);
             }
-            return this.wrong.with(key, value);
+
+            return this.error.with(key, value);
         }
+
         return this;
     }
 

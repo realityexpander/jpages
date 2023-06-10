@@ -37,8 +37,8 @@ public final class TextPageTest {
 
     @Test
     public void testWorks() throws Exception {
-        final Page page = new PageWithType(
-            new SimplePage("Hi!"),
+        final Page page = new PageWithContentType(
+            new HtmlTextPage("Hi!"),
             "text/html"
         );
         page.with("X-Path", "/user/account")
