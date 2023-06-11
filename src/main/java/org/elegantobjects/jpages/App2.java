@@ -6,10 +6,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class App2 extends IOException {
 
@@ -204,6 +201,24 @@ public final class App2 extends IOException {
 
 ///////////////////////////////////
 
+class Pair<T, U> {
+    private final T first;
+    private final U second;
+
+    Pair(T first, U second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    T getFirst() {
+        return first;
+    }
+
+    U getSecond() {
+        return second;
+    }
+}
+
 class HttpClient {
     private final String client;
 
@@ -361,8 +376,22 @@ class API implements IAPI {
 interface IRepo {
 
     interface Book extends IRepo {
-        Result<Model.Domain.Book> getBookInfo(UUID id);
+        Result<Model.Domain.Book> getBookInfoResult(UUID id);
         Result<Model.Domain.Book> updateBookInfo(Model.Domain.Book bookInfo);
+    }
+
+    interface User extends IRepo {
+        Result<Model.Domain.User> getUserInfoResult(UUID id);
+        Model.Domain.User getUserInfo(UUID id);
+        Result<Model.Domain.User> updateUserInfo(Model.Domain.User userInfo);
+        Model.Domain.User createUser(Model.Domain.User user);
+    }
+
+    interface Library extends IRepo {
+        Result<Model.Domain.Library> getLibraryInfoResult(UUID id);
+        Model.Domain.Library getLibraryInfo(UUID id);
+        Result<Model.Domain.Library> updateLibraryInfo(Model.Domain.Library libraryInfo);
+        Model.Domain.Library createLibrary(Model.Domain.Library library);
     }
 }
 
@@ -377,7 +406,7 @@ class Repo implements IRepo {
             this.database = database;
         }
 
-        public Result<Model.Domain.Book> getBookInfo(UUID id) {
+        public Result<Model.Domain.Book> getBookInfoResult(UUID id) {
             // Make the request
             Result<Model.DTO.Book> bookInfo = api.getBook(id);
             if(bookInfo instanceof Result.Failure) {
@@ -459,32 +488,131 @@ class Repo implements IRepo {
             }
         }
     }
+
+    static class User implements IRepo.User {
+        private final HashMap<UUID, Model.Domain.User> database = new HashMap<>(); // Simulate a database on server
+
+        @Override
+        public Result<Model.Domain.User> getUserInfoResult(UUID id) {
+            if(database.containsKey(id)) {
+                return new Result.Success<>(database.get(id));
+            }
+
+            return new Result.Failure<>(new Exception("User not found"));
+        }
+
+        @Override
+        public Model.Domain.User getUserInfo(UUID id) {
+            return database.get(id);
+        }
+
+        @Override
+        public Result<Model.Domain.User> updateUserInfo(Model.Domain.User userInfo) {
+            if(database.containsKey(userInfo.id)) {
+                database.put(userInfo.id, userInfo);
+                return new Result.Success<>(userInfo);
+            }
+
+            return new Result.Failure<>(new Exception("User not found"));
+        };
+
+        @Override
+        public Model.Domain.User createUser(Model.Domain.User user) {
+            database.put(user.id, user);
+            return user;
+        }
+
+    }
+
+    static class Library implements IRepo.Library {
+        private final HashMap<UUID, Model.Domain.Library> database = new HashMap<>(); // simulates a database on server
+
+        @Override
+        public Result<Model.Domain.Library> getLibraryInfoResult(UUID id) {
+            if(database.containsKey(id)) {
+                return new Result.Success<>(database.get(id));
+            }
+
+            return new Result.Failure<>(new Exception("Library not found"));
+        }
+
+        @Override
+        public Model.Domain.Library getLibraryInfo(UUID id) {
+            return database.get(id);
+        }
+
+        @Override
+        public Result<Model.Domain.Library> updateLibraryInfo(Model.Domain.Library libraryInfo) {
+            if(database.containsKey(libraryInfo.id)) {
+                database.put(libraryInfo.id, libraryInfo);
+                return new Result.Success<>(libraryInfo);
+            }
+
+            return new Result.Failure<>(new Exception("Library not found"));
+        };
+
+        @Override
+        public Model.Domain.Library createLibrary(Model.Domain.Library libraryInfo) {
+            database.put(libraryInfo.id, libraryInfo);
+            return libraryInfo;
+        }
+
+        public void populateLibraryWithRandomBooks(UUID libraryId, int numberOfBooks) {
+            for(int i = 0; i < numberOfBooks; i++) {
+                database.get(libraryId).availableBooks
+                    .put(UUID.fromString("00000000-0000-0000-0000-00000000000" + i),
+                        1 /* number on hand */ );
+            }
+        }
+
+    }
 }
 
 interface IContext {
-    Repo.Book getBookRepo();
+    Repo.Book bookRepo();
     void setBookRepo(Repo.Book bookRepo);
 }
 
 class Context implements IContext {
-    static Context INSTANCE = new Context(null);  // Default Context
+    static Context INSTANCE = new Context();  // Create Default Context
     private Repo.Book bookRepo = null;
+    private Repo.User userRepo = null;
+    private Repo.Library libraryRepo = null;
 
     Context(
-        Repo.Book bookRepo
+        Repo.Book bookRepo,
+        Repo.User userRepo,
+        Repo.Library libraryRepo
     ) {
         this.bookRepo = bookRepo;
+        this.userRepo = userRepo;
+        this.libraryRepo = libraryRepo;
+    }
+    Context() {
+        this(null, null, null);
     }
 
     public void setBookRepo(Repo.Book bookRepo) {
         if (bookRepo != null) this.bookRepo = bookRepo;
     }
-
-    public Repo.Book getBookRepo() {
+    public Repo.Book bookRepo() {
         return this.bookRepo;
     }
-}
 
+    public void setUserRepo(Repo.User userRepo) {
+        if (userRepo != null) this.userRepo = userRepo;
+    }
+    public Repo.User userRepo() {
+        return this.userRepo;
+    }
+
+    public void setLibraryRepo(Repo.Library libraryRepo) {
+        if (libraryRepo != null) this.libraryRepo = libraryRepo;
+    }
+    public Repo.Library libraryRepo() {
+        return this.libraryRepo;
+    }
+}
 
 class Model {
     static class Domain extends Model {
@@ -518,6 +646,53 @@ class Model {
 
             public Entity.Book toEntity() {
                 return new Entity.Book(this.id, this.title, this.author, this.description);
+            }
+        }
+
+        static class User extends Domain {
+            final UUID id;
+            final String name;
+            final String email;
+            final ArrayList<Book> books = new ArrayList<>();
+
+            User(UUID id, String name, String email) {
+                this.id = id;
+                this.name = name;
+                this.email = email;
+            }
+
+            public String toString() {
+                return "User: " + this.name + " (" + this.email + ")";
+            }
+        }
+
+        static class Library extends Domain {
+            final UUID id;
+            final String name;
+            final HashMap<UUID, ArrayList<UUID>> checkoutMap; // User ID -> Books
+            final HashMap<UUID, Integer> availableBooks; // Book ID -> Number of books available
+
+            Library(UUID id,
+                    String name,
+                    HashMap<UUID, ArrayList<UUID>> checkoutMap,
+                    HashMap<UUID, Integer> availableBooks
+            ) {
+                this.id = id;
+                this.name = name;
+                this.checkoutMap = checkoutMap;
+                this.availableBooks = availableBooks;
+            }
+            Library(UUID id, String name) {
+                this.id = id;
+                this.name = name;
+                this.checkoutMap = new HashMap<>();
+                this.availableBooks = new HashMap<>();
+            }
+
+            public String toString() {
+                return "Library: " + this.name + " (" + this.id + ")" + "\n" +
+                    "Available Books: " + this.availableBooks + "\n" +
+                    "Checkout Map: " + this.checkoutMap;
             }
         }
     }
@@ -583,11 +758,11 @@ class Model {
     }
 }
 
-
 class Book {
     final UUID id;
     private Model.Domain.Book info = null;
-    private Repo.Book repo = Context.INSTANCE.getBookRepo();
+    private Result<Model.Domain.Book> infoResult = null;
+    private Repo.Book repo = Context.INSTANCE.bookRepo();
 
     Book(UUID id, Repo.Book repo) {
         if (repo != null) this.repo = repo;
@@ -601,10 +776,9 @@ class Book {
         this(UUID.randomUUID());
     }
 
-    public Result<Model.Domain.Book> getInfo() {
-        if (this.info != null) return new Result.Success<>(this.info);
-
-        Result<Model.Domain.Book> result = this.repo.getBookInfo(this.id);
+    public Result<Model.Domain.Book> getInfoResult() {
+        Result<Model.Domain.Book> result = this.repo.getBookInfoResult(this.id);
+        infoResult = result;
         if(result instanceof Result.Failure) {
             return result;
         }
@@ -613,27 +787,36 @@ class Book {
         return result;
     }
 
+    public Model.Domain.Book getInfo() {
+        if (this.info != null) return this.info;
+
+        Result<Model.Domain.Book> result = this.getInfoResult();
+        if(result instanceof Result.Failure) {
+            return null;
+        }
+
+        this.info = ((Result.Success<Model.Domain.Book>) result).getValue();
+        return this.info;
+    }
+
     public void updateInfo(Model.Domain.Book info) throws Exception {
-        // optimistic update
+        // Update self optimistically
         this.info = info;
 
         // Update the repo
         Result<Model.Domain.Book> result = this.repo.updateBookInfo(info);
-
         if(result instanceof Result.Failure) {
             Exception exception = ((Result.Failure<Model.Domain.Book>) result).getException();
             throw exception;
         }
 
-        // Update the resulting info
+        // Update self with repo result
         this.info = ((Result.Success<Model.Domain.Book>) result).getValue();
-
-        return;
     }
 
     public void refreshInfo() {
         this.info = null;
-        this.getInfo();
+        this.getInfoResult();
     }
 
     public String toString() {
@@ -641,9 +824,231 @@ class Book {
     }
 }
 
+class User {
+    final UUID id;
+    private Model.Domain.User info = null;
+    private Result<Model.Domain.User> infoResult = null;
+    private Repo.User repo = Context.INSTANCE.userRepo();
+
+    User(UUID id, Repo.User repo) {
+        if (repo != null) this.repo = repo;
+
+        this.id = id;
+    }
+    User(UUID id) {
+        this(id, null);
+    }
+    User() {
+        this(UUID.randomUUID());
+    }
+
+    public Result<Model.Domain.User> getInfoResult() {
+        Result<Model.Domain.User> result = this.repo.getUserInfoResult(this.id);
+        infoResult = result;
+        if(result instanceof Result.Failure) {
+            return result;
+        }
+
+        this.info = ((Result.Success<Model.Domain.User>) result).getValue();
+        return result;
+    }
+
+    public Model.Domain.User getInfo() {
+        if (this.info != null) return this.info;
+
+        Result<Model.Domain.User> result = this.getInfoResult();
+        if(result instanceof Result.Failure) {
+            return null;
+        }
+
+        this.info = ((Result.Success<Model.Domain.User>) result).getValue();
+        return this.info;
+    }
+
+    public void updateInfo(Model.Domain.User info) throws Exception {
+        // Update self optimistically
+        this.info = info;
+
+        // Update the repo
+        Result<Model.Domain.User> result = this.repo.updateUserInfo(info);
+        if(result instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<Model.Domain.User>) result).getException();
+            throw exception;
+        }
+
+        // Update self with repo result
+        this.info = ((Result.Success<Model.Domain.User>) result).getValue();
+    }
+
+    public void refreshInfo() {
+        this.info = null;
+        this.getInfoResult();
+    }
+
+    public String toString() {
+        return "User: " + this.info.name;
+    }
+}
+
+class Library {
+    final UUID id;
+    private Model.Domain.Library info = null;
+    private Result<Model.Domain.Library> infoResult = null;
+    private Repo.Library repo = Context.INSTANCE.libraryRepo();
+
+    Library(UUID id, Repo.Library repo) {
+        if (repo != null) this.repo = repo;
+
+        this.id = id;
+    }
+    Library(UUID id) {
+        this(id, null);
+    }
+    Library() {
+        this(UUID.randomUUID());
+    }
+
+    public Result<Model.Domain.Library> getInfoResult() {
+        Result<Model.Domain.Library> result = this.repo.getLibraryInfoResult(this.id);
+        infoResult = result;
+        if(result instanceof Result.Failure) {
+            return result;
+        }
+
+        this.info = ((Result.Success<Model.Domain.Library>) result).getValue();
+        return result;
+    }
+
+    public Model.Domain.Library getInfo() {
+        if (this.info != null) return this.info;
+
+        Result<Model.Domain.Library> result = this.getInfoResult();
+        if(result instanceof Result.Failure) {
+            return null;
+        }
+
+        this.info = ((Result.Success<Model.Domain.Library>) result).getValue();
+        return this.info;
+    }
+
+    public void updateInfo(Model.Domain.Library info) throws Exception {
+        // Update self optimistically
+        this.info = info;
+
+        // Update the repo
+        Result<Model.Domain.Library> result = this.repo.updateLibraryInfo(info);
+        if(result instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<Model.Domain.Library>) result).getException();
+            throw exception;
+        }
+
+        // Update self with repo result
+        this.info = ((Result.Success<Model.Domain.Library>) result).getValue();
+    }
+
+    public void refreshInfo() {
+        this.info = null;
+        this.getInfoResult();
+    }
+
+    public String toString() {
+        return "Library: " + this.info.name;
+    }
+
+    public Result<UUID> checkOutBookToUser(Book book, UUID userId) {
+        System.out.printf("Checking out book %s to user %s\n", book.id, userId);
+        if (!isInfoLoaded()) return new Result.Failure<>(new Exception("Library info not found"));
+
+        checkUserExistsOrCreateUser(userId);
+
+        // Check if book exists
+        if(!this.info.availableBooks.containsKey(book.id)) {
+            return new Result.Failure<>(new Exception("Book not found, id: " + book.id));
+        }
+
+        // Check if book is available
+        if(this.info.availableBooks.get(book.id).equals(0)) {
+            return new Result.Failure<>(new Exception("Book is not available, id: " + book.id));
+        }
+
+        // Check if user has already checked out book
+        if(this.info.checkoutMap.get(userId).contains(book.id)) {
+            return new Result.Failure<>(new Exception("User has already checked out book"));
+        }
+
+        this.info.checkoutMap.get(userId).add(book.id);
+        this.info.availableBooks.put(book.id, this.info.availableBooks.get(book.id) - 1);
+        return new Result.Success<>(book.id);
+    }
+
+    public Result<UUID> returnBookFromUser(Book book, UUID userId) {
+        System.out.printf("Returning book %s from user %s\n", book.id, userId);
+        if (this.info == null) {
+            if (this.getInfo() == null) {
+                return new Result.Failure<>(new Exception("Library info not found"));
+            }
+        }
+
+        checkUserExistsOrCreateUser(userId);
+
+        // Check if user has not checked out book
+        if(!this.info.checkoutMap.get(userId).contains(book.id)) {
+            return new Result.Failure<>(new Exception("User has not checked out book, id: " + book.id));
+        }
+
+        this.info.checkoutMap.get(userId).remove(book.id);
+        this.info.availableBooks.put(book.id, this.info.availableBooks.get(book.id) + 1);
+        return new Result.Success<>(book.id);
+    }
+
+    private void checkUserExistsOrCreateUser(UUID userId) {
+        // Check if user exists
+        if(!this.info.checkoutMap.containsKey(userId)) {
+            // Create new user entry
+            this.info.checkoutMap.put(userId, new ArrayList<>());
+        }
+    }
+
+    public Result<ArrayList<UUID>> getBooksCheckedOutByUser(UUID userId) {
+        System.out.printf("Getting books checked out by user %s\n", userId);
+        if (!isInfoLoaded()) return new Result.Failure<>(new Exception("Library info not found"));
+
+        checkUserExistsOrCreateUser(userId);
+
+        return new Result.Success<>(this.info.checkoutMap.get(userId));
+    }
+
+    public Result<ArrayList<Pair<UUID, Integer>>> getAvailableBooks() {
+        System.out.print("Getting available books\n");
+        if (!isInfoLoaded()) return new Result.Failure<>(new Exception("Library info not found"));
+
+        ArrayList<Pair<UUID, Integer>> availableBooks = new ArrayList<>();
+        for (Map.Entry<UUID, Integer> entry : this.info.availableBooks.entrySet()) {
+            if(entry.getValue() > 0) {
+                availableBooks.add(new Pair<>(entry.getKey(), entry.getValue()));
+            }
+        }
+
+        return new Result.Success<>(availableBooks);
+    }
+
+    private boolean isInfoLoaded() {
+        if (this.info == null) {
+            return this.getInfo() != null;
+        }
+
+        return true;
+    }
+
+    public void DumpDB() {
+        System.out.println("\nDumping Library DB:");
+        System.out.println(this.info);
+    }
+}
+
 class XApp2 {
     private Context context = Context.INSTANCE;
-    private IRepo repo = new Repo.Book(
+    private final Repo.Book bookRepo = new Repo.Book(
         new API(
             new URL("http://localhost:8080"),
             new HttpClient("Apache")
@@ -653,67 +1058,196 @@ class XApp2 {
                 "password"
         )
     );
+    private final Repo.Library libraryRepo = new Repo.Library();
+    private final Repo.User userRepo = new Repo.User();
 
     XApp2(Context context) {
         if(context != null) {
             // Passed in context
             this.context = context;
         } else {
-            // Setup the context
-            this.context.setBookRepo((Repo.Book) this.repo);
+            this.context.setBookRepo(this.bookRepo);
+            this.context.setLibraryRepo(this.libraryRepo);
+            this.context.setUserRepo(this.userRepo);
         }
 
-        PopulateDBandAPI();
+        // Poke at a book
+        {
+            PopulateBookDBandAPI();
 
-        // Get the book info
-        Book book = new Book(UUID.fromString("00000000-0000-0000-0000-000000000001"));
-        System.out.println(book.getInfo().toString());
+            // Get the book info
+            Book book = new Book(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+            System.out.println(book.getInfoResult().toString());
 
-        // Update info for a book
-        try {
-            book.updateInfo(new Model.Domain.Book(
-                "00000000-0000-0000-0000-000000000001",
-                "The Updated Title",
-                "The Updated Author",
-                "The Updated Description"
-            ));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            // Update info for a book
+            try {
+                book.updateInfo(new Model.Domain.Book(
+                        "00000000-0000-0000-0000-000000000001",
+                        "The Updated Title",
+                        "The Updated Author",
+                        "The Updated Description"
+                ));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+            // Get the book infoResult
+            System.out.println(book.getInfoResult().toString());
+
+            // Get the bookInfo (null if not loaded)
+            Model.Domain.Book book3 = book.getInfo();
+            if (book3 == null) {
+                System.out.println("OH NO! --> " +
+                        "book id: " + book.id + " >> " +
+                        " is null"
+                );
+            } else {
+                System.out.println(
+                        book3.id + " >> " +
+                                book3.title + ", " +
+                                book3.author
+                );
+            }
+
+            // Try to get a book id that doesn't exist
+            Book book2 = new Book(UUID.fromString("00000000-0000-0000-0000-000000000099"));
+            if (book2.getInfoResult() instanceof Result.Failure) {
+                System.out.println("OH NO! --> " +
+                        "book id: " + book2.id + " >> " +
+                        ((Result.Failure<Model.Domain.Book>) book2.getInfoResult())
+                );
+            } else {
+                System.out.println("YAY! --> " +
+                        ((Result.Success<Model.Domain.Book>) book2.getInfoResult()).getValue()
+                );
+            }
+
+            DumpBookDBandAPI();
         }
 
-        // Get the book info
-        System.out.println(book.getInfo().toString());
+        // Populate the library and user DBs
+        {
+            // Create & populate a fake library in the library repo
+            final Model.Domain.Library libraryInfo = createFakeLibraryInfoInRepo();
+            this.context.libraryRepo()
+                    .populateLibraryWithRandomBooks(libraryInfo.id, 10);
 
-        // Try to get a book id that doesn't exist
-        Book book2 = new Book(UUID.fromString("00000000-0000-0000-0000-000000000099"));
-        if(book2.getInfo() instanceof Result.Failure) {
-            System.out.println("OH NO! --> " +
-                    "book id: " + book2.id + " >> " +
-                ((Result.Failure<Model.Domain.Book>) book2.getInfo())
-            );
-        } else {
-            System.out.println("YAY! --> " +
-                ((Result.Success<Model.Domain.Book>) book2.getInfo()).getValue()
-            );
+            // Create & populate a fake user in the user repo
+            final Model.Domain.User userInfo = createFakeUserInfoInRepo();
+
+            // Create a fake book to checkout
+            final Model.Domain.Book bookInfo = createFakeBookInfo();
+
+
+            // Create the App objects
+            final User user = new User(userInfo.id);
+            final Library library = new Library(libraryInfo.id);
+            final Book book = new Book(bookInfo.id);
+
+            // Checkout a book to the user
+            {
+                final Result<UUID> result = library.checkOutBookToUser(book, user.id);
+                if (result instanceof Result.Failure) {
+                    System.out.println("OH NO! --> " +
+                            ((Result.Failure<UUID>) result).getException().getMessage()
+                    );
+                } else {
+                    System.out.println("YAY! --> " +
+                            ((Result.Success<UUID>) result).getValue()
+                    );
+                }
+                library.DumpDB();
+            }
+
+            // get available books in library
+            {
+                final Result<ArrayList<Pair<UUID, Integer>>> availableBookIdCounts = library.getAvailableBooks();
+                if (availableBookIdCounts instanceof Result.Failure) {
+                    System.out.println("OH NO! --> " +
+                            ((Result.Failure<ArrayList<Pair<UUID, Integer>>>) availableBookIdCounts).getException().getMessage()
+                    );
+                }
+
+                // create objects and populate info for available books
+                assert availableBookIdCounts instanceof Result.Success;
+                final ArrayList<Pair<UUID, Integer>> availableBooks =
+                        ((Result.Success<ArrayList<Pair<UUID, Integer>>>) availableBookIdCounts).getValue();
+                for (Pair<UUID, Integer> bookIdCount : availableBooks) {
+                    final Book book2 = new Book(bookIdCount.getFirst());
+
+                    final Result<Model.Domain.Book> bookInfoResult = book2.getInfoResult();
+                    if (bookInfoResult instanceof Result.Failure) {
+                        System.out.println(
+                                "Book Error:" +
+                                        ((Result.Failure<Model.Domain.Book>) bookInfoResult)
+                                                .getException().getMessage()
+                        );
+                    } else {
+                        System.out.println(
+                                ((Result.Success<Model.Domain.Book>) bookInfoResult).getValue() +
+                                        " >> count: " + bookIdCount.getSecond()
+                        );
+                    }
+                }
+            }
+
+            // Return the book from the user
+            {
+                final Result<UUID> result2 = library.returnBookFromUser(book, user.id);
+                if (result2 instanceof Result.Failure) {
+                    System.out.println("OH NO! --> " +
+                            ((Result.Failure<UUID>) result2).getException().getMessage()
+                    );
+                } else {
+                    System.out.println("YAY! --> " +
+                            ((Result.Success<UUID>) result2).getValue()
+                    );
+                }
+                library.DumpDB();
+            }
         }
-
-        DumpDBandAPI();
     }
 
-    private void PopulateDBandAPI() {
+    private Model.Domain.Library createFakeLibraryInfoInRepo() {
+        return this.context.libraryRepo()
+                .createLibrary(new Model.Domain.Library(
+                        UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                        "Library 1"
+                ));
+    }
+
+    private void PopulateBookDBandAPI() {
         // Populate the databases
-        this.context.getBookRepo().populateDB();
-        this.context.getBookRepo().populateAPI();
+        this.context.bookRepo().populateDB();
+        this.context.bookRepo().populateAPI();
     }
 
-    private void DumpDBandAPI() {
+    private void DumpBookDBandAPI() {
         System.out.print("\n");
         System.out.println("DB Dump");
-        this.context.getBookRepo().printDB();
+        this.context.bookRepo().printDB();
 
         System.out.print("\n");
         System.out.println("API Dump");
-        this.context.getBookRepo().printAPI();
+        this.context.bookRepo().printAPI();
+    }
+
+    private Model.Domain.User createFakeUserInfoInRepo() {
+        return this.context.userRepo()
+            .createUser(new Model.Domain.User(
+            UUID.fromString("00000000-0000-0000-0000-000000000001"),
+            "User 1",
+            "user1@test.com"
+        ));
+    }
+
+    private Model.Domain.Book createFakeBookInfo() {
+        return new Model.Domain.Book(
+            UUID.fromString("00000000-0000-0000-0000-000000000001"),
+            "Book 1",
+            "Author 1",
+            "Description 1"
+        );
     }
 
     public static void main(final String... args) {
