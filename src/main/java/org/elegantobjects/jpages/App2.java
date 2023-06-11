@@ -894,6 +894,7 @@ class User extends BaseObject<Model.Domain.User> {
         this(UUID.randomUUID());
     }
 
+    @Override
     public Model.Domain.User getInfo() {
         if (this.info != null) return this.info;
 
@@ -907,6 +908,7 @@ class User extends BaseObject<Model.Domain.User> {
         return this.info;
     }
 
+    @Override
     public Result<Model.Domain.User> getInfoResult() {
         Result<Model.Domain.User> result = this.repo.getUserInfoResult(this.id);
         infoResult = result;
@@ -918,6 +920,7 @@ class User extends BaseObject<Model.Domain.User> {
         return result;
     }
 
+    @Override
     public Result<Model.Domain.User> updateInfo(Model.Domain.User info) {
         // Update self optimistically
         this.info = info;
@@ -977,7 +980,7 @@ class User extends BaseObject<Model.Domain.User> {
             return new Result.Failure<>(new Exception("User has not accepted book"));
         }
 
-        // Return book
+        // Remove the Returned book
         this.info.acceptedBooks.remove(book.id);
 
         // Update user
@@ -1081,10 +1084,16 @@ class Library extends BaseObject<Model.Domain.Library> {
         this.info.checkoutMap.get(user.id).add(book.id);
         this.info.availableBooks.put(book.id, this.info.availableBooks.get(book.id) - 1);
 
-        // Make user accept book
-        Result<ArrayList<UUID>> result = user.acceptBook(book);
+        // Update the repo
+        Result<Model.Domain.Library> result = this.updateInfo(this.info);
         if (result instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<ArrayList<UUID>>) result).getException());
+            return new Result.Failure<>(((Result.Failure<Model.Domain.Library>) result).getException());
+        }
+
+        // Make user accept book
+        Result<ArrayList<UUID>> result2 = user.acceptBook(book);
+        if (result2 instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<ArrayList<UUID>>) result2).getException());
         }
 
         return new Result.Success<>(book.id);
@@ -1283,7 +1292,8 @@ class XApp2 {
 
             // Get available books and counts in library
             {
-                final Result<ArrayList<Pair<UUID, Integer>>> availableBookIdCounts = library.getAvailableBooksAndAmountOnHand();
+                final Result<ArrayList<Pair<UUID, Integer>>> availableBookIdCounts =
+                        library.getAvailableBooksAndAmountOnHand();
                 if (availableBookIdCounts instanceof Result.Failure) {
                     System.out.println("OH NO! --> " +
                             ((Result.Failure<ArrayList<Pair<UUID, Integer>>>) availableBookIdCounts)
