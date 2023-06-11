@@ -1252,13 +1252,13 @@ class XApp2 {
             // Create & populate a fake user in the user repo
             final Model.Domain.User userInfo = createFakeUserInfoInRepo();
 
-            // Create fake books for library
+            // Create "hollow" bookInfo for the user to use to check out. These only contain an id.
             final Model.Domain.Book bookInfo = createFakeBookInfo(null, null);
             final Model.Domain.Book bookInfo2 = createFakeBookInfo("00000000-0000-0000-0000-000000000002", 2);
 
-            //////////////////////////////////////////////////////
-            // Actual App functionality                         //
-            //////////////////////////////////////////////////////
+            //////////////////////////////////
+            // Actual App functionality     //
+            //////////////////////////////////
 
             // Create the App objects
             final User user = new User(userInfo.id);
