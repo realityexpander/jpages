@@ -1252,10 +1252,13 @@ class XApp2 {
             // Create & populate a fake user in the user repo
             final Model.Domain.User userInfo = createFakeUserInfoInRepo();
 
-            // Create a fake books to checkout
+            // Create fake books for library
             final Model.Domain.Book bookInfo = createFakeBookInfo(null, null);
             final Model.Domain.Book bookInfo2 = createFakeBookInfo("00000000-0000-0000-0000-000000000002", 2);
 
+            //////////////////////////////////////////////////////
+            // Actual App functionality                         //
+            //////////////////////////////////////////////////////
 
             // Create the App objects
             final User user = new User(userInfo.id);
@@ -1360,7 +1363,7 @@ class XApp2 {
                         );
                     }
                 }
-                System.out.printf("\n");
+                System.out.print("\n");
             }
 
             // Return the book from the user to the library
