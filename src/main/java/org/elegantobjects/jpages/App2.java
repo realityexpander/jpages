@@ -903,16 +903,7 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         this.info = ((Result.Success<T>) result).getValue();
         return this.info;
     }
-    public boolean isInfoFetched() {
-        return this.info != null;
-    }
     public Result<T> fetchInfoResult() { return infoResult; };
-    public Result<T> updateInfo(T info) { return null; };
-    public Result<T> refreshInfo() {
-        this.info = null;
-        return this.fetchInfoResult();
-    }
-
     protected String fetchInfoResultFailureReason() {
         if (!isInfoFetched()) {
             if (fetchInfoResult() instanceof Result.Failure) {
@@ -921,6 +912,14 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         }
 
         return null; // Returns `null` if the info has been fetched successfully.
+    }
+    public boolean isInfoFetched() {
+        return this.info != null;
+    }
+    public Result<T> updateInfo(T info) { return null; };
+    public Result<T> refreshInfo() {
+        this.info = null;
+        return this.fetchInfoResult();
     }
 }
 
@@ -968,6 +967,10 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
 class Book extends DomainObject<Model.Domain.Book> {
     private Repo.Book repo = null;
 
+    Book() { this(UUID.randomUUID()); }
+    Book(UUID id) {
+        this(id, new StaticContext());
+    }
     Book(UUID id, Context context) {
         super(context);
         this.repo = this.context.bookRepo();
@@ -975,10 +978,6 @@ class Book extends DomainObject<Model.Domain.Book> {
 
         // System.out.println("Book created, id: " + this.id.toString());
     }
-    Book(UUID id) {
-        this(id, new StaticContext());
-    }
-    Book() { this(UUID.randomUUID()); }
 
     @Override
     public Result<Model.Domain.Book> fetchInfoResult() {
@@ -1012,18 +1011,18 @@ class Book extends DomainObject<Model.Domain.Book> {
 class User extends DomainObject<Model.Domain.User> {
     private Repo.User repo = null;
 
+    User() {
+        this(UUID.randomUUID());
+    }
+    User(UUID id) {
+        this(id, null);
+    }
     User(UUID id, Context context) {
         super(context);
         this.repo = this.context.userRepo();
         this.id = id;
 
         System.out.println("User created, id: " + this.id.toString());
-    }
-    User(UUID id) {
-        this(id, null);
-    }
-    User() {
-        this(UUID.randomUUID());
     }
 
     @Override
@@ -1112,18 +1111,18 @@ class User extends DomainObject<Model.Domain.User> {
 class Library extends DomainObject<Model.Domain.Library> {
     private Repo.Library repo = null;
 
+    Library() {
+        this(UUID.randomUUID());
+    }
+    Library(UUID id) {
+        this(id, null);
+    }
     Library(UUID id, Context context) {
         super(context);
         this.repo = this.context.libraryRepo();
         this.id = id;
 
         System.out.println("Library created, id: " + id);
-    }
-    Library(UUID id) {
-        this(id, null);
-    }
-    Library() {
-        this(UUID.randomUUID());
     }
 
     @Override
