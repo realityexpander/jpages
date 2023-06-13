@@ -394,29 +394,23 @@ class API implements IAPI {
 interface IRepo {
 
     interface Book extends IRepo {
-        Result<Model.Domain.Book> getBookInfoResult(UUID id);
-
+        Model.Domain.Book bookInfo(UUID id);
+        Result<Model.Domain.Book> fetchBookInfoResult(UUID id);
         Result<Model.Domain.Book> updateBookInfo(Model.Domain.Book bookInfo);
     }
 
     interface User extends IRepo {
-        Result<Model.Domain.User> getUserInfoResult(UUID id);
-
-        Model.Domain.User getUserInfo(UUID id);
-
-        Result<Model.Domain.User> updateUserInfo(Model.Domain.User userInfo);
-
-        Model.Domain.User createUser(Model.Domain.User user);
+        Result<Model.Domain.User> fetchUserInfoResult(UUID id);
+        Model.Domain.User userInfo(UUID id);
+        Result<Model.Domain.User> updateUserInfoResult(Model.Domain.User userInfo);
+        Model.Domain.User upsertUserInfo(Model.Domain.User user);
     }
 
     interface Library extends IRepo {
-        Result<Model.Domain.Library> getLibraryInfoResult(UUID id);
-
-        Model.Domain.Library getLibraryInfo(UUID id);
-
-        Result<Model.Domain.Library> updateLibraryInfo(Model.Domain.Library libraryInfo);
-
-        Model.Domain.Library createLibrary(Model.Domain.Library library);
+        Result<Model.Domain.Library> fetchLibraryInfoResult(UUID id);
+        Model.Domain.Library libraryInfo(UUID id);
+        Result<Model.Domain.Library> updateLibraryInfoResult(Model.Domain.Library libraryInfo);
+        Model.Domain.Library upsertLibraryInfo(Model.Domain.Library library);
     }
 }
 
@@ -438,14 +432,17 @@ class Repo implements IRepo {
         }
 
         @Override
-        public Result<Model.Domain.Book> getBookInfoResult(UUID id) {
-            // Make the request to API
-            Result<Model.DTO.Book> bookInfo = api.getBook(id);
-            if (bookInfo instanceof Result.Failure) {
-//                Exception exception = ((Result.Failure<Model.DTO.Book>) bookInfo).getException();
-//                return new Result.Failure<Model.Domain.Book>(exception);
+        public Model.Domain.Book bookInfo(UUID id) {
+            return database.getBook(id).toDomain();
+        }
 
-                // Try to get from cached DB
+        @Override
+        public Result<Model.Domain.Book> fetchBookInfoResult(UUID id) {
+            // Make the request to API
+            Result<Model.DTO.Book> bookInfoApiResult = api.getBook(id);
+            if (bookInfoApiResult instanceof Result.Failure) {
+
+                // If API fails, try to get from cached DB
                 Model.Entity.Book book = database.getBook(id);
                 if (book == null) {
                     return new Result.Failure<>(new Exception("Book not found"));
@@ -455,7 +452,7 @@ class Repo implements IRepo {
             }
 
             // Convert to Domain Model
-            Model.Domain.Book book = ((Result.Success<Model.DTO.Book>) bookInfo).getValue().toDomain();
+            Model.Domain.Book book = ((Result.Success<Model.DTO.Book>) bookInfoApiResult).getValue().toDomain();
 
             // Cache to Local DB
             Result<Model.Entity.Book> resultDB = database.updateBook(book.toEntity());
@@ -475,7 +472,7 @@ class Repo implements IRepo {
             Result<Model.DTO.Book> resultApi = api.updateBook(bookInfo.toDTO());
             if (resultApi instanceof Result.Failure) {
                 Exception exception = ((Result.Failure<Model.DTO.Book>) resultApi).getException();
-                return new Result.Failure<Model.Domain.Book>(exception);
+                return new Result.Failure<>(exception);
             }
 
             // Convert to Domain Model
@@ -485,10 +482,10 @@ class Repo implements IRepo {
             Result<Model.Entity.Book> resultDB = database.updateBook(book.toEntity());
             if (resultDB instanceof Result.Failure) {
                 Exception exception = ((Result.Failure<Model.Entity.Book>) resultDB).getException();
-                return new Result.Failure<Model.Domain.Book>(exception);
+                return new Result.Failure<>(exception);
             }
 
-            return new Result.Success<Model.Domain.Book>(book);
+            return new Result.Success<>(book);
         }
 
         public void populateDB() {
@@ -536,7 +533,7 @@ class Repo implements IRepo {
         private final HashMap<UUID, Model.Domain.User> database = new HashMap<>(); // Simulate a database on server
 
         @Override
-        public Result<Model.Domain.User> getUserInfoResult(UUID id) {
+        public Result<Model.Domain.User> fetchUserInfoResult(UUID id) {
             if (database.containsKey(id)) {
                 return new Result.Success<>(database.get(id));
             }
@@ -545,12 +542,12 @@ class Repo implements IRepo {
         }
 
         @Override
-        public Model.Domain.User getUserInfo(UUID id) {
+        public Model.Domain.User userInfo(UUID id) {
             return database.get(id);
         }
 
         @Override
-        public Result<Model.Domain.User> updateUserInfo(Model.Domain.User userInfo) {
+        public Result<Model.Domain.User> updateUserInfoResult(Model.Domain.User userInfo) {
             if (database.containsKey(userInfo.id)) {
                 database.put(userInfo.id, userInfo);
                 return new Result.Success<>(userInfo);
@@ -559,10 +556,8 @@ class Repo implements IRepo {
             return new Result.Failure<>(new Exception("User not found"));
         }
 
-        ;
-
         @Override
-        public Model.Domain.User createUser(Model.Domain.User user) {
+        public Model.Domain.User upsertUserInfo(Model.Domain.User user) {
             database.put(user.id, user);
             return user;
         }
@@ -573,7 +568,7 @@ class Repo implements IRepo {
         private final HashMap<UUID, Model.Domain.Library> database = new HashMap<>(); // simulates a database on server
 
         @Override
-        public Result<Model.Domain.Library> getLibraryInfoResult(UUID id) {
+        public Result<Model.Domain.Library> fetchLibraryInfoResult(UUID id) {
             if (database.containsKey(id)) {
                 return new Result.Success<>(database.get(id));
             }
@@ -582,24 +577,23 @@ class Repo implements IRepo {
         }
 
         @Override
-        public Model.Domain.Library getLibraryInfo(UUID id) {
+        public Model.Domain.Library libraryInfo(UUID id) {
             return database.get(id);
         }
 
         @Override
-        public Result<Model.Domain.Library> updateLibraryInfo(Model.Domain.Library libraryInfo) {
+        public Result<Model.Domain.Library> updateLibraryInfoResult(Model.Domain.Library libraryInfo) {
             if (database.containsKey(libraryInfo.id)) {
                 database.put(libraryInfo.id, libraryInfo);
+
                 return new Result.Success<>(libraryInfo);
             }
 
             return new Result.Failure<>(new Exception("Library not found"));
         }
 
-        ;
-
         @Override
-        public Model.Domain.Library createLibrary(Model.Domain.Library libraryInfo) {
+        public Model.Domain.Library upsertLibraryInfo(Model.Domain.Library libraryInfo) {
             database.put(libraryInfo.id, libraryInfo);
             return libraryInfo;
         }
@@ -627,9 +621,9 @@ interface IContext {
 
 // Context is a singleton class that holds all the repositories and global objects like Gson
 class Context implements IContext {
-    static Context INSTANCE = new Context();  // Create Default static Context
+    static Context INSTANCE = new Context();  // Create default static Context
 
-    // Repositories
+    // Repository Singletons
     private Repo.Book bookRepo = null;
     private Repo.User userRepo = null;
     private Repo.Library libraryRepo = null;
@@ -657,18 +651,18 @@ class Context implements IContext {
         );
     }
 
-    // Returns the default static Context if null OR StaticContext is passed in
-    public static Context getContextInstance(Context context) {
+    // If `context` is `null` OR `StaticContext` this returns the default static Context,
+    // otherwise returns the `context` passed in.
+    public static Context contextInstance(Context context) {
         if(context == null || context instanceof StaticContext)
-            return Context.INSTANCE;
+            return Context.INSTANCE;  // pass in null/StaticContext to get the default static context
         else
-            return context;
+            return context;           // pass in a context to get that context (for testing)
     }
 
     public void setBookRepo(Repo.Book bookRepo) {
         if (bookRepo != null) this.bookRepo = bookRepo;
     }
-
     public Repo.Book bookRepo() {
         return this.bookRepo;
     }
@@ -676,7 +670,6 @@ class Context implements IContext {
     public void setUserRepo(Repo.User userRepo) {
         if (userRepo != null) this.userRepo = userRepo;
     }
-
     public Repo.User userRepo() {
         return this.userRepo;
     }
@@ -684,7 +677,6 @@ class Context implements IContext {
     public void setLibraryRepo(Repo.Library libraryRepo) {
         if (libraryRepo != null) this.libraryRepo = libraryRepo;
     }
-
     public Repo.Library libraryRepo() {
         return this.libraryRepo;
     }
@@ -855,8 +847,10 @@ interface Info<T extends Model.Domain> {
 abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     UUID id;
     protected T info;
+    protected Result<T> infoResult = null;
     protected Context context = null;
-    private Gson gson = null;
+
+    private Gson gson = null; // convenience reference to the context's Gson object
 
     // Class of the info<T> (for GSON deserialization)
     @SuppressWarnings("unchecked")
@@ -865,18 +859,18 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
 
 
     IDomainObject(T info, Context context) {
-        this.context = Context.getContextInstance(context);
+        this.context = Context.contextInstance(context);
         this.gson = this.context.gson;
         this.info = info;
         this.id = info.id;
     }
     IDomainObject(UUID id, Context context) {
-        this.context = Context.getContextInstance(context);
+        this.context = Context.contextInstance(context);
         this.gson = this.context.gson;
         this.id = id;
     }
     IDomainObject(String json, Context context) {
-        this.context = Context.getContextInstance(context);
+        this.context = Context.contextInstance(context);
         this.gson = this.context.gson;
         this.info = this.gson.fromJson(json, this.infoClass);
         this.id = this.info.id;
@@ -895,34 +889,6 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     }
     IDomainObject() { this(UUID.randomUUID(), null); }
 
-    public boolean isInfoFetched() {
-        return this.info != null;
-    }
-    public T fetchInfo() { return null; }
-    public Result<T> fetchInfoResult() { return null; };
-    public Result<T> updateInfo(T info) { return null; };
-    public Result<T> refreshInfo() {
-        this.info = null;
-        return this.fetchInfoResult();
-    }
-
-    protected String getFetchInfoResultFailureReason() {
-        if (!isInfoFetched()) {
-            if (fetchInfoResult() instanceof Result.Failure) {
-                return ((Result.Failure<T>) fetchInfoResult()).getException().getMessage();
-            }
-        }
-        return null;
-    }
-}
-
-abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
-
-    public DomainObject(Context context) {
-        super(context);
-    }
-
-
     public T fetchInfo() {
         if (isInfoFetched()) { return this.info; }
 
@@ -937,18 +903,36 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
         this.info = ((Result.Success<T>) result).getValue();
         return this.info;
     }
+    public boolean isInfoFetched() {
+        return this.info != null;
+    }
+    public Result<T> fetchInfoResult() { return infoResult; };
+    public Result<T> updateInfo(T info) { return null; };
+    public Result<T> refreshInfo() {
+        this.info = null;
+        return this.fetchInfoResult();
+    }
+
+    protected String fetchInfoResultFailureReason() {
+        if (!isInfoFetched()) {
+            if (fetchInfoResult() instanceof Result.Failure) {
+                return ((Result.Failure<T>) fetchInfoResult()).getException().getMessage();
+            }
+        }
+
+        return null; // Returns `null` if the info has been fetched successfully.
+    }
+}
+
+abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
+
+    public DomainObject(Context context) {
+        super(context);
+    }
 
     public Result<T> updateInfo(T info) {
         this.info = info;
         return new Result.Success<>(info);
-    }
-
-    public String toJson() {
-        return this.context.gson.toJson(this.fetchInfo());
-    }
-
-    public String toJsonPretty() {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this.fetchInfo());
     }
 
     @SuppressWarnings("unchecked")
@@ -966,6 +950,14 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
         }
     }
 
+    public String toJsonPretty() {
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this.fetchInfo());
+    }
+
+    public String toJson() {
+        return this.context.gson.toJson(this.fetchInfo());
+    }
+
     public String toString() {
         String infoString = this.info == null ? "null" : this.info.toString();
         String nameOfClass = this.getClass().getName();
@@ -974,8 +966,6 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
 }
 
 class Book extends DomainObject<Model.Domain.Book> {
-    private Model.Domain.Book info = null;
-    private Result<Model.Domain.Book> infoResult = null;
     private Repo.Book repo = null;
 
     Book(UUID id, Context context) {
@@ -983,7 +973,7 @@ class Book extends DomainObject<Model.Domain.Book> {
         this.repo = this.context.bookRepo();
         this.id = id;
 
-        System.out.println("Book created, id: " + this.id.toString());
+        // System.out.println("Book created, id: " + this.id.toString());
     }
     Book(UUID id) {
         this(id, new StaticContext());
@@ -992,14 +982,14 @@ class Book extends DomainObject<Model.Domain.Book> {
 
     @Override
     public Result<Model.Domain.Book> fetchInfoResult() {
-        Result<Model.Domain.Book> result = this.repo.getBookInfoResult(this.id);
-        infoResult = result;
-        if (result instanceof Result.Failure) {
-            return result;
+        infoResult = this.repo.fetchBookInfoResult(this.id);
+        if (infoResult instanceof Result.Failure) {
+            return infoResult;
         }
 
-        this.info = ((Result.Success<Model.Domain.Book>) result).getValue();
-        return result;
+        this.info = ((Result.Success<Model.Domain.Book>) infoResult).getValue();
+
+        return infoResult;
     }
 
     @Override
@@ -1020,8 +1010,6 @@ class Book extends DomainObject<Model.Domain.Book> {
 }
 
 class User extends DomainObject<Model.Domain.User> {
-    private Model.Domain.User info = null;
-    private Result<Model.Domain.User> infoResult = null;
     private Repo.User repo = null;
 
     User(UUID id, Context context) {
@@ -1040,14 +1028,13 @@ class User extends DomainObject<Model.Domain.User> {
 
     @Override
     public Result<Model.Domain.User> fetchInfoResult() {
-        Result<Model.Domain.User> result = this.repo.getUserInfoResult(this.id);
-        infoResult = result;
-        if (result instanceof Result.Failure) {
-            return result;
+        infoResult = this.repo.fetchUserInfoResult(this.id);
+        if (infoResult instanceof Result.Failure) {
+            return infoResult;
         }
 
-        this.info = ((Result.Success<Model.Domain.User>) result).getValue();
-        return result;
+        this.info = ((Result.Success<Model.Domain.User>) infoResult).getValue();
+        return infoResult;
     }
 
     @Override
@@ -1056,7 +1043,7 @@ class User extends DomainObject<Model.Domain.User> {
         this.info = info;
 
         // Update the repo
-        Result<Model.Domain.User> result = this.repo.updateUserInfo(info);
+        Result<Model.Domain.User> result = this.repo.updateUserInfoResult(info);
         if (result instanceof Result.Failure) {
             return result;
         }
@@ -1067,11 +1054,11 @@ class User extends DomainObject<Model.Domain.User> {
     }
 
     public Result<ArrayList<UUID>> acceptBook(@NotNull Book book) {
-        System.out.println("User acceptBook,  book: " + book.id.toString() + " to user: " + this.id.toString());
+        System.out.println("User - acceptBook,  book: " + book.id.toString() + " to user: " + this.id.toString());
 
-        fetchInfo();
-        if (infoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<Model.Domain.User>) infoResult).getException ());
+        String reason = fetchInfoResultFailureReason();
+        if(reason != null) {
+            return new Result.Failure<>(new Exception(reason));
         }
 
         // Check user has not already accepted book
@@ -1092,8 +1079,12 @@ class User extends DomainObject<Model.Domain.User> {
     }
 
     public Result<ArrayList<UUID>> returnBook(Book book) {
-        System.out.println("Returning book");
-        if (!isInfoFetched()) return new Result.Failure<>(new Exception("User info not found"));
+        System.out.println("User - Returning book");
+
+        String reason = fetchInfoResultFailureReason();
+        if(reason != null) {
+            return new Result.Failure<>(new Exception(reason));
+        }
 
         // check if book is valid
         if (book == null) {
@@ -1119,8 +1110,6 @@ class User extends DomainObject<Model.Domain.User> {
 }
 
 class Library extends DomainObject<Model.Domain.Library> {
-    private Model.Domain.Library info = null;
-    private Result<Model.Domain.Library> infoResult = null;
     private Repo.Library repo = null;
 
     Library(UUID id, Context context) {
@@ -1139,14 +1128,13 @@ class Library extends DomainObject<Model.Domain.Library> {
 
     @Override
     public Result<Model.Domain.Library> fetchInfoResult() {
-        Result<Model.Domain.Library> result = this.repo.getLibraryInfoResult(this.id);
-        infoResult = result;
-        if (result instanceof Result.Failure) {
-            return result;
+        infoResult = this.repo.fetchLibraryInfoResult(this.id);
+        if (infoResult instanceof Result.Failure) {
+            return infoResult;
         }
 
-        this.info = ((Result.Success<Model.Domain.Library>) result).getValue();
-        return result;
+        this.info = ((Result.Success<Model.Domain.Library>) infoResult).getValue();
+        return infoResult;
     }
 
     @Override
@@ -1155,7 +1143,7 @@ class Library extends DomainObject<Model.Domain.Library> {
         this.info = newInfo;
 
         // Update the repo
-        Result<Model.Domain.Library> result = this.repo.updateLibraryInfo(newInfo);
+        Result<Model.Domain.Library> result = this.repo.updateLibraryInfoResult(newInfo);
         if (result instanceof Result.Failure) {
             return result;
         }
@@ -1165,12 +1153,14 @@ class Library extends DomainObject<Model.Domain.Library> {
         return result;
     }
 
-    public Result<UUID> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
-        System.out.printf("Library checkOutBookToUser, book %s to user %s\n", book.id, user.id);
+    // Returns Book id if successful
+    public Result<UUID> checkoutBookToUser(@NotNull Book book, @NotNull User user) {
+        System.out.printf("Library - checkoutBookToUser, book %s to user %s\n", book.id, user.id);
 
-        Result<Void> refreshResult = createUserIfMissing(user.id);
-        if (refreshResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<Void>) refreshResult).getException());
+        // Make sure user exists in library
+        Result<Void> upsertUserResult = upsertUser(user.id);
+        if (upsertUserResult instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<Void>) upsertUserResult).getException());
         }
 
         // Check if book exists
@@ -1199,23 +1189,24 @@ class Library extends DomainObject<Model.Domain.Library> {
         }
 
         // Make user accept book
-        Result<ArrayList<UUID>> result2 = user.acceptBook(book);
-        if (result2 instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<ArrayList<UUID>>) result2).getException());
+        Result<ArrayList<UUID>> acceptedBookIds = user.acceptBook(book);
+        if (acceptedBookIds instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<ArrayList<UUID>>) acceptedBookIds).getException());
         }
 
         return new Result.Success<>(book.id);
     }
 
+    // Returns Book id if successful
     public Result<UUID> returnBookFromUser(Book book, User user) {
-        System.out.printf("Returning book %s from user %s\n", book.id, user.id);
-        if (this.info == null) {
-            if (this.fetchInfo() == null) {
-                return new Result.Failure<>(new Exception("Library info not found"));
-            }
+        System.out.printf("Library - Returning book %s from user %s\n", book.id, user.id);
+
+        String reason = fetchInfoResultFailureReason();
+        if(reason != null) {
+            return new Result.Failure<>(new Exception(reason));
         }
 
-        createUserIfMissing(user.id);
+        upsertUser(user.id);
 
         // Check if user has not checked out book
         if (!this.info.checkoutMap.get(user.id).contains(book.id)) {
@@ -1235,9 +1226,12 @@ class Library extends DomainObject<Model.Domain.Library> {
         return new Result.Success<>(book.id);
     }
 
-    private Result<Void> createUserIfMissing(UUID userId) {
-        if(refreshInfo() instanceof Result.Failure) {
-            return new Result.Failure<>(new Exception(((Result.Failure<Model.Domain.Library>) refreshInfo()).getException()));
+    private Result<Void> upsertUser(UUID userId) {
+        System.out.println("Library - upsert User: userId=" + userId);
+
+        String reason = fetchInfoResultFailureReason();
+        if(reason != null) {
+            return new Result.Failure<>(new Exception(reason));
         }
 
         // Check if user exists
@@ -1249,19 +1243,23 @@ class Library extends DomainObject<Model.Domain.Library> {
         return new Result.Success<>(null);
     }
 
-    public Result<ArrayList<UUID>> getBooksCheckedOutByUser(UUID userId) {
-        System.out.printf("Getting books checked out by user %s\n", userId);
-        if (!isInfoFetched()) return new Result.Failure<>(new Exception("Library info not found"));
+    public Result<ArrayList<UUID>> findBooksCheckedOutByUser(UUID userId) {
+        System.out.printf("Library - find Books Checked Out By User %s\n", userId);
 
-        createUserIfMissing(userId);
+        String reason = fetchInfoResultFailureReason();
+        if(reason != null) {
+            return new Result.Failure<>(new Exception(reason));
+        }
+
+        upsertUser(userId);
 
         return new Result.Success<>(this.info.checkoutMap.get(userId));
     }
 
     public Result<ArrayList<Pair<UUID, Integer>>> calculateAvailableBooksAndAmountOnHand() {
-        System.out.print("Getting available books\n");
+        System.out.print("Library - Getting available books\n");
 
-        String reason = getFetchInfoResultFailureReason();
+        String reason = fetchInfoResultFailureReason();
         if(reason != null) {
             return new Result.Failure<>(new Exception(reason));
         }
@@ -1275,16 +1273,6 @@ class Library extends DomainObject<Model.Domain.Library> {
 
         return new Result.Success<>(availableBooks);
     }
-
-//    @Override
-//    protected String getFetchInfoResultFailureReason() {
-//        if (!isInfoFetched()) {
-//            if (fetchInfoResult() instanceof Result.Failure) {
-//                return ((Result.Failure<Model.Domain.Library>) fetchInfoResult()).getException().getMessage();
-//            }
-//        }
-//        return null;
-//    }
 
     public void DumpDB() {
         System.out.println("\nDumping Library DB:");
@@ -1402,7 +1390,7 @@ class XApp2 {
             {
                 System.out.println("\nChecking out books to user " + user.id + "\n");
 
-                final Result<UUID> result = library.checkOutBookToUser(book, user);
+                final Result<UUID> result = library.checkoutBookToUser(book, user);
                 if (result instanceof Result.Failure) {
                     System.out.println("Checked out book FAILURE--> " +
                             ((Result.Failure<UUID>) result).getException().getMessage()
@@ -1413,7 +1401,7 @@ class XApp2 {
                     );
                 }
 
-                final Result<UUID> result2 = library.checkOutBookToUser(book1, user);
+                final Result<UUID> result2 = library.checkoutBookToUser(book1, user);
                 if (result2 instanceof Result.Failure) {
                     System.out.println("Checked out book FAILURE--> " +
                             ((Result.Failure<UUID>) result2).getException().getMessage()
@@ -1469,7 +1457,7 @@ class XApp2 {
 
             Get_books_checked_out_by_user:
             {
-                final Result<ArrayList<UUID>> checkedOutBookIds = library.getBooksCheckedOutByUser(user.id);
+                final Result<ArrayList<UUID>> checkedOutBookIds = library.findBooksCheckedOutByUser(user.id);
                 if (checkedOutBookIds instanceof Result.Failure) {
                     System.out.println("OH NO! --> " +
                         ((Result.Failure<ArrayList<UUID>>) checkedOutBookIds)
@@ -1505,14 +1493,14 @@ class XApp2 {
 
             Return_the_book_from_the_user_to_the_library:
             {
-                final Result<UUID> result2 = library.returnBookFromUser(book, user);
-                if (result2 instanceof Result.Failure) {
-                    System.out.println("Returned book FAILURE --> " +
-                            ((Result.Failure<UUID>) result2).getException().getMessage()
+                final Result<UUID> bookReturnId = library.returnBookFromUser(book, user);
+                if (bookReturnId instanceof Result.Failure) {
+                    System.out.println("Returned book FAILURE --> book id:" +
+                            ((Result.Failure<UUID>) bookReturnId).getException().getMessage()
                     );
                 } else {
-                    System.out.println("Returned Book SUCCESS --> " +
-                            ((Result.Success<UUID>) result2).getValue()
+                    System.out.println("Returned Book SUCCESS --> book id:" +
+                            ((Result.Success<UUID>) bookReturnId).getValue()
                     );
                 }
 
@@ -1554,7 +1542,7 @@ class XApp2 {
 
     private Model.Domain.Library createFakeLibraryInfoInRepo() {
         return this.context.libraryRepo()
-                .createLibrary(new Model.Domain.Library(
+                .upsertLibraryInfo(new Model.Domain.Library(
                         UUID.fromString("00000000-0000-0000-0000-000000000001"),
                         "Library 1"
                 ));
@@ -1580,7 +1568,7 @@ class XApp2 {
 
     private Model.Domain.User createFakeUserInfoInRepo() {
         return this.context.userRepo()
-                .createUser(new Model.Domain.User(
+                .upsertUserInfo(new Model.Domain.User(
                         UUID.fromString("00000000-0000-0000-0000-000000000001"),
                         "User 1",
                         "user1@test.com"
