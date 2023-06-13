@@ -845,11 +845,11 @@ class Model {
 
 // Info - Caches the info and provides methods to fetch and update the info
 interface Info<T extends Model.Domain> {
-    T fetchInfo();
-    Result<T> fetchInfoResult();
-    boolean isInfoFetched();
-    Result<T> updateInfo(T info);
-    Result<T> refreshInfo();
+    T fetchInfo();                  // Fetches the info for the object from the server
+    Result<T> fetchInfoResult();    // Fetches the Result<T> for the info object from the server
+    boolean isInfoFetched();        // Returns true if the info has been fetched
+    Result<T> updateInfo(T info);   // Updates the info for the object on the server
+    Result<T> refreshInfo();        // Refreshes the info for the object from the server
 }
 
 abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
@@ -865,15 +865,15 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
 
 
     IDomainObject(T info, Context context) {
-        this.id = info.id;
-        this.info = info;
         this.context = Context.getContextInstance(context);
         this.gson = this.context.gson;
+        this.info = info;
+        this.id = info.id;
     }
     IDomainObject(UUID id, Context context) {
-        this.id = id;
         this.context = Context.getContextInstance(context);
         this.gson = this.context.gson;
+        this.id = id;
     }
     IDomainObject(String json, Context context) {
         this.context = Context.getContextInstance(context);
@@ -901,7 +901,19 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     public T fetchInfo() { return null; }
     public Result<T> fetchInfoResult() { return null; };
     public Result<T> updateInfo(T info) { return null; };
-    public Result<T> refreshInfo() { return null; };
+    public Result<T> refreshInfo() {
+        this.info = null;
+        return this.fetchInfoResult();
+    }
+
+    protected String getFetchInfoResultFailureReason() {
+        if (!isInfoFetched()) {
+            if (fetchInfoResult() instanceof Result.Failure) {
+                return ((Result.Failure<T>) fetchInfoResult()).getException().getMessage();
+            }
+        }
+        return null;
+    }
 }
 
 abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
@@ -910,10 +922,6 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
         super(context);
     }
 
-    public Result<T> refreshInfo() {
-        this.info = null;
-        return this.fetchInfoResult();
-    }
 
     public T fetchInfo() {
         if (isInfoFetched()) { return this.info; }
@@ -1229,7 +1237,7 @@ class Library extends DomainObject<Model.Domain.Library> {
 
     private Result<Void> createUserIfMissing(UUID userId) {
         if(refreshInfo() instanceof Result.Failure) {
-            return new Result.Failure<>(new Exception("Library info not found"));
+            return new Result.Failure<>(new Exception(((Result.Failure<Model.Domain.Library>) refreshInfo()).getException()));
         }
 
         // Check if user exists
@@ -1250,9 +1258,13 @@ class Library extends DomainObject<Model.Domain.Library> {
         return new Result.Success<>(this.info.checkoutMap.get(userId));
     }
 
-    public Result<ArrayList<Pair<UUID, Integer>>> getAvailableBooksAndAmountOnHand() {
+    public Result<ArrayList<Pair<UUID, Integer>>> calculateAvailableBooksAndAmountOnHand() {
         System.out.print("Getting available books\n");
-        if (!isInfoFetched()) return new Result.Failure<>(new Exception("Library info not found"));
+
+        String reason = getFetchInfoResultFailureReason();
+        if(reason != null) {
+            return new Result.Failure<>(new Exception(reason));
+        }
 
         ArrayList<Pair<UUID, Integer>> availableBooks = new ArrayList<>();
         for (Map.Entry<UUID, Integer> entry : this.info.availableBooks.entrySet()) {
@@ -1263,6 +1275,16 @@ class Library extends DomainObject<Model.Domain.Library> {
 
         return new Result.Success<>(availableBooks);
     }
+
+//    @Override
+//    protected String getFetchInfoResultFailureReason() {
+//        if (!isInfoFetched()) {
+//            if (fetchInfoResult() instanceof Result.Failure) {
+//                return ((Result.Failure<Model.Domain.Library>) fetchInfoResult()).getException().getMessage();
+//            }
+//        }
+//        return null;
+//    }
 
     public void DumpDB() {
         System.out.println("\nDumping Library DB:");
@@ -1298,8 +1320,9 @@ class XApp2 {
             this.context.setUserRepo(this.userRepo);
         }
 
-        // Poke at a book
+        Populate_And_Poke_Book:
         {
+            System.out.println("Populating Book DB and API");
             PopulateBookDBandAPI();
 
             // Create a book object (it only has an id)
@@ -1338,7 +1361,7 @@ class XApp2 {
             // Try to get a book id that doesn't exist
             Book book2 = new Book(UUID.fromString("00000000-0000-0000-0000-000000000099"));
             if (book2.fetchInfoResult() instanceof Result.Failure) {
-                System.out.println("OH NO! --> " +
+                System.out.println("Get Book FAILURE --> " +
                         "book id: " + book2.id + " >> " +
                         ((Result.Failure<Model.Domain.Book>) book2.fetchInfoResult())
                 );
@@ -1351,7 +1374,7 @@ class XApp2 {
             DumpBookDBandAPI();
         }
 
-        // Populate the library and user DBs
+        Populate_the_library_and_user_DBs:
         {
             // Create & populate a fake library in the library repo
             final Model.Domain.Library libraryInfo = createFakeLibraryInfoInRepo();
@@ -1375,8 +1398,10 @@ class XApp2 {
             final Book book = new Book(bookInfo.id);
             final Book book1 = new Book(bookInfo2.id);
 
-            // Checkout a book to the user
+            Checkout_a_book_to_the_user:
             {
+                System.out.println("\nChecking out books to user " + user.id + "\n");
+
                 final Result<UUID> result = library.checkOutBookToUser(book, user);
                 if (result instanceof Result.Failure) {
                     System.out.println("Checked out book FAILURE--> " +
@@ -1402,19 +1427,18 @@ class XApp2 {
                 library.DumpDB();
             }
 
-            // Get available books and counts in library
-            xxx: {
+            Get_Available_Books_And_Counts_In_Library: {
                 System.out.println("\nGetting available books and counts in library:");
 
                 final Result<ArrayList<Pair<UUID, Integer>>> availableBookIdCounts =
-                        library.getAvailableBooksAndAmountOnHand();
+                        library.calculateAvailableBooksAndAmountOnHand();
                 if (availableBookIdCounts instanceof Result.Failure) {
-                    System.out.println("OH NO! --> " +
+                    System.out.println("AvailableBookIdCounts FAILURE! --> " +
                             ((Result.Failure<ArrayList<Pair<UUID, Integer>>>) availableBookIdCounts)
                                     .getException().getMessage()
                     );
 
-                    break xxx;
+                    break Get_Available_Books_And_Counts_In_Library;
                 }
 
                 // create objects and populate info for available books
@@ -1443,7 +1467,7 @@ class XApp2 {
                 }
             }
 
-            // Get books checked out by user
+            Get_books_checked_out_by_user:
             {
                 final Result<ArrayList<UUID>> checkedOutBookIds = library.getBooksCheckedOutByUser(user.id);
                 if (checkedOutBookIds instanceof Result.Failure) {
@@ -1479,7 +1503,7 @@ class XApp2 {
                 System.out.print("\n");
             }
 
-            // Return the book from the user to the library
+            Return_the_book_from_the_user_to_the_library:
             {
                 final Result<UUID> result2 = library.returnBookFromUser(book, user);
                 if (result2 instanceof Result.Failure) {
@@ -1507,22 +1531,22 @@ class XApp2 {
                                 "  \"checkoutMap\": {\n" +
                                 "  },\n" +
                                 "  \"availableBooks\": {\n" +
-                                "    \"00000000-0000-0000-0000-000000000000\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000001\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000002\": 0,\n" +
-                                "    \"00000000-0000-0000-0000-000000000003\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000004\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000005\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000006\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000007\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000008\": 1,\n" +
-                                "    \"00000000-0000-0000-0000-000000000009\": 1\n" +
+                                "    \"00000000-0000-0000-0000-000000000010\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000011\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000012\": 0,\n" +
+                                "    \"00000000-0000-0000-0000-000000000013\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000014\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000015\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000016\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000017\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000018\": 1,\n" +
+                                "    \"00000000-0000-0000-0000-000000000019\": 1\n" +
                                 "  },\n" +
                                 "  \"id\": \"00000000-0000-0000-0000-000000000099\"\n" +
                         "}"
                 );
-                System.out.println("\nLibrary2 Json to Object:");
-                System.out.println(library2.toJsonPretty());
+                System.out.println("\nLibrary2:");
+                //System.out.println(library2.toJsonPretty());
 
             }
         }
