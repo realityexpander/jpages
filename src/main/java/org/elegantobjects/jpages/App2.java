@@ -1499,7 +1499,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         return new Result.Success<>(books);
     }
 
-    public Result<ArrayList<Pair<UUID, Integer>>> calculateAvailableBooksAndAmountOnHand() {
+    public Result<ArrayList<Pair<UUID, Integer>>> calculateAvailableBookIdToNumberAvailableList() {
         System.out.print("Library (" + this.id + ") - calculateAvailableBooksAndAmountOnHand\n");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -1673,7 +1673,7 @@ class XApp2 {
                 System.out.println("\nGetting available books and counts in library:");
 
                 final Result<ArrayList<Pair<UUID, Integer>>> availableBookIdCounts =
-                        library1.calculateAvailableBooksAndAmountOnHand();
+                        library1.calculateAvailableBookIdToNumberAvailableList();
                 if (availableBookIdCounts instanceof Result.Failure) {
                     System.out.println("AvailableBookIdCounts FAILURE! --> " +
                             ((Result.Failure<ArrayList<Pair<UUID, Integer>>>) availableBookIdCounts)
@@ -1743,7 +1743,7 @@ class XApp2 {
                 System.out.print("\n");
             }
 
-            Return_the_book_from_the_user_to_the_library:
+            Return_the_Book_from_the_User_to_the_Library:
             {
                 final Result<Book> returnedBookResult = library1.checkInBookFromUser(book1, user1);
                 if (returnedBookResult instanceof Result.Failure) {
@@ -1759,7 +1759,7 @@ class XApp2 {
                 library1.DumpDB();
             }
 
-            // Dump Json
+            // Load Library from Json
             if (false) {
                 System.out.println("\nLibrary Json:");
                 System.out.println(library1.toPrettyJson());
