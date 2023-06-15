@@ -761,7 +761,7 @@ interface IContext {
 
 // Context is a singleton class that holds all the repositories and global objects like Gson
 class Context implements IContext {
-    static Context INSTANCE = new Context();  // Create default static Context
+    static Context INSTANCE = null;  // Enforces singleton instance
 
     // Repository Singletons
     private Repo.Book bookRepo = null;
@@ -782,23 +782,29 @@ class Context implements IContext {
         this.libraryRepo = libraryRepo;
         this.gson = gson;
     }
-
     Context() {
         this(
-                new Repo.Book(),
-                new Repo.User(),
-                new Repo.Library(),
-                new Gson()
+            new Repo.Book(),
+            new Repo.User(),
+            new Repo.Library(),
+            new Gson()
         );
     }
 
     // If `context` is `null` OR `StaticContext` this returns the default static Context,
     // otherwise returns the `context` passed in.
-    public static Context contextInstance(Context context) {
-        if (context == null || context instanceof StaticContext)
-            return Context.INSTANCE;  // pass in null/StaticContext to get the default static context
-        else
-            return context;           // pass in a context to get that context (for testing)
+    public static Context setupINSTANCE(Context context) {
+        if (context == null) {
+            if(INSTANCE != null) return INSTANCE;
+
+            System.out.println("Context.getINSTANCE(): passed in Context is null, creating default Context");
+            INSTANCE = new Context();
+            return INSTANCE;  // return default Context (singleton)
+        } else {
+            System.out.println("Context.getINSTANCE(): using passed in Context");
+            INSTANCE = context;  // set the default Context to the one passed in
+            return context;
+        }
     }
 
     public void setBookRepo(Repo.Book bookRepo) {
@@ -823,12 +829,6 @@ class Context implements IContext {
 
     public Repo.Library libraryRepo() {
         return this.libraryRepo;
-    }
-}
-
-class StaticContext extends Context {
-    StaticContext() {
-        super(); // Create the default static context
     }
 }
 
@@ -993,52 +993,43 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     UUID id;
     protected T info;
     protected Result<T> infoResult = null;
-    protected Context context = null;
 
+    protected Context context = null;
     private Gson gson = null; // convenience reference to the context's Gson object
 
-    // Class of the info<T> (for GSON deserialization)
+    // Class of the info<T> (for GSON serialization)
     @SuppressWarnings("unchecked")
     Class<T> infoClass = (Class<T>) ((ParameterizedType) getClass()
             .getGenericSuperclass()).getActualTypeArguments()[0];
 
 
     IDomainObject(T info, Context context) {
-        this.context = Context.contextInstance(context);
+        this.context = Context.setupINSTANCE(context);
         this.gson = this.context.gson;
         this.info = info;
         this.id = info.id;
     }
-
     IDomainObject(UUID id, Context context) {
-        this.context = Context.contextInstance(context);
+        this.context = Context.setupINSTANCE(context);
         this.gson = this.context.gson;
         this.id = id;
     }
-
     IDomainObject(String json, Context context) {
-        this.context = Context.contextInstance(context);
+        this.context = Context.setupINSTANCE(context);
         this.gson = this.context.gson;
         this.info = this.gson.fromJson(json, this.infoClass);
         this.id = this.info.id;
     }
-
     IDomainObject(Context context) {
         this(UUID.randomUUID(), context);
     }
-
     IDomainObject(String json) {
-        this(json, new StaticContext());
+        this(json, null);
     }
-
     IDomainObject(T info) {
-        this(info, new StaticContext());
+        this(info, null);
     }
-
-    IDomainObject(UUID id) {
-        this(id, new StaticContext());
-    }
-
+    IDomainObject(UUID id) { this(id, null);}
     IDomainObject() {
         this(UUID.randomUUID(), null);
     }
@@ -1522,7 +1513,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
 
 class XApp2 {
     // Setup App Singletons for Context
-    private Context context = Context.INSTANCE;
+    private final Context context;
     private final Repo.Book bookRepo = new Repo.Book(
             new API(
                     new URL("http://localhost:8080"),
@@ -1542,14 +1533,11 @@ class XApp2 {
 
     XApp2(Context context) {
         // Setup App Context Object
-        if (context != null) {
-            // Passed in context
-            this.context = context;
-        } else {
-            this.context.setBookRepo(this.bookRepo);
-            this.context.setLibraryRepo(this.libraryRepo);
-            this.context.setUserRepo(this.userRepo);
-        }
+        this.context = Context.setupINSTANCE(context);
+        this.context.setBookRepo(this.bookRepo);
+        this.context.setLibraryRepo(this.libraryRepo);
+        this.context.setUserRepo(this.userRepo);
+        this.context.gson = new GsonBuilder().setPrettyPrinting().create();
 
         Populate_And_Poke_Book:
         {
