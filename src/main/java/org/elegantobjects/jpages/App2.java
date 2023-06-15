@@ -765,7 +765,7 @@ interface IContext {
 
 // Context is a singleton class that holds all the repositories and global objects like Gson
 class Context implements IContext {
-//    static public Context INSTANCE = null;  // Enforces singleton instance & allows global access
+    // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
 
     // Repository Singletons
     private Repo.Book bookRepo = null;
@@ -775,7 +775,7 @@ class Context implements IContext {
     // Utility Singletons
     protected Gson gson = null;
 
-    Context(
+    private Context(
             Repo.Book bookRepo,
             Repo.User userRepo,
             Repo.Library libraryRepo,
@@ -786,15 +786,38 @@ class Context implements IContext {
         this.libraryRepo = libraryRepo;
         this.gson = gson;
     }
-    Context() {
-        this(
-            new Repo.Book(),
+
+    public static Context setupInstance(Context context) {
+        if(context == null) {
+            System.out.println("Context.setupInstance(): passed in Context is null, creating default Context");
+
+            // Generate sensible default singletons for the production application
+            return Context.generateProductionDefaultContext();
+        } else {
+            System.out.println("Context.setupInstance(): using passed in Context");
+            return context;
+        }
+    }
+
+    private static Context generateProductionDefaultContext() {
+        return new Context(
+            new Repo.Book(
+                new InMemoryAPI(
+                        new URL("http://localhost:8080"),
+                        new HttpClient("Apache")
+                ),
+                new InMemoryDatabase(new URL("http://localhost:16078"),
+                        "root",
+                        "password"
+                )
+            ),
             new Repo.User(),
             new Repo.Library(),
-            new Gson()
+            new GsonBuilder().setPrettyPrinting().create()
         );
     }
 
+//    LEAVE for Reference - This is how you would enforce a singleton instance using a static method & variable
 //    // If `context` is `null` OR `StaticContext` this returns the default static Context,
 //    // otherwise returns the `context` passed in.
 //    public static Context setupINSTANCE(Context context) {
@@ -998,7 +1021,7 @@ class Model {
 // Info - Caches the info and provides methods to fetch and update the info
 interface Info<T extends Model.Domain> {
     T fetchInfo();                  // Fetches info for object from server
-    boolean isInfoFetched();        // Returns true if info has been fetched
+    boolean isInfoFetched();        // Returns true if info has been fetched from server
     Result<T> fetchInfoResult();    // Fetches Result<T> for info object from server
     Result<T> updateInfo(T info);   // Updates info for object to server
     Result<T> refreshInfo();        // Refreshes info for object from server
@@ -1019,10 +1042,9 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     Class<T> infoClass = (Class<T>) ((ParameterizedType) getClass()
             .getGenericSuperclass()).getActualTypeArguments()[0];
 
-
     IDomainObject(T info, Context context) {
-        this.context = context;
-        // this.context = Context.setupINSTANCE(context);  // left for reference for static context instance
+//        this.context = context;
+         this.context = Context.setupInstance(context);  // left for reference for static context instance
         this.gson = this.context.gson;
         this.info = info;
         this.id = info.id;
@@ -1538,32 +1560,15 @@ class LibraryApp {
 
     public static void main(final String... args) {
 
-        // Setup App Context Object for singletons
-        Context context = new Context();
-        final Repo.Book bookRepo = new Repo.Book(
-                new InMemoryAPI(
-                        new URL("http://localhost:8080"),
-                        new HttpClient("Apache")
-                ),
-                new InMemoryDatabase(new URL("http://localhost:16078"),
-                        "root",
-                        "password"
-                )
-        );
-        final Repo.Library libraryRepo = new Repo.Library();
-        final Repo.User userRepo = new Repo.User();
+        // Setup App Context Object singletons
+        Context productionContext = Context.setupInstance(null);
 
-        context.setBookRepo(bookRepo);
-        context.setLibraryRepo(libraryRepo);
-        context.setUserRepo(userRepo);
-        context.gson = new GsonBuilder().setPrettyPrinting().create();
-
-        new LibraryApp(context);
+        new LibraryApp(productionContext);
     }
 
     LibraryApp(Context context) {
 
-        //context = Context.setupINSTANCE(context);
+        //context = Context.setupINSTANCE(context);  // For implementing a static Context. LEAVE for reference
 
         Populate_And_Poke_Book:
         {
