@@ -283,21 +283,17 @@ class Result<T> {
     }
 }
 
-interface IDB {
-    Model.Entity.BookInfo getBook(UUID id);
-
+interface IDatabase {
+    Model.Entity.BookInfo getBookInfo(UUID id);
     Result<Model.Entity.BookInfo> updateBook(Model.Entity.BookInfo bookInfo);
-
     Result<Model.Entity.BookInfo> addBook(Model.Entity.BookInfo bookInfo);
-
     Result<Model.Entity.BookInfo> upsertBook(Model.Entity.BookInfo bookInfo);
-
     Result<Model.Entity.BookInfo> deleteBook(Model.Entity.BookInfo bookInfo);
 
 }
 
 // DB uses Entities
-class DB implements IDB {
+class InMemoryDatabase implements IDatabase {
     private final URL url;
     private final String user;
     private final String password;
@@ -305,14 +301,17 @@ class DB implements IDB {
     // Simulate a database
     private final HashMap<UUID, Model.Entity.BookInfo> database = new HashMap<>();  // Book id -> book
 
-    DB(URL url, String user, String password) {
+    InMemoryDatabase(URL url, String user, String password) {
         this.url = url;
         this.user = user;
         this.password = password;
     }
+    InMemoryDatabase() {
+        this(new URL("memory://hash.map"), "admin", "password");
+    }
 
     @Override
-    public Model.Entity.BookInfo getBook(UUID id) {
+    public Model.Entity.BookInfo getBookInfo(UUID id) {
         // Simulate the request
         return database.get(id);
     }
@@ -361,39 +360,40 @@ class DB implements IDB {
 }
 
 interface IAPI {
-    Result<Model.DTO.BookInfo> getBook(UUID id);
-
-    Result<Model.DTO.BookInfo> getBook(String id);
-
+    Result<Model.DTO.BookInfo> getBookInfo(UUID id);
+    Result<Model.DTO.BookInfo> getBookInfo(String id);
     Result<Model.DTO.BookInfo> addBook(Model.DTO.BookInfo bookInfo);
-
     Result<Model.DTO.BookInfo> updateBook(Model.DTO.BookInfo bookInfo);
-
     Result<Model.DTO.BookInfo> upsertBook(Model.DTO.BookInfo bookInfo);
-
     Result<Model.DTO.BookInfo> deleteBook(Model.DTO.BookInfo bookInfo);
 }
 
 // API uses DTOs
-class API implements IAPI {
+class InMemoryAPI implements IAPI {
     private final URL url;
     private final HttpClient client;
 
     // Simulate an API database
-    private final HashMap<UUID, Model.DTO.BookInfo> database = new HashMap<>(); // Book ID -> Book
+    private final HashMap<UUID, Model.DTO.BookInfo> database = new HashMap<>(); // Book ID -> BookInfo
 
-    API(URL url, HttpClient client) {
+    InMemoryAPI(URL url, HttpClient client) {
         this.url = url;
         this.client = client;
     }
-
-    @Override
-    public Result<Model.DTO.BookInfo> getBook(String id) {
-        return getBook(UUID.fromString(id));
+    InMemoryAPI() {
+        this(
+            new URL("http://localhost:8080"),
+            new HttpClient()
+        );
     }
 
     @Override
-    public Result<Model.DTO.BookInfo> getBook(UUID id) {
+    public Result<Model.DTO.BookInfo> getBookInfo(String id) {
+        return getBookInfo(UUID.fromString(id));
+    }
+
+    @Override
+    public Result<Model.DTO.BookInfo> getBookInfo(UUID id) {
         // Simulate the request
         if (!database.containsKey(id)) {
             return new Result.Failure<>(new Exception("API: Book not found"));
@@ -450,27 +450,20 @@ interface IRepo {
 
     interface Book extends IRepo {
         Result<Model.Domain.BookInfo> fetchBookInfo(UUID id);
-
         Result<Model.Domain.BookInfo> addBook(Model.Domain.BookInfo bookInfo);
-
         Result<Model.Domain.BookInfo> updateBook(Model.Domain.BookInfo bookInfo);
-
         Result<Model.Domain.BookInfo> upsertBook(Model.Domain.BookInfo bookInfo);
     }
 
     interface User extends IRepo {
         Result<Model.Domain.UserInfo> fetchUserInfo(UUID id);
-
         Result<Model.Domain.UserInfo> updateUser(Model.Domain.UserInfo userInfo);
-
         Model.Domain.UserInfo upsertUser(Model.Domain.UserInfo userInfo);
     }
 
     interface Library extends IRepo {
         Result<Model.Domain.LibraryInfo> fetchLibraryInfo(UUID id);
-
         Result<Model.Domain.LibraryInfo> updateLibrary(Model.Domain.LibraryInfo libraryInfo);
-
         Result<Model.Domain.LibraryInfo> upsertLibrary(Model.Domain.LibraryInfo libraryInfo);
     }
 }
@@ -479,17 +472,17 @@ interface IRepo {
 class Repo implements IRepo {
 
     static class Book implements IRepo.Book {
-        private final API api;
-        private final DB database;
+        private final InMemoryAPI api;
+        private final InMemoryDatabase database;
 
         Book() {
             this(
-                    new API(new URL("https://api.book.com"), new HttpClient()),
-                    new DB(new URL("https://db.book.com"), "user", "password")
+                new InMemoryAPI(new URL("https://api.book.com"), new HttpClient()),
+                new InMemoryDatabase(new URL("https://db.book.com"), "user", "password")
             );
         }
 
-        Book(API api, DB database) {
+        Book(InMemoryAPI api, InMemoryDatabase database) {
             this.api = api;
             this.database = database;
         }
@@ -497,11 +490,11 @@ class Repo implements IRepo {
         @Override
         public Result<Model.Domain.BookInfo> fetchBookInfo(UUID id) {
             // Make the request to API
-            Result<Model.DTO.BookInfo> bookInfoApiResult = api.getBook(id);
+            Result<Model.DTO.BookInfo> bookInfoApiResult = api.getBookInfo(id);
             if (bookInfoApiResult instanceof Result.Failure) {
 
                 // If API fails, try to get from cached DB
-                Model.Entity.BookInfo bookInfo = database.getBook(id);
+                Model.Entity.BookInfo bookInfo = database.getBookInfo(id);
                 if (bookInfo == null) {
                     return new Result.Failure<>(new Exception("Book not found"));
                 }
@@ -554,7 +547,7 @@ class Repo implements IRepo {
         public Result<Model.Domain.BookInfo> upsertBook(Model.Domain.BookInfo bookInfo) {
             System.out.println("Repo.Book - Upserting book info: " + bookInfo);
 
-            if (database.getBook(bookInfo.id) != null) {
+            if (database.getBookInfo(bookInfo.id) != null) {
                 return updateBook(bookInfo);
             } else {
                 return addBook(bookInfo);
@@ -663,8 +656,8 @@ class Repo implements IRepo {
     }
 
     static class User implements IRepo.User {
-        // Simulate a database on server
-        private final HashMap<UUID, Model.Domain.UserInfo> database = new HashMap<>(); // User ID -> User
+        // Simulate a database on a server somewhere
+        private final HashMap<UUID, Model.Domain.UserInfo> database = new HashMap<>(); // User ID -> UserInfo
 
         @Override
         public Result<Model.Domain.UserInfo> fetchUserInfo(UUID id) {
@@ -982,8 +975,8 @@ class Model {
 // Info - Caches the info and provides methods to fetch and update the info
 interface Info<T extends Model.Domain> {
     T fetchInfo();                  // Fetches the info for the object from the server
-    Result<T> fetchInfoResult();    // Fetches the Result<T> for the info object from the server
     boolean isInfoFetched();        // Returns true if the info has been fetched
+    Result<T> fetchInfoResult();    // Fetches the Result<T> for the info object from the server
     Result<T> updateInfo(T info);   // Updates the info for the object on the server
     Result<T> refreshInfo();        // Refreshes the info for the object from the server
 }
@@ -992,7 +985,6 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     UUID id;
     protected T info;
     protected Result<T> infoResult = null;
-
 
     // Singletons
     protected Context context = null;
@@ -1005,21 +997,21 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
 
 
     IDomainObject(T info, Context context) {
-//        this.context = Context.setupINSTANCE(context);
         this.context = context;
+        // this.context = Context.setupINSTANCE(context);  // left for reference for static context instance
         this.gson = this.context.gson;
         this.info = info;
         this.id = info.id;
     }
     IDomainObject(UUID id, Context context) {
-//        this.context = Context.setupINSTANCE(context);
         this.context = context;
+        // this.context = Context.setupINSTANCE(context);  // left for reference for static context instance
         this.gson = this.context.gson;
         this.id = id;
     }
     IDomainObject(String json, Context context) {
-//        this.context = Context.setupINSTANCE(context);
         this.context = context;
+        // this.context = Context.setupINSTANCE(context);  // left for reference for static context instance
         this.gson = this.context.gson;
         this.info = this.gson.fromJson(json, this.infoClass);
         this.id = this.info.id;
@@ -1038,17 +1030,16 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         this(UUID.randomUUID(), null);
     }
 
+    // To be Implemented by subclasses
     public Result<T> fetchInfoResult() {
-        return infoResult;
+        return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
     }
 
-    ; // Implemented by subclasses
-
+    // To be Implemented by subclasses
     public Result<T> updateInfo(T info) {
-        return null;
+        return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
     }
 
-    ; // Implemented by subclasses
 
     public T fetchInfo() {
         if (isInfoFetched()) {
@@ -1082,6 +1073,10 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     }
 
     public Result<T> refreshInfo() {
+        System.out.println("Refreshing info for " +
+                "class: " + this.getClass().getName() + ", " +
+                "id: " + this.id.toString());
+
         this.info = null;
         return this.fetchInfoResult();
     }
@@ -1328,7 +1323,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         System.out.printf("Library (%s) - checkOutBookToUser, user: %s, book: %s\n", this.id.toString(), user.id.toString(), book.id.toString());
 
         // Refresh the repo
-        this.refreshInfo();
+//        this.refreshInfo();
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         if (isUnableToFindOrAddUser(user)) {
@@ -1375,7 +1370,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
 
     public Result<Book> checkInBookFromUser(Book book, User user) {
         System.out.printf("Library (%s) - checkInBookFromUser, book %s from user %s\n", this.id, book.id, user.id);
-        if (fetchInfoFailureReason() == null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         if (isUnableToFindOrAddUser(user)) {
             return new Result.Failure<>(new Exception("User is not known, id: " + user.id));
@@ -1519,11 +1514,11 @@ class LibraryApp {
         // Setup App Context Object for singletons
         Context context = new Context();
         final Repo.Book bookRepo = new Repo.Book(
-                new API(
+                new InMemoryAPI(
                         new URL("http://localhost:8080"),
                         new HttpClient("Apache")
                 ),
-                new DB(new URL("http://localhost:16078"),
+                new InMemoryDatabase(new URL("http://localhost:16078"),
                         "root",
                         "password"
                 )
@@ -1717,7 +1712,7 @@ class LibraryApp {
                 ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
 
                 // Print checked out books
-                System.out.println("\nChecked Out Books from User [" + user1.fetchInfo().name + ", " + user1.id + "]:");
+                System.out.println("\nChecked Out Books for User [" + user1.fetchInfo().name + ", " + user1.id + "]:");
                 for (Book book : checkedOutBooks) {
                     final Result<Model.Domain.BookInfo> bookInfoResult = book.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
@@ -1735,16 +1730,17 @@ class LibraryApp {
                 System.out.print("\n");
             }
 
-            Return_the_Book_from_the_User_to_the_Library:
+            Check_In_the_Book_from_the_User_to_the_Library:
             {
-                final Result<Book> returnedBookResult = library1.checkInBookFromUser(book1, user1);
-                if (returnedBookResult instanceof Result.Failure) {
-                    System.out.println("Returned book FAILURE --> book id:" +
-                            ((Result.Failure<Book>) returnedBookResult).exception().getMessage()
+                System.out.println("\nCheck in book " + book1.id + " from user " + user1.id);
+                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1, user1);
+                if (checkInBookResult instanceof Result.Failure) {
+                    System.out.println("Check In book FAILURE --> book id:" +
+                            ((Result.Failure<Book>) checkInBookResult).exception().getMessage()
                     );
                 } else {
                     System.out.println("Returned Book SUCCESS --> book id:" +
-                            ((Result.Success<Book>) returnedBookResult).value()
+                            ((Result.Success<Book>) checkInBookResult).value()
                     );
                 }
 
