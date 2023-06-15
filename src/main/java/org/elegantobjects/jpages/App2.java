@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.*;
 
+import static org.elegantobjects.jpages.Context.ContextType.*;
+
 public final class App2 extends IOException {
 
     private static final long serialVersionUID = 0x7523L;
@@ -775,7 +777,12 @@ class Context implements IContext {
     // Utility Singletons
     protected Gson gson = null;
 
-    private Context(
+    public enum ContextType {
+        PRODUCTION,
+        TEST
+    }
+
+    Context(
             Repo.Book bookRepo,
             Repo.User userRepo,
             Repo.Library libraryRepo,
@@ -787,18 +794,23 @@ class Context implements IContext {
         this.gson = gson;
     }
 
-    public static Context setupInstance(Context context) {
-        if(context == null) {
-            System.out.println("Context.setupInstance(): passed in Context is null, creating default Context");
-
-            // Generate sensible default singletons for the production application
-            return Context.generateProductionDefaultContext();
-        } else {
-            System.out.println("Context.setupInstance(): using passed in Context");
-            return context;
+    public static Context setupProductionInstance() {
+        return setupInstance(PRODUCTION, null);
+    }
+    public static Context setupInstance(ContextType contextType, Context context) {
+        switch (contextType) {
+            case PRODUCTION:
+                System.out.println("Context.setupInstance(): passed in Context is null, creating PRODUCTION Context");
+                return Context.generateProductionDefaultContext();
+            case TEST:
+                System.out.println("Context.setupInstance(): using passed in Context");
+                return context;
         }
+
+        throw new RuntimeException("Context.setupInstance(): Invalid ContextType");
     }
 
+    // Generate sensible default singletons for the production application
     private static Context generateProductionDefaultContext() {
         return new Context(
             new Repo.Book(
@@ -1043,8 +1055,8 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
             .getGenericSuperclass()).getActualTypeArguments()[0];
 
     IDomainObject(T info, Context context) {
-//        this.context = context;
-         this.context = Context.setupInstance(context);  // left for reference for static context instance
+        this.context = context;
+        // this.context = Context.setupInstance(context);  // left for reference for static context instance
         this.gson = this.context.gson;
         this.info = info;
         this.id = info.id;
@@ -1561,7 +1573,8 @@ class LibraryApp {
     public static void main(final String... args) {
 
         // Setup App Context Object singletons
-        Context productionContext = Context.setupInstance(null);
+        Context productionContext = Context.setupProductionInstance();
+        // Context productionContext = Context.setupInstance(TEST, testContext); // for testing
 
         new LibraryApp(productionContext);
     }
