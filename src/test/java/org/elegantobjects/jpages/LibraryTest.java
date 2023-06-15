@@ -27,7 +27,7 @@ public class LibraryTest {
         Book book = new Book(UUID.fromString("00000000-0000-0000-0000-000000000003"));
 
         // Act
-        library.checkoutBookToUser(book, user);
+        library.checkOutBookToUser(book, user);
 
         // Assert
         Result<ArrayList<UUID>> numBooksCheckedOut = library.findBooksCheckedOutByUser(user.id);
