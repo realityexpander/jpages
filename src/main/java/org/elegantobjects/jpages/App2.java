@@ -625,7 +625,7 @@ class Repo implements IRepo {
             for (int i = 0; i < 10; i++) {
                 database.addBook(
                         new Model.Entity.BookInfo(
-                                XApp2.createFakeUUID(i),
+                                LibraryApp.createFakeUUID(i),
                                 "Title " + i,
                                 "Author " + i,
                                 "Description " + i)
@@ -636,7 +636,7 @@ class Repo implements IRepo {
         public void populateAPI() {
             for (int i = 0; i < 10; i++) {
                 Result<Model.DTO.BookInfo> result = api.addBook(
-                        new Model.DTO.BookInfo(XApp2.createFakeUUID(i),
+                        new Model.DTO.BookInfo(LibraryApp.createFakeUUID(i),
                                 "Title " + i,
                                 "Author " + i,
                                 "Description " + i)
@@ -738,7 +738,7 @@ class Repo implements IRepo {
         public void populateWithRandomBooks(UUID libraryId, int numberOfBooksToCreate) {
             for (int i = 0; i < numberOfBooksToCreate; i++) {
                 database.get(libraryId).bookIdToNumBooksAvailableMap
-                        .put(XApp2.createFakeUUID(i), 1 /* number on hand */);
+                        .put(LibraryApp.createFakeUUID(i), 1 /* number on hand */);
             }
         }
 
@@ -761,7 +761,7 @@ interface IContext {
 
 // Context is a singleton class that holds all the repositories and global objects like Gson
 class Context implements IContext {
-    static Context INSTANCE = null;  // Enforces singleton instance
+//    static public Context INSTANCE = null;  // Enforces singleton instance & allows global access
 
     // Repository Singletons
     private Repo.Book bookRepo = null;
@@ -791,21 +791,24 @@ class Context implements IContext {
         );
     }
 
-    // If `context` is `null` OR `StaticContext` this returns the default static Context,
-    // otherwise returns the `context` passed in.
-    public static Context setupINSTANCE(Context context) {
-        if (context == null) {
-            if(INSTANCE != null) return INSTANCE;
-
-            System.out.println("Context.getINSTANCE(): passed in Context is null, creating default Context");
-            INSTANCE = new Context();
-            return INSTANCE;  // return default Context (singleton)
-        } else {
-            System.out.println("Context.getINSTANCE(): using passed in Context");
-            INSTANCE = context;  // set the default Context to the one passed in
-            return context;
-        }
-    }
+//    // If `context` is `null` OR `StaticContext` this returns the default static Context,
+//    // otherwise returns the `context` passed in.
+//    public static Context setupINSTANCE(Context context) {
+//        if (context == null) {
+//            if(INSTANCE != null) return INSTANCE;
+//
+//            System.out.println("Context.getINSTANCE(): passed in Context is null, creating default Context");
+//            INSTANCE = new Context();
+//            return INSTANCE;  // return default Context (singleton)
+//        } else {
+//            System.out.println("Context.getINSTANCE(): using passed in Context");
+//            INSTANCE = context;  // set the default Context to the one passed in
+//            return context;
+//        }
+//    }
+//    public static Context getINSTANCE() {
+//        return setupINSTANCE(null);
+//    }
 
     public void setBookRepo(Repo.Book bookRepo) {
         if (bookRepo != null) this.bookRepo = bookRepo;
@@ -979,13 +982,9 @@ class Model {
 // Info - Caches the info and provides methods to fetch and update the info
 interface Info<T extends Model.Domain> {
     T fetchInfo();                  // Fetches the info for the object from the server
-
     Result<T> fetchInfoResult();    // Fetches the Result<T> for the info object from the server
-
     boolean isInfoFetched();        // Returns true if the info has been fetched
-
     Result<T> updateInfo(T info);   // Updates the info for the object on the server
-
     Result<T> refreshInfo();        // Refreshes the info for the object from the server
 }
 
@@ -994,6 +993,8 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     protected T info;
     protected Result<T> infoResult = null;
 
+
+    // Singletons
     protected Context context = null;
     private Gson gson = null; // convenience reference to the context's Gson object
 
@@ -1004,18 +1005,21 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
 
 
     IDomainObject(T info, Context context) {
-        this.context = Context.setupINSTANCE(context);
+//        this.context = Context.setupINSTANCE(context);
+        this.context = context;
         this.gson = this.context.gson;
         this.info = info;
         this.id = info.id;
     }
     IDomainObject(UUID id, Context context) {
-        this.context = Context.setupINSTANCE(context);
+//        this.context = Context.setupINSTANCE(context);
+        this.context = context;
         this.gson = this.context.gson;
         this.id = id;
     }
     IDomainObject(String json, Context context) {
-        this.context = Context.setupINSTANCE(context);
+//        this.context = Context.setupINSTANCE(context);
+        this.context = context;
         this.gson = this.context.gson;
         this.info = this.gson.fromJson(json, this.infoClass);
         this.id = this.info.id;
@@ -1130,11 +1134,9 @@ class Book extends DomainObject<Model.Domain.BookInfo> {
     Book() {
         this(UUID.randomUUID());
     }
-
     Book(UUID id) {
         this(id, null);
     }
-
     Book(UUID id, Context context) {
         super(context);
         this.repo = this.context.bookRepo();
@@ -1178,11 +1180,9 @@ class User extends DomainObject<Model.Domain.UserInfo> {
     User() {
         this(UUID.randomUUID());
     }
-
     User(UUID id) {
         this(id, null);
     }
-
     User(UUID id, Context context) {
         super(context);
         this.repo = this.context.userRepo();
@@ -1282,11 +1282,12 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
     Library() {
         this(UUID.randomUUID());
     }
-
     Library(UUID id) {
         this(id, null);
     }
-
+    Library(Context context) {
+        this(UUID.randomUUID(), context);
+    }
     Library(UUID id, Context context) {
         super(context);
         this.repo = this.context.libraryRepo();
@@ -1402,7 +1403,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         System.out.println("Library (" + this.id + ") - upsertUser id: " + user.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if (!isKnownUser(user)) {
+        if (!isUserKnown(user)) {
             try {
                 // Create new user entry
                 this.info.userIdToCheckedOutBookMap.put(user.id, new ArrayList<>());
@@ -1419,7 +1420,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         System.out.printf("Library (%s) - isUnableToFindOrAddUser %s\n", this.id, user.id);
         if (fetchInfoFailureReason() != null) return true;
 
-        if (isKnownUser(user)) {
+        if (isUserKnown(user)) {
             return false;
         }
 
@@ -1432,14 +1433,14 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         return false;
     }
 
-    public boolean isKnownBook(Book book) {
+    public boolean isBookKnown(Book book) {
         System.out.printf("Library(%s) - hasBook %s\n", this.id, book.id);
         if (fetchInfoFailureReason() != null) return false;
 
         return this.info.bookIdToNumBooksAvailableMap.containsKey(book.id);
     }
 
-    public boolean isKnownUser(User user) {
+    public boolean isUserKnown(User user) {
         System.out.printf("Library (%s) - isKnownUser %s\n", this.id, user.id);
         if (fetchInfoFailureReason() != null) return false;
 
@@ -1484,7 +1485,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         ArrayList<UUID> bookIds = new ArrayList<>(this.info.userIdToCheckedOutBookMap.get(user.id));
         ArrayList<Book> books = new ArrayList<>();
         for (UUID bookId : bookIds) {
-            books.add(new Book(bookId));
+            books.add(new Book(bookId, context));
         }
 
         return new Result.Success<>(books);
@@ -1511,41 +1512,44 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
     }
 }
 
-class XApp2 {
-    // Setup App Singletons for Context
-    private final Context context;
-    private final Repo.Book bookRepo = new Repo.Book(
-            new API(
-                    new URL("http://localhost:8080"),
-                    new HttpClient("Apache")
-            ),
-            new DB(new URL("http://localhost:16078"),
-                    "root",
-                    "password"
-            )
-    );
-    private final Repo.Library libraryRepo = new Repo.Library();
-    private final Repo.User userRepo = new Repo.User();
+class LibraryApp {
 
     public static void main(final String... args) {
-        new XApp2(null);
+
+        // Setup App Context Object for singletons
+        Context context = new Context();
+        final Repo.Book bookRepo = new Repo.Book(
+                new API(
+                        new URL("http://localhost:8080"),
+                        new HttpClient("Apache")
+                ),
+                new DB(new URL("http://localhost:16078"),
+                        "root",
+                        "password"
+                )
+        );
+        final Repo.Library libraryRepo = new Repo.Library();
+        final Repo.User userRepo = new Repo.User();
+
+        context.setBookRepo(bookRepo);
+        context.setLibraryRepo(libraryRepo);
+        context.setUserRepo(userRepo);
+        context.gson = new GsonBuilder().setPrettyPrinting().create();
+
+        new LibraryApp(context);
     }
 
-    XApp2(Context context) {
-        // Setup App Context Object
-        this.context = Context.setupINSTANCE(context);
-        this.context.setBookRepo(this.bookRepo);
-        this.context.setLibraryRepo(this.libraryRepo);
-        this.context.setUserRepo(this.userRepo);
-        this.context.gson = new GsonBuilder().setPrettyPrinting().create();
+    LibraryApp(Context context) {
+
+        //context = Context.setupINSTANCE(context);
 
         Populate_And_Poke_Book:
         {
             System.out.println("Populating Book DB and API");
-            PopulateBookDBandAPI();
+            PopulateBookDBandAPI(context);
 
             // Create a book object (it only has an id)
-            Book book = new Book(XApp2.createFakeUUID(1));
+            Book book = new Book(LibraryApp.createFakeUUID(1), context);
             System.out.println(book.fetchInfoResult().toString());
 
             // Update info for a book
@@ -1575,7 +1579,7 @@ class XApp2 {
             }
 
             // Try to get a book id that doesn't exist
-            Book book2 = new Book(XApp2.createFakeUUID(99));
+            Book book2 = new Book(LibraryApp.createFakeUUID(99), context);
             if (book2.fetchInfoResult() instanceof Result.Failure) {
                 System.out.println("Get Book FAILURE --> " +
                         "book id: " + book2.id + " >> " +
@@ -1587,17 +1591,17 @@ class XApp2 {
                 );
             }
 
-            DumpBookDBandAPI();
+            DumpBookDBandAPI(context);
         }
 
         Populate_the_library_and_user_DBs:
         {
-            ///////////////////////////////////////
-            // Setup DB & API simulated resources//
-            ///////////////////////////////////////
+            ////////////////////////////////////////
+            // Setup DB & API simulated resources //
+            ////////////////////////////////////////
 
-            // Create & populate a fake library in the library repo
-            final Result<Model.Domain.LibraryInfo> libraryInfo = createFakeLibraryInfoInContextLibraryRepo(1);
+            // Create & populate a Library in the Library Repo
+            final Result<Model.Domain.LibraryInfo> libraryInfo = createFakeLibraryInfoInContextLibraryRepo(1, context);
             if (libraryInfo instanceof Result.Failure) {
                 System.out.println("Create Library FAILURE --> " +
                         ((Result.Failure<Model.Domain.LibraryInfo>) libraryInfo)
@@ -1611,21 +1615,21 @@ class XApp2 {
             );
 
             // Populate the library
-            this.context.libraryRepo()
+            context.libraryRepo()
                     .populateWithRandomBooks(libraryInfoId, 10);
 
-            // Create & populate a fake user in the user repo
-            final Model.Domain.UserInfo userInfo = createFakeUserInfoInContextUserRepo(1);
+            // Create & populate a User in the User Repo
+            final Model.Domain.UserInfo userInfo = createFakeUserInfoInContextUserRepo(1, context);
 
             //////////////////////////////////
             // Actual App functionality     //
             //////////////////////////////////
 
             // Create the App objects
-            final User user1 = new User(userInfo.id);
-            final Library library1 = new Library(libraryInfoId);
-            final Book book1 = new Book(createFakeUUID(1));
-            final Book book2 = new Book(createFakeUUID(2));
+            final User user1 = new User(userInfo.id, context);
+            final Library library1 = new Library(libraryInfoId, context);
+            final Book book1 = new Book(createFakeUUID(1), context);
+            final Book book2 = new Book(createFakeUUID(2), context);
 
             Checkout_a_book_to_the_user:
             {
@@ -1679,7 +1683,7 @@ class XApp2 {
                 // Print out available books
                 System.out.println("\nAvailable Books in Library:");
                 for (Pair<UUID, Integer> bookIdCount : availableBooks) {
-                    final Book book3 = new Book(bookIdCount.getFirst());
+                    final Book book3 = new Book(bookIdCount.getFirst(), context);
 
                     final Result<Model.Domain.BookInfo> bookInfoResult = book3.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
@@ -1752,7 +1756,7 @@ class XApp2 {
                 System.out.println("\nLibrary Json:");
                 System.out.println(library1.toPrettyJson());
 
-                Library library2 = new Library();
+                Library library2 = new Library(context);
                 Result<Model.Domain.LibraryInfo> library2Result = library2.updateInfoFromJson(
                         "{\n" +
                                 "  \"name\": \"Library 99\",\n" +
@@ -1779,8 +1783,8 @@ class XApp2 {
 
             Check_out_Book_via_User:
             {
-                final User user2 = new User(createFakeUserInfoInContextUserRepo(2).id);
-                final Result<Model.Domain.BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12);
+                final User user2 = new User(createFakeUserInfoInContextUserRepo(2, context).id, context);
+                final Result<Model.Domain.BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, context);
 
                 if (book12Result instanceof Result.Failure) {
                     System.out.println("Book Error: " +
@@ -1788,7 +1792,7 @@ class XApp2 {
                     );
                 } else {
                     final UUID book12id = ((Result.Success<Model.Domain.BookInfo>) book12Result).value().id;
-                    final Book book12 = new Book(book12id);
+                    final Book book12 = new Book(book12id, context);
 
                     final Result<Book> book12UpsertResult = library1.upsertAvailableBook(book12, 1);
                     if (book12UpsertResult instanceof Result.Failure) {
@@ -1817,29 +1821,32 @@ class XApp2 {
     //////////////////////////////////////////////////////////////////////
     /////////////////////////// Helper Methods ///////////////////////////
 
-    private void PopulateBookDBandAPI() {
+    private void PopulateBookDBandAPI(Context context) {
         // Populate the databases
-        this.context.bookRepo().populateDB();
-        this.context.bookRepo().populateAPI();
+        context.bookRepo().populateDB();
+        context.bookRepo().populateAPI();
     }
 
-    private void DumpBookDBandAPI() {
+    private void DumpBookDBandAPI(Context context) {
         System.out.print("\n");
         System.out.println("DB Dump");
-        this.context.bookRepo().printDB();
+        context.bookRepo().printDB();
 
         System.out.print("\n");
         System.out.println("API Dump");
-        this.context.bookRepo().printAPI();
+        context.bookRepo().printAPI();
 
         System.out.print("\n");
     }
 
-    private Result<Model.Domain.LibraryInfo> createFakeLibraryInfoInContextLibraryRepo(final Integer id) {
+    private Result<Model.Domain.LibraryInfo> createFakeLibraryInfoInContextLibraryRepo(
+        final Integer id,
+        Context context
+    ) {
         Integer someNumber = id;
         if (someNumber == null) someNumber = 1;
 
-        return this.context.libraryRepo()
+        return context.libraryRepo()
                 .upsertLibrary(
                         new Model.Domain.LibraryInfo(
                                 createFakeUUID(someNumber),
@@ -1848,11 +1855,14 @@ class XApp2 {
                 );
     }
 
-    private Model.Domain.UserInfo createFakeUserInfoInContextUserRepo(final Integer id) {
+    private Model.Domain.UserInfo createFakeUserInfoInContextUserRepo(
+        final Integer id,
+        Context context
+    ) {
         Integer someNumber = id;
         if (someNumber == null) someNumber = 1;
 
-        return this.context.userRepo()
+        return context.userRepo()
                 .upsertUser(new Model.Domain.UserInfo(
                         createFakeUUID(someNumber),
                         "User " + someNumber,
@@ -1860,9 +1870,12 @@ class XApp2 {
                 ));
     }
 
-    private Result<Model.Domain.BookInfo> addFakeBookInfoInContextBookRepo(final Integer id) {
+    private Result<Model.Domain.BookInfo> addFakeBookInfoInContextBookRepo(
+        final Integer id,
+        Context context
+    ) {
         final Model.Domain.BookInfo bookInfo = createFakeBookInfo(null, id);
-        return this.context.bookRepo()
+        return context.bookRepo()
                 .upsertBook(bookInfo);
     }
 
