@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.*;
 
+import static org.elegantobjects.jpages.BaseUUID.*;
 import static org.elegantobjects.jpages.Context.ContextType.*;
 import static org.elegantobjects.jpages.LibraryApp.createFakeBaseUUID;
 
@@ -324,43 +325,71 @@ class BaseUUID {
     public static BaseUUID randomUUID() {
         return new BaseUUID(UUID.randomUUID());
     }
-}
-class BookUUID extends BaseUUID {
-    BookUUID(UUID uuid) {
-        super(uuid);
+
+    static class BookUUID extends BaseUUID {
+        BookUUID(UUID uuid) {
+            super(uuid);
+        }
+
+        public static BookUUID fromString(String uuid) {
+            return new BookUUID(UUID.fromString(uuid));
+        }
+
+        public static BookUUID fromUUID(UUID uuid) {
+            return new BookUUID(uuid);
+        }
+
+        public static BookUUID randomUUID() {
+            return new BookUUID(UUID.randomUUID());
+        }
+
+        public static BookUUID fromBaseUUID(BaseUUID uuid) {
+            return new BookUUID(uuid.uuid);
+        }
     }
 
-    public static BookUUID fromString(String uuid) {
-        return new BookUUID(UUID.fromString(uuid));
+    static class LibraryUUID extends BaseUUID {
+        LibraryUUID(UUID uuid) {
+            super(uuid);
+        }
+
+        public static LibraryUUID fromString(String uuid) {
+            return new LibraryUUID(UUID.fromString(uuid));
+        }
+
+        public static LibraryUUID fromUUID(UUID uuid) {
+            return new LibraryUUID(uuid);
+        }
+
+        public static LibraryUUID fromBaseUUID(BaseUUID uuid) {
+            return new LibraryUUID(uuid.uuid);
+        }
+
+        public static LibraryUUID randomUUID() {
+            return new LibraryUUID(UUID.randomUUID());
+        }
     }
 
-    public static BookUUID fromUUID(UUID uuid) {
-        return new BookUUID(uuid);
-    }
-    public static BookUUID randomUUID() {
-        return new BookUUID(UUID.randomUUID());
-    }
-}
-class LibraryUUID extends BaseUUID {
-    LibraryUUID(UUID uuid) {
-        super(uuid);
-    }
+    static class UserUUID extends BaseUUID {
+        UserUUID(UUID uuid) {
+            super(uuid);
+        }
 
-    public static LibraryUUID fromString(String uuid) {
-        return new LibraryUUID(UUID.fromString(uuid));
-    }
+        public static UserUUID fromString(String uuid) {
+            return new UserUUID(UUID.fromString(uuid));
+        }
 
-    public static LibraryUUID fromUUID(UUID uuid) {
-        return new LibraryUUID(uuid);
-    }
+        public static UserUUID fromUUID(UUID uuid) {
+            return new UserUUID(uuid);
+        }
 
-    public static LibraryUUID randomUUID() {
-        return new LibraryUUID(UUID.randomUUID());
-    }
-}
-class UserUUID extends BaseUUID {
-    UserUUID(UUID uuid) {
-        super(uuid);
+        public static UserUUID fromBaseUUID(BaseUUID uuid) {
+            return new UserUUID(uuid.uuid);
+        }
+
+        public static UserUUID randomUUID() {
+            return new UserUUID(UUID.randomUUID());
+        }
     }
 }
 
@@ -504,7 +533,7 @@ class InMemoryAPI<T extends Model.DTO> implements IAPI<T> {
 
     @Override
     public Result<T> getDtoInfo(String id) {
-        return getDtoInfo(BaseUUID.fromString(id));
+        return getDtoInfo(fromString(id));
     }
 
     @Override
@@ -518,42 +547,42 @@ class InMemoryAPI<T extends Model.DTO> implements IAPI<T> {
     }
 
     @Override
-    public Result<T> updateDtoInfo(T DtoInfoInfo) {
+    public Result<T> updateDtoInfo(T dtoInfo) {
         // Simulate the network request
-        if (database.put(DtoInfoInfo.id, DtoInfoInfo) == null) {
+        if (database.put(dtoInfo.id, dtoInfo) == null) {
             return new Result.Failure<>(new Exception("API: Failed to update book"));
         }
 
-        return new Result.Success<>(DtoInfoInfo);
+        return new Result.Success<>(dtoInfo);
     }
 
     @Override
-    public Result<T> addDtoInfo(T DtoInfoInfo) {
-        if (database.containsKey(DtoInfoInfo.id)) {
-            return new Result.Failure<>(new Exception("API: DtoInfo already exists"));
+    public Result<T> addDtoInfo(T dtoInfo) {
+        if (database.containsKey(dtoInfo.id)) {
+            return new Result.Failure<>(new Exception("API: DtoInfo already exists, use update, id=" + dtoInfo.id));
         }
 
-        database.put(DtoInfoInfo.id, DtoInfoInfo);
+        database.put(dtoInfo.id, dtoInfo);
 
-        return new Result.Success<>(DtoInfoInfo);
+        return new Result.Success<>(dtoInfo);
     }
 
     @Override
-    public Result<T> upsertDtoInfo(T DtoInfoInfo) {
-        if (database.containsKey(DtoInfoInfo.id)) {
-            return updateDtoInfo(DtoInfoInfo);
+    public Result<T> upsertDtoInfo(T dtoInfo) {
+        if (database.containsKey(dtoInfo.id)) {
+            return updateDtoInfo(dtoInfo);
         } else {
-            return addDtoInfo(DtoInfoInfo);
+            return addDtoInfo(dtoInfo);
         }
     }
 
     @Override
-    public Result<T> deleteDtoInfo(T DtoInfoInfo) {
-        if (database.remove(DtoInfoInfo.id) == null) {
+    public Result<T> deleteDtoInfo(T dtoInfo) {
+        if (database.remove(dtoInfo.id) == null) {
             return new Result.Failure<>(new Exception("API: Failed to delete DtoInfo"));
         }
 
-        return new Result.Success<>(DtoInfoInfo);
+        return new Result.Success<>(dtoInfo);
     }
 
     public Map<BaseUUID, T> getAllDtoInfos() {
@@ -571,7 +600,7 @@ class BookApi { // Use DSL to define the API (wrapper over in-memory generic API
     }
 
     public Result<Model.DTO.BookInfo> getBookInfo(String id) {
-        return api.getDtoInfo(BaseUUID.fromString(id));
+        return api.getDtoInfo(fromString(id));
     }
     public Result<Model.DTO.BookInfo> getBookInfo(BookUUID id) {
         return api.getDtoInfo(id);
@@ -776,7 +805,7 @@ class Repo implements IRepo {
             for (int i = 0; i < 10; i++) {
                 database.addBookInfo(
                         new Model.Entity.BookInfo(
-                                (BookUUID) createFakeBaseUUID(i),
+                                BookUUID.fromBaseUUID(createFakeBaseUUID(i)),
                                 "Title " + i,
                                 "Author " + i,
                                 "Description " + i)
@@ -788,7 +817,7 @@ class Repo implements IRepo {
             for (int i = 0; i < 10; i++) {
                 Result<Model.DTO.BookInfo> result = api.addBookInfo(
                         new Model.DTO.BookInfo(
-                                (BookUUID) createFakeBaseUUID(i),
+                                BookUUID.fromBaseUUID(createFakeBaseUUID(i)),
                                 "Title " + i,
                                 "Author " + i,
                                 "Description " + i)
@@ -904,7 +933,7 @@ class Repo implements IRepo {
             for (int i = 0; i < numberOfBooksToCreate; i++) {
                 database.get(libraryId)
                         .bookIdToNumBooksAvailableMap
-                        .put((BookUUID) createFakeBaseUUID(i), 1 /* number on hand */);
+                        .put(BookUUID.fromBaseUUID(createFakeBaseUUID(i)), 1 /* number of books available */);
             }
         }
 
@@ -1042,10 +1071,18 @@ class Context implements IContext {
 class Model {
     BaseUUID id;
 
+    Model(BaseUUID id) {
+        this.id = id;
+    }
+
     static class Domain extends Model {
 
+        Domain(BaseUUID id) {
+            super(id);
+        }
+
         static class BookInfo extends Domain implements ToEntity<Entity.BookInfo>, ToDTO<DTO.BookInfo> {
-            BookUUID id;
+            transient BookUUID id;
             final String title;
             final String author;
             final String description;
@@ -1054,6 +1091,7 @@ class Model {
                 this(BookUUID.fromString(id), title, author, description);
             }
             BookInfo(BookUUID id, String title, String author, String description) {
+                super(id);
                 this.id = id;
                 this.title = title;
                 this.author = author;
@@ -1076,12 +1114,13 @@ class Model {
         }
 
         static class UserInfo extends Domain {
-            final UserUUID id;
+            transient final UserUUID id;
             final String name;
             final String email;
             final ArrayList<BookUUID> acceptedBooks = new ArrayList<>();
 
             UserInfo(UserUUID id, String name, String email) {
+                super(id);
                 this.id = id;
                 this.name = name;
                 this.email = email;
@@ -1093,7 +1132,7 @@ class Model {
         }
 
         static class LibraryInfo extends Domain {
-            final LibraryUUID id;
+            transient final LibraryUUID id;
             final private String name;
             final HashMap<UserUUID, ArrayList<BookUUID>> userIdToCheckedOutBookMap;
             final HashMap<BookUUID, Integer> bookIdToNumBooksAvailableMap;
@@ -1103,12 +1142,14 @@ class Model {
                         HashMap<UserUUID, ArrayList<BookUUID>> checkoutUserBookMap,
                         HashMap<BookUUID, Integer> bookIdToNumBooksAvailableMap
             ) {
+                super(id);
                 this.id = id;
                 this.name = name;
                 this.userIdToCheckedOutBookMap = checkoutUserBookMap;
                 this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
             }
             LibraryInfo(LibraryUUID id, String name) {
+                super(id);
                 this.id = id;
                 this.name = name;
                 this.userIdToCheckedOutBookMap = new HashMap<>();
@@ -1134,13 +1175,19 @@ class Model {
 
     // Data Transfer Objects for API
     static class DTO extends Model {
+        public DTO(BaseUUID id) {
+            super(id);
+        }
+
         static class BookInfo extends DTO implements ToDomain<Domain.BookInfo> {
-            final BookUUID id;
+            BookUUID id;
+
             final String title;
             final String author;
             final String description;
 
             BookInfo(BookUUID id, String title, String author, String description) {
+                super(id);
                 this.id = id;
                 this.title = title;
                 this.author = author;
@@ -1159,6 +1206,10 @@ class Model {
 
     // Entities for Database
     static class Entity extends Model {
+        Entity(BaseUUID id) {
+            super(id);
+        }
+
         static class BookInfo extends Entity implements ToDomain<Domain.BookInfo> {
             final BookUUID id;
             final String title;
@@ -1166,6 +1217,7 @@ class Model {
             final String description;
 
             BookInfo(BookUUID id, String title, String author, String description) {
+                super(id);
                 this.id = id;
                 this.title = title;
                 this.author = author;
@@ -1249,7 +1301,7 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         this.id = this.info.id;
     }
     IDomainObject(Context context) {
-        this(BaseUUID.fromString(UUID.randomUUID().toString()), context);
+        this(fromString(UUID.randomUUID().toString()), context);
     }
     IDomainObject(String json) {
         this(json, null);
@@ -1259,7 +1311,7 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     }
     IDomainObject(BaseUUID id) { this(id, null);}
     IDomainObject() {
-        this(BaseUUID.randomUUID(), null);
+        this(randomUUID(), null);
     }
 
     // To be Implemented by subclasses
@@ -1410,7 +1462,7 @@ class User extends DomainObject<Model.Domain.UserInfo> {
     private Repo.User repo = null;
 
     User() {
-        this((UserUUID) UserUUID.randomUUID());
+        this(UserUUID.randomUUID());
     }
     User(UserUUID id) {
         this(id, null);
@@ -1766,14 +1818,14 @@ class LibraryApp {
             PopulateBookDBandAPI(ctx);
 
             // Create a book object (it only has an id)
-            Book book = new Book((BookUUID) createFakeBaseUUID(1), ctx);
+            Book book = new Book(BookUUID.fromBaseUUID(createFakeBaseUUID(1)), ctx);
             ctx.log.d(this,book.fetchInfoResult().toString());
 
             // Update info for a book
             final Result<Model.Domain.BookInfo> bookInfoResult =
                     book.updateInfo(
                             new Model.Domain.BookInfo(
-                                    (BookUUID) book.id,
+                                    book.id,
                                     "The Updated Title",
                                     "The Updated Author",
                                     "The Updated Description"
@@ -1796,7 +1848,7 @@ class LibraryApp {
             }
 
             // Try to get a book id that doesn't exist
-            Book book2 = new Book((BookUUID) createFakeBaseUUID(99), ctx);
+            Book book2 = new Book(BookUUID.fromBaseUUID(createFakeBaseUUID(99)), ctx);
             if (book2.fetchInfoResult() instanceof Result.Failure) {
                 ctx.log.d(this,"Get Book FAILURE --> " +
                         "book id: " + book2.id + " >> " +
@@ -1844,9 +1896,9 @@ class LibraryApp {
 
             // Create the App objects
             final User user1 = new User(userInfo.id, ctx);
-            final Library library1 = new Library((LibraryUUID) libraryInfoId, ctx);
-            final Book book1 = new Book((BookUUID) createFakeBaseUUID(1), ctx);
-            final Book book2 = new Book((BookUUID) createFakeBaseUUID(2), ctx);
+            final Library library1 = new Library(libraryInfoId, ctx);
+            final Book book1 = new Book(BookUUID.fromBaseUUID(createFakeBaseUUID(1)), ctx);
+            final Book book2 = new Book(BookUUID.fromBaseUUID(createFakeBaseUUID(2)), ctx);
 
             Checkout_2_books_to_a_user:
             {
@@ -2073,8 +2125,8 @@ class LibraryApp {
         return context.libraryRepo()
                 .upsertLibrary(
                         new Model.Domain.LibraryInfo(
-                                (LibraryUUID) createFakeBaseUUID(someNumber),
-                                "Library " + someNumber
+                            LibraryUUID.fromBaseUUID(createFakeBaseUUID(someNumber)),
+                            "Library " + someNumber
                         )
                 );
     }
@@ -2088,7 +2140,7 @@ class LibraryApp {
 
         return context.userRepo()
                 .upsertUser(new Model.Domain.UserInfo(
-                        (UserUUID) createFakeBaseUUID(someNumber),
+                        UserUUID.fromBaseUUID(createFakeBaseUUID(someNumber)),
                         "User " + someNumber,
                         "user" + someNumber + "@gmail.com"
                 ));
@@ -2109,9 +2161,9 @@ class LibraryApp {
 
         BookUUID uuid;
         if (uuidStr == null)
-            uuid = (BookUUID) createFakeBaseUUID(fakeId);
+            uuid = BookUUID.fromBaseUUID(createFakeBaseUUID(fakeId));
         else
-            uuid = (BookUUID) BaseUUID.fromString(uuidStr);
+            uuid = (BookUUID) fromString(uuidStr);
 
         return new Model.Domain.BookInfo(
                 uuid,
@@ -2127,6 +2179,6 @@ class LibraryApp {
         // convert to string and add pad with 11 leading zeros
         final String str = String.format("%011d", id);
 
-        return BaseUUID.fromString("00000000-0000-0000-0000-" + str);
+        return fromString("00000000-0000-0000-0000-" + str);
     }
 }
