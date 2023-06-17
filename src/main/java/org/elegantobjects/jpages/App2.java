@@ -437,9 +437,7 @@ class BaseUUID {
         public boolean containsKey(String baseUUIDStr) {
             return containsKey(UUID.fromString(baseUUIDStr));
         }
-        public boolean containsKey(BaseUUID baseUUID) {
-            return super.containsKey(baseUUID.uuid);
-        }
+        public boolean containsKey(BaseUUID baseUUID) { return super.containsKey(baseUUID.uuid); }
 
         public Set<T> keys() throws RuntimeException {
             Set<UUID> uuidSet = super.keySet();
@@ -744,6 +742,7 @@ class BookApi { // Use DSL to define the API (wrapper over in-memory generic API
     }
 }
 
+// Repo only accepts/returns Domain Models, and internally converts to/from DTOs/Entities/Domains
 interface IRepo {
     interface Book extends IRepo {
         Result<Model.Domain.BookInfo> fetchBookInfo(BookUUID id);
@@ -764,8 +763,6 @@ interface IRepo {
         Result<Model.Domain.LibraryInfo> upsertLibraryInfo(Model.Domain.LibraryInfo libraryInfo);
     }
 }
-
-// Repo only accepts/returns Domain Models, and internally converts to/from DTOs/Entities/Domains
 class Repo implements IRepo {
     protected final Log log;
 
@@ -1007,7 +1004,7 @@ class Repo implements IRepo {
     // Holds Library info for all the libraries in the system
     static class Library extends Repo implements IRepo.Library {
         // simulate a database on server
-        private final HashMap<LibraryUUID, Model.Domain.LibraryInfo> database = new HashMap<>();
+        private final BaseUUID.HashMap<LibraryUUID, Model.Domain.LibraryInfo> database = new BaseUUID.HashMap<>();
 
         Library(Log log) {
             super(log);
@@ -1042,7 +1039,7 @@ class Repo implements IRepo {
                 return new Result.Success<>(libraryInfo);
             }
 
-            return new Result.Failure<>(new Exception("Library not found"));
+            return new Result.Failure<>(new Exception("Library not found, id: " + libraryInfo.id));
         }
 
         @Override
@@ -1080,9 +1077,7 @@ interface ILog {
     void e(String tag, String msg);
     void e(String tag, String msg, Exception e);
 }
-
 class Log implements ILog {
-
     public void d(String tag, String msg) {
         System.out.println(tag + ": " + msg);
     }
@@ -1100,6 +1095,7 @@ class Log implements ILog {
     }
 }
 
+// Context is a singleton class that holds all the repositories and global objects like Gson
 interface IContext {
     Repo.Book bookRepo = null;
     Repo.User userRepo = null;
@@ -1107,8 +1103,6 @@ interface IContext {
     Gson gson = null;
     Log log = null;
 }
-
-// Context is a singleton class that holds all the repositories and global objects like Gson
 class Context implements IContext {
     // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
 
@@ -1204,9 +1198,13 @@ class Context implements IContext {
 
 // These hold the "{Model}Info" for each App Domain Object. (like a DTO for a database row)
 class Model {
-    transient BaseUUID id;
+    transient protected BaseUUID id;
 
     Model(BaseUUID id) {
+        this.id = id;
+    }
+
+    public void setBaseUUID(BaseUUID id) {
         this.id = id;
     }
 
@@ -1217,7 +1215,7 @@ class Model {
         }
 
         static class BookInfo extends Domain implements ToEntity<Entity.BookInfo>, ToDTO<DTO.BookInfo> {
-            transient BookUUID id;
+            BookUUID id;
             final String title;
             final String author;
             final String description;
@@ -1249,7 +1247,7 @@ class Model {
         }
 
         static class UserInfo extends Domain {
-            transient final UserUUID id;
+            final UserUUID id;
             final String name;
             final String email;
             final ArrayList<BookUUID> acceptedBooks = new ArrayList<>();
@@ -1268,14 +1266,15 @@ class Model {
 
         static class LibraryInfo extends Domain {
             final LibraryUUID id;  // transient because we don't want to serialize this
-            final private String name;
+            final String name;
             final private BaseUUID.HashMap<UserUUID, ArrayList<BookUUID>> userIdToCheckedOutBookMap;
             final private BaseUUID.HashMap<BookUUID, Integer> bookIdToNumBooksAvailableMap;
 
-            LibraryInfo(LibraryUUID id,
-                        String name,
-                        BaseUUID.HashMap<UserUUID, ArrayList<BookUUID>> checkoutUserBookMap,
-                        BaseUUID.HashMap<BookUUID, Integer> bookIdToNumBooksAvailableMap
+            LibraryInfo(
+                LibraryUUID id,
+                String name,
+                BaseUUID.HashMap<UserUUID, ArrayList<BookUUID>> checkoutUserBookMap,
+                BaseUUID.HashMap<BookUUID, Integer> bookIdToNumBooksAvailableMap
             ) {
                 super(id);
                 this.id = id;
@@ -1284,11 +1283,7 @@ class Model {
                 this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
             }
             LibraryInfo(LibraryUUID id, String name) {
-                super(id);
-                this.id = id;
-                this.name = name;
-                this.userIdToCheckedOutBookMap = new BaseUUID.HashMap<>();
-                this.bookIdToNumBooksAvailableMap = new BaseUUID.HashMap<>();
+                this(id, name, new BaseUUID.HashMap<>(), new BaseUUID.HashMap<>());
             }
 
             public Result<BookUUID> checkOutBookToUser(BookUUID bookId, UserUUID userId) {
@@ -1643,7 +1638,8 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
     // Class of the info<T> (for GSON serialization)
     @SuppressWarnings("unchecked")
     Class<T> infoClass = (Class<T>) ((ParameterizedType) getClass()
-            .getGenericSuperclass()).getActualTypeArguments()[0];
+            .getGenericSuperclass())
+            .getActualTypeArguments()[0];
 
     IDomainObject(T info, Context context) {
         if(context == null) throw new IllegalArgumentException("Context cannot be null");
@@ -1660,7 +1656,6 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         this.context = context;
         this.gson = this.context.gson;
         this.id = id;
-
     }
     IDomainObject(String json, Context context) {
         if(context == null) throw new IllegalArgumentException("Context cannot be null");
@@ -1718,6 +1713,9 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         return this.info;
     }
 
+    // Returns reason for failure of last fetchInfo() call, or null if was successful.
+    // Used as an error guard and if Info is not fetched, it attempts to fetch it.
+    // The "returning null" behavior is to make the call site error handling code smaller.
     public String fetchInfoFailureReason() {
         if (!isInfoFetched()) {
             if (fetchInfoResult() instanceof Result.Failure) {
@@ -1732,6 +1730,7 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         return this.info != null;
     }
 
+    // Forces refresh of Info from server
     public Result<T> refreshInfo() {
         context.log.d(this,"Refreshing info for " +
                 "class: " + this.getClass().getName() + ", " +
@@ -1741,7 +1740,6 @@ abstract class IDomainObject<T extends Model.Domain> implements Info<T> {
         return this.fetchInfoResult();
     }
 }
-
 abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
 
     public DomainObject(T info, Context context) {
@@ -1771,18 +1769,16 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
             T infoFromJson = (T) this.context.gson.fromJson(json, infoClass);
             assert infoFromJson.getClass() == this.info.getClass();
 
-            // Update the info object with the new info
-            this.info = infoFromJson;
-
-            if(!this.info.id.equals(this.id)) {
-                return new Result.Failure<>(new Exception("ID mismatch when updating info from JSON: json.Id=" + this.info.id + " != object.id" + this.id.toString()));
+            Result<T> checkResult = checkInfoIdMatchesJsonId(infoClass, infoFromJson);
+            if (checkResult instanceof Result.Failure) {
+                return checkResult;
             }
 
-            // cast the info object to the correct type and set the id
-            this.info = (T) infoClass.cast(this.info);
-            this.info.id = this.id;
+            // Set id - GSON deserialization doesn't set it (???)
+            infoFromJson.setBaseUUID(this.id);
 
-            return this.updateInfo(this.info);
+            // Update the info object with the new info
+            return this.updateInfo(infoFromJson);
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
@@ -1800,6 +1796,31 @@ abstract class DomainObject<T extends Model.Domain> extends IDomainObject<T> {
         String infoString = this.info == null ? "null" : this.info.toString();
         String nameOfClass = this.getClass().getName();
         return nameOfClass + ": " + this.id.toString() + ", info=" + infoString;
+    }
+
+    /////////////////////////////////
+    // Private helpers             //
+    /////////////////////////////////
+
+    // Ensure id of Info object matches the id of the JSON data
+    private Result<T> checkInfoIdMatchesJsonId(Class<?> infoClass, T infoFromJson) {
+
+        try {
+            String infoFromJsonId = infoClass.getDeclaredField("id")
+                    .get(infoFromJson)
+                    .toString();
+            UUID infoFromJsonUUID = UUID.fromString(infoFromJsonId);
+
+            if (!infoFromJsonUUID.equals(this.id.uuid)) {
+                return new Result.Failure<>(new Exception("checkInfoIdMatchesJsonId(): Info id does not match json id, " +
+                        "info id: " + this.id.toString() + ", " +
+                        "json id: " + infoFromJsonId));
+            }
+        } catch (Exception e) {
+            return new Result.Failure<>(e);
+        }
+
+        return new Result.Success<>(infoFromJson);
     }
 }
 
@@ -2086,7 +2107,7 @@ class Library extends DomainObject<Model.Domain.LibraryInfo> {
         }
 
         // Update self with Repo result
-        this.info = ((Result.Success<Model.Domain.LibraryInfo>) infoResult).value();
+        super.updateInfo(((Result.Success<Model.Domain.LibraryInfo>) infoResult).value());
         return infoResult;
     }
 
@@ -2277,6 +2298,9 @@ class LibraryApp {
 
         Populate_And_Poke_Book:
         if(false){
+            ctx.log.d(this, "----------------------------------");
+            ctx.log.d(this, "Populate_And_Poke_Book");
+
             // Create a book object (it only has an id)
             Book book = new Book(BookUUID.fromBaseUUID(createFakeBaseUUID(1)), ctx);
             ctx.log.d(this,book.fetchInfoResult().toString());
@@ -2344,8 +2368,7 @@ class LibraryApp {
             );
 
             // Populate the library
-            ctx.libraryRepo()
-                    .populateWithFakeBooks(libraryInfoId, 10);
+            ctx.libraryRepo().populateWithFakeBooks(libraryInfoId, 10);
 
             // Create & populate a User in the User Repo
             final Model.Domain.UserInfo userInfo = createFakeUserInfoInContextUserRepo(1, ctx);
@@ -2362,7 +2385,8 @@ class LibraryApp {
 
             Checkout_2_books_to_a_user:
             {
-                ctx.log.d(this,"\nChecking out 2 books to user " + user1.id);
+                ctx.log.d(this, "----------------------------------");
+                ctx.log.d(this,"Checking out 2 books to user " + user1.id);
 
                 final Result<Book> result = library1.checkOutBookToUser(book1, user1);
                 if (result instanceof Result.Failure) {
@@ -2391,6 +2415,7 @@ class LibraryApp {
 
             Get_Available_Books_And_Counts_In_Library:
             if (false) {
+                ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"\nGetting available books and counts in library:");
 
                 final Result<HashMap<Book, Integer>> availableBookToNumAvailableResult =
@@ -2433,6 +2458,7 @@ class LibraryApp {
 
             Get_books_checked_out_by_user:
             if (false) {
+                ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"\nGetting books checked out by user " + user1.id);
 
                 final Result<ArrayList<Book>> checkedOutBooksResult = library1.findBooksCheckedOutByUser(user1);
@@ -2467,6 +2493,7 @@ class LibraryApp {
 
             Check_In_the_Book_from_the_User_to_the_Library:
             if (false) {
+                ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"\nCheck in book " + book1.id + " from user " + user1.id);
 
                 final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1, user1);
@@ -2485,9 +2512,10 @@ class LibraryApp {
 
             // Load Library from Json
             if (true) {
+                ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"Load Library from Json: ");
 
-//                Library library2 = new Library(ctx); // creates using a random UUID, but no info. Must load from json.
+                // Library library2 = new Library(ctx); // uses random UUID, will cause expected error due to unknown UUID
                 Library library2 = new Library(library1.id, ctx);
                 ctx.log.d(this, library2.toPrettyJson());
                 Result<Model.Domain.LibraryInfo> library2Result = library2.updateInfoFromJson(
@@ -2518,15 +2546,10 @@ class LibraryApp {
                         "}"
                 );
                 if(library2Result instanceof Result.Failure) {
-                    ctx.log.d(this,"Library2 Load Error: " +
-                            ((Result.Failure<Model.Domain.LibraryInfo>) library2Result).exception().getMessage()
+                    ctx.log.d(this, ((Result.Failure<Model.Domain.LibraryInfo>) library2Result).exception().getMessage()
                     );
                 } else {
-                    ctx.log.d(this,"Library2 Load Success: " +
-                            ((Result.Success<Model.Domain.LibraryInfo>) library2Result).value()
-                    );
-
-                    ctx.log.d(this,"\nResults of Library2 json load:");
+                    ctx.log.d(this,"Results of Library2 json load:");
                     ctx.log.d(this,library2.toPrettyJson());
                 }
             }
@@ -2567,12 +2590,12 @@ class LibraryApp {
                 }
             }
 
-
         }
     }
 
     //////////////////////////////////////////////////////////////////////
     /////////////////////////// Helper Methods ///////////////////////////
+    //////////////////////////////////////////////////////////////////////
 
     private void PopulateFakeBookInfoInContextBookRepoDBandAPI(Context context) {
         context.bookRepo().populateDatabaseWithFakeBookInfo();
