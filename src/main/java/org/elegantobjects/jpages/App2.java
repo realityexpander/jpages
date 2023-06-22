@@ -1206,7 +1206,7 @@ class Model {
     public UUID2<?> id() { return _id; }
     public UUID2<?> uuid2() { return id(); }
     public UUID uuid() { return _id.toUUID(); }
-    protected void _setIdFromImportedJson(UUID2<DomainUUID2> id) {
+    protected void _setId(UUID2<DomainUUID2> id) {
         this._id = id;
     }
 
@@ -1984,7 +1984,7 @@ abstract class IDomainObject<TDomain extends Domain>
         this.info = info;
         this.context = context;
     }
-    <TDomainInfo extends ToDomain<TDomain>> // only ToDomain<> interfaces have Info<> objects
+    <TDomainInfo extends ToDomain<TDomain>> // All classes implementing ToDomain<> interfaces ,ust have TDomainInfo objects
         IDomainObject(String json, Class<TDomainInfo> classType, Context context) {
             this(
                 Objects.requireNonNull(
@@ -2041,7 +2041,7 @@ abstract class IDomainObject<TDomain extends Domain>
     // Note: Types are to make sure it works with the correct generics and subclasses.
     // ie: The Library domain object has a Domain.LibraryInfo object which requires ToDomain<Domain.LibraryInfo> to be implemented.
     // todo : change to a marker interface instead of a checking for the ToDomain<> interface?
-    @SuppressWarnings("unchecked") // for _setIdFromImportedJson(
+    @SuppressWarnings("unchecked") // for _setIdFromImportedJson()
     public static <
             TDomain extends Domain,  // ie: Domain.BookInfo
             TDomainInfo extends ToDomain<? extends TDomain> // implementations of ToDomain<> interfaces MUST have Info<TDomain> objects
@@ -2054,9 +2054,9 @@ abstract class IDomainObject<TDomain extends Domain>
             TDomainInfo obj = context.gson.fromJson(json, (Type) domainInfoClassType);
             context.log.d("IDomainObject:createDomainInfoFromJson()", "obj = " + obj);
 
-            // Set Model Object id to match id of imported Info
+            // Set Model Object "master" id to match id of imported Info
             // ie: Model._id = Domain.BookInfo.id
-            ((TDomain)obj)._setIdFromImportedJson(
+            ((TDomain)obj)._setId(
                 (UUID2<DomainUUID2>) obj.toDomain().id()
             );
 
