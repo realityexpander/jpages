@@ -1169,7 +1169,7 @@ class Context implements IContext {
     }
 }
 
-// Info - Caches the Object "Info" and defines required fetch and update methods
+// Info - Caches the Object "Info" and defines required fetch and update methods.
 // Info object stores the "business data" for the Domain object.
 // It is the "single source of truth" for the Domain object.
 // Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
@@ -1186,7 +1186,7 @@ interface Info<T> {
 // Similar to an Entity for a database row or a DTO for a REST API, these are the objects that are
 // passed around the application. They are the "source of truth" for the data in the application.
 class Model {
-    transient private UUID2<DomainUUID2> _id; // Can't keep it final because we need to set it based on ID from imported JSON
+    transient private UUID2<DomainUUID2> _id; // Can't make it final bc need to set to be same id from imported JSON
 
     Model(UUID2<DomainUUID2> id) {
         this._id = new UUID2<DomainUUID2>(id);
@@ -1225,8 +1225,9 @@ class Model {
         public UUID2<?> id() { return super.id(); }
 
         // Makes a SHALLOW copy of the Domain.{DomainInfo} object
-        // Must be overridden in each Domain object to return a DEEP copy
-        // Call this.copy() to get a shallow copy of the Domain object, then call this.copy() on each member variable.
+        // - Must be overridden in each Domain object to return a DEEP copy
+        // - Call this.copy() to get a shallow copy of the Domain object.
+        // - Then in overridden method populate the new object with copies of its deep objects.
         @SuppressWarnings("unchecked")
         public <TDomainInfo extends ToDomain<? extends Domain>> TDomainInfo copy() {
             return (TDomainInfo) ((TDomainInfo) this).toDomain();
@@ -1268,7 +1269,8 @@ class Model {
             }
 
             // Domain Must accept both DTO and Entity BookInfo (and convert to Domain BookInfo)
-            // Domain decides what to include from the DTOs/Entities // todo - should the DTO/Entites decide what to include?
+            // Domain decides what to include from the DTOs/Entities
+            // todo - should the DTO/Entites decide what to include?
             BookInfo(DTO.BookInfo bookInfo) {
                 // simple conversion from DTO to Domain
                 // todo validation here
@@ -2000,7 +2002,7 @@ abstract class IRole<TDomainInfo extends Domain>
         DomainUUID2
 {
     // Unique ID for this DomainObject
-    // - Matches id of it's Info<TDomain> object (to avoid confusion)
+    // - Matches id of its Info<TDomain> object (to avoid confusion)
     // - Marked transient so gson will ignore it, as every concrete DomainObject will have a type-specific UUID2.
     private final UUID2<DomainUUID2> id;
 
@@ -2010,11 +2012,12 @@ abstract class IRole<TDomainInfo extends Domain>
     // Singletons
     protected final Context context;
 
-    // Class of the Info<TDomain> (for Gson serialization)
+    // Clazz of the Info<TDomain> (for Gson serialization)
     @SuppressWarnings("unchecked")
-    Class<TDomainInfo> infoClass = (Class<TDomainInfo>) ((ParameterizedType) getClass()
-            .getGenericSuperclass())
-            .getActualTypeArguments()[0];
+    private final Class<TDomainInfo> infoClazz =
+            (Class<TDomainInfo>) ((ParameterizedType) getClass()
+                .getGenericSuperclass())
+                .getActualTypeArguments()[0];
 
     private IRole(@NotNull UUID id, TDomainInfo info, @NotNull Context context) {
         this.id = UUID2.fromUUID(id); // intentionally NOT validating id==info.id bc need to be able to pass in info as null.
@@ -2022,7 +2025,7 @@ abstract class IRole<TDomainInfo extends Domain>
         this.context = context;
     }
     <TDomainInfo_ extends ToDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo objects
-    IRole(@NotNull String json, Class<TDomainInfo_> classType, Context context) {
+        IRole(@NotNull String json, Class<TDomainInfo_> classType, Context context) {
             this(
                 Objects.requireNonNull(
                     IRole.createDomainInfoFromJson(json, classType, context)
@@ -2031,7 +2034,7 @@ abstract class IRole<TDomainInfo extends Domain>
             );
     }
     <TDomainInfo_ extends TDomainInfo>
-    IRole(@NotNull TDomainInfo_ info, Context context) {
+        IRole(@NotNull TDomainInfo_ info, Context context) {
             this(info.uuid(), info, context);
     }
     IRole(UUID2<DomainUUID2> id, Context context) {
@@ -2100,7 +2103,7 @@ abstract class IRole<TDomainInfo extends Domain>
                 "id: " + this.id());
 
         try {
-            Class<?> infoClass = this.infoClass;
+            Class<?> infoClass = this.infoClazz;
             TDomainInfo infoFromJson = (TDomainInfo) this.context.gson.fromJson(json, infoClass);
             assert infoFromJson.getClass() == this.info.getClass();
 
@@ -2118,7 +2121,6 @@ abstract class IRole<TDomainInfo extends Domain>
         }
     }
 
-    // protected void setInfo(TDomainInfo info) { this.info = info; } // Info is immutable, so can't set it, only update it
 
     public String toJson() {
         if(!isInfoFetched()) {
@@ -2137,20 +2139,25 @@ abstract class IRole<TDomainInfo extends Domain>
     /////////////////////////////////////////////////////
 
     // Defines how to fetch info from server
-    // - MUST be overridden/implemented in subclasses
+    // - *MUST* be overridden/implemented in subclasses
     @Override
     public Result<TDomainInfo> fetchInfoResult() {
         return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
     }
 
-    // To be Implemented by subclasses
-    // - MUST be overridden/implemented in subclasses
-    // - then call super.updateInfo(info) to update the info<TDomainInfo> object
+    // Updates the info object with new info object
+    // - *MUST* be overridden/implemented in subclasses
+    // - Call super.updateInfo(info) to update the info<TDomainInfo> object
+    //   (caller decides when appropriate, ie: optimistic updates, or after server update)
     @Override
     public Result<TDomainInfo> updateInfo(TDomainInfo info) {
         //noinspection unchecked
         this.info = info.copy();
         return new Result.Success<>(info);
+    }
+
+    protected void setInfo(TDomainInfo info) {
+        this.updateInfo(info); // Info is immutable, so only set a new copy
     }
 
     // NOTE: Should be Implemented by subclasses but not required
@@ -2163,10 +2170,9 @@ abstract class IRole<TDomainInfo extends Domain>
         return nameOfClass + ": " + this.id() + ", info=" + infoString;
     }
 
-    ////////////////////////////////////////////////////////////////////////
-    // Info<T> interface methods                                          //
-    // - contains the logic for fetching and updating info to/from server //
-    ////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////
+    // Info<T> interface methods   //
+    /////////////////////////////////
 
     public TDomainInfo info() {
         return this.fetchInfo();
