@@ -2980,9 +2980,6 @@ class LibraryApp {
                         "  \"id\": {\n" +
                         "    \"uuid\": \"00000000-0000-0000-0000-000000000099\"\n" +
                         "  }\n" +
-//                        "  \"_id\": {\n" +
-//                        "    \"uuid\": \"00000000-0000-0000-0000-000000000099\"\n" +
-//                        "  }\n" +
                         "}";
                 if(true) {
                     Result<Domain.LibraryInfo> library2Result = library2.updateInfoFromJson(json);
