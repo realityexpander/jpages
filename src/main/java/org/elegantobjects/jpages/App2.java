@@ -1,14 +1,13 @@
 package org.elegantobjects.jpages;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -293,7 +292,7 @@ class Result<T> {
     }
 }
 
-// Marker interface for Domain classes that use UUID2.
+// Marker interface for Domain classes that use UUID2<{Domain}>.
 interface DomainUUID2 {} // Keep this in global namespace to reduce wordiness at declaration sites (avoiding: UUID2<UUID2.DomainUUID2> wordiness)
 
 // UUID2 is a type-safe wrapper for UUIDs.
@@ -362,10 +361,11 @@ class UUID2<TDomainUUID2 extends DomainUUID2> implements DomainUUID2 {
         return new UUID2<>(this.uuid);
     }
 
-    // Utility HashMap class for mapping UUID2<T> to Objects. (UUID2<T> is the key)
+    // Utility HashMap class for mapping UUID2<T> to Objects.
     // Wrapper for HashMap where the `key` hash is the common UUID value stored in UUID class.
     // The problem is that normal HashMap uses `hash()` of UUID<{type}> object itself, which is not
     // consistent between UUID2<{type}> objects.
+    // This class uses UUID2<T> for the keys, but the hash is the common UUID value stored in UUID class.
     static class HashMap<TUUID2 extends DomainUUID2, TEntity> extends java.util.HashMap<UUID, TEntity> {
         private static final long serialVersionUID = 0x7723L;
 
@@ -475,9 +475,11 @@ class InMemoryDatabase<TEntity extends Entity, TDomainUUID extends DomainUUID2> 
     @SuppressWarnings("unchecked")
     @Override
     public Result<TEntity> updateEntityInfo(TEntity entityInfo) {
-        // Simulate the request
-        if (database.put((UUID2<TDomainUUID>) entityInfo.id, entityInfo) == null) {
-            return new Result.Failure<>(new Exception("DB: Failed to update entityInfo, entityInfo: " + entityInfo));
+        // Simulate the
+        try {
+            database.put((UUID2<TDomainUUID>) entityInfo.id(), entityInfo);
+        } catch (Exception e) {
+            return new Result.Failure<>(e);
         }
 
         return new Result.Success<>(entityInfo);
@@ -487,10 +489,10 @@ class InMemoryDatabase<TEntity extends Entity, TDomainUUID extends DomainUUID2> 
     @SuppressWarnings("unchecked")
     public Result<TEntity> addEntityInfo(TEntity entityInfo) {
         // Simulate the request
-        if (database.containsKey((UUID2<TDomainUUID>) entityInfo.id)) {
+        if (database.containsKey((UUID2<TDomainUUID>) entityInfo.id())) {
             return new Result.Failure<>(new Exception("DB: Entity already exists, entityInfo: " + entityInfo));
         }
-        if (database.put((UUID2<TDomainUUID>) entityInfo.id, entityInfo) == null) {
+        if (database.put((UUID2<TDomainUUID>) entityInfo.id(), entityInfo) == null) {
             return new Result.Failure<>(new Exception("DB: Failed to add entity, entityInfo: " + entityInfo));
         }
 
@@ -500,7 +502,7 @@ class InMemoryDatabase<TEntity extends Entity, TDomainUUID extends DomainUUID2> 
     @Override
     @SuppressWarnings("unchecked")
     public Result<TEntity> upsertEntityInfo(TEntity entityInfo) {
-        if (database.containsKey((UUID2<TDomainUUID>) entityInfo.id)) {
+        if (database.containsKey((UUID2<TDomainUUID>) entityInfo.id())) {
             return updateEntityInfo(entityInfo);
         } else {
             return addEntityInfo(entityInfo);
@@ -510,7 +512,7 @@ class InMemoryDatabase<TEntity extends Entity, TDomainUUID extends DomainUUID2> 
     @Override
     @SuppressWarnings("unchecked")
     public Result<TEntity> deleteEntityInfo(TEntity entityInfo) {
-        if (database.remove((UUID2<TDomainUUID>) entityInfo.id) == null) {
+        if (database.remove((UUID2<TDomainUUID>) entityInfo.id()) == null) {
             return new Result.Failure<>(new Exception("DB: Failed to delete entityInfo, entityInfo: " + entityInfo));
         }
 
@@ -575,7 +577,6 @@ interface IAPI<TDomainUUID extends DomainUUID2, TEntity extends DTO> {
     Result<TEntity> upsertDtoInfo(TEntity dtoInfo);
     Result<TEntity> deleteDtoInfo(TEntity dtoInfo);
 }
-//class InMemoryAPI<T extends Model.DTO> implements IAPI<T> {
 @SuppressWarnings("FieldCanBeLocal")
 class InMemoryAPI<TDomainUUID extends DomainUUID2, TEntity extends DTO> implements IAPI<TDomainUUID, TEntity> {
     private final URL url;
@@ -619,8 +620,10 @@ class InMemoryAPI<TDomainUUID extends DomainUUID2, TEntity extends DTO> implemen
     @Override
     @SuppressWarnings("unchecked")
     public Result<TEntity> updateDtoInfo(TEntity dtoInfo) {
-        if (database.put((UUID2<TDomainUUID>) dtoInfo.id, dtoInfo) == null) {
-            return new Result.Failure<>(new Exception("API: Failed to update Entity, id=" + dtoInfo.id));
+        try {
+            database.put((UUID2<TDomainUUID>) dtoInfo.id(), dtoInfo);
+        } catch (Exception e) {
+            return new Result.Failure<>(e);
         }
 
         return new Result.Success<>(dtoInfo);
@@ -629,11 +632,11 @@ class InMemoryAPI<TDomainUUID extends DomainUUID2, TEntity extends DTO> implemen
     @Override
     @SuppressWarnings("unchecked")
     public Result<TEntity> addDtoInfo(TEntity dtoInfo) {
-        if (database.containsKey((UUID2<TDomainUUID>) dtoInfo.id)) {
-            return new Result.Failure<>(new Exception("API: DtoInfo already exists, use update, id=" + dtoInfo.id));
+        if (database.containsKey((UUID2<TDomainUUID>) dtoInfo.id())) {
+            return new Result.Failure<>(new Exception("API: DtoInfo already exists, use UPDATE, id=" + dtoInfo.id()));
         }
 
-        database.put((UUID2<TDomainUUID>) dtoInfo.id, dtoInfo);
+        database.put((UUID2<TDomainUUID>) dtoInfo.id(), dtoInfo);
 
         return new Result.Success<>(dtoInfo);
     }
@@ -641,7 +644,7 @@ class InMemoryAPI<TDomainUUID extends DomainUUID2, TEntity extends DTO> implemen
     @Override
     @SuppressWarnings("unchecked")
     public Result<TEntity> upsertDtoInfo(TEntity dtoInfo) {
-        if (database.containsKey((UUID2<TDomainUUID>) dtoInfo.id)) {
+        if (database.containsKey((UUID2<TDomainUUID>) dtoInfo.id())) {
             return updateDtoInfo(dtoInfo);
         } else {
             return addDtoInfo(dtoInfo);
@@ -651,7 +654,7 @@ class InMemoryAPI<TDomainUUID extends DomainUUID2, TEntity extends DTO> implemen
     @Override
     @SuppressWarnings("unchecked")
     public Result<TEntity> deleteDtoInfo(TEntity dtoInfo) {
-        if (database.remove((UUID2<TDomainUUID>) dtoInfo.id) == null) {
+        if (database.remove((UUID2<TDomainUUID>) dtoInfo.id()) == null) {
             return new Result.Failure<>(new Exception("API: Failed to delete DtoInfo"));
         }
 
@@ -715,6 +718,9 @@ class BookApi { // Use DSL to define the API (wrapper over in-memory generic API
 }
 
 // Repo only accepts/returns Domain Models, and internally converts to/from DTOs/Entities/Domains
+// - works with the network API & local database to perform CRUD operations, and also performs validation.
+// - can also be used to implement caching.
+// The Repo can easily accept fake APIs & Database for testing.
 interface IRepo {
     interface BookRepo extends IRepo {
         Result<Domain.BookInfo> fetchBookInfo(UUID2<Book> id);
@@ -742,10 +748,9 @@ class Repo implements IRepo {
         this.log = log;
     }
 
-    // Business logic for Book Repo (converts to/from DTOs/Entities/Domains)
+    // Business logic for Book Repo (simple CRUD oerations; converts to/from DTOs/Entities/Domains)
     static class BookRepo extends Repo implements IRepo.BookRepo {
         private final BookApi api;
-        //private final InMemoryDatabase<Model.Entity.BookInfo> database;
         private final BookDatabase database;
 
         BookRepo(BookApi api,
@@ -818,9 +823,9 @@ class Repo implements IRepo {
 
         @Override
         public Result<Domain.BookInfo> upsertBookInfo(Domain.BookInfo bookInfo) {
-            log.d(this,"Repo.Book - Upserting book id: " + bookInfo.id);
+            log.d(this,"Repo.Book - Upserting book id: " + bookInfo.id());
 
-            if (database.getBookInfo(bookInfo.id) != null) {
+            if (database.getBookInfo(bookInfo.id()) != null) {
                 return updateBookInfo(bookInfo);
             } else {
                 return addBookInfo(bookInfo);
@@ -842,19 +847,19 @@ class Repo implements IRepo {
                 Domain.BookInfo bookInfo,
                 UpdateType updateType
         ) {
-            log.d(this,"Repo.BookRepo - saveBookToApiAndDB, updateType: " + updateType + ", id: " + bookInfo.id);
+            log.d(this,"updateType: " + updateType + ", id: " + bookInfo.id());
 
             // Make the API request
             Result<DTO.BookInfo> resultApi;
             switch (updateType) {
                 case UPDATE:
-                    resultApi = api.updateBookInfo(bookInfo.toDTO());// updateBook(bookInfo.toDTO());
+                    resultApi = api.updateBookInfo(bookInfo.toDTO());
                     break;
                 case ADD:
                     resultApi = api.addBookInfo(bookInfo.toDTO());
                     break;
                 default:
-                    return new Result.Failure<>(new Exception("UpdateType not supported"));
+                    return new Result.Failure<>(new Exception("UpdateType not supported: " + updateType));
             }
 
             if (resultApi instanceof Result.Failure) {
@@ -872,7 +877,7 @@ class Repo implements IRepo {
                     resultDB = database.addBookInfo(bookInfo.toEntity());
                     break;
                 default:
-                    return new Result.Failure<>(new Exception("UpdateType not supported"));
+                    return new Result.Failure<>(new Exception("UpdateType not supported: " + updateType));
             }
 
             if (resultDB instanceof Result.Failure) {
@@ -929,7 +934,7 @@ class Repo implements IRepo {
         }
     }
 
-    // Holds User info for all users in the system
+    // Holds User info for all users in the system (simple CRUD operations)
     static class UserRepo extends Repo implements IRepo.UserRepo {
         // Simulate a database on a server somewhere
         private final UUID2.HashMap<User, Domain.UserInfo> database = new UUID2.HashMap<>();
@@ -951,29 +956,30 @@ class Repo implements IRepo {
 
         @Override
         public Result<Domain.UserInfo> updateUserInfo(Domain.UserInfo userInfo) {
-            log.d(this,"Repo.User - Updating user info: " + userInfo);
+            String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+            log.d(this, "Repo.User - " + method + " - Updating user info: " + userInfo);
 
-            if (database.containsKey(userInfo.id)) {
-                database.put(userInfo.id, userInfo);
+            if (database.containsKey(userInfo.id())) {
+                database.put(userInfo.id(), userInfo);
                 return new Result.Success<>(userInfo);
             }
 
-            return new Result.Failure<>(new Exception("User not found"));
+            return new Result.Failure<>(new Exception("User not found, id:" + userInfo.id()));
         }
 
         @Override
         public Domain.UserInfo upsertUserInfo(Domain.UserInfo userInfo) {
             log.d(this,"Repo.User - Upserting user info: " + userInfo);
 
-            database.put(userInfo.id, userInfo);
+            database.put(userInfo.id(), userInfo);
             return userInfo;
         }
 
     }
 
-    // Holds Library info for all the libraries in the system
+    // Holds Library info for all the libraries in the system (simple CRUD operations)
     static class LibraryRepo extends Repo implements IRepo.LibraryRepo {
-        // simulate a database on server
+        // simulate a database on server (UUID2<Library> is the key)
         private final UUID2.HashMap<Library, Domain.LibraryInfo> database = new UUID2.HashMap<>();
 
         LibraryRepo(Log log) {
@@ -982,7 +988,7 @@ class Repo implements IRepo {
 
         @Override
         public Result<Domain.LibraryInfo> fetchLibraryInfo(UUID2<Library> id) {
-            log.d(this,"Repo.Library - Fetching library info: " + id);
+            log.d(this,"id: " + id);
 
             // Simulate a network request
             if (database.containsKey(id)) {
@@ -994,7 +1000,7 @@ class Repo implements IRepo {
 
         @Override
         public Result<Domain.LibraryInfo> updateLibraryInfo(Domain.LibraryInfo libraryInfo) {
-            log.d(this,"Repo.Library - updateLibrary, libraryInfo id: " + libraryInfo.id);
+            log.d(this," libraryInfo: " + libraryInfo);
 
             // Simulate a network request
             if (database.containsKey(libraryInfo.id)) {
@@ -1008,7 +1014,7 @@ class Repo implements IRepo {
 
         @Override
         public Result<Domain.LibraryInfo> upsertLibraryInfo(Domain.LibraryInfo libraryInfo) {
-            log.d(this,"Repo.Library - Upserting library id: " + libraryInfo.id);
+            log.d(this,"libraryInfo: " + libraryInfo);
 
             database.put(libraryInfo.id, libraryInfo);
 
@@ -1016,11 +1022,11 @@ class Repo implements IRepo {
         }
 
         ///////////////////////////////////
-        /// Helper methods              ///
+        /// Published Helper methods    ///
         ///////////////////////////////////
 
-        // todo move out of this class?
         public void populateWithFakeBooks(UUID2<Library> libraryId, int numberOfBooksToCreate) {
+            log.d(this,"libraryId: " + libraryId + ", numberOfBooksToCreate: " + numberOfBooksToCreate);
             Domain.LibraryInfo library = database.get(libraryId);
 
             for (int i = 0; i < numberOfBooksToCreate; i++) {
@@ -1036,6 +1042,7 @@ class Repo implements IRepo {
     }
 }
 
+// Simple Logging Operations
 interface ILog {
     void d(String tag, String msg);
     void e(String tag, String msg);
@@ -1053,9 +1060,11 @@ class Log implements ILog {
         e.printStackTrace();
     }
 
-    // log.d(this, "message") will print "ClassName: message"
+    // example: log.d(this, "message") will print "ClassName➤MethodName(): message"
     public void d(Object obj, String msg) {
-        d(obj.getClass().getSimpleName(), msg);
+        d(obj.getClass().getSimpleName() + "➤" +
+                Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
+                msg);
     }
 }
 
@@ -1071,13 +1080,13 @@ class Context implements IContext {
     // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
 
     // Repository Singletons
-    private Repo.BookRepo bookRepo = null;
-    private Repo.UserRepo userRepo = null;
-    private Repo.LibraryRepo libraryRepo = null;
+    private final Repo.BookRepo bookRepo;
+    private final Repo.UserRepo userRepo;
+    private final Repo.LibraryRepo libraryRepo;
 
     // Utility Singletons
-    protected Gson gson = null;
-    public Log log = null;
+    protected final Gson gson;
+    public final Log log;
 
     public enum ContextType {
         PRODUCTION,
@@ -1104,7 +1113,7 @@ class Context implements IContext {
         switch (contextType) {
             case PRODUCTION:
                 System.out.println("Context.setupInstance(): passed in Context is null, creating PRODUCTION Context");
-                return Context.generateProductionDefaultContext();
+                return Context.generateDefaultProductionContext();
             case TEST:
                 System.out.println("Context.setupInstance(): using passed in Context");
                 return context;
@@ -1114,7 +1123,7 @@ class Context implements IContext {
     }
 
     // Generate sensible default singletons for the production application
-    private static Context generateProductionDefaultContext() {
+    private static Context generateDefaultProductionContext() {
         Log log = new Log();
         return new Context(
             new Repo.BookRepo(
@@ -1160,19 +1169,32 @@ class Context implements IContext {
     }
 }
 
-// These hold the "{Model}Info" for each App Domain Object.
+// Info - Caches the Object "Info" and defines required fetch and update methods
+// Info object stores the "business data" for the Domain object.
+// It is the "single source of truth" for the Domain object.
+// Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
+interface Info<T> {
+    T fetchInfo();                  // Fetches info for object from server/DB
+    boolean isInfoFetched();        // Returns true if info has been fetched from server/DB
+    Result<T> fetchInfoResult();    // Fetches Result<T> for info object from server/DB
+    Result<T> updateInfo(T info);   // Updates info for object to server/DB
+    Result<T> refreshInfo();        // Refreshes info for object from server/DB
+    String fetchInfoFailureReason();// Returns reason for failure of last fetchInfo() call, or null if successful
+}
+
+// "{Model}Info" Data Holders held inside each App Domain Object.
 // Similar to an Entity for a database row or a DTO for a REST API, these are the objects that are
 // passed around the application. They are the "source of truth" for the data in the application.
 class Model {
-    transient protected UUID2<DomainUUID2> id;
+    transient private UUID2<DomainUUID2> _id; // Can't keep it final because we need to set it based on ID from imported JSON
 
-    Model(UUID2<DomainUUID2> id) { // todo UUID2 remove
-        this.id = new UUID2<DomainUUID2>(id);
+    Model(UUID2<DomainUUID2> id) {
+        this._id = new UUID2<DomainUUID2>(id);
     }
 
     // Converters between Domain, Entity, and DTO
     interface ToDomain<T extends Domain> {
-        T toDomain(); // Should return a deep copy (no original references)
+        T toDomain(); // Overridden function should return a deep copy (no original references)
     }
     interface ToEntity<T extends Entity> {
         T toEntity(); // Should return a deep copy (no original references)
@@ -1181,35 +1203,41 @@ class Model {
         T toDTO();    // Should return a deep copy (no original references)
     }
 
-    UUID uuid() {
-        return id.toUUID();
+    public UUID2<?> id() { return _id; }
+    public UUID2<?> uuid2() { return id(); }
+    public UUID uuid() { return _id.toUUID(); }
+    protected void _setIdFromImportedJson(UUID2<DomainUUID2> id) {
+        this._id = id;
     }
-    UUID2<?> uuid2() {
-        return id;
+
+    public String toPrettyJson() {
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
     // Domain objects contain the "{Model}Info" and the associated business logic to manipulate it
     static class Domain extends Model {
-        Domain(UUID2<?> id) {
-            super(id.toDomainUUID2());
-        }
 
-        static class BookInfo extends Domain
-            implements
+        // next lines are ugly java boilerplate to allow call to super() with a UUID2
+        Domain(UUID2<?> id) { super(id.toDomainUUID2()); }
+        Domain(UUID uuid) { super(new UUID2<DomainUUID2>(uuid)); }
+        Domain(String id) { super(UUID2.fromString(id)); }
+
+        public UUID2<?> id() { return super.id(); }
+
+        static class BookInfo extends Domain implements
                 ToEntity<Entity.BookInfo>,
                 ToDTO<DTO.BookInfo>,
                 ToDomain<Domain.BookInfo>
         {
-            protected UUID2<Book> id;
-            final String title;
-            final String author;
-            final String description;
+            private final UUID2<Book> id;
+            private final String title;
+            private final String author;
+            private final String description;
 
-            BookInfo(@NotNull
-                     UUID2<Book> id,
-                     String title,
-                     String author,
-                     String description
+            BookInfo(@NotNull UUID2<Book> id,
+                 String title,
+                 String author,
+                 String description
             ) {
                 super(id);
                 this.title = title;
@@ -1238,6 +1266,28 @@ class Model {
                 // todo validation here
                 this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);
             }
+            BookInfo(UUID id) {
+                this(id, "", "", "");
+            }
+
+            public UUID2<Book> id() { return id; }
+
+            ///////////////////////////////////////////
+            // BookInfo  Business Logic Methods      //
+            ///////////////////////////////////////////
+
+            public BookInfo withTitle(String title) {
+                return new BookInfo(this.id, title, this.author, this.description);
+            }
+
+            public BookInfo withAuthor(String authorName) {
+                return new BookInfo(this.id, this.title, authorName, this.description);
+            }
+
+            public BookInfo withDescription(String description) {
+                return new BookInfo(this.id, this.title, this.author, description);
+            }
+
 
             @Override
             public String toString() {
@@ -1251,6 +1301,7 @@ class Model {
             public Entity.BookInfo toEntity() {
                 return new Entity.BookInfo(this);
             }
+
             @Override
             public Domain.BookInfo toDomain() {
                 return new Domain.BookInfo(this);
@@ -1258,13 +1309,14 @@ class Model {
         }
 
         static class UserInfo extends Domain implements ToDomain<Domain.UserInfo> {
-            UUID2<User> id;
-            final String name;
-            final String email;
-            final ArrayList<UUID2<Book>> acceptedBooks;
-            final Account account;
+            private final UUID2<User> id;
+            private final String name;
+            private final String email;
+            private final ArrayList<UUID2<Book>> acceptedBooks;
+            private final Account account;
 
             static class Account {
+
                 final AccountStatus accountStatus;
                 final int currentFineAmountPennies;
                 final int maxBooks;             // max books allowed to be checked out
@@ -1420,6 +1472,61 @@ class Model {
                 this(UUID.fromString(id), name, email);
             }
 
+            public UUID2<User> id() {
+                return id;
+            }
+
+            ////////////////////////////////////////
+            // User Info Business Logic Methods   //
+            ////////////////////////////////////////
+
+            public Result<ArrayList<UUID2<Book>>> acceptBook(UUID2<Book> bookId) {
+                if (this.acceptedBooks.contains(bookId)) {
+                    return new Result.Failure<>(new Exception("Book already accepted by user"));
+                }
+
+                try {
+                    this.acceptedBooks.add(bookId);
+                } catch (Exception e) {
+                    return new Result.Failure<>(e);
+                }
+
+                return new Result.Success<>(findAllAcceptedBooks());
+            }
+
+            public Result<ArrayList<UUID2<Book>>> unacceptBook(UUID2<Book> bookId) {
+                if (!this.acceptedBooks.contains(bookId)) {
+                    return new Result.Failure<>(new Exception("Book not accepted by user"));
+                }
+
+                try {
+                    this.acceptedBooks.remove(bookId);
+                } catch (Exception e) {
+                    return new Result.Failure<>(e);
+                }
+
+                return new Result.Success<>(findAllAcceptedBooks());
+            }
+
+            public ArrayList<UUID2<Book>> findAllAcceptedBooks() {
+                return new ArrayList<UUID2<Book>>(this.acceptedBooks);
+            }
+
+            public boolean isBookAcceptedByUser(UUID2<Book> bookId) {
+                return !this.acceptedBooks.contains(bookId);
+            }
+
+            ///////////////////////////////
+            // Published Simple Getters  //
+            ///////////////////////////////
+
+            public String name() {
+                return this.name;
+            }
+            public String email() {
+                return this.email;
+            }
+
             @Override
             public String toString() {
                 return "User: " + this.name + " (" + this.email + "), acceptedBooks: " + this.acceptedBooks + ", borrowerStatus: " + this.account;
@@ -1443,15 +1550,13 @@ class Model {
         static class LibraryInfo extends Domain implements ToDomain<Domain.LibraryInfo> {
             final UUID2<Library> id;
             final String name;
-            final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userToCheckedOutBookMap;
-            final private UUID2.HashMap<Book, Integer> bookToNumBooksAvailableMap;
+            final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userToCheckedOutBookMap;  // registered users of this library
+            final private UUID2.HashMap<Book, Integer> bookToNumBooksAvailableMap;  // books known & available in this library
 
             LibraryInfo(@NotNull
                         UUID2<Library> id,
                         String name,
-//                        UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> checkoutUserBookMap,
                         UUID2.HashMap<User, ArrayList<UUID2<Book>>> checkoutUserBookMap,
-//                        UUID2.HashMap<UUID2<Book>, Integer> bookToNumBooksAvailableMap
                         UUID2.HashMap<Book, Integer> bookToNumBooksAvailableMap
             ) {
                 super(id);
@@ -1463,7 +1568,7 @@ class Model {
             LibraryInfo(UUID2<Library> id, String name) {
                 this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
             }
-            LibraryInfo(LibraryInfo libraryInfo) {
+            LibraryInfo(Domain.LibraryInfo libraryInfo) {
                 this(libraryInfo.id,
                     libraryInfo.name,
                     libraryInfo.userToCheckedOutBookMap,
@@ -1481,14 +1586,14 @@ class Model {
             /////////////////////////////////////////////
 
             public Result<UUID2<Book>> checkOutBookToUser(UUID2<Book> bookId, UUID2<User> userId) {
-                if(!isBookKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known. bookId: " + bookId));
-                if(!isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known, userId: " + userId));
-                if(!isBookAvailable(bookId)) return new Result.Failure<>(new IllegalArgumentException("book is not available, bookId: " + bookId));
+                if(!isBookIdKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known. bookId: " + bookId));
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known, userId: " + userId));
+                if(!isBookIdAvailable(bookId)) return new Result.Failure<>(new IllegalArgumentException("book is not available, bookId: " + bookId));
                 if(isBookCurrentlyCheckedOutByUser(bookId, userId)) return new Result.Failure<>(new IllegalArgumentException("book is already checked out by user, bookId: " + bookId + ", userId: " + userId));
 
                 try {
-                    removeBookFromInventory(bookId, 1);
-                    addBookToUser(bookId, userId);
+                    removeBookIdFromInventory(bookId, 1);
+                    addBookIdToUser(bookId, userId);
                 } catch (Exception e) {
                     return new Result.Failure<>(e);
                 }
@@ -1506,13 +1611,13 @@ class Model {
             }
 
             public Result<UUID2<Book>> checkInBookFromUser(UUID2<Book> bookId, UUID2<User> userId) {
-                if(!isBookKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known"));
-                if(!isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
+                if(!isBookIdKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known"));
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
                 if(!isBookCurrentlyCheckedOutByUser(bookId, userId)) return new Result.Failure<>(new IllegalArgumentException("book is not checked out by user"));
 
                 try {
-                    addBookToInventory(bookId, 1);
-                    removeBookFromUser(bookId, userId);
+                    addBookIdToInventory(bookId, 1);
+                    removeBookIdFromUserId(bookId, userId);
                 } catch (Exception e) {
                     return new Result.Failure<>(e);
                 }
@@ -1533,17 +1638,18 @@ class Model {
             // Published Domain Reporting Methods  //
             /////////////////////////////////////////
 
-            public Result<ArrayList<UUID2<Book>>> findBooksCheckedOutByUser(UUID2<User> userId) {
-                if(!isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
+            public Result<ArrayList<UUID2<Book>>> findBooksCheckedOutByUserId(UUID2<User> userId) {
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
 
                 return new Result.Success<>(userToCheckedOutBookMap.get(userId));
             }
+
 
             public Result<HashMap<UUID2<Book>, Integer>> calculateAvailableBookIdToCountOfAvailableBooksList() {
                 HashMap<UUID2<Book>, Integer> availableBookIdToNumBooksAvailableMap = new HashMap<>();
 
                 for(Book book : this.bookToNumBooksAvailableMap.keys()) {
-                    if(isBookAvailable(book)) {
+                    if(isBookIdAvailable(book)) {
                         int numBooksAvail = this.bookToNumBooksAvailableMap.get(book.id);
                         availableBookIdToNumBooksAvailableMap.put(book.id, numBooksAvail);
                     }
@@ -1556,25 +1662,25 @@ class Model {
             // Published Helper Methods    //
             /////////////////////////////////
 
-            public boolean isBookKnown(UUID2<Book> bookId) {
+            public boolean isBookIdKnown(UUID2<Book> bookId) {
                 return bookToNumBooksAvailableMap.containsKey(bookId);
             }
-            public boolean isBookKnown(Book book) {
-                return isBookKnown(book.id);
+            public boolean isBookIdKnown(Book book) {
+                return isBookIdKnown(book.id);
             }
 
-            public boolean isUserKnown(UUID2<User> userId) {
+            public boolean isUserIdKnown(UUID2<User> userId) {
                 return userToCheckedOutBookMap.containsKey(userId);
             }
-            public boolean isUserKnown(User user) {
-                return isUserKnown(user.id);
+            public boolean isUserIdKnown(User user) {
+                return isUserIdKnown(user.id);
             }
 
-            public boolean isBookAvailable(UUID2<Book> bookId) {
+            public boolean isBookIdAvailable(UUID2<Book> bookId) {
                 return bookToNumBooksAvailableMap.get(bookId) > 0;
             }
-            public boolean isBookAvailable(Book book) {
-                return isBookAvailable(book.id);
+            public boolean isBookIdAvailable(Book book) {
+                return isBookIdAvailable(book.id);
             }
 
             public boolean isBookCurrentlyCheckedOutByUser(UUID2<Book> bookId, UUID2<User> userId) {
@@ -1593,7 +1699,7 @@ class Model {
             /////////////////////////////////////////
 
             protected Result<UUID2<Book>> addTestBook(UUID2<Book> bookId, int quantity) {
-                return addBookToInventory(bookId, quantity);
+                return addBookIdToInventory(bookId, quantity);
             }
 
             protected Result<UUID2<User>> upsertTestUser(UUID2<User> userId) {
@@ -1604,7 +1710,7 @@ class Model {
             // Private Helper Functions //
             //////////////////////////////
 
-            private Result<UUID2<Book>> addBookToInventory(UUID2<Book> bookId, int quantity) {
+            private Result<UUID2<Book>> addBookIdToInventory(UUID2<Book> bookId, int quantity) {
                 if(quantity <= 0) return new Result.Failure<>(new IllegalArgumentException("quantity must be > 0"));
 
                 try {
@@ -1620,7 +1726,7 @@ class Model {
                 return new Result.Success<>(bookId);
             }
             private Result<Book> addBookToInventory(Book book, int quantity) {
-                Result<UUID2<Book>> addedUUID2Book = addBookToInventory(book.id, quantity);
+                Result<UUID2<Book>> addedUUID2Book = addBookIdToInventory(book.id, quantity);
 
                 if(addedUUID2Book instanceof Result.Failure) {
                     return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) addedUUID2Book).exception().getMessage()));
@@ -1629,7 +1735,7 @@ class Model {
                 return new Result.Success<>(book);
             }
 
-            private Result<UUID2<Book>> removeBookFromInventory(UUID2<Book> bookId, int quantity) {
+            private Result<UUID2<Book>> removeBookIdFromInventory(UUID2<Book> bookId, int quantity) {
                 if(quantity <= 0) return new Result.Failure<>(new IllegalArgumentException("quantity must be > 0"));
 
                 try {
@@ -1645,7 +1751,7 @@ class Model {
                 return new Result.Success<>(bookId);
             }
             private Result<Book> removeBookFromInventory(Book book, int quantity) {
-                Result<UUID2<Book>> removedUUID2Book = removeBookFromInventory(book.id, quantity);
+                Result<UUID2<Book>> removedUUID2Book = removeBookIdFromInventory(book.id, quantity);
 
                 if(removedUUID2Book instanceof Result.Failure) {
                     return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removedUUID2Book).exception().getMessage()));
@@ -1654,9 +1760,9 @@ class Model {
                 return new Result.Success<>(book);
             }
 
-            private Result<UUID2<Book>> addBookToUser(UUID2<Book> bookId, UUID2<User> userId) {
-                if(!isBookKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known"));
-                if(!isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
+            private Result<UUID2<Book>> addBookIdToUser(UUID2<Book> bookId, UUID2<User> userId) {
+                if(!isBookIdKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known"));
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
                 if(isBookCurrentlyCheckedOutByUser(bookId, userId)) return new Result.Failure<>(new IllegalArgumentException("book is already checked out by user"));
 
                 try {
@@ -1673,7 +1779,7 @@ class Model {
                 return new Result.Success<>(bookId);
             }
             private Result<Book> addBookToUser(Book book, User user) {
-                Result<UUID2<Book>> addedUUID2Book = addBookToUser(book.id, user.id);
+                Result<UUID2<Book>> addedUUID2Book = addBookIdToUser(book.id, user.id);
 
                 if(addedUUID2Book instanceof Result.Failure) {
                     return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) addedUUID2Book).exception().getMessage()));
@@ -1682,9 +1788,9 @@ class Model {
                 return new Result.Success<>(book);
             }
 
-            private Result<UUID2<Book>> removeBookFromUser(UUID2<Book> bookId, UUID2<User> userId) {
-                if(!isBookKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known"));
-                if(!isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
+            private Result<UUID2<Book>> removeBookIdFromUserId(UUID2<Book> bookId, UUID2<User> userId) {
+                if(!isBookIdKnown(bookId)) return new Result.Failure<>(new IllegalArgumentException("bookId is not known"));
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
                 if(!isBookCurrentlyCheckedOutByUser(bookId, userId)) return new Result.Failure<>(new IllegalArgumentException("book is not checked out by user"));
 
                 try {
@@ -1696,7 +1802,7 @@ class Model {
                 return new Result.Success<>(bookId);
             }
             private Result<Book> removeBookFromUser(Book book, User user) {
-                Result<UUID2<Book>> removedUUID2Book = removeBookFromUser(book.id, user.id);
+                Result<UUID2<Book>> removedUUID2Book = removeBookIdFromUserId(book.id, user.id);
 
                 if(removedUUID2Book instanceof Result.Failure) {
                     return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removedUUID2Book).exception().getMessage()));
@@ -1706,7 +1812,7 @@ class Model {
             }
 
             private Result<UUID2<User>> insertUserId(UUID2<User> userId) {
-                if(isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is already known"));
+                if(isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is already known"));
 
                 try {
                     userToCheckedOutBookMap.put(userId.uuid(), new ArrayList<>());
@@ -1718,13 +1824,13 @@ class Model {
             }
 
             private Result<UUID2<User>> upsertUserId(UUID2<User> userId) {
-                if(isUserKnown(userId)) return new Result.Success<>(userId);
+                if(isUserIdKnown(userId)) return new Result.Success<>(userId);
 
                 return insertUserId(userId);
             }
 
             private Result<UUID2<User>> removeUserId(UUID2<User> userId) {
-                if(!isUserKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
 
                 try {
                     userToCheckedOutBookMap.remove(userId.uuid());
@@ -1769,7 +1875,7 @@ class Model {
         }
 
         static class BookInfo extends DTO implements ToDomain<Domain.BookInfo> {
-            UUID2<Book> id;
+            final UUID2<Book> id;
             final String title;
             final String author;
             final String description;
@@ -1815,7 +1921,7 @@ class Model {
         }
 
         static class BookInfo extends Entity implements ToDomain<Domain.BookInfo> {
-            UUID2<Book> id;
+            final UUID2<Book> id;
             final String title;
             final String author;
             final String description;
@@ -1852,116 +1958,149 @@ class Model {
             }
         }
     }
-
-    public String toPrettyJson() {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
-    }
 }
 
-// Info - Caches the Object "Info" and defines required fetch and update methods
-interface Info<T> {
-    T fetchInfo();                  // Fetches info for object from server
-    boolean isInfoFetched();        // Returns true if info has been fetched from server
-    Result<T> fetchInfoResult();    // Fetches Result<T> for info object from server
-    Result<T> updateInfo(T info);   // Updates info for object to server
-    Result<T> refreshInfo();        // Refreshes info for object from server
-    String fetchInfoFailureReason();// Returns reason for failure of last fetchInfo() call, or null if successful
-}
-
-abstract class IDomainObject<T extends Domain> implements Info<T> { // todo why is not ok be within (& DomainUUID)?
-    UUID2<DomainUUID2> id;
-    protected T info;  // Info<T> object for this DomainObject
-    protected Result<T> infoResult = null;
+abstract class IDomainObject<TDomain extends Domain>
+        implements
+            Info<TDomain>,
+            DomainUUID2
+{
+    private final UUID2<DomainUUID2> id;  // Unique ID for this DomainObject (matches the ID of it's info<T> object to avoid confusion), marked transient for gson to ignore, as every actual domain object will have a type-specific ID.
+    protected TDomain info;  // Info<Domain.{domain}Info> holder object
+    protected Result<TDomain> infoResult = null;
 
     // Singletons
-    protected Context context = null;
-    private Gson gson = null; // convenience reference to the Context Gson singleton object
+    protected final Context context;
 
-    // Class of the info<T> (for GSON serialization)
+    // Class of the Info<TDomain> (for GSON serialization)
     @SuppressWarnings("unchecked")
-    Class<T> infoClass = (Class<T>) ((ParameterizedType) getClass()
+    Class<TDomain> infoClass = (Class<TDomain>) ((ParameterizedType) getClass()
             .getGenericSuperclass())
             .getActualTypeArguments()[0];
 
-    IDomainObject(T info, Context context) {
-        if(context == null) throw new IllegalArgumentException("Context cannot be null");
-        // this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
-
-        this.gson = this.context.gson;
+    private IDomainObject(@NotNull UUID id, TDomain info, @NotNull Context context) {
+        // assert id.equals(info.uuid()); // not validating this bc id from gson imports must be set here
+        this.id = UUID2.fromUUID(id);
         this.info = info;
-        this.id = info.id;
+        this.context = context;
+    }
+    <TDomainInfo extends ToDomain<TDomain>> // only ToDomain<> interfaces have Info<> objects
+        IDomainObject(String json, Class<TDomainInfo> classType, Context context) {
+            this(
+                Objects.requireNonNull(
+                    IDomainObject.createDomainInfoFromJson(json, classType, context)
+                ).toDomain(),
+                context
+            );
+    }
+    <T extends TDomain>
+        IDomainObject(@NotNull T info, Context context) {
+            this(info.uuid(), info, context);
+            this.info = info;
     }
     IDomainObject(UUID2<DomainUUID2> id, Context context) {
-        if(context == null) throw new IllegalArgumentException("Context cannot be null");
-        // this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
-
-        this.context = context;
-        this.gson = this.context.gson;
-        this.id = id;
-    }
-    IDomainObject(String json, Context context) {
-        if(context == null) throw new IllegalArgumentException("Context cannot be null");
-        // this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
-
-        this.context = context;
-        this.gson = this.context.gson;
-        this.info = this.gson.fromJson(json, this.infoClass);
-        this.id = this.info.id;
+        this(id.toUUID(), null, context);
     }
     IDomainObject(Context context) {
-        this(UUID2.randomUUID2(), context);
+        this(UUID.randomUUID(), null, context);
     }
 
+    public UUID2<DomainUUID2> id() {
+        return this.id;
+    }
     // LEAVE for reference, for static Context instance implementation
     //IDomainObject(String json) {
     //    this(json, null);
+    //    this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
     //}
     //IDomainObject(T info) {
     //    this(info, null);
+    //    this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
     //}
-    //IDomainObject(BaseUUID id) { this(id, null);}
-    //IDomainObject() {
-    //    this(randomUUID(), null);
+    //IDomainObject(UUID id) {
+    //    this(id, null);
+    //    this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
     //}
-
-    public UUID2<DomainUUID2> getId() {
-        return this.id;
-    }
 
     // To be Implemented by subclasses
-    public Result<T> fetchInfoResult() {
+    public Result<TDomain> fetchInfoResult() {
         return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
     }
 
     // To be Implemented by subclasses
-    public Result<T> updateInfo(T info) {
+    public Result<TDomain> updateInfo(TDomain info) {
         return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
     }
 
+    protected void setInfo(TDomain info) {
+        this.info = info;
+    }
+
+    // Creates new `Domain.{Domain}Info` object with id from JSON string
+    // It's a static method so that it can be called from the constructor. (Can't call instance methods from constructor)
+    // Note: Types are to make sure it works with the correct generics and subclasses.
+    // ie: The Library domain object has a Domain.LibraryInfo object which requires ToDomain<Domain.LibraryInfo> to be implemented.
+    // todo : change to a marker interface instead of a checking for the ToDomain<> interface?
+    @SuppressWarnings("unchecked") // for _setIdFromImportedJson(
+    public static <
+            TDomain extends Domain,  // ie: Domain.BookInfo
+            TDomainInfo extends ToDomain<? extends TDomain> // implementations of ToDomain<> interfaces MUST have Info<TDomain> objects
+        > TDomainInfo createDomainInfoFromJson(
+            String json,
+            Class<TDomainInfo> domainInfoClassType, // type of `Domain.{Domain}Info` object to create
+            Context context // for logging & gson deserialization
+    ) {
+        try {
+            TDomainInfo obj = context.gson.fromJson(json, (Type) domainInfoClassType);
+            context.log.d("IDomainObject:createDomainInfoFromJson()", "obj = " + obj);
+
+            // Set Model Object id to match id of imported Info
+            // ie: Model._id = Domain.BookInfo.id
+            ((TDomain)obj)._setIdFromImportedJson(
+                (UUID2<DomainUUID2>) obj.toDomain().id()
+            );
+
+            return obj;
+        } catch (Exception e) {
+            context.log.d( "IDomainObject:createDomainInfoFromJson()", "Failed to createDomainInfoObjectFromJson() for " +
+                    "class: " + Domain.LibraryInfo.class.getName() + ", " +
+                    "json: " + json + ", " +
+                    "exception: " + e.toString());
+
+            return null;
+        }
+    }
 
     //////////////////////////////
-    // Info<T> interface methods - contains the logic for fetching and updating info to/from server
+    // Info<T> interface methods
+    // - contains the logic for fetching and updating info to/from server
+    //////////////////////////////
 
     // Returns the Info<T> object if it has been fetched, otherwise null.
     // Used to access the Info object without having to handle the Result<T> object.
     // NOTE: The Info object is not re-fetched if it has already been fetched.
-    public T fetchInfo() {
+    public TDomain fetchInfo() {
         if (isInfoFetched()) {
             return this.info;
         }
 
         // Attempt to fetch info, since it hasn't been successfully fetched yet.
-        Result<T> result = this.fetchInfoResult();
+        Result<TDomain> result = this.fetchInfoResult();
         if (result instanceof Result.Failure) {
-            context.log.d(this,"Failed to fetchInfoResult() for " +
+            context.log.d(this,"fetchInfoResult() FAILED for " +
                     "class: " + this.getClass().getName() + ", " +
                     "id: " + this.id.toString());
 
             return null;
         }
 
-        this.info = ((Result.Success<T>) result).value();
+        // Fetch was successful, so set info and return it.
+        this.info = ((Result.Success<TDomain>) result).value();
         return this.info;
+    }
+
+    public TDomain info() {
+        return this.fetchInfo();
     }
 
     // Returns reason for failure of last fetchInfo() call, or null if was successful.
@@ -1970,7 +2109,7 @@ abstract class IDomainObject<T extends Domain> implements Info<T> { // todo why 
     public String fetchInfoFailureReason() {
         if (!isInfoFetched()) {
             if (fetchInfoResult() instanceof Result.Failure) {
-                return ((Result.Failure<T>) fetchInfoResult()).exception().getMessage();
+                return ((Result.Failure<TDomain>) fetchInfoResult()).exception().getMessage();
             }
         }
 
@@ -1982,7 +2121,7 @@ abstract class IDomainObject<T extends Domain> implements Info<T> { // todo why 
     }
 
     // Forces refresh of Info from server
-    public Result<T> refreshInfo() {
+    public Result<TDomain> refreshInfo() {
         context.log.d(this,"Refreshing info for " +
                 "class: " + this.getClass().getName() + ", " +
                 "id: " + this.id.toString());
@@ -1991,36 +2130,37 @@ abstract class IDomainObject<T extends Domain> implements Info<T> { // todo why 
         return this.fetchInfoResult();
     }
 }
-abstract class DomainObject<T extends Domain> extends IDomainObject<T> {
+abstract class DomainObject<TDomain extends Domain> extends IDomainObject<TDomain> {
 
-    public DomainObject(T info, Context context) {
+    DomainObject(TDomain info, Context context) {
         super(info, context);
     }
-    public DomainObject(UUID2<DomainUUID2> id, Context context) {
+    DomainObject(UUID2<DomainUUID2> id, Context context) {
         super(id.toDomainUUID2(), context);
     }
-    public DomainObject(String json, Context context) {
-        super(json, context);
+    <TDomainInfo extends ToDomain<TDomain>> // only ToDomain<> interfaces have Info<> objects
+        DomainObject(String json, Class<TDomainInfo> classType, Context context) {
+            super(json, classType, context);
     }
 
     // Defines how to fetch info from server - Should be overridden/implemented in subclasses
-    public Result<T> updateInfo(T info) {
+    public Result<TDomain> updateInfo(TDomain info) {
         this.info = info;
         return new Result.Success<>(info);
     }
 
     @SuppressWarnings("unchecked")
-    public Result<T> updateInfoFromJson(String json) {
+    public Result<TDomain> updateInfoFromJson(String json) {
         context.log.d(this,"Updating info from JSON for " +
                 "class: " + this.getClass().getName() + ", " +
-                "id: " + this.id.toString());
+                "id: " + this.id());
 
         try {
             Class<?> infoClass = this.infoClass;
-            T infoFromJson = (T) this.context.gson.fromJson(json, infoClass);
+            TDomain infoFromJson = (TDomain) this.context.gson.fromJson(json, infoClass);
             assert infoFromJson.getClass() == this.info.getClass();
 
-            Result<T> checkResult = checkInfoIdMatchesJsonId(infoClass, infoFromJson);
+            Result<TDomain> checkResult = checkInfoIdMatchesJsonId(infoClass, infoFromJson);
             if (checkResult instanceof Result.Failure) {
                 return checkResult;
             }
@@ -2035,24 +2175,40 @@ abstract class DomainObject<T extends Domain> extends IDomainObject<T> {
     }
 
     public String toPrettyJson() {
+        if(!isInfoFetched()) {
+            context.log.d(this,"called on unfetched info for " +
+                    "class: " + this.getClass().getName() + ", " +
+                    "id: " + this.id());
+
+            return "{}";
+        }
+
         return new GsonBuilder().setPrettyPrinting().create().toJson(this.fetchInfo());
     }
 
     public String toJson() {
-        return this.context.gson.toJson(this.fetchInfo());
+        if(!isInfoFetched()) {
+            context.log.d(this,"called on unfetched info for " +
+                    "class: " + this.getClass().getName() + ", " +
+                    "id: " + this.id());
+
+            return "{}";
+        }
+
+        return context.gson.toJson(this.fetchInfo());
     }
 
     public String toString() {
         String infoString = this.info == null ? "null" : this.info.toString();
         String nameOfClass = this.getClass().getName();
-        return nameOfClass + ": " + this.id.toString() + ", info=" + infoString;
+        return nameOfClass + ": " + this.id() + ", info=" + infoString;
     }
 
     /////////////////////////////////
     // Private helpers             //
     /////////////////////////////////
 
-    private Result<T> checkInfoIdMatchesJsonId(Class<?> infoClass, T infoFromJson) {
+    private Result<TDomain> checkInfoIdMatchesJsonId(Class<?> infoClass, TDomain infoFromJson) {
 
         try {
             Object idField = infoClass.getDeclaredField("id").get(infoFromJson);
@@ -2063,9 +2219,9 @@ abstract class DomainObject<T extends Domain> extends IDomainObject<T> {
             String idStr = idField.toString();
             UUID infoFromJsonUUID = UUID.fromString(idStr);
 
-            if (!infoFromJsonUUID.equals(this.id.uuid())) {
+            if (!infoFromJsonUUID.equals(this.id().uuid())) {
                 return new Result.Failure<>(new Exception("checkInfoIdMatchesJsonId(): Info id does not match json id, " +
-                        "info id: " + this.id.toString() + ", " +
+                        "info id: " + this.id() + ", " +
                         "json id: " + idStr));
             }
         } catch (NoSuchFieldException e) {
@@ -2080,36 +2236,29 @@ abstract class DomainObject<T extends Domain> extends IDomainObject<T> {
 
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
 class Book extends DomainObject<Domain.BookInfo> implements DomainUUID2 {
-    UUID2<Book> id;
-    private Repo.BookRepo repo = null;
+    final UUID2<Book> id;
+    private final Repo.BookRepo repo;
 
     Book(Domain.BookInfo info, Context context) {
         super(info, context);
         this.repo = this.context.bookRepo();
-        this.id = this.info.id;
+        this.id = this.info.id();
 
-        context.log.d(this, "Book (" + this.id.toString() + ") created");
+        context.log.d(this, "Book (" + this.id + ") created from info");
+    }
+    Book(String json, Class<Domain.BookInfo> classType, Context context) {
+        super(json, classType, context);
+        this.repo = this.context.bookRepo();
+        this.id = this.info.id();
     }
     Book(UUID2<Book> id, Context context) {
-        super(id.toDomainUUID2(), context);
-        this.repo = this.context.bookRepo();
-        this.id = id;
-
-        context.log.d(this, "Book (" + this.id.toString() + ") created");
+        this(new Domain.BookInfo(id.uuid()), context);
     }
     Book(String json, Context context) {
-        super(json, context);
-        this.repo = this.context.bookRepo();
-        this.id = this.info.id;
-
-        context.log.d(this, "Book (" + this.id.toString() + ") created");
+        this(json, Domain.BookInfo.class, context);
     }
     Book(Context context) {
-        super(UUID2.randomUUID2(), context);
-        this.repo = this.context.bookRepo();
-        this.id = UUID2.fromUUID(super.getId().uuid()); // todo is this necessary? super.getId2() should be the same as this.id2
-
-        context.log.d(this, "Book (" + this.id.toString() + ") created");
+        this(new Domain.BookInfo(UUID2.randomUUID2().uuid()), context);
     }
 
     // LEAVE for reference, for static Context instance implementation
@@ -2149,41 +2298,50 @@ class Book extends DomainObject<Domain.BookInfo> implements DomainUUID2 {
         this.info = ((Result.Success<Domain.BookInfo>) infoResult).value();
         return infoResult;
     }
+
+    ///////////////////////////////////////////
+    // Book Domain Business Logic Methods    //
+    ///////////////////////////////////////////
+
+    public Result<Domain.BookInfo> updateAuthor(String authorName) {
+        Domain.BookInfo updatedInfo = this.info.withAuthor(authorName);
+        return this.updateInfo(updatedInfo);
+    }
 }
 
 // User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
 class User extends DomainObject<Domain.UserInfo>  implements DomainUUID2 {
     UUID2<User> id;
-    private Repo.UserRepo repo = null;
+    private final Repo.UserRepo repo;
 
     User(Domain.UserInfo info, Context context) {
         super(info, context);
-        this.repo = this.context.userRepo();
-        this.id = this.info.id;
+        this.repo = context.userRepo();
+        this.id = info.id();
 
         context.log.d(this,"User (" + this.id.toString() + ") created");
     }
     User(UUID2<User> id, Context context) {
         super(id.toDomainUUID2(), context);
-        this.repo = this.context.userRepo();
+        this.repo = context.userRepo();
         this.id = id;
 
         context.log.d(this,"User (" + this.id.toString() + ") created");
     }
-    User(String json, Context context) {
-        super(json, context);
-        this.repo = this.context.userRepo();
-        this.id = this.info.id;
+    User(String json, Class<Domain.UserInfo> classType, Context context) {
+        super(json, classType, context);
+        this.repo = context.userRepo();
+        this.id = this.info.id();
 
         context.log.d(this,"User (" + this.id.toString() + ") created");
+    }
+    User(String json, Context context) {
+        this(json, Domain.UserInfo.class, context);
     }
     User(Context context) {
-        super(UUID2.randomUUID2(), context);
-        this.repo = this.context.userRepo();
-        this.id = this.info.id;
-
-        context.log.d(this,"User (" + this.id.toString() + ") created");
+        this(UUID2.randomUUID2(), context);
     }
+
     // LEAVE for reference, for static Context instance implementation
     // User(UserUUID id) {
     //     this(id, null);
@@ -2207,7 +2365,7 @@ class User extends DomainObject<Domain.UserInfo>  implements DomainUUID2 {
 
     @Override
     public Result<Domain.UserInfo> updateInfo(Domain.UserInfo updatedUserInfo) {
-        context.log.d(this,"User (" + this.id.toString() + ") - updateInfo,  userInfo: " + updatedUserInfo.toString());
+        context.log.d(this,"User (" + this.id + "),  userInfo: " + updatedUserInfo);
 
         // Update self optimistically
         super.updateInfo(updatedUserInfo);
@@ -2218,87 +2376,89 @@ class User extends DomainObject<Domain.UserInfo>  implements DomainUUID2 {
             return infoResult;
         }
 
-        // Update self with repo result
+        // Update self with Repo result
         this.info = ((Result.Success<Domain.UserInfo>) infoResult).value();
         return infoResult;
     }
 
-    public Result<ArrayList<UUID2<Book>>> receiveBook(@NotNull Book book) {
-        context.log.d(this,"User (" + this.id.toString() + ") - receiveBook,  book: " + this.id.toString());
+    ///////////////////////////////////////////
+    // User Domain Business Logic Methods    //
+    ///////////////////////////////////////////
+
+    public Result<ArrayList<Book>> acceptBook(@NotNull Book book) {
+        context.log.d(this,"User (" + this.id.toString() + "),  book: " + this.id.toString());
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        // Check user has already accepted book
-        if (this.info.acceptedBooks.contains(this.id)) {
-            return new Result.Failure<>(new Exception("User has already accepted book, book: " + book.id.toString()));
+        Result<ArrayList<UUID2<Book>>> acceptResult = this.info.acceptBook(book.id);
+        if(acceptResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception("Failed to acceptBook, book: " + book.id.toString()));
+
+        Result<Domain.UserInfo> result = this.updateInfo(this.info);
+        if (result instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<Domain.UserInfo>) result).exception());
+
+        return findAllAcceptedBooks();
+    }
+
+    public Result<ArrayList<Book>> findAllAcceptedBooks() {
+        context.log.d(this,"User (" + this.id.toString() + ")");
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Create Book Domain list from the list of Book UUID2s
+        ArrayList<Book> books = new ArrayList<>();
+        for (UUID2<Book> bookId : this.info.findAllAcceptedBooks()) {
+            books.add(new Book(bookId, this.context));
         }
 
-        // Accept book
-        if(!this.info.acceptedBooks.add(book.id)) {
-            return new Result.Failure<>(new Exception("Failed to add book to acceptedBooks, book: " + book.id.toString()));
+        return new Result.Success<>(books);
+    }
+
+    public Result<ArrayList<UUID2<Book>>> unacceptBook(Book book) {
+        context.log.d(this,"User (" + this.id.toString() + ") - returnBook,  book: " + book.id.toString() + " to user: " + this.id.toString());
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        Result<ArrayList<UUID2<Book>>> unacceptResult = this.info.unacceptBook(book.id);
+        if(unacceptResult instanceof Result.Failure) {
+            return new Result.Failure<>(new Exception("Failed to unaccept book from User, book: " + book.id.toString()));
         }
 
-        // Update user
         Result<Domain.UserInfo> result = this.updateInfo(this.info);
         if (result instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<Domain.UserInfo>) result).exception());
         }
 
-        return new Result.Success<>(this.info.acceptedBooks);
+        return unacceptResult;
     }
 
-    public Result<ArrayList<UUID2<Book>>> returnBook(Book book) {
-        context.log.d(this,"User (" + this.id.toString() + ") - returnBook,  book: " + this.id.toString() + " to user: " + this.id.toString());
-        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
-
-        // Check user has accepted book
-        if (!this.info.acceptedBooks.contains(this.id)) {
-            return new Result.Failure<>(new Exception("User has not accepted book, bookId = " + this.id.toString()));
-        }
-
-        // Remove the Returned book
-        this.info.acceptedBooks.remove(this.id);
-
-        // Update UserInfo
-        Result<Domain.UserInfo> result = this.updateInfo(this.info);
-        if (result instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<Domain.UserInfo>) result).exception());
-        }
-
-        return new Result.Success<>(this.info.acceptedBooks);
-    }
-
+    // Note: *ONLY* the Domain Object can take a Book from one User and give it to another User.
     public Result<ArrayList<UUID2<Book>>> giveBookToUser(Book book, User receivingUser) {
-        context.log.d(this,"User (" + this.id.toString() + ") - giveBookToUser,  book: " + this.id.toString() + ", user: " + this.id.toString());
+        context.log.d(this,"User (" + id + ") - giveBookToUser,  book: " + book.id + ", user: " + this.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        // Check user has accepted book
-        if (!this.info.acceptedBooks.contains(this.id)) {
-            return new Result.Failure<>(new Exception("User has not accepted book, bookId = " + this.id.toString()));
-        }
+        // Check this User has the Book
+        if (!this.info.isBookAcceptedByUser(book.id))
+            return new Result.Failure<>(new Exception("User (" + this.id + ") does not have book (" + book.id + ")"));
 
-        // Remove the Given book
-        this.info.acceptedBooks.remove(this.id);
+        // Add the Book to the receiving User
+        Result<ArrayList<Book>> acceptBookResult = receivingUser.acceptBook(book);
+        if (acceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception());
+
+        // Remove the Book from this User
+        Result<ArrayList<UUID2<Book>>> unacceptBookResult = this.unacceptBook(book);
+        if (unacceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception());
 
         // Update UserInfo
         Result<Domain.UserInfo> result = this.updateInfo(this.info);
-        if (result instanceof Result.Failure) {
+        if (result instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<Domain.UserInfo>) result).exception());
-        }
 
-        // Give book to user
-        Result<ArrayList<UUID2<Book>>> result2 = receivingUser.receiveBook(book);
-        if (result2 instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) result2).exception());
-        }
-
-        return new Result.Success<>(this.info.acceptedBooks);
+        return unacceptBookResult;
     }
 
-    public Result<ArrayList<UUID2<Book>>> checkoutBookFromLibrary(
-    Book book,
-    Library library
-    ) {
-        context.log.d(this,"User (" + this.id.toString() + ") - checkoutBookFromLibrary, book: " + this.id.toString() + ", library: " + library.id);
+    public Result<UUID2<Book>> checkoutBookFromLibrary(Book book, Library library) {
+        context.log.d(this,"User (" + this.id + "), book: " + this.id + ", library: " + library.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         Result<Book> bookResult = library.checkOutBookToUser(book, this);
@@ -2306,12 +2466,13 @@ class User extends DomainObject<Domain.UserInfo>  implements DomainUUID2 {
             return new Result.Failure<>(((Result.Failure<Book>) bookResult).exception());
         }
 
-        return new Result.Success<>(this.info.acceptedBooks);
+        return new Result.Success<>(((Result.Success<Book>) bookResult).value().id);
     }
 }
 
 // Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
-class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
+class Library extends DomainObject<Domain.LibraryInfo> implements DomainUUID2
+{
     UUID2<Library> id;
     private Repo.LibraryRepo repo = null;
 
@@ -2329,13 +2490,12 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
 
         context.log.d(this,"Library (" + this.id + ") created");
     }
-    Library(String json, Context context) {
-        super(json, context);
+    Library(String json, Class<Domain.LibraryInfo> classType, Context context) {
+        super(json, classType, context);
         this.repo = this.context.libraryRepo();
         this.id = this.info.id;
-
-        context.log.d(this,"Library (" + this.id + ") created");
     }
+    Library(String json, Context context) { this(json, Domain.LibraryInfo.class, context); }
     Library(Context context) {
         super(UUID2.randomUUID2(), context);
         this.repo = this.context.libraryRepo();
@@ -2379,9 +2539,9 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
         return infoResult;
     }
 
-    ////////////////////////////
-    // Library Domain Methods //
-    ////////////////////////////
+    ///////////////////////////////////////////
+    // Library Domain Business Logic Methods //
+    ///////////////////////////////////////////
 
     public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
         context.log.d(this, format("Library (%s) - checkOutBookToUser, user: %s, book: %s", this.id, this.id.toString(), this.id.toString()));
@@ -2398,9 +2558,9 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
         }
 
         // User receives Book
-        Result<ArrayList<UUID2<Book>>> receiveBookResult = user.receiveBook(book);
+        Result<ArrayList<Book>> receiveBookResult = user.acceptBook(book);
         if (receiveBookResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) receiveBookResult).exception());
+            return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) receiveBookResult).exception());
         }
 
         // Update the Info
@@ -2425,7 +2585,7 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
             return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
         }
 
-        Result<ArrayList<UUID2<Book>>> userReturnedBookResult = user.returnBook(book);
+        Result<ArrayList<UUID2<Book>>> userReturnedBookResult = user.unacceptBook(book);
         if (userReturnedBookResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) userReturnedBookResult).exception());
         }
@@ -2439,9 +2599,9 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
         return new Result.Success<>(book);
     }
 
-    // DomainObject enforces the rule: if a User is not known, they are added as a new user.
+    // This Library DomainObject enforces the rule: if a User is not known, they are added as a new user.
     public boolean isUnableToFindOrAddUser(User user) {
-        context.log.d(this, format("Library (%s) - isUnableToFindOrAddUser user: %s", this.id, this.id));
+        context.log.d(this, format("Library (%s) user: %s", this.id, this.id));
         if (fetchInfoFailureReason() != null) return true;
 
         if (isKnownUser(user)) {
@@ -2459,28 +2619,28 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
     }
 
     public boolean isKnownBook(Book book) {
-        context.log.d(this, format("Library(%s) - hasBook book id: %s\n", this.id, book.id));
+        context.log.d(this, format("Library(%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookKnown(book);
+        return this.info.isBookIdKnown(book);
     }
 
     public boolean isKnownUser(User user) {
-        context.log.d(this, format("Library (%s) - isKnownUser user id: %s", this.id, user.id));
+        context.log.d(this, format("Library (%s) User id: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isUserKnown(user);
+        return this.info.isUserIdKnown(user);
     }
 
     public boolean isBookAvailable(Book book) {
-        context.log.d(this, format("Library (%s) - hasBookAvailable book id: %s\n", this.id, book.id));
+        context.log.d(this, format("Library (%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookAvailable(book);
+        return this.info.isBookIdAvailable(book);
     }
 
     public Result<ArrayList<Book>> findBooksCheckedOutByUser(User user) {
-        context.log.d(this, format("Library (%s) - findBooksCheckedOutByUser %s\n", this.id, user));
+        context.log.d(this, format("Library (%s) User id: %s\n", this.id, user));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Make sure User is Known
@@ -2488,7 +2648,7 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
             return new Result.Failure<>(new Exception("User is not known, id: " + this.id));
         }
 
-        Result<ArrayList<UUID2<Book>>> entriesResult = this.info.findBooksCheckedOutByUser(user.id);
+        Result<ArrayList<UUID2<Book>>> entriesResult = this.info.findBooksCheckedOutByUserId(user.id);
         if (entriesResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) entriesResult).exception());
         }
@@ -2504,7 +2664,7 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
     }
 
     public Result<HashMap<Book, Integer>> calculateAvailableBookIdToNumberAvailableList() {
-        context.log.d(this, "Library (" + this.id + ") - calculateAvailableBooksAndAmountOnHand\n");
+        context.log.d(this, "Library (" + this.id + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         Result<HashMap<UUID2<Book>, Integer>> entriesResult = this.info.calculateAvailableBookIdToCountOfAvailableBooksList();
@@ -2512,7 +2672,8 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
             return new Result.Failure<>(((Result.Failure<HashMap<UUID2<Book>, Integer>>) entriesResult).exception());
         }
 
-        // Convert UUID2<Books to Books
+        // Convert list of UUID2<Book> to list of Book
+        // Note: the BookInfo is not fetched, so the Book only contains the id. This is by design.
         HashMap<UUID2<Book>, Integer> bookIdToNumberAvailable = ((Result.Success<HashMap<UUID2<Book>, Integer>>) entriesResult).value();
         HashMap<Book, Integer> bookToNumberAvailable = new HashMap<>();
         for (Map.Entry<UUID2<Book>, Integer> entry : bookIdToNumberAvailable.entrySet()) {
@@ -2523,7 +2684,7 @@ class Library extends DomainObject<Domain.LibraryInfo>  implements DomainUUID2 {
     }
 
     public Result<Book> addTestBookToLibrary(Book book, Integer count) {
-        context.log.d(this, format("Library (%s) - addTestBookToLibrary count: %s, book: %s\n", this.id, count, book));
+        context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         Result<UUID2<Book>> addBookResult =  this.info.addTestBook(book.id, count);
@@ -2588,14 +2749,12 @@ class LibraryApp {
             Domain.BookInfo bookInfo3 = book.fetchInfo();
             if (bookInfo3 == null) {
                 ctx.log.d(this,"Book Missing --> " +
-                        "book id: " + bookInfo3.id + " >> " +
+                        "book id: " + bookInfo3.id() + " >> " +
                         " is null"
                 );
             } else {
                 ctx.log.d(this,"Book Info --> " +
-                        bookInfo3.id + " >> " +
-                        bookInfo3.title + ", " +
-                        bookInfo3.author
+                        bookInfo3.toString()
                 );
             }
 
@@ -2648,7 +2807,7 @@ class LibraryApp {
             //////////////////////////////////
 
             // Create the App objects
-            final User user1 = new User(userInfo.id, ctx);
+            final User user1 = new User(userInfo.id(), ctx);
             final Library library1 = new Library(libraryInfoId, ctx);
             final Book book1 = new Book(UUID2.createFakeUUID2(1), ctx);
             final Book book2 = new Book(UUID2.createFakeUUID2(2), ctx);
@@ -2660,7 +2819,7 @@ class LibraryApp {
             );
 
             Checkout_2_books_to_a_user:
-            {
+            if (false) {
                 ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
 
@@ -2750,7 +2909,7 @@ class LibraryApp {
                 ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
 
                 // Print checked out books
-                ctx.log.d(this,"\nChecked Out Books for User [" + user1.fetchInfo().name + ", " + user1.id + "]:");
+                ctx.log.d(this,"\nChecked Out Books for User [" + user1.fetchInfo().name() + ", " + user1.id + "]:");
                 for (Book book : checkedOutBooks) {
                     final Result<Domain.BookInfo> bookInfoResult = book.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
@@ -2793,19 +2952,20 @@ class LibraryApp {
                 ctx.log.d(this,"Load Library from Json: ");
 
                 // Library library2 = new Library(ctx); // uses random UUID, will cause expected error due to unknown UUID
-                Library library2 = new Library(library1.id, ctx);
+                Library library2 = new Library(UUID2.createFakeUUID2(99), ctx);
                 ctx.log.d(this, library2.toPrettyJson());
-                Result<Domain.LibraryInfo> library2Result = library2.updateInfoFromJson(
+
+                String json =
                         "{\n" +
                         "  \"name\": \"Ronald Reagan Library\",\n" +
-                        "  \"userIdToCheckedOutBookMap\": {\n" +
+                        "  \"userToCheckedOutBookMap\": {\n" +
                         "    \"00000000-0000-0000-0000-000000000001\": [\n" +
                         "      {\n" +
-                        "        \"uuid\": \"00000000-0000-0000-0000-000000000002\"\n" +
+                        "        \"uuid\": \"00000000-0000-0000-0000-000000000010\"\n" +
                         "      }\n" +
                         "    ]\n" +
                         "  },\n" +
-                        "  \"bookIdToNumBooksAvailableMap\": {\n" +
+                        "  \"bookToNumBooksAvailableMap\": {\n" +
                         "    \"00000000-0000-0000-0000-000000000010\": 50,\n" +
                         "    \"00000000-0000-0000-0000-000000000011\": 50,\n" +
                         "    \"00000000-0000-0000-0000-000000000012\": 50,\n" +
@@ -2818,16 +2978,39 @@ class LibraryApp {
                         "    \"00000000-0000-0000-0000-000000000019\": 50\n" +
                         "  },\n" +
                         "  \"id\": {\n" +
-                        "    \"uuid\": \"00000000-0000-0000-0000-000000000001\"\n" +
+                        "    \"uuid\": \"00000000-0000-0000-0000-000000000099\"\n" +
                         "  }\n" +
-                        "}"
-                );
-                if(library2Result instanceof Result.Failure) {
-                    ctx.log.d(this, ((Result.Failure<Domain.LibraryInfo>) library2Result).exception().getMessage()
-                    );
-                } else {
-                    ctx.log.d(this,"Results of Library2 json load:");
-                    ctx.log.d(this,library2.toPrettyJson());
+//                        "  \"_id\": {\n" +
+//                        "    \"uuid\": \"00000000-0000-0000-0000-000000000099\"\n" +
+//                        "  }\n" +
+                        "}";
+                if(true) {
+                    Result<Domain.LibraryInfo> library2Result = library2.updateInfoFromJson(json);
+                    if (library2Result instanceof Result.Failure) {
+                        ctx.log.d(this, ((Result.Failure<Domain.LibraryInfo>) library2Result).exception().getMessage());
+                    } else {
+                        ctx.log.d(this, "Results of Library2 json load:");
+                        ctx.log.d(this, library2.toPrettyJson());
+                    }
+                }
+
+                try {
+                    Domain.LibraryInfo libraryInfo3 =
+                        Library.createDomainInfoFromJson(
+                                json,
+                                Domain.LibraryInfo.class,
+                                ctx
+                        );
+
+                    Library library3 = new Library(libraryInfo3, ctx);
+                    if(libraryInfo3 == null) {
+                        ctx.log.d(this, "Library3 is null");
+                    } else {
+                        ctx.log.d(this,"Results of Library3 json load:");
+                        ctx.log.d(this,library3.toPrettyJson());
+                    }
+                } catch (Exception e) {
+                    ctx.log.d(this, "Exception: " + e.getMessage());
                 }
             }
 
@@ -2842,7 +3025,7 @@ class LibraryApp {
                     );
                 } else {
 
-                    final UUID2<Book> book12id = ((Result.Success<Domain.BookInfo>) book12Result).value().id;
+                    final UUID2<Book> book12id = ((Result.Success<Domain.BookInfo>) book12Result).value().id();
                     final Book book12 = new Book(book12id, ctx);
 
                     ctx.log.d(this,"\nCheck out book " + book12id + " to user " + user1.id);
@@ -2854,14 +3037,14 @@ class LibraryApp {
                         );
                     }
 
-                    final Result<ArrayList<UUID2<Book>>> booksAcceptedByUser = user2.checkoutBookFromLibrary(book12, library1);
-                    if (booksAcceptedByUser instanceof Result.Failure) {
+                    final Result<UUID2<Book>> checkedOutBookResult = user2.checkoutBookFromLibrary(book12, library1);
+                    if (checkedOutBookResult instanceof Result.Failure) {
                         ctx.log.d(this,"Checkout book FAILURE --> " +
-                                ((Result.Failure<ArrayList<UUID2<Book>>>) booksAcceptedByUser).exception().getMessage()
+                                ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage()
                         );
                     } else {
-                        ctx.log.d(this,"Checkout Book SUCCESS --> booksAcceptedByUser:" +
-                                ((Result.Success<ArrayList<UUID2<Book>>>) booksAcceptedByUser).value()
+                        ctx.log.d(this,"Checkout Book SUCCESS --> checkedOutBook:" +
+                                ((Result.Success<UUID2<Book>>) checkedOutBookResult).value()
                         );
                     }
                 }
