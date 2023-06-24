@@ -931,7 +931,8 @@ class Repo implements IRepo {
                                 UUID2.createFakeUUID2(i, DTO.BookInfo.class.getName()),
                                 "Title " + i,
                                 "Author " + i,
-                                "Description " + i)
+                                "Description " + i,
+                                "Some extra info from the DTO" + i)
                 );
 
                 if (result instanceof Result.Failure) {
@@ -1311,9 +1312,8 @@ class Model {
     // - DTO.{Domain}Info
     ///////////////////////////////
 
-//    interface DomainInfo<TDomainInfo extends Domain> extends Info.ToInfo<TDomainInfo> {
     interface DomainInfo<TDomainInfo extends Domain> {
-        UUID2<?> getDomainInfoId();            // Requires override, method should return id of DomainInfo object (used for deserialization)
+        UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
         @SuppressWarnings("unchecked")
         default TDomainInfo getDomainInfo()
@@ -2088,33 +2088,39 @@ class Model {
             final String title;
             final String author;
             final String description;
-            final String extraFieldToShowThisIsADTO = "This is a DTO";
+            final String extraFieldToShowThisIsADTO;
 
             BookInfo(@NotNull
                      UUID2<Book> id,
                      String title,
                      String author,
-                     String description
+                     String description,
+                     String extraFieldToShowThisIsADTO
             ) {
                 super(id.toDomainUUID2(), DTO.BookInfo.class.getName());
                 this.id = id;
                 this.title = title;
                 this.author = author;
                 this.description = description;
+
+                if(extraFieldToShowThisIsADTO == null) {
+                    this.extraFieldToShowThisIsADTO = "This is a DTO";
+                } else {
+                    this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
+                }
             }
-            BookInfo(String json, Context context) {  // for creating DTO from from JSON
-                this(context.gson.fromJson(json, DTO.BookInfo.class));
+            BookInfo(String json, Context context) {
+                this(context.gson.fromJson(json, DTO.BookInfo.class));  // creates a DTO.BookInfo from the JSON
             }
 
             // Intentionally DON'T accept `Entity.BookInfo` (to keep the DB layer separate from the API layer)
             BookInfo(DTO.BookInfo bookInfo) {
-                this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);
+                this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description, bookInfo.extraFieldToShowThisIsADTO);
             }
             BookInfo(Domain.BookInfo bookInfo) {
-                this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);
+                this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description, "Imported from Domain.BookInfo");
             }
-
-            // todo - Is it better to have a constructor that takes in a Entity.BookInfo and throws an exception? Or to not have it at all?
+            // todo - Is it better to have a constructor that takes in a DTO.BookInfo and throws an exception? Or to not have it at all?
             // BookInfo(Entity.BookInfo bookInfo) {
             //     // Never accept Entity.BookInfo to keep the API layer separate from the DB layer
             //     super(bookInfo.id.toDomainUUID2());
@@ -3057,7 +3063,7 @@ class LibraryApp {
         PopulateFakeBookInfoInContextBookRepoDBandAPI(ctx);
 
         Populate_And_Poke_Book:
-        if(true){
+        if(false) {
             ctx.log.d(this, "----------------------------------");
             ctx.log.d(this, "Populate_And_Poke_Book");
 
@@ -3278,7 +3284,7 @@ class LibraryApp {
             }
 
             // Load Library from Json
-            if (true) {
+            if (false) {
                 ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"Load Library from Json: ");
 
@@ -3338,6 +3344,33 @@ class LibraryApp {
                         ctx.log.d(this,"Results of Library3 json load:");
                         ctx.log.d(this,library3.toJson());
                     }
+                } catch (Exception e) {
+                    ctx.log.d(this, "Exception: " + e.getMessage());
+                }
+            }
+
+            // Load Book from DTO Json
+            if(true) {
+                ctx.log.d(this, "----------------------------------");
+                ctx.log.d(this,"Load Book from DTO Json: ");
+
+                String json =
+                        "{\n" +
+                        "  \"id\": {\n" +
+                        "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
+                        "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.Model$DTO$BookInfo\"\n" +
+                        "  },\n" +
+                        "  \"title\": \"The Great Gatsby\",\n" +
+                        "  \"author\": \"F. Scott Fitzgerald\",\n" +
+                        "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
+                        "  \"extraFieldToShowThisIsADTO\": \"Data from JSON load\"\n" +
+                        "}";
+
+                try {
+                    DTO.BookInfo bookInfo3 = new DTO.BookInfo(json, ctx);
+                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx);
+
+                    ctx.log.d(this,"Results of Load Book from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
                     ctx.log.d(this, "Exception: " + e.getMessage());
                 }
