@@ -386,7 +386,7 @@ class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     @SuppressWarnings("unchecked")
-    public UUID2<IUUID2> toThisUUID2() {
+    public UUID2<IUUID2> toUUID2() {
         return (UUID2<IUUID2>) this;
     }
 
@@ -795,11 +795,11 @@ class Repo implements IRepo {
                 }
 
                 Entity.BookInfo bookInfo = ((Result.Success<Entity.BookInfo>) bookInfoResult).value();
-                return new Result.Success<>(bookInfo.toDeepCopyOfDomainInfo());
+                return new Result.Success<>(bookInfo.toDeepCopyDomainInfo());
             }
 
             // Convert to Domain Model
-            Domain.BookInfo bookInfo = ((Result.Success<DTO.BookInfo>) bookInfoApiResult).value().toDeepCopyOfDomainInfo();
+            Domain.BookInfo bookInfo = ((Result.Success<DTO.BookInfo>) bookInfoApiResult).value().toDeepCopyDomainInfo();
 
             // Cache to Local DB
             Result<Entity.BookInfo> resultDB = database.updateBookInfo(bookInfo.toEntity());
@@ -1201,12 +1201,84 @@ class Context implements IContext {
 // It is the "single source of truth" for the Domain object.
 // Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
 interface Info<TInfo> {
+    // TInfo info;                        // Requires a field named "info" of type TInfo (is there a way to enforce this in java?
+
     TInfo fetchInfo();                    // Fetches info for object from server/DB
     boolean isInfoFetched();              // Returns true if info has been fetched from server/DB
     Result<TInfo> fetchInfoResult();      // Fetches Result<T> for info object from server/DB
     Result<TInfo> updateInfo(TInfo info); // Updates info for object to server/DB
     Result<TInfo> refreshInfo();          // Refreshes info for object from server/DB
     String fetchInfoFailureReason();      // Returns reason for failure of last fetchInfo() call, or null if successful
+
+    @SuppressWarnings("unchecked")
+    default TInfo deepCopyInfo() {                // Returns a deep copy of the Info object
+
+        return (TInfo) new Gson().fromJson(
+                new Gson().toJson(this),
+                this.getClass()
+        );
+    }
+
+    interface ToInfo<TInfo> {
+        UUID2<?> getInfoId();             // Returns the UUID2 of the Info object
+
+        @SuppressWarnings("unchecked")
+        default TInfo getInfo() {         // Returns the Info object
+            //noinspection unchecked
+            return (TInfo) this; // todo test this cast
+        }
+
+        @SuppressWarnings("unchecked")
+        default TInfo toDeepCopyInfo() {    // **MUST** override, method should return a DEEP copy (& no original references)
+            //noinspection unchecked
+            return ((Info<TInfo>) this).deepCopyInfo();  // todo test this cast
+
+            // throw new RuntimeException("Info:ToInfo:toDeepCopyInfo(): Must override this method");
+        }
+    }
+
+    public static <
+            TInfo extends ToInfo<?> // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
+        > TInfo createInfoFromJson(
+            String json,
+            Class<TInfo> infoClazz, // type of `Info` object to create
+            Context context
+    ) {
+        try {
+            TInfo obj = context.gson.fromJson(json, (Type) infoClazz);
+            assert obj != null;
+            context.log.d("Info:createInfoFromJson()", "obj = " + obj);
+
+            // Set the UUID2 typeStr to match the Info Class name
+            String infoClazzName = infoClazz.getName();
+            infoClazz.cast(obj)
+                    .getInfoId()
+                    .setUUID2TypeStr(infoClazzName);
+
+            return obj;
+        } catch (Exception e) {
+            context.log.d( "IDomainObject:createDomainInfoFromJson()", "Failed to createDomainInfoObjectFromJson() for " +
+                    "class: " + Domain.LibraryInfo.class.getName() + ", " +
+                    "json: " + json + ", " +
+                    "exception: " + e.toString());
+
+            return null;
+        }
+    }
+
+    // This interface is to enforce all DomainInfo objects have a deepCopy() method
+    // - Just add "implements ToInfo.hasDeepCopyInfo<ToInfo<{InfoClass}>>" to the class
+    //   definition, and the toDeepCopyInfo() method will be added.
+    interface hasToDeepCopyInfo<TInfo extends ToInfo<?>> {
+
+        @SuppressWarnings("unchecked")
+        default TInfo deepCopyInfo()
+        {
+            // This is a default implementation for deepCopyInfo() that simply calls the toDeepCopyInfo() method implemented in the subclass
+            // This is a workaround for the fact that Java doesn't allow static methods in interfaces.
+            return (TInfo) ((TInfo) this).toDeepCopyInfo(); // calls the toDeepCopyInfo() method of the implementing class
+        }
+    }
 }
 
 // "{Model}Info" Data Holders held inside each App Domain Object.
@@ -1226,43 +1298,58 @@ class Model {
     // - DTO.{Domain}Info
     ///////////////////////////////
 
-    interface ToDomainInfo<TDomainInfo extends Domain> {
-        TDomainInfo toDeepCopyOfDomainInfo(); // Requires override, method should return a DEEP copy (& no original references)
-        UUID2<?> infoId();              // Requires override, method should return id of DomainInfo object (used for deserialization)
+//    interface DomainInfo<TDomainInfo extends Domain> extends Info.ToInfo<TDomainInfo> {
+    interface DomainInfo<TDomainInfo extends Domain> {
+        UUID2<?> getDomainInfoId();            // Requires override, method should return id of DomainInfo object (used for deserialization)
+
+        @SuppressWarnings("unchecked")
+        default
+        TDomainInfo getDomainInfo()
+        {  // Return reference to TDomainInfo, used when importing JSON
+            return (TDomainInfo) this; // todo test this cast
+        }
+
+        default TDomainInfo toDeepCopyDomainInfo() {    // **MUST** override, method should return a DEEP copy (& no original references)
+            throw new RuntimeException("DomainInfo:ToDomainInfo:toDeepCopyDomainInfo(): Must override this method");
+        }
 
         // This interface is to enforce all DomainInfo objects have a deepCopy() method
         // - Just add "implements ToDomainInfo.hasDeepCopy<ToDomainInfo<Domain>>" to the class
         //   definition, and the deepCopy() method will be added.
-        interface hasDeepCopy<TToInfo extends ToDomainInfo<? extends Domain>> {
+        interface hasToDeepCopyDomainInfo<TToInfo extends DomainInfo<? extends Domain>> {
 
             @SuppressWarnings("unchecked")
             default <TDomainInfo extends Domain>
-            TDomainInfo deepCopy() // Requires method override, should return a deep copy (no original references)
+            TDomainInfo deepCopyDomainInfo() // Requires method override, should return a deep copy (no original references)
             {
                 // This is a hack to get around the fact that Java doesn't allow you to call a generic method from a generic class
-                return (TDomainInfo) ((TToInfo) this).toDeepCopyOfDomainInfo();
+                return (TDomainInfo) ((TToInfo) this).toDeepCopyDomainInfo();
             }
         }
     }
-    interface ToEntity<T extends Entity> {
+    interface ToEntityInfo<T extends Entity> {
         T toEntity(); // Should return a deep copy (no original references)
     }
-    interface ToDTO<T extends DTO> {
+    interface ToDTOInfo<T extends DTO> {
         T toDTO();    // Should return a deep copy (no original references)
     }
 
     public String toPrettyJson() {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this); // todo switch over to context version
+    }
+    public String toPrettyJson(Context context) {
+        return context.gson.toJson(this);
     }
 
     // These are methods are for JSON deserialization purposes
     protected UUID2<?> id() { return _id; }
-    protected void _setId(UUID2<IUUID2> _id) {
+    protected void _setIdFromImportedJson(UUID2<IUUID2> _id) {
         this._id = _id;
     }
 
     // Domain objects contain the "{Model}Info" and the associated business logic to manipulate it
-    static class Domain extends Model implements ToDomainInfo.hasDeepCopy<ToDomainInfo<Domain>> {
+//    static class Domain extends Model implements Info.hasDeepCopy<ToDomainInfo<Domain>> {
+    static class Domain extends Model {
 
         // next lines are ugly java boilerplate to allow call to super() with a UUID2
         Domain(UUID2<?> id, String className) {
@@ -1282,9 +1369,9 @@ class Model {
         }
 
         static class BookInfo extends Domain implements
-                ToEntity<Entity.BookInfo>,
-                ToDTO<DTO.BookInfo>,
-                ToDomainInfo<BookInfo>
+                ToEntityInfo<Entity.BookInfo>,
+                ToDTOInfo<DTO.BookInfo>,
+                DomainInfo<BookInfo>
         {
             private final UUID2<Book> id; // note this is a UUID2<Book> not a UUID2<BookInfo>, it is the id of the Book.
             private final String title;
@@ -1369,18 +1456,23 @@ class Model {
             /////////////////////////////////
 
             @Override
-            public Domain.BookInfo toDeepCopyOfDomainInfo() {
+            public Domain.BookInfo toDeepCopyDomainInfo() {
                 // shallow copy OK here bc its flat
                 return new Domain.BookInfo(this);
             }
 
             @Override
-            public UUID2<?> infoId() {
+            public UUID2<?> getDomainInfoId() {
                 return this.id;
             }
+
+//            @Override
+//            public UUID2<?> getInfoId() {
+//                return this.id;
+//            }
         }
 
-        static class UserInfo extends Domain implements ToDomainInfo<UserInfo> {
+        static class UserInfo extends Domain implements DomainInfo<UserInfo> {
             private final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
             private final String name;
             private final String email;
@@ -1611,7 +1703,7 @@ class Model {
 
             // note: no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
             @Override
-            public Domain.UserInfo toDeepCopyOfDomainInfo() {
+            public Domain.UserInfo toDeepCopyDomainInfo() {
                 // Note: Must return a deep copy (no original references)
                 Domain.UserInfo domainInfoCopy = new Domain.UserInfo(this);
 
@@ -1625,12 +1717,12 @@ class Model {
             }
 
             @Override
-            public UUID2<?> infoId() {
+            public UUID2<?> getDomainInfoId() {
                 return this.id;
             }
         }
 
-        static class LibraryInfo extends Domain implements ToDomainInfo<LibraryInfo> {
+        static class LibraryInfo extends Domain implements DomainInfo<LibraryInfo> {
             final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
             final String name;
             final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
@@ -1943,7 +2035,7 @@ class Model {
 
             // note: currently no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
             @Override
-            public Domain.LibraryInfo toDeepCopyOfDomainInfo() {
+            public Domain.LibraryInfo toDeepCopyDomainInfo() {
                 // Note: *MUST* return a deep copy
                 Domain.LibraryInfo libraryInfoDeepCopy = new Domain.LibraryInfo(this.id, this.name);
 
@@ -1959,35 +2051,50 @@ class Model {
             }
 
             @Override
-            public UUID2<?> infoId() {
+            public UUID2<?> getDomainInfoId() {
                 return this.id;
             }
         }
     }
 
     // Data Transfer Objects for APIs
-    // Simple data holder class for transferring data to/from the Domain from API
-    static class DTO extends Model implements ToDomainInfo.hasDeepCopy<ToDomainInfo<Domain>> {
-
+    // - Simple data holder class for transferring data to/from the Domain from API
+    // - Objects can be created from JSON
+    static class DTO extends Model {
         public DTO(UUID2<IUUID2> id, String className) {
             super(id, className);
         }
 
-        static class BookInfo extends DTO implements ToDomainInfo<Domain.BookInfo> {
+        static class BookInfo extends DTO
+                implements
+                    DomainInfo<Domain.BookInfo>,
+                    DomainInfo.hasToDeepCopyDomainInfo<Domain.BookInfo>,
+                    Info.ToInfo<DTO.BookInfo>,
+                    Info.hasToDeepCopyInfo<DTO.BookInfo>
+        {
             final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
             final String title;
             final String author;
             final String description;
+            final String extraFieldToShowThisIsADTO = "This is a DTO";
 
-            BookInfo(UUID2<Book> id, String title, String author, String description) {
-                super(id.toDomainUUID2(), BookInfo.class.getName());
+            BookInfo(@NotNull
+                     UUID2<Book> id,
+                     String title,
+                     String author,
+                     String description
+            ) {
+                super(id.toDomainUUID2(), DTO.BookInfo.class.getName());
                 this.id = id;
                 this.title = title;
                 this.author = author;
                 this.description = description;
             }
+            BookInfo(String json, Context context) {  // for creating DTO from from JSON
+                this(context.gson.fromJson(json, DTO.BookInfo.class));
+            }
 
-            // Don't accept Entity.BookInfo (to keep the DB layer separate from the API layer)
+            // Intentionally DON'T accept `Entity.BookInfo` (to keep the DB layer separate from the API layer)
             BookInfo(DTO.BookInfo bookInfo) {
                 this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);
             }
@@ -2007,19 +2114,34 @@ class Model {
                 return "Book (" + this.id + ") : " + this.title + " by " + this.author +", " + this.description;
             }
 
-            /////////////////////////////
-            // ToInfo implementation   //
-            /////////////////////////////
+            ///////////////////////////////////
+            // ToDomainInfo implementation   //
+            ///////////////////////////////////
 
             // note: DTO only emits to the Domain layer. (so no need for .toDTO(), or .toEntity() )
             @Override
-            public Domain.BookInfo toDeepCopyOfDomainInfo() {
+            public Domain.BookInfo toDeepCopyDomainInfo() {
                 // note: implement deep copy, if needed.
                 return new Domain.BookInfo(this);
             }
 
             @Override
-            public UUID2<?> infoId() {
+            public UUID2<Book> getDomainInfoId() {
+                return this.id;
+            }
+
+            /////////////////////////////
+            // ToInfo implementation   //
+            /////////////////////////////
+
+            @Override
+            public DTO.BookInfo toDeepCopyInfo() {
+                // note: implement deep copy, if needed.
+                return new DTO.BookInfo(this);
+            }
+
+            @Override
+            public UUID2<Book> getInfoId() {
                 return this.id;
             }
         }
@@ -2027,16 +2149,18 @@ class Model {
 
     // Entities for Databases
     // Simple data holder class for transferring data to/from the Domain from Database
-    static class Entity extends Model implements ToDomainInfo.hasDeepCopy<ToDomainInfo<Domain>> {
+//    static class Entity extends Model implements Info.hasToDeepCopyInfo<DomainInfo<Domain>> {
+    static class Entity extends Model  {
         Entity(UUID2<IUUID2> id, String className) {
             super(id, className);
         }
 
-        static class BookInfo extends Entity implements ToDomainInfo<Domain.BookInfo> {
+        static class BookInfo extends Entity implements DomainInfo<Domain.BookInfo> {
             final UUID2<Book> id;  // note this is a UUID2<Book> and not a UUID2<BookInfo>
             final String title;
             final String author;
             final String description;
+            final String extraFieldToShowThisIsAnEntity = "This is an Entity";
 
             BookInfo(
                     @NotNull UUID2<Book> id,
@@ -2075,21 +2199,23 @@ class Model {
             // ToInfo implementation //
             ///////////////////////////
 
-            // note: Entity only emits to the Domain layer (so no need for .toDTO(), or .toEntity() )
+            // note: Entity only interacts to the Domain layer (so no need for .toDTO() or .toEntity() )
             @Override
-            public Domain.BookInfo toDeepCopyOfDomainInfo() {
+            public Domain.BookInfo toDeepCopyDomainInfo() {
                 // implement deep copy, if needed.
                 return new Domain.BookInfo(this);
             }
 
             @Override
-            public UUID2<?> infoId() {
+            public UUID2<?> getDomainInfoId() {
                 return this.id;
             }
         }
     }
 }
 
+/////////////////////////////////////////////////////
+// Domain Role - Common Domain Role Abstract class
 abstract class IRole<TDomainInfo extends Domain>
     implements
         Info<TDomainInfo>,
@@ -2100,7 +2226,7 @@ abstract class IRole<TDomainInfo extends Domain>
     // - Marked transient so gson will ignore it, as every concrete DomainObject will have a type-specific UUID2.
     private final UUID2<IUUID2> id;
 
-    protected TDomainInfo info;  // Information object for Info<Domain.{domain}Info>
+    protected TDomainInfo info;  // Information object for Info<Domain.{Domain}Info>
     protected Result<TDomainInfo> infoResult = null;
 
     // Singletons
@@ -2118,20 +2244,20 @@ abstract class IRole<TDomainInfo extends Domain>
             TDomainInfo info,
             @NotNull Context context
         ) {
-            this.id = UUID2.fromUUID(id); // intentionally NOT validating id==info.id bc need to be able to pass in info as null.
+            this.id = UUID2.fromUUID(id); // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
             this.info = info;
             this.context = context;
         }
-    <TDomainInfo_ extends ToDomainInfo<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
+    <TDomainInfo_ extends DomainInfo<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
         IRole(
-            @NotNull String domainInfoJson,  // json string of TDomainInfo object
+            @NotNull String domainInfoJson,
             Class<TDomainInfo_> classType,
             Context context
         ) {
             this(
                 Objects.requireNonNull(
                     IRole.createDomainInfoFromJson(domainInfoJson, classType, context)
-                ).toDeepCopyOfDomainInfo(),
+                ).getDomainInfo(),
                 context
             );
         }
@@ -2170,32 +2296,35 @@ abstract class IRole<TDomainInfo extends Domain>
         return this.id;
     }
 
-    // Creates new `Domain.{Domain}Info` object with id from JSON string
-    // - It's a static method so that it can be called from a constructor. (Can't call instance methods from constructor)
-    // - Note: Types are to make sure it works with correct types and subclasses.
+    // Todo refactor to use Info.createInfoFromJson interface instead of this method
+    // Creates new `Domain.{Domain}Info` object with id from JSON string of `Domain.{Domain}Info` object
+    // - It's a static method so that it can be called from a constructor. (Can't call instance methods from constructor in java)
+    // - Note: Types are to make sure it works with correct subtypes and subclasses.
     // - ie: The Library domain object has a Domain.LibraryInfo object which requires ToDomain<Domain.LibraryInfo> to be implemented.
-    // - todo : change to a marker interface instead of a constraining to the ToDomain<> interface?
-    @SuppressWarnings("unchecked") // for _setIdFromImportedJson()
+    // - We only import JSON as Domain objects. The Entity and DTO layer only accept Domain objects.
+    // - todo : Should change to a marker interface instead of a constraining to the ToDomain<TDomain> interface?
+    @SuppressWarnings("unchecked") // for _setId() call
     public static <
             TDomain extends Domain,  // ie: Domain.BookInfo
-            TDomainInfo extends ToDomainInfo<? extends TDomain> // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
+            TDomainInfo extends DomainInfo<? extends TDomain> // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
         > TDomainInfo createDomainInfoFromJson(
             String json,
             Class<TDomainInfo> domainInfoClazz, // type of `Domain.{Domain}Info` object to create
-            Context context // for logging & gson deserialization only
+            Context context
     ) {
         try {
             TDomainInfo obj = context.gson.fromJson(json, (Type) domainInfoClazz);
+            assert obj != null;
             context.log.d("IDomainObject:createDomainInfoFromJson()", "obj = " + obj);
 
             // Set the UUID2 typeStr to match the type of the DomainInfo object
             String domainInfoClazzName = domainInfoClazz.getName();
             domainInfoClazz.cast(obj)
-                    .infoId()
+                    .getDomainInfoId()
                     .setUUID2TypeStr(domainInfoClazzName);
 
             // Set Domain "master" id to match id of imported Info, ie: Model._id = Domain.{Domain}Info.id // todo maybe a better way to do this?
-            ((TDomain) obj)._setId(
+            ((TDomain) obj)._setIdFromImportedJson(
                 new UUID2<>(((TDomain) obj).id(), domainInfoClazzName)
             );
 
@@ -2264,9 +2393,9 @@ abstract class IRole<TDomainInfo extends Domain>
     // - Call super.updateInfo(info) to update the info<TDomainInfo> object
     //   (caller decides when appropriate, ie: optimistic updates, or after server confirms update)
     @Override
-    public Result<TDomainInfo> updateInfo(TDomainInfo info) {
-        this.info = info.deepCopy();  // Info is immutable so create new copy of info
-        return new Result.Success<>(info);
+    public Result<TDomainInfo> updateInfo(TDomainInfo info) { // **MUST** Override in subclasses
+        this.info = info;
+        return new Result.Success<>(this.info);
     }
 
     // NOTE: Should be Implemented by subclasses but not required
@@ -2372,6 +2501,10 @@ abstract class IRole<TDomainInfo extends Domain>
     }
 }
 
+////////////////////////////////////////////////
+// Application Layer - Domain Objects         //
+////////////////////////////////////////////////
+
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
 class Book extends IRole<Domain.BookInfo> implements IUUID2 {
     final UUID2<Book> id;
@@ -2384,8 +2517,8 @@ class Book extends IRole<Domain.BookInfo> implements IUUID2 {
 
         context.log.d(this, "Book (" + this.id + ") created from info");
     }
-    Book(String json, Class<Domain.BookInfo> classType, Context context) {
-        super(json, classType, context);
+    Book(String json, Class<Domain.BookInfo> clazz, Context context) {
+        super(json, clazz, context);
         this.repo = this.context.bookRepo();
         this.id = this.info.id();
     }
@@ -2623,8 +2756,7 @@ class User extends IRole<Domain.UserInfo> implements IUUID2 {
 }
 
 // Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
-class Library extends IRole<Domain.LibraryInfo> implements IUUID2
-{
+class Library extends IRole<Domain.LibraryInfo> implements IUUID2 {
     final UUID2<Library> id;
     private Repo.LibraryInfo repo = null;
 
@@ -2883,7 +3015,7 @@ class LibraryApp {
         PopulateFakeBookInfoInContextBookRepoDBandAPI(ctx);
 
         Populate_And_Poke_Book:
-        if(false){
+        if(true){
             ctx.log.d(this, "----------------------------------");
             ctx.log.d(this, "Populate_And_Poke_Book");
 
