@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class App2Test extends TestCase {
+public class App1Test extends TestCase {
 
     @Test
     @Ignore
@@ -22,18 +22,18 @@ public class App2Test extends TestCase {
         final int port = 12345;
 
         // Create the session with the resource to be served
-        final App2.Session session = new App2.Session(
-                new App2.Resource() {
+        final App1.Session session = new App1.Session(
+                new App1.Resource() {
                     Map<String, String> params = new HashMap<>();
 
                     @Override
-                    public App2.Resource define(String name, String value) {
+                    public App1.Resource define(String name, String value) {
                         params.put(name, value);
                         return this;
                     }
 
                     @Override
-                    public void printTo(final App2.Output output) throws IOException {
+                    public void printTo(final App1.Output output) throws IOException {
 
                         // Simulate a http request that takes 100ms to complete
                         try {
@@ -59,7 +59,7 @@ public class App2Test extends TestCase {
         final Thread thread = new Thread(() -> {
 
             // Create the app with the session
-            final App2 app = new App2(session);
+            final App1 app = new App1(session);
 
             try {
                 app.start(port);
