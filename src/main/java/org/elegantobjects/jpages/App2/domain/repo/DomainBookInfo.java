@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2.domain.repoData;
+package org.elegantobjects.jpages.App2.domain.repo;
 
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.common.Model;

@@ -6,7 +6,7 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.network.DTO;
 import org.elegantobjects.jpages.App2.data.local.Entity;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.repoData.Domain;
+import org.elegantobjects.jpages.App2.domain.repo.Domain;
 import org.jetbrains.annotations.NotNull;
 
 // "{Model}Info" Data Holders held inside each App Domain Object.

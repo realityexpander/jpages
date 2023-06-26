@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
 
 import java.lang.reflect.Type;
 import java.util.UUID;

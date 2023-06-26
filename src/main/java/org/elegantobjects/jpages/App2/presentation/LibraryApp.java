@@ -5,9 +5,9 @@ import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.*;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainBookInfo;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.repo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repo.DomainUserInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,9 +100,9 @@ class LibraryApp {
             }
             UUID2<Library> library1InfoId = ((Result.Success<DomainLibraryInfo>) libraryInfo).value().id();
             ctx.log.d(this,"Library Created --> id: " +
-                    ((Result.Success<DomainLibraryInfo>) libraryInfo).value().id() +
-                    ", name: "+
-                    ((Result.Success<DomainLibraryInfo>) libraryInfo).value().name()
+                ((Result.Success<DomainLibraryInfo>) libraryInfo).value().id() +
+                ", name: "+
+                ((Result.Success<DomainLibraryInfo>) libraryInfo).value().name()
             );
 
             // Populate the library

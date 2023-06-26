@@ -2,7 +2,7 @@ package org.elegantobjects.jpages.App2.domain.common;
 
 import com.google.gson.Gson;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
-import org.elegantobjects.jpages.App2.domain.Repo;
+import org.elegantobjects.jpages.App2.domain.repo.Repo;
 
 // Context is a singleton class that holds all the repositories and global objects like Gson
 public interface IContext {

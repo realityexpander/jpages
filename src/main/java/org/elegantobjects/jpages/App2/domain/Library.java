@@ -4,7 +4,8 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repo.Repo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

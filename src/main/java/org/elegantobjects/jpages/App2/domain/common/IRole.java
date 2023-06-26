@@ -7,8 +7,8 @@ import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.repoData.Domain;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repo.Domain;
+import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;

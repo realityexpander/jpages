@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2.domain;
+package org.elegantobjects.jpages.App2.domain.repo;
 
 
 import org.elegantobjects.jpages.App2.common.util.Result;
@@ -9,10 +9,10 @@ import org.elegantobjects.jpages.App2.data.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
+import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.Library;
+import org.elegantobjects.jpages.App2.domain.User;
 import org.elegantobjects.jpages.App2.domain.common.IRepo;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainBookInfo;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainUserInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -26,7 +26,7 @@ public class Repo implements IRepo {
         this.log = log;
     }
 
-    // Business logic for Book Repo (simple CRUD oerations; converts to/from DTOs/Entities/Domains)
+    // Business logic for Book Repo (simple CRUD operations; converts to/from DTOs/Entities/Domains)
     public static class BookInfo extends Repo implements IRepo.BookInfo {
         private final BookInfoApi api;
         private final BookInfoDatabase database;

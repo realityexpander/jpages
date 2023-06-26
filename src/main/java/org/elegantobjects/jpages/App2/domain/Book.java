@@ -4,7 +4,8 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.repoData.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.repo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.repo.Repo;
 import org.jetbrains.annotations.NotNull;
 
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
@@ -101,8 +102,8 @@ public class Book extends IRole<DomainBookInfo> implements IUUID2 {
     // - Methods to modify it's BookInfo  //
     ////////////////////////////////////////
 
-    public Result<DomainBookInfo> updateAuthor(String authorName) {
-        DomainBookInfo updatedInfo = this.info.withAuthor(authorName);
+    public Result<DomainBookInfo> updateAuthor(String author) {
+        DomainBookInfo updatedInfo = this.info.withAuthor(author);
         return this.updateInfo(updatedInfo);
     }
 
