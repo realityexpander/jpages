@@ -7,7 +7,9 @@ import org.elegantobjects.jpages.App2.data.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.domain.common.IContext;
-import org.elegantobjects.jpages.App2.domain.repo.Repo;
+import org.elegantobjects.jpages.App2.domain.repo.BookInfoRepo;
+import org.elegantobjects.jpages.App2.domain.repo.LibraryInfoRepo;
+import org.elegantobjects.jpages.App2.domain.repo.UserInfoRepo;
 
 import static org.elegantobjects.jpages.App2.domain.Context.ContextType.PRODUCTION;
 
@@ -15,9 +17,9 @@ public class Context implements IContext {
     // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
 
     // Repository Singletons
-    private final Repo.BookInfo bookInfoRepo;
-    private final Repo.UserInfo userInfoRepo;
-    private final Repo.LibraryInfo libraryInfoRepo;
+    private final BookInfoRepo bookInfoRepo;
+    private final UserInfoRepo userInfoRepo;
+    private final LibraryInfoRepo libraryInfoRepo;
 
     // Utility Singletons
     public final Gson gson;
@@ -29,9 +31,9 @@ public class Context implements IContext {
     }
 
     Context(
-        Repo.BookInfo bookInfoRepo,
-        Repo.UserInfo userInfoRepo,
-        Repo.LibraryInfo libraryInfoRepo,
+        BookInfoRepo bookInfoRepo,
+        UserInfoRepo userInfoRepo,
+        LibraryInfoRepo libraryInfoRepo,
         Gson gson,
         ILog log
     ) {
@@ -62,13 +64,13 @@ public class Context implements IContext {
     private static Context generateDefaultProductionContext() {
         ILog log = new Log();
         return new Context(
-                new Repo.BookInfo(
+                new BookInfoRepo(
                         new BookInfoApi(),
                         new BookInfoDatabase(),
                         log
                 ),
-                new Repo.UserInfo(log),
-                new Repo.LibraryInfo(log),
+                new UserInfoRepo(log),
+                new LibraryInfoRepo(log),
                 new GsonBuilder().setPrettyPrinting().create(),
                 log
         );
@@ -94,13 +96,13 @@ public class Context implements IContext {
 //        return setupINSTANCE(null);
 //    }
 
-    public Repo.BookInfo bookRepo() {
+    public BookInfoRepo bookRepo() {
         return this.bookInfoRepo;
     }
-    public Repo.UserInfo userRepo() {
+    public UserInfoRepo userRepo() {
         return this.userInfoRepo;
     }
-    public Repo.LibraryInfo libraryRepo() {
+    public LibraryInfoRepo libraryRepo() {
         return this.libraryInfoRepo;
     }
 }

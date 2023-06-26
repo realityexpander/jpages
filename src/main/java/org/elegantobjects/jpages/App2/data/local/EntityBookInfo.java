@@ -1,16 +1,16 @@
 package org.elegantobjects.jpages.App2.data.local;
 
-import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.domain.Book;
-import org.elegantobjects.jpages.App2.domain.repo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
 import org.jetbrains.annotations.NotNull;
 
 public class EntityBookInfo extends Entity
     implements
-        Model.ToDomain<DomainBookInfo>,
-        Model.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,
+        ModelInfo.ToDomain<DomainBookInfo>,
+        ModelInfo.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,
         Info.ToInfo<EntityBookInfo>,
         Info.hasToDeepCopyInfo<EntityBookInfo>
 {

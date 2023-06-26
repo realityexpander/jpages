@@ -1,7 +1,8 @@
-package org.elegantobjects.jpages.App2.domain.repo;
+package org.elegantobjects.jpages.App2.domain.domainInfo;
 
+import org.elegantobjects.jpages.App2.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.data.local.EntityBookInfo;
 import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.domain.Book;
@@ -9,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class DomainBookInfo extends Domain
+public class DomainBookInfo extends DomainInfo
     implements
-        Model.ToEntity<EntityBookInfo>,
-        Model.ToDTO<DTOBookInfo>,
-        Model.ToDomain<DomainBookInfo>
+        ModelInfo.ToEntity<EntityBookInfo>,
+        ModelInfo.ToDTO<DTOBookInfo>,
+        ModelInfo.ToDomain<DomainBookInfo>
 {
     private final UUID2<Book> id; // note this is a UUID2<Book> not a UUID2<BookInfo>, it is the id of the Book.
     public final String title;

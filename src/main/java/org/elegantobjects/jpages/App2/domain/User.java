@@ -4,8 +4,8 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.repo.DomainUserInfo;
-import org.elegantobjects.jpages.App2.domain.repo.Repo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.repo.UserInfoRepo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 // User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
 public class User extends IRole<DomainUserInfo> implements IUUID2 {
     public final UUID2<User> id;
-    private final Repo.UserInfo repo;
+    private final UserInfoRepo repo;
 
     public User(
         @NotNull DomainUserInfo info,

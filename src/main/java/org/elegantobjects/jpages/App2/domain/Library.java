@@ -4,8 +4,8 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.repo.Repo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repo.LibraryInfoRepo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import static java.lang.String.format;
 // Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
 public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
     public final UUID2<Library> id;
-    private final Repo.LibraryInfo repo;
+    private final LibraryInfoRepo repo;
 
     public Library(
         @NotNull DomainLibraryInfo info,

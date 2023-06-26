@@ -1,8 +1,9 @@
-package org.elegantobjects.jpages.App2.domain.repo;
+package org.elegantobjects.jpages.App2.domain.domainInfo;
 
+import org.elegantobjects.jpages.App2.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.domain.Book;
 import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
@@ -10,9 +11,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class DomainLibraryInfo extends Domain
+public class DomainLibraryInfo extends DomainInfo
         implements
-        Model.ToDomain<DomainLibraryInfo>
+        ModelInfo.ToDomain<DomainLibraryInfo>
 {
     private final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     final private String name;

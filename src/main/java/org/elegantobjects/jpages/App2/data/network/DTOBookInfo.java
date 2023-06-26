@@ -1,17 +1,17 @@
 package org.elegantobjects.jpages.App2.data.network;
 
-import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.domain.Book;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.repo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
 import org.jetbrains.annotations.NotNull;
 
 public class DTOBookInfo extends DTO
         implements
-        Model.ToDomain<DomainBookInfo>,
-        Model.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,
+        ModelInfo.ToDomain<DomainBookInfo>,
+        ModelInfo.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,
         Info.ToInfo<DTOBookInfo>,
         Info.hasToDeepCopyInfo<DTOBookInfo>
 {
@@ -40,19 +40,19 @@ public class DTOBookInfo extends DTO
             this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
         }
     }
-    public DTOBookInfo(String json, Context context) {
+    public DTOBookInfo(String json, @NotNull Context context) {
         this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTO.BookInfo from the JSON
     }
 
     // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
-    DTOBookInfo(DTOBookInfo bookInfo) {
+    DTOBookInfo(@NotNull DTOBookInfo bookInfo) {
         this(new UUID2<Book>(bookInfo.id().uuid()),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
             bookInfo.extraFieldToShowThisIsADTO);
     }
-    public DTOBookInfo(DomainBookInfo bookInfo) {
+    public DTOBookInfo(@NotNull DomainBookInfo bookInfo) {
         this(new UUID2<Book>(bookInfo.id().uuid()),
             bookInfo.title,
             bookInfo.author,

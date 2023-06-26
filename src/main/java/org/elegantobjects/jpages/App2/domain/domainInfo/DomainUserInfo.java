@@ -1,8 +1,9 @@
-package org.elegantobjects.jpages.App2.domain.repo;
+package org.elegantobjects.jpages.App2.domain.domainInfo;
 
+import org.elegantobjects.jpages.App2.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.domain.Book;
 import org.elegantobjects.jpages.App2.domain.User;
 import org.jetbrains.annotations.NotNull;
@@ -10,9 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class DomainUserInfo extends Domain
+public class DomainUserInfo extends DomainInfo
     implements
-        Model.ToDomain<DomainUserInfo>
+        ModelInfo.ToDomain<DomainUserInfo>
 {
     private final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
     private final String name;

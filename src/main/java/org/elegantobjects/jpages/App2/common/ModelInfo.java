@@ -6,7 +6,6 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.network.DTO;
 import org.elegantobjects.jpages.App2.data.local.Entity;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.repo.Domain;
 import org.jetbrains.annotations.NotNull;
 
 // "{Model}Info" Data Holders held inside each App Domain Object.
@@ -16,10 +15,10 @@ import org.jetbrains.annotations.NotNull;
 // - {Domain}Info hold the Info state that is on the server/api.
 // - {DTO}Info hold the API transfer "dumb" objects and Validation layer for the Domain objects.
 // - {Entity}Info hold the Database transfer "dumb" objects. Validation can occur here too, but usually not necessary.
-public class Model {
+public class ModelInfo {
     transient protected UUID2<IUUID2> _id; // Can't make final bc need to set it during JSON deserialization. :(
 
-    protected Model(UUID2<?> id, String uuidTypeStr) {
+    protected ModelInfo(UUID2<?> id, String uuidTypeStr) {
         this._id = new UUID2<>(id, uuidTypeStr);
     }
 
@@ -30,7 +29,7 @@ public class Model {
     // - DTO.{Domain}Info
     ///////////////////////////////
 
-    public interface ToDomain<TDomainInfo extends Domain> {
+    public interface ToDomain<TDomainInfo extends DomainInfo> {
         UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
         @SuppressWarnings("unchecked")
@@ -46,10 +45,10 @@ public class Model {
         // This interface enforces all DomainInfo objects to include a deepCopyDomainInfo() method
         // - Just add "implements ToDomainInfo.deepCopyDomainInfo<ToDomainInfo<Domain>>" to the class
         //   definition, and the deepCopy() method will be added.
-        interface hasToDeepCopyDomainInfo<TToInfo extends ToDomain<? extends Domain>> {
+        interface hasToDeepCopyDomainInfo<TToInfo extends ToDomain<? extends DomainInfo>> {
 
             @SuppressWarnings("unchecked")
-            default <TDomainInfo extends Domain>
+            default <TDomainInfo extends DomainInfo>
             TDomainInfo deepCopyDomainInfo() // Requires method override, should return a deep copy (no original references)
             {
                 // This is a hack to get around the fact that Java doesn't allow you to call a generic method from a generic class

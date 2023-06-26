@@ -1,14 +1,14 @@
 package org.elegantobjects.jpages.App2.domain.common;
 
 import com.google.gson.JsonSyntaxException;
-import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.repo.Domain;
-import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.common.DomainInfo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /////////////////////////////////////////////////////
 // Domain Role - Common Domain Role Abstract class
-public abstract class IRole<TDomainInfo extends Domain>
+public abstract class IRole<TDomainInfo extends DomainInfo>
         implements
         Info<TDomainInfo>,
         IUUID2
@@ -61,7 +61,7 @@ public abstract class IRole<TDomainInfo extends Domain>
         this.info = info;
         this.context = context;
     }
-    protected <TDomainInfo_ extends Model.ToDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
+    protected <TDomainInfo_ extends ModelInfo.ToDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
     IRole(
         @NotNull String domainInfoJson,
         Class<TDomainInfo_> classType,
@@ -121,8 +121,8 @@ public abstract class IRole<TDomainInfo extends Domain>
     // - todo : Should change to a marker interface instead of a constraining to the ToDomain<TDomain> interface?
     @SuppressWarnings("unchecked") // for _setIdFromImportedJson() call
     public static <
-            TDomain extends Domain,  // restrict to Domain subclasses, ie: Domain.BookInfo
-            TDomainInfo extends Model.ToDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
+            TDomain extends DomainInfo,  // restrict to Domain subclasses, ie: Domain.BookInfo
+            TDomainInfo extends ModelInfo.ToDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
             TToInfo extends ToInfo<?>
             > TDomainInfo createDomainInfoFromJson(
             String json,

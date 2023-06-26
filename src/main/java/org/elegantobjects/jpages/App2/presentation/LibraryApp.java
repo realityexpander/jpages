@@ -5,9 +5,10 @@ import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.*;
-import org.elegantobjects.jpages.App2.domain.repo.DomainBookInfo;
-import org.elegantobjects.jpages.App2.domain.repo.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.repo.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.domainInfo.DomainUserInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ class LibraryApp {
         new LibraryApp(productionContext);
     }
 
-    LibraryApp(Context ctx) {
+    LibraryApp(@NotNull Context ctx) {
         //context = Context.setupINSTANCE(context);  // For implementing a static Context. LEAVE for reference
 
         ctx.log.d(this,"Populating Book DB and API");
