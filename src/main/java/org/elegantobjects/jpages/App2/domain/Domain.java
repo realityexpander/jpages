@@ -2,7 +2,7 @@ package org.elegantobjects.jpages.App2.domain;
 
 import org.elegantobjects.jpages.App2.data.Entity;
 import org.elegantobjects.jpages.App2.data.DTO;
-import org.elegantobjects.jpages.App2.Model;
+import org.elegantobjects.jpages.App2.core.Model;
 import org.elegantobjects.jpages.App2.core.Result;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
@@ -42,11 +42,11 @@ public class Domain extends Model {
         public final String author;
         public final String description;
 
-        public BookInfo(@NotNull
-                        UUID2<Book> id,
-                        String title,
-                        String author,
-                        String description
+        public BookInfo(
+            @NotNull UUID2<Book> id,
+            String title,
+            String author,
+            String description
         ) {
             super(id, BookInfo.class.getName());
             this.title = title;
@@ -292,12 +292,13 @@ public class Domain extends Model {
             }
         }
 
-        UserInfo(@NotNull
-                 UUID2<User> id,
-                 String name,
-                 String email,
-                 ArrayList<UUID2<Book>> acceptedBooks,
-                 UserInfo.Account account
+        UserInfo(
+            @NotNull
+            UUID2<User> id,
+            String name,
+            String email,
+            ArrayList<UUID2<Book>> acceptedBooks,
+            UserInfo.Account account
         ) {
             super(id.toDomainUUID2(), UserInfo.class.getName());
             this.id = id;
@@ -306,7 +307,6 @@ public class Domain extends Model {
             this.acceptedBooks = acceptedBooks;
             this.account = account;
         }
-
         UserInfo(UserInfo userInfo) {
             this(userInfo.id,
                     userInfo.name,
@@ -314,35 +314,30 @@ public class Domain extends Model {
                     userInfo.acceptedBooks,
                     userInfo.account);
         }
-
         UserInfo(UUID uuid, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, UserInfo.Account account) {
             this(new UUID2<User>(uuid), name, email, acceptedBooks, account);
         }
-
         UserInfo(String id, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, UserInfo.Account account) {
             this(UUID.fromString(id), name, email, acceptedBooks, account);
         }
-
         public UserInfo(UUID2<User> id, String name, String email) {
             this(id, name, email, new ArrayList<UUID2<Book>>(), new UserInfo.Account());
         }
-
         UserInfo(UUID uuid, String name, String email) {
             this(new UUID2<User>(uuid), name, email);
         }
-
         UserInfo(String id, String name, String email) {
             this(UUID.fromString(id), name, email);
-        }
-
-        @Override
-        public UUID2<User> id() {
-            return id;
         }
 
         ///////////////////////////////
         // Published Simple Getters  //
         ///////////////////////////////
+
+        @Override
+        public UUID2<User> id() {
+            return id;
+        }
 
         public String name() {
             return this.name;
@@ -443,22 +438,18 @@ public class Domain extends Model {
             this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
             this.id = id;
         }
-
         public LibraryInfo(UUID2<Library> id, String name) {
             this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
         }
-
         LibraryInfo(LibraryInfo libraryInfo) {
             this(libraryInfo.id,
                     libraryInfo.name,
                     libraryInfo.userIdToCheckedOutBookIdMap,
                     libraryInfo.bookIdToNumBooksAvailableMap);
         }
-
         LibraryInfo(UUID uuid, String name) {
             this(new UUID2<Library>(uuid), name);
         }
-
         LibraryInfo(String id, String name) {
             this(UUID.fromString(id), name);
         }
@@ -470,6 +461,10 @@ public class Domain extends Model {
 //                        "  Available Books: " + this.bookIdToNumBooksAvailableMap + "\n" +
 //                        "  Checkout Map: " + this.userIdToCheckedOutBookMap;
         }
+
+        ///////////////////////////////
+        // Published Simple Getters  //
+        ///////////////////////////////
 
         @Override
         public UUID2<Library> id() {
@@ -770,9 +765,9 @@ public class Domain extends Model {
             return new Result.Success<>(userId);
         }
 
-        /////////////////////////////////
+        ///////////////////////////
         // ToInfo implementation //
-        /////////////////////////////////
+        ///////////////////////////
 
         // note: currently no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
         @Override

@@ -262,7 +262,7 @@ class LibraryApp {
                                 "    \"00000000-0000-0000-0000-000000000001\": [\n" +
                                 "      {\n" +
                                 "        \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.Model.Domain.BookInfo\"\n" +
+                                "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.core.Model.Domain.BookInfo\"\n" +
                                 "      }\n" +
                                 "    ]\n" +
                                 "  },\n" +
@@ -280,7 +280,7 @@ class LibraryApp {
                                 "  },\n" +
                                 "  \"id\": {\n" +
                                 "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.Model.Domain.LibraryInfo\"\n" +
+                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.core.Model.Domain.LibraryInfo\"\n" +
                                 "  }\n" +
                                 "}";
 
@@ -330,7 +330,7 @@ class LibraryApp {
                         "{\n" +
                                 "  \"id\": {\n" +
                                 "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.Model.DTO.BookInfo\"\n" +
+                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.core.Model.DTO.BookInfo\"\n" +
                                 "  },\n" +
                                 "  \"title\": \"The Great Gatsby\",\n" +
                                 "  \"author\": \"F. Scott Fitzgerald\",\n" +

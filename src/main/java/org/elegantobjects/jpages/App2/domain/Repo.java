@@ -13,6 +13,8 @@ import org.elegantobjects.jpages.App2.domain.core.IRepo;
 
 import java.util.Map;
 
+// Since the Repo only accepts/returns Domain.{Domain}Info objects, this lives in the domain layer.
+// - Internally, it accesses the data layer, and does conversions between the layers.
 public class Repo implements IRepo {
     protected final ILog log;
 
@@ -33,7 +35,7 @@ public class Repo implements IRepo {
             this.api = api;
             this.database = database;
         }
-        BookInfo() { this(new BookInfoApi(), new BookInfoDatabase(), new Log()); }
+        public BookInfo() { this(new BookInfoApi(), new BookInfoDatabase(), new Log()); }
 
         @Override
         public Result<Domain.BookInfo> fetchBookInfo(UUID2<Book> id) {

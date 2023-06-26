@@ -1,6 +1,6 @@
 package org.elegantobjects.jpages.App2.data;
 
-import org.elegantobjects.jpages.App2.Model;
+import org.elegantobjects.jpages.App2.core.Model;
 import org.elegantobjects.jpages.App2.core.Info;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
@@ -16,11 +16,12 @@ public class Entity extends Model {
     }
 
     public static class BookInfo extends Entity
-            implements
+        implements
             ToDomainInfo<Domain.BookInfo>,
             ToDomainInfo.hasToDeepCopyDomainInfo<Domain.BookInfo>,
             Info.ToInfo<BookInfo>,
-            Info.hasToDeepCopyInfo<BookInfo> {
+            Info.hasToDeepCopyInfo<BookInfo>
+    {
         final UUID2<Book> id;  // note this is a UUID2<Book> and not a UUID2<BookInfo>
         public final String title;
         public final String author;

@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.core;
 
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
@@ -70,7 +70,7 @@ public class Model {
         return context.gson.toJson(this);
     }
 
-    // These are methods are for JSON deserialization purposes
+    // These methods are for JSON deserialization purposes
     public UUID2<?> id() { return _id; }
     public void _setIdFromImportedJson(UUID2<IUUID2> _id) {
         this._id = _id;

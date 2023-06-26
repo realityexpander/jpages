@@ -1,7 +1,7 @@
 package org.elegantobjects.jpages.App2.domain.core;
 
 import com.google.gson.JsonSyntaxException;
-import org.elegantobjects.jpages.App2.*;
+import org.elegantobjects.jpages.App2.core.Model;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.Info;
 import org.elegantobjects.jpages.App2.core.Result;

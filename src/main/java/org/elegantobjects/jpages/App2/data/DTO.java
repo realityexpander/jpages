@@ -1,6 +1,6 @@
 package org.elegantobjects.jpages.App2.data;
 
-import org.elegantobjects.jpages.App2.Model;
+import org.elegantobjects.jpages.App2.core.Model;
 import org.elegantobjects.jpages.App2.core.Info;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
@@ -18,23 +18,24 @@ public class DTO extends Model {
     }
 
     public static class BookInfo extends DTO
-            implements
+        implements
             ToDomainInfo<Domain.BookInfo>,
             ToDomainInfo.hasToDeepCopyDomainInfo<Domain.BookInfo>,
             Info.ToInfo<BookInfo>,
-            Info.hasToDeepCopyInfo<BookInfo> {
+            Info.hasToDeepCopyInfo<BookInfo>
+    {
         final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
         public final String title;
         public final String author;
         public final String description;
         final String extraFieldToShowThisIsADTO;
 
-        public BookInfo(@NotNull
-                        UUID2<Book> id,
-                        String title,
-                        String author,
-                        String description,
-                        String extraFieldToShowThisIsADTO
+        public BookInfo(
+            @NotNull UUID2<Book> id,
+            String title,
+            String author,
+            String description,
+            String extraFieldToShowThisIsADTO
         ) {
             super(id.toDomainUUID2(), BookInfo.class.getName());
             this.id = id;
@@ -48,7 +49,6 @@ public class DTO extends Model {
                 this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
             }
         }
-
         public BookInfo(String json, Context context) {
             this(context.gson.fromJson(json, BookInfo.class));  // creates a DTO.BookInfo from the JSON
         }
@@ -56,18 +56,17 @@ public class DTO extends Model {
         // Note: Intentionally DON'T accept `Entity.BookInfo` (to keep DB layer separate from API layer)
         BookInfo(BookInfo bookInfo) {
             this(new UUID2<Book>(bookInfo.id().uuid()),
-                    bookInfo.title,
-                    bookInfo.author,
-                    bookInfo.description,
-                    bookInfo.extraFieldToShowThisIsADTO);
+                bookInfo.title,
+                bookInfo.author,
+                bookInfo.description,
+                bookInfo.extraFieldToShowThisIsADTO);
         }
-
         public BookInfo(Domain.BookInfo bookInfo) {
             this(new UUID2<Book>(bookInfo.id().uuid()),
-                    bookInfo.title,
-                    bookInfo.author,
-                    bookInfo.description,
-                    "Imported from Domain.BookInfo");
+                bookInfo.title,
+                bookInfo.author,
+                bookInfo.description,
+                "Imported from Domain.BookInfo");
         }
         // todo - Is it better to have a constructor that takes in a DTO.BookInfo and throws an exception? Or to not have it at all?
         // BookInfo(Entity.BookInfo bookInfo) {
@@ -78,7 +77,7 @@ public class DTO extends Model {
 
         @Override
         public String toString() {
-            return "Book (" + this.id + ") : " + this.title + " by " + this.author + ", " + this.description;
+            return "Book (" + this.id + ") : " + this.title + " by " + this.author + ", " + this.description + ", " + this.extraFieldToShowThisIsADTO;
         }
 
         ///////////////////////////////////////////
@@ -93,10 +92,10 @@ public class DTO extends Model {
         public Domain.BookInfo toDeepCopyDomainInfo() {
             // note: implement deep copy, if required.
             return new Domain.BookInfo(
-                    this.id,
-                    this.title,
-                    this.author,
-                    this.description
+                this.id,
+                this.title,
+                this.author,
+                this.description
             );
         }
 
