@@ -58,12 +58,11 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     public UUID2<IUUID2> toDomainUUID2() {
-        return new UUID2<>(this, this.getUUID2TypeStr()); //uuid2TypeStr); // todo make sure this works
+        return new UUID2<>(this, this.getUUID2TypeStr());
     }
 
-    @SuppressWarnings("unchecked")
-    public UUID2<IUUID2> toUUID2() {
-        return (UUID2<IUUID2>) this;
+    public UUID2<?> toUUID2() {
+        return this;
     }
 
     public static <TDomainUUID2 extends IUUID2>
@@ -185,6 +184,9 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
     }
 
+
+    ////////////////////////////
+    ///// Private helpers //////
 
     private String normalizeUuid2TypeString(String uuid2TypeStr) {
         if(uuid2TypeStr == null) {
