@@ -1,6 +1,6 @@
 package org.elegantobjects.jpages.App2;
 
-class HttpClient {
+public class HttpClient {
     private final String client;
 
     HttpClient(String client) {

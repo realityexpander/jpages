@@ -1,6 +1,8 @@
 package org.elegantobjects.jpages.App2;
 
+
 import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ class LibraryApp {
         PopulateFakeBookInfoInContextBookRepoDBandAPI(ctx);
 
         Populate_And_Poke_Book:
-        if(false) {
+        if(true) {
             ctx.log.d(this, "----------------------------------");
             ctx.log.d(this, "Populate_And_Poke_Book");
 
@@ -90,37 +92,34 @@ class LibraryApp {
 
                 break Populate_the_library_and_user_DBs;
             }
-            UUID2<Library> libraryInfoId = ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id;
+            UUID2<Library> library1InfoId = ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id();
             ctx.log.d(this,"Library Created --> id: " +
-                    ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id +
+                    ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id() +
                     ", name: "+
                     ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().name
             );
 
             // Populate the library
-            ctx.libraryRepo().populateWithFakeBooks(libraryInfoId, 10);
+            ctx.libraryRepo().populateWithFakeBooks(library1InfoId, 10);
 
-            // Create & populate a User in the User Repo
-            final Domain.UserInfo userInfo = createFakeUserInfoInContextUserRepo(1, ctx);
+            // Create & populate User 1 in the User Repo
+            final Domain.UserInfo user1Info = createFakeUserInfoInContextUserRepo(1, ctx);
 
             //////////////////////////////////
             // Actual App functionality     //
             //////////////////////////////////
 
             // Create the App objects
-            final User user1 = new User(userInfo.id(), ctx);
-            final Library library1 = new Library(libraryInfoId, ctx);
+            final User user1 = new User(user1Info, ctx);
+            final Library library1 = new Library(library1InfoId, ctx);
             final Book book1 = new Book(UUID2.createFakeUUID2(1, Book.class.getName()), ctx);
             final Book book2 = new Book(UUID2.createFakeUUID2(2, Book.class.getName()), ctx);
 
-            // print the user
-            ctx.log.d(this,"User --> " +
-                    user1.id + ", " +
-                    user1.fetchInfo().toPrettyJson()
-            );
+            // print User 1
+            ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
-            Checkout_2_books_to_a_user:
-            if (false) {
+            Checkout_2_Books_to_User:
+            if (true) {
                 ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
 
@@ -149,8 +148,8 @@ class LibraryApp {
                 // library1.DumpDB(ctx);  // LEAVE for debugging
             }
 
-            Get_Available_Books_And_Counts_In_Library:
-            if (false) {
+            Get_available_Books_and_Inventory_Counts_in_Library:
+            if (true) {
                 ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"\nGetting available books and counts in library:");
 
@@ -162,7 +161,7 @@ class LibraryApp {
                                     .exception().getMessage()
                     );
 
-                    break Get_Available_Books_And_Counts_In_Library;
+                    break Get_available_Books_and_Inventory_Counts_in_Library;
                 }
 
                 // create objects and populate info for available books
@@ -173,7 +172,8 @@ class LibraryApp {
                 // Print out available books
                 ctx.log.d(this,"\nAvailable Books in Library:");
                 for (Map.Entry<Book, Integer> availableBook : availableBooks.entrySet()) {
-                    final Book book3 = new Book(availableBook.getKey().id, ctx);
+                    final UUID2<Book> bookId = availableBook.getKey().id;
+                    final Book book3 = new Book(bookId, ctx);
 
                     final Result<Domain.BookInfo> bookInfoResult = book3.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
@@ -193,8 +193,8 @@ class LibraryApp {
                 ctx.log.d(this,"\n");
             }
 
-            Get_books_checked_out_by_user:
-            if (false) {
+            Get_Books_checked_out_by_User:
+            if (true) {
                 ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"\nGetting books checked out by user " + user1.id);
 
@@ -228,10 +228,10 @@ class LibraryApp {
                 System.out.print("\n");
             }
 
-            Check_In_the_Book_from_the_User_to_the_Library:
-            if (false) {
+            Check_In_Book_from_User_to_Library:
+            if (true) {
                 ctx.log.d(this, "----------------------------------");
-                ctx.log.d(this,"\nCheck in book " + book1.id + " from user " + user1.id);
+                ctx.log.d(this,"\nCheck in book:" + book1.id + ", from user: " + user1.id + ", to library:" + library1.id);
 
                 final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1, user1);
                 if (checkInBookResult instanceof Result.Failure) {
@@ -253,7 +253,7 @@ class LibraryApp {
                 ctx.log.d(this,"Load Library from Json: ");
 
                 // Library library2 = new Library(ctx); // uses random UUID, will cause expected error due to unknown UUID
-                Library library2 = new Library(UUID2.createFakeUUID2(99), ctx);
+                Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class.getName()), ctx);
                 ctx.log.d(this, library2.toJson());
 
                 String json =
@@ -263,7 +263,7 @@ class LibraryApp {
                                 "    \"00000000-0000-0000-0000-000000000001\": [\n" +
                                 "      {\n" +
                                 "        \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.Model$Domain$BookInfo\"\n" +
+                                "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.Model.Domain.BookInfo\"\n" +
                                 "      }\n" +
                                 "    ]\n" +
                                 "  },\n" +
@@ -280,69 +280,79 @@ class LibraryApp {
                                 "    \"00000000-0000-0000-0000-000000000019\": 50\n" +
                                 "  },\n" +
                                 "  \"id\": {\n" +
-                                "    \"uuid\": \"00000000-0000-0000-0000-000000000099\"\n" +
+                                "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
+                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.Model.Domain.LibraryInfo\"\n" +
                                 "  }\n" +
                                 "}";
+
+                // Check JSON loaded properly
                 if(true) {
                     Result<Domain.LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
+
+                        // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
                         ctx.log.d(this, ((Result.Failure<Domain.LibraryInfo>) library2Result).exception().getMessage());
+
+                        // The JSON was still loaded properly
+                        ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
+
                     } else {
+                        // Intentionally Wont see this branch bc the library2 was never saved to the central database/api.
                         ctx.log.d(this, "Results of Library2 json load:");
                         ctx.log.d(this, library2.toJson());
                     }
                 }
 
-                try {
-                    Domain.LibraryInfo libraryInfo3 =
-                            Library.createDomainInfoFromJson(
-                                    json,
-                                    Domain.LibraryInfo.class,
-                                    ctx
-                            );
+                // Create a Library Domain Object from the Info
+                if(true) {
+                    try {
+                        Domain.LibraryInfo libraryInfo3 =
+                                Library.createDomainInfoFromJson(
+                                        json,
+                                        Domain.LibraryInfo.class,
+                                        ctx
+                                );
 
-                    Library library3 = new Library(libraryInfo3, ctx);
-                    if(libraryInfo3 == null) {
-                        ctx.log.d(this, "Library3 is null");
-                    } else {
-                        ctx.log.d(this,"Results of Library3 json load:");
-                        ctx.log.d(this,library3.toJson());
+                        assert libraryInfo3 != null;
+                        Library library3 = new Library(libraryInfo3, ctx);
+                        ctx.log.d(this, "Results of Library3 json load:" + library3.toJson());
+                    } catch (Exception e) {
+                        ctx.log.d(this, "Exception: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    ctx.log.d(this, "Exception: " + e.getMessage());
                 }
             }
 
             // Load Book from DTO Json
-            if(false) {
+            if(true) {
                 ctx.log.d(this, "----------------------------------");
-                ctx.log.d(this,"Load Book from DTO Json: ");
+                ctx.log.d(this,"Load BookInfo from DTO Json: ");
 
                 String json =
                         "{\n" +
                                 "  \"id\": {\n" +
                                 "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.Model$DTO$BookInfo\"\n" +
+                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.Model.DTO.BookInfo\"\n" +
                                 "  },\n" +
                                 "  \"title\": \"The Great Gatsby\",\n" +
                                 "  \"author\": \"F. Scott Fitzgerald\",\n" +
                                 "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
-                                "  \"extraFieldToShowThisIsADTO\": \"Data from JSON load\"\n" +
+                                "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
                                 "}";
 
                 try {
                     DTO.BookInfo bookInfo3 = new DTO.BookInfo(json, ctx);
-                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx);
+//                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx);
+                    Book book3 = new Book(new Domain.BookInfo(bookInfo3), ctx);
 
-                    ctx.log.d(this,"Results of Load Book from DTO Json: " + book3.toJson());
+                    ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
                     ctx.log.d(this, "Exception: " + e.getMessage());
                 }
             }
 
             Check_out_Book_via_User:
-            if (false) {
-                final User user2 = new User(createFakeUserInfoInContextUserRepo(2, ctx).id(), ctx);
+            if (true) {
+                final User user2 = new User(createFakeUserInfoInContextUserRepo(2, ctx), ctx);
                 final Result<Domain.BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
 
                 if (book12Result instanceof Result.Failure) {
@@ -359,18 +369,51 @@ class LibraryApp {
                     final Result<Book> book12UpsertResult = library1.addTestBookToLibrary(book12, 1);
                     if (book12UpsertResult instanceof Result.Failure) {
                         ctx.log.d(this,"Upsert Book Error: " +
-                                ((Result.Failure<Book>) book12UpsertResult).exception().getMessage()
+                            ((Result.Failure<Book>) book12UpsertResult).exception().getMessage()
                         );
                     }
 
                     final Result<UUID2<Book>> checkedOutBookResult = user2.checkoutBookFromLibrary(book12, library1);
                     if (checkedOutBookResult instanceof Result.Failure) {
                         ctx.log.d(this,"Checkout book FAILURE --> " +
-                                ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage()
+                            ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage()
                         );
                     } else {
                         ctx.log.d(this,"Checkout Book SUCCESS --> checkedOutBook:" +
-                                ((Result.Success<UUID2<Book>>) checkedOutBookResult).value()
+                            ((Result.Success<UUID2<Book>>) checkedOutBookResult).value()
+                        );
+                    }
+                }
+            }
+
+            Give_Book_To_User:
+            if(true) {
+                final User user01 = new User(createFakeUserInfoInContextUserRepo(1, ctx), ctx);
+                final User user2 = new User(createFakeUserInfoInContextUserRepo(2, ctx), ctx);
+                final Result<Domain.BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
+
+                if (book12Result instanceof Result.Failure) {
+                    ctx.log.d(this,"Book Error: " +
+                        ((Result.Failure<Domain.BookInfo>) book12Result).exception().getMessage()
+                    );
+                } else {
+
+                    final UUID2<Book> book12id = ((Result.Success<Domain.BookInfo>) book12Result).value().id();
+                    final Book book12 = new Book(book12id, ctx);
+
+                    // If book was checked out, it is still checked out by the first person. todo if its checked out of a library, have the library perform a "checkout" transfer
+                    user2.acceptBook(book12); // no library involved.
+
+                    ctx.log.d(this,"User (2):" + user2.id + " Give Book:" + book12id + " to User(1):" + user01.id);
+
+                    final Result<ArrayList<UUID2<Book>>> giveBookToUserResult = user2.giveBookToUser(book12, user01);
+                    if (giveBookToUserResult instanceof Result.Failure) {
+                        ctx.log.d(this,"Give book FAILURE --> Book:" +
+                            ((Result.Failure<ArrayList<UUID2<Book>>>) giveBookToUserResult).exception().getMessage()
+                        );
+                    } else {
+                        ctx.log.d(this,"Give Book SUCCESS --> Book:" +
+                            ((Result.Success<ArrayList<UUID2<Book>>>) giveBookToUserResult).value()
                         );
                     }
                 }

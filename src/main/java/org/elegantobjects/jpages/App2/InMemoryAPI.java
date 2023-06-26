@@ -14,6 +14,7 @@ interface IAPI<TUUID2 extends IUUID2, TDTOInfo> {
     Result<TDTOInfo> deleteDtoInfo(TDTOInfo dtoInfo);
 }
 @SuppressWarnings("FieldCanBeLocal")
+public
 class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends Model.DTO> implements IAPI<TUUID2, TDTOInfo> {
     private final URL url;
     private final HttpClient client;
@@ -21,7 +22,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends Model.DTO> implements 
     // Simulate a database accessed via a network API
     private final UUID2.HashMap<TUUID2, TDTOInfo> database = new UUID2.HashMap<>();
 
-    InMemoryAPI(URL url, HttpClient client) {
+    public InMemoryAPI(URL url, HttpClient client) {
         this.url = url;
         this.client = client;
     }

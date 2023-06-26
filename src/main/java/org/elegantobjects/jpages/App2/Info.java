@@ -63,7 +63,7 @@ interface Info<TInfo> {
             String infoClazzName = infoClazz.getName();
             infoClazz.cast(obj)
                     .getInfoId()
-                    .setUUID2TypeStr(infoClazzName);
+                    ._setUUID2TypeStr(infoClazzName);
 
             return obj;
         } catch (Exception e) {

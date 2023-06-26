@@ -3,6 +3,7 @@ package org.elegantobjects.jpages.App2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         this.uuid = ((UUID2<?>) uuid2).uuid();
 
         if(uuid2TypeStr != null) {
-            this.uuid2TypeStr = uuid2TypeStr;
+            this.uuid2TypeStr = normalizeUuid2TypeString(uuid2TypeStr);
         } else {
             this.uuid2TypeStr = "UUID"; // Default to untyped UUID
         }
@@ -47,39 +48,72 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     @Override
-    public int hashCode() {
-        return uuid.hashCode();
-    }
-
-    @Override
     public String getUUID2TypeStr() {
         return uuid2TypeStr;
     }
 
     // Note: Should only be used for importing JSON
-    protected void setUUID2TypeStr(String uuidType) {
-        this.uuid2TypeStr = uuidType;
+    public void _setUUID2TypeStr(String uuid2TypeStr) {
+        this.uuid2TypeStr = normalizeUuid2TypeString(uuid2TypeStr);
+    }
+    private String normalizeUuid2TypeString(String uuid2TypeStr) {
+        if(uuid2TypeStr == null) {
+            return "UUID"; // unspecified-type
+        }
+
+        // Change any '$' in path of `uuid2TypeStr` into a '.'
+        // - For some(?) reason Java returns delimiter `$` with: Model.Domain.BookInfo.class.getName();
+        //   And returns returns `.` with: this.getClass().getName();
+        StringBuilder normalizedTypeStr = new StringBuilder();
+        for(int i = 0; i < uuid2TypeStr.length(); i++) {
+            if(uuid2TypeStr.charAt(i) == '$') {
+                normalizedTypeStr.append('.');
+            } else {
+                normalizedTypeStr.append(uuid2TypeStr.charAt(i));
+            }
+        }
+
+        return normalizedTypeStr.toString();
     }
 
     @Override
     public String toString() {
-        return uuid.toString();
+            return uuid + " (" + getLast3SegmentsOfTypeStrPath(uuid2TypeStr) + ")";
+    }
+    private String getLast3SegmentsOfTypeStrPath(String uuid2TypeStr) {
+        String[] segments = uuid2TypeStr.split("\\.");
+        if(segments.length < 3) {
+            return uuid2TypeStr;
+        }
+
+        return segments[segments.length - 3] + "." +
+               segments[segments.length - 2] + "." +
+               segments[segments.length - 1];
     }
 
-    public static <TDomainUUID2 extends IUUID2> UUID2<TDomainUUID2> fromString(String uuidStr) {
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
+    }
+
+    public static <TDomainUUID2 extends IUUID2>
+    UUID2<TDomainUUID2> fromString(String uuidStr) {
         return new UUID2<>(UUID.fromString(uuidStr));
     }
 
-    public static <TDomainUUID2 extends IUUID2> UUID2<TDomainUUID2> fromUUID(UUID uuid) {
+    public static <TDomainUUID2 extends IUUID2>
+    UUID2<TDomainUUID2> fromUUID(UUID uuid) {
         return new UUID2<>(uuid);
     }
 
-    public static <TDomainUUID2 extends IUUID2> UUID2<TDomainUUID2> randomUUID2() {
+    public static <TDomainUUID2 extends IUUID2>
+    UUID2<TDomainUUID2> randomUUID2() {
         return new UUID2<>(UUID.randomUUID());
     }
 
     @SuppressWarnings("unchecked")
-    public static <TDomainUUID2 extends IUUID2> @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id, String className) {
+    public static <TDomainUUID2 extends IUUID2>
+    @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id, String className) {
         Integer nonNullId = id;
         if (nonNullId == null) nonNullId = 1;
 
@@ -88,7 +122,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return new UUID2<>((TDomainUUID2) uuid2, className);
     }
-    public static <TDomainUUID2 extends IUUID2> @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
+    public static <TDomainUUID2 extends IUUID2>
+    @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
         return createFakeUUID2(id, null);
     }
 
@@ -112,8 +147,10 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         HashMap() {
             super();
         }
+
         // Creates a database from another database
-        public <T extends TUUID2, U extends TEntity> HashMap(UUID2.HashMap<UUID2<T>, U> sourceDatabase) {
+        public <TKey extends TUUID2, TValue extends TEntity>
+            HashMap(UUID2.HashMap<UUID2<TKey>, TValue> sourceDatabase) {
             super();
             this.putAll(sourceDatabase);
         }
@@ -153,15 +190,17 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
         public boolean containsKey(UUID2<TUUID2> uuid2) { return super.containsKey(uuid2.uuid); }
 
-        public Set<TUUID2> keys() throws RuntimeException {
+        public <TKey extends TUUID2>
+        Set<UUID2<TKey>> keys() throws RuntimeException {
             Set<UUID> uuidSet = super.keySet();
-            Set<TUUID2> uuid2Set = new HashSet<>();
+            Set<UUID2<TKey>> uuid2Set = new HashSet<>();
 
             // Convert UUIDs to TDomainUUIDs
             try {
                 for (UUID uuid : uuidSet) {
                     @SuppressWarnings({"unchecked"})
-                    TUUID2 uuid2 = (TUUID2) UUID2.fromUUID(uuid);
+//                    UUID2<TUUID2> uuid2 = (UUID2<TUUID2>) UUID2.fromUUID(uuid);
+                    UUID2<TKey> uuid2 = UUID2.fromUUID(uuid);
                     uuid2Set.add(uuid2);
                 }
             } catch (Exception e) {

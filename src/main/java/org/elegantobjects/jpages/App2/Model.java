@@ -2,19 +2,24 @@ package org.elegantobjects.jpages.App2;
 
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 // "{Model}Info" Data Holders held inside each App Domain Object.
-// Similar to an Entity for a database row or a DTO for a REST API, these are the objects that are
-// passed around the application. They are the "source of truth" for the data in the application.
+// - Similar to an Entity for a database row or a DTO for a REST API endpoint, these are
+//   the objects that are passed around the application.
+// - They are the "source of truth" for the Domain objects in the application.
+// - {Domain}Info hold the Info state that is on the server/api.
+// - {DTO}Info hold the API transfer "dumb" objects and Validation layer for the Domain objects.
+// - {Entity}Info hold the Database transfer "dumb" objects. Validation can occur here too, but usually not necessary.
 public class Model {
     transient protected UUID2<IUUID2> _id; // Can't make final bc need to set it during JSON deserialization. :(
 
-    Model(UUID2<IUUID2> id, String uuidTypeStr) {
-        this._id = new UUID2<IUUID2>(id, uuidTypeStr);
+    Model(UUID2<?> id, String uuidTypeStr) {
+        this._id = new UUID2<>(id, uuidTypeStr);
     }
 
     ///////////////////////////////
@@ -77,7 +82,8 @@ public class Model {
 
         // next lines are ugly java boilerplate to allow call to super() with a UUID2
         Domain(UUID2<?> id, String className) {
-            super(id.toDomainUUID2(), className);
+//            super(id.toDomainUUID2(), className); // todo Dont convert to UUID2<IUUID2> other places
+            super(id, className);
         }
         Domain(UUID uuid, String className) {
             super(new UUID2<IUUID2>(uuid), className);
@@ -247,6 +253,14 @@ public class Model {
                     CLOSED;
                 }
 
+                @Override
+                public String toString() {
+                    return "Account (" +
+                            this.accountStatus + ") : " +
+                            "currentFineAmountPennies=" + this.currentFineAmountPennies + ", " +
+                            "maxBooks=" + this.maxBooks;
+                }
+
                 // Use Builder pattern to create Account
                 static class Builder {
                     Model.Domain.UserInfo.Account.AccountStatus accountStatus;
@@ -384,7 +398,7 @@ public class Model {
 
             public Result<ArrayList<UUID2<Book>>> acceptBook(UUID2<Book> bookId) {
                 if (this.acceptedBooks.contains(bookId)) {
-                    return new Result.Failure<>(new Exception("Book already accepted by user"));
+                    return new Result.Failure<>(new Exception("Book already accepted by user, book id:" + bookId));
                 }
 
                 try {
@@ -398,7 +412,7 @@ public class Model {
 
             public Result<ArrayList<UUID2<Book>>> unacceptBook(UUID2<Book> bookId) {
                 if (!this.acceptedBooks.contains(bookId)) {
-                    return new Result.Failure<>(new Exception("Book not accepted by user"));
+                    return new Result.Failure<>(new Exception("Book not in acceptedBooks List for user, book id:" + bookId));
                 }
 
                 try {
@@ -415,7 +429,7 @@ public class Model {
             }
 
             public boolean isBookAcceptedByUser(UUID2<Book> bookId) {
-                return !this.acceptedBooks.contains(bookId);
+                return this.acceptedBooks.contains(bookId);
             }
 
             /////////////////////////////
@@ -444,7 +458,7 @@ public class Model {
         }
 
         static public class LibraryInfo extends Model.Domain implements Model.ToDomainInfo<Model.Domain.LibraryInfo> {
-            final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
+            private final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
             final String name;
             final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
             final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // books known & available in this library
@@ -548,7 +562,7 @@ public class Model {
             /////////////////////////////////////////
 
             public Result<ArrayList<UUID2<Book>>> findBooksCheckedOutByUserId(UUID2<User> userId) {
-                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known"));
+                if(!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known, id: " + userId));
 
                 return new Result.Success<>(userIdToCheckedOutBookIdMap.get(userId));
             }
@@ -557,10 +571,14 @@ public class Model {
             public Result<HashMap<UUID2<Book>, Integer>> calculateAvailableBookIdToCountOfAvailableBooksList() {
                 HashMap<UUID2<Book>, Integer> availableBookIdToNumBooksAvailableMap = new HashMap<>();
 
-                for(Book book : this.bookIdToNumBooksAvailableMap.keys()) {
-                    if(isBookIdAvailable(book)) {
-                        int numBooksAvail = this.bookIdToNumBooksAvailableMap.get(book.id);
-                        availableBookIdToNumBooksAvailableMap.put(book.id, numBooksAvail);
+//                HashSet<Book> bookSet = new HashSet<>();
+                Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keys();
+
+//                for(UUID2<Book> bookId : this.bookIdToNumBooksAvailableMap.keys()) {
+                for(UUID2<Book> bookId : bookSet) {
+                    if(isBookIdAvailable(bookId)) {
+                        int numBooksAvail = this.bookIdToNumBooksAvailableMap.get(bookId);
+                        availableBookIdToNumBooksAvailableMap.put(bookId, numBooksAvail);
                     }
                 }
 
@@ -599,7 +617,7 @@ public class Model {
                 return isBookCurrentlyCheckedOutByUser(book.id, user.id);
             }
 
-            protected Result<UUID2<User>> registerUser(UUID2<User> userId) {
+            public Result<UUID2<User>> registerUser(UUID2<User> userId) {
                 return insertUserId(userId);
             }
 
@@ -607,7 +625,7 @@ public class Model {
             // Published Testing Helper Methods    //
             /////////////////////////////////////////
 
-            protected Result<UUID2<Book>> addTestBook(UUID2<Book> bookId, int quantity) {
+            public Result<UUID2<Book>> addTestBook(UUID2<Book> bookId, int quantity) {
                 return addBookIdToInventory(bookId, quantity);
             }
 
@@ -786,7 +804,7 @@ public class Model {
             super(id, className);
         }
 
-        static class BookInfo extends Model.DTO
+        public static class BookInfo extends Model.DTO
                 implements
                 Model.ToDomainInfo<Model.Domain.BookInfo>,
                 Model.ToDomainInfo.hasToDeepCopyDomainInfo<Model.Domain.BookInfo>,

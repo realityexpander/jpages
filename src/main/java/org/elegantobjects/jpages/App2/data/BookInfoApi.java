@@ -1,21 +1,21 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.data;
 
+import org.elegantobjects.jpages.App2.*;
 import org.elegantobjects.jpages.App2.domain.Book;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class BookInfoApi {
+// Note: Use Domain-specific language to define the API
+public class BookInfoApi {
     private final InMemoryAPI<Book, Model.DTO.BookInfo> api;
 
-    BookInfoApi() {
+    public BookInfoApi() {
         this(new InMemoryAPI<>(new URL("memory://api.book.com"), new HttpClient()));
     }
     BookInfoApi(InMemoryAPI<Book, Model.DTO.BookInfo> api) {
         this.api = api;
     }
-
-    // Use Domain-specific language to define the API
 
     public Result<Model.DTO.BookInfo> getBookInfo(String id) {
         return api.getDtoInfo(id);

@@ -1,16 +1,17 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.data;
 
+import org.elegantobjects.jpages.App2.*;
 import org.elegantobjects.jpages.App2.domain.Book;
 
 import java.util.Map;
 
-class BookInfoDatabase {
+public class BookInfoDatabase {
     private final IDatabase<Book, Model.Entity.BookInfo> database;
 
     BookInfoDatabase(IDatabase<Book, Model.Entity.BookInfo> database) {
         this.database = database;
     }
-    BookInfoDatabase() {
+    public BookInfoDatabase() {
         this(new InMemoryDatabase<>(new URL("memory://db.book.com"), "user", "password"));
     }
 

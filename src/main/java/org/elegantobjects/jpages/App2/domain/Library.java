@@ -1,7 +1,7 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.domain;
 
-import org.elegantobjects.jpages.App2.domain.Book;
-import org.elegantobjects.jpages.App2.domain.User;
+import org.elegantobjects.jpages.App2.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,38 +12,54 @@ import static java.lang.String.format;
 // Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
 public class Library extends IRole<Model.Domain.LibraryInfo> implements IUUID2 {
     public final UUID2<Library> id;
-    private Repo.LibraryInfo repo = null;
+    private final Repo.LibraryInfo repo;
 
-    Library(Model.Domain.LibraryInfo info, Context context) {
+    public Library(
+        @NotNull Model.Domain.LibraryInfo info,
+        Context context
+    ) {
         super(info, context);
         this.repo = this.context.libraryRepo();
-        this.id = info.id;
+        this.id = info.id();
+        this.id._setUUID2TypeStr(this.getUUID2TypeStr());
 
-        context.log.d(this,"Library (" + this.id + ") created");
+        context.log.d(this,"Library (" + this.id + ") created from Info");
     }
-    Library(UUID2<Library> id, Context context) {
-        super(id.toDomainUUID2(), context);
+    public Library(
+        String json,
+        Class<Model.Domain.LibraryInfo> clazz,
+        Context context
+    ) {
+        super(json, clazz, context);
+        this.repo = this.context.libraryRepo();
+        this.id = this.info.id();
+        this.id._setUUID2TypeStr(this.getUUID2TypeStr());
+
+        context.log.d(this,"Library (" + this.id + ") created from Json with class: " + clazz.getName());
+    }
+    public Library(
+            @NotNull UUID2<Library> id,
+            Context context
+    ) {
+        super(id, context);
         this.repo = this.context.libraryRepo();
         this.id = id;
+        this.id._setUUID2TypeStr(this.getUUID2TypeStr());
 
-        context.log.d(this,"Library (" + this.id + ") created");
+        context.log.d(this,"Library (" + this.id + ") created by id with no Info");
     }
-    Library(String json, Class<Model.Domain.LibraryInfo> classType, Context context) {
-        super(json, classType, context);
-        this.repo = this.context.libraryRepo();
-        this.id = this.info.id;
+    public Library(String json, Context context) { this(json, Model.Domain.LibraryInfo.class, context); }
+    public Library(Context context) {
+        this(UUID2.randomUUID2(), context);
     }
-    Library(String json, Context context) { this(json, Model.Domain.LibraryInfo.class, context); }
-    Library(Context context) {
-        super(UUID2.randomUUID2(), context);
-        this.repo = this.context.libraryRepo();
-        this.id = this.info.id;
-    }
-
     // LEAVE for reference, for static Context instance implementation
     // Library() {
     //     this(UUID2.randomUUID());
     // }
+
+    /////////////////////////////////////
+    // IRole/UUID2 Required Overrides  //
+    /////////////////////////////////////
 
     @Override
     public Result<Model.Domain.LibraryInfo> fetchInfoResult() {
@@ -84,6 +100,7 @@ public class Library extends IRole<Model.Domain.LibraryInfo> implements IUUID2 {
 
     ///////////////////////////////////////////
     // Library Domain Business Logic Methods //
+    // - Methods to modify it's LibraryInfo  //
     ///////////////////////////////////////////
 
     public Result<Book> checkOutBookToUser(Book book, User user) {

@@ -2,6 +2,8 @@ package org.elegantobjects.jpages.App2;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.elegantobjects.jpages.App2.data.BookInfoApi;
+import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
 
 import static org.elegantobjects.jpages.App2.Context.ContextType.PRODUCTION;
 

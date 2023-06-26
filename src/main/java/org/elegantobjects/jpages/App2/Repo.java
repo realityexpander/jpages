@@ -1,7 +1,10 @@
 package org.elegantobjects.jpages.App2;
 
 
+import org.elegantobjects.jpages.App2.data.BookInfoApi;
+import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
 
 import java.util.Map;
@@ -239,13 +242,14 @@ public class Repo implements IRepo {
 
         @Override
         public Result<Model.Domain.UserInfo> fetchUserInfo(UUID2<User> id) {
-            log.d(this,"Repo.User - Fetching user info: " + id);
+            log.d(this,"Repo.UserInfo - Fetching user info: " + id);
 
+            // Simulate network/database
             if (database.containsKey(id)) {
                 return new Result.Success<>(database.get(id));
             }
 
-            return new Result.Failure<>(new Exception("User not found"));
+            return new Result.Failure<>(new Exception("Repo.UserInfo, UserInfo not found, id:" + id));
         }
 
         @Override
@@ -253,17 +257,18 @@ public class Repo implements IRepo {
             String method = Thread.currentThread().getStackTrace()[2].getMethodName();
             log.d(this, "Repo.User - " + method + " - Updating user info: " + userInfo);
 
+            // Simulate network/database
             if (database.containsKey(userInfo.id())) {
                 database.put(userInfo.id(), userInfo);
                 return new Result.Success<>(userInfo);
             }
 
-            return new Result.Failure<>(new Exception("User not found, id:" + userInfo.id()));
+            return new Result.Failure<>(new Exception("Repo.UserInfo, UserInfo not found, id:" + userInfo.id()));
         }
 
         @Override
         public Model.Domain.UserInfo upsertUserInfo(Model.Domain.UserInfo userInfo) {
-            log.d(this,"Repo.User - Upserting user info: " + userInfo);
+            log.d(this,"Repo.UserInfo - Upserting user info: " + userInfo);
 
             database.put(userInfo.id(), userInfo);
             return userInfo;
@@ -282,35 +287,36 @@ public class Repo implements IRepo {
 
         @Override
         public Result<Model.Domain.LibraryInfo> fetchLibraryInfo(UUID2<Library> id) {
-            log.d(this,"id: " + id);
+            log.d(this,"Repo.LibraryInfo - Fetching library info: " + id);
 
-            // Simulate a network request
+            // Simulate network/database
             if (database.containsKey(id)) {
                 return new Result.Success<>(database.get(id));
             }
 
-            return new Result.Failure<>(new Exception("Library not found, id: " + id));
+            return new Result.Failure<>(new Exception("Repo.LibraryInfo, Library not found, id: " + id));
         }
 
         @Override
         public Result<Model.Domain.LibraryInfo> updateLibraryInfo(Model.Domain.LibraryInfo libraryInfo) {
-            log.d(this," libraryInfo: " + libraryInfo);
+            log.d(this,"Repo.LibraryInfo - Updating library info: " + libraryInfo.id());
 
-            // Simulate a network request
-            if (database.containsKey(libraryInfo.id)) {
-                database.put(libraryInfo.id, libraryInfo);
+            // Simulate network/database
+            if (database.containsKey(libraryInfo.id())) {
+                database.put(libraryInfo.id(), libraryInfo);
 
                 return new Result.Success<>(libraryInfo);
             }
 
-            return new Result.Failure<>(new Exception("Library not found, id: " + libraryInfo.id));
+            return new Result.Failure<>(new Exception("Repo.LibraryInfo, Library not found, id: " + libraryInfo.id()));
         }
 
         @Override
         public Result<Model.Domain.LibraryInfo> upsertLibraryInfo(Model.Domain.LibraryInfo libraryInfo) {
-            log.d(this,"libraryInfo: " + libraryInfo);
+            log.d(this,"Repo.LibraryInfo - Upsert library info: " + libraryInfo.id());
 
-            database.put(libraryInfo.id, libraryInfo);
+            // Simulate network/database
+            database.put(libraryInfo.id(), libraryInfo);
 
             return new Result.Success<>(libraryInfo);
         }

@@ -20,7 +20,7 @@ public abstract class IRole<TDomainInfo extends Domain>
     // Unique ID for this Role
     // - Matches id of its Info<TDomainInfo> object (to avoid confusion)
     // - Marked transient so gson will ignore it, as every concrete DomainObject will have a type-specific UUID2.
-    private final UUID2<IUUID2> id;
+    private final UUID2<?> id;
 
     protected TDomainInfo info;  // Information object for Info<Domain.{Domain}Info>
     protected Result<TDomainInfo> infoResult = null;
@@ -44,29 +44,41 @@ public abstract class IRole<TDomainInfo extends Domain>
         this.info = info;
         this.context = context;
     }
+    private IRole(
+            @NotNull UUID2<?> id,
+            TDomainInfo info,
+            @NotNull Context context
+    ) {
+        this.id = id; // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
+//        this.id._setUUID2TypeStr(infoClazz.getSimpleName());
+        this.id._setUUID2TypeStr(info.id().getUUID2TypeStr());
+        this.info = info;
+        this.context = context;
+    }
     protected <TDomainInfo_ extends Model.ToDomainInfo<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
     IRole(
-            @NotNull String domainInfoJson,
-            Class<TDomainInfo_> classType,
-            Context context
+        @NotNull String domainInfoJson,
+        Class<TDomainInfo_> classType,
+        Context context
     ) {
         this(
-                Objects.requireNonNull(
-                    IRole.createDomainInfoFromJson(domainInfoJson, classType, context)
-                ).getDomainInfo(),
-                context
+            Objects.requireNonNull(
+                IRole.createDomainInfoFromJson(domainInfoJson, classType, context)
+            ).getDomainInfo(),
+            context
         );
     }
     protected <TDomainInfo_ extends TDomainInfo>
     IRole(
-            @NotNull TDomainInfo_ info,
-            Context context
+        @NotNull TDomainInfo_ info,
+        Context context
     ) {
         this(info.id().uuid(), info, context);
+        this.id._setUUID2TypeStr(info.id().getUUID2TypeStr()); // todo is this correct way? Do we want the Model id to have a typestr?
     }
-    IRole(
-            @NotNull UUID2<IUUID2> id,
-            Context context
+    protected IRole(
+        @NotNull UUID2<?> id,
+        Context context
     ) {
         this(id.toUUID(), null, context);
     }
@@ -87,7 +99,7 @@ public abstract class IRole<TDomainInfo extends Domain>
     //    this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
     //}
 
-    public UUID2<IUUID2> id() {
+    public UUID2<?> id() {
         return this.id;
     }
 
@@ -119,9 +131,9 @@ public abstract class IRole<TDomainInfo extends Domain>
             String domainInfoClazzName = domainInfoClazz.getName();
             domainInfoClazz.cast(obj)
                     .getDomainInfoId()
-                    .setUUID2TypeStr(domainInfoClazzName);
+                    ._setUUID2TypeStr(domainInfoClazzName);
 
-            // Set Domain "master" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
+            // Set Domain "Model" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
             ((TDomain) obj)._setIdFromImportedJson(
                     new UUID2<>(((TDomain) obj).id(), domainInfoClazzName)
             );
@@ -152,6 +164,11 @@ public abstract class IRole<TDomainInfo extends Domain>
             if (checkResult instanceof Result.Failure) {
                 return checkResult;
             }
+
+            // Set Domain "Model" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
+            infoFromJson._setIdFromImportedJson(
+                new UUID2<>(infoFromJson.id(), domainInfoClazz.getName())
+            );
 
             // Update the info object with the new info
             return this.updateInfo(infoFromJson);
