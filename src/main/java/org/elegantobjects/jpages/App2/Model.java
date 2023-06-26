@@ -29,7 +29,7 @@ public class Model {
     // - DTO.{Domain}Info
     ///////////////////////////////
 
-    interface ToDomainInfo<TDomainInfo extends Model.Domain> {
+    public interface ToDomainInfo<TDomainInfo extends Model.Domain> {
         UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
         @SuppressWarnings("unchecked")
@@ -71,8 +71,8 @@ public class Model {
     }
 
     // These are methods are for JSON deserialization purposes
-    protected UUID2<?> id() { return _id; }
-    protected void _setIdFromImportedJson(UUID2<IUUID2> _id) {
+    public UUID2<?> id() { return _id; }
+    public void _setIdFromImportedJson(UUID2<IUUID2> _id) {
         this._id = _id;
     }
 

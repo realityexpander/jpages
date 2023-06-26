@@ -18,7 +18,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;
     private String uuid2TypeStr; // usually just the full class name of the Domain object // not final due to JSON deserialization needs to set this
 
-    UUID2(TUUID2 uuid2, String uuid2TypeStr) {
+    public UUID2(TUUID2 uuid2, String uuid2TypeStr) {
         this.uuid = ((UUID2<?>) uuid2).uuid();
 
         if(uuid2TypeStr != null) {
@@ -27,7 +27,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             this.uuid2TypeStr = "UUID"; // Default to untyped UUID
         }
     }
-    UUID2(UUID uuid) {
+    public UUID2(UUID uuid) {
         this.uuid = uuid;
         this.uuid2TypeStr = "UUID";  // untyped UUID
     }
@@ -35,71 +35,13 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         this(uuid2, uuid2.getUUID2TypeStr());
     }
 
-    // simple getter
-    public UUID uuid() {return uuid;}
-
-    // return a copy of the UUID
-    public UUID toUUID() {
-        return new UUID(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
-    }
-
-    public boolean equals(UUID2<TUUID2> other) {
-        return (other).uuid.equals(uuid);
-    }
-
-    @Override
-    public String getUUID2TypeStr() {
-        return uuid2TypeStr;
-    }
-
-    // Note: Should only be used for importing JSON
-    public void _setUUID2TypeStr(String uuid2TypeStr) {
-        this.uuid2TypeStr = normalizeUuid2TypeString(uuid2TypeStr);
-    }
-    private String normalizeUuid2TypeString(String uuid2TypeStr) {
-        if(uuid2TypeStr == null) {
-            return "UUID"; // unspecified-type
-        }
-
-        // Change any '$' in path of `uuid2TypeStr` into a '.'
-        // - For some(?) reason Java returns delimiter `$` with: Model.Domain.BookInfo.class.getName();
-        //   And returns returns `.` with: this.getClass().getName();
-        StringBuilder normalizedTypeStr = new StringBuilder();
-        for(int i = 0; i < uuid2TypeStr.length(); i++) {
-            if(uuid2TypeStr.charAt(i) == '$') {
-                normalizedTypeStr.append('.');
-            } else {
-                normalizedTypeStr.append(uuid2TypeStr.charAt(i));
-            }
-        }
-
-        return normalizedTypeStr.toString();
-    }
-
     @Override
     public String toString() {
-            return uuid + " (" + getLast3SegmentsOfTypeStrPath(uuid2TypeStr) + ")";
-    }
-    private String getLast3SegmentsOfTypeStrPath(String uuid2TypeStr) {
-        String[] segments = uuid2TypeStr.split("\\.");
-        if(segments.length < 3) {
-            return uuid2TypeStr;
-        }
-
-        return segments[segments.length - 3] + "." +
-               segments[segments.length - 2] + "." +
-               segments[segments.length - 1];
+        return uuid + "<" + getLast3SegmentsOfTypeStrPath(uuid2TypeStr) + ">";
     }
 
-    @Override
-    public int hashCode() {
-        return uuid.hashCode();
-    }
-
-    public static <TDomainUUID2 extends IUUID2>
-    UUID2<TDomainUUID2> fromString(String uuidStr) {
-        return new UUID2<>(UUID.fromString(uuidStr));
-    }
+    // simple getter
+    public UUID uuid() {return uuid;}
 
     public static <TDomainUUID2 extends IUUID2>
     UUID2<TDomainUUID2> fromUUID(UUID uuid) {
@@ -107,9 +49,50 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     public static <TDomainUUID2 extends IUUID2>
+    UUID2<TDomainUUID2> fromString(String uuidStr) {
+        return new UUID2<>(UUID.fromString(uuidStr));
+    }
+
+    // return a copy of the UUID
+    public UUID toUUID() {
+        return new UUID(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+    }
+
+    public UUID2<IUUID2> toDomainUUID2() {
+        return new UUID2<>(this, this.getUUID2TypeStr()); //uuid2TypeStr); // todo make sure this works
+    }
+
+    @SuppressWarnings("unchecked")
+    public UUID2<IUUID2> toUUID2() {
+        return (UUID2<IUUID2>) this;
+    }
+
+    public static <TDomainUUID2 extends IUUID2>
     UUID2<TDomainUUID2> randomUUID2() {
         return new UUID2<>(UUID.randomUUID());
     }
+
+    @Override
+    public String getUUID2TypeStr() {
+        return uuid2TypeStr;
+    }
+
+    // Note: Should only be used when importing JSON
+    public void _setUUID2TypeStr(String uuid2TypeStr) {
+        this.uuid2TypeStr = normalizeUuid2TypeString(uuid2TypeStr);
+    }
+
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
+    }
+    public boolean equals(UUID2<TUUID2> other) {
+        return (other).uuid.equals(uuid);
+    }
+
+    //////////////////////////////////////////////////
+    // Methods for creating fake UUID's for testing //
+    //////////////////////////////////////////////////
 
     @SuppressWarnings("unchecked")
     public static <TDomainUUID2 extends IUUID2>
@@ -127,24 +110,15 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return createFakeUUID2(id, null);
     }
 
-    public UUID2<IUUID2> toDomainUUID2() {
-        return new UUID2<>(this, this.getUUID2TypeStr()); //uuid2TypeStr); // todo make sure this works
-    }
-
-    @SuppressWarnings("unchecked")
-    public UUID2<IUUID2> toUUID2() {
-        return (UUID2<IUUID2>) this;
-    }
-
     // Utility HashMap class for mapping UUID2<T> to Objects.
     // Wrapper for HashMap where the `key` hash is the common UUID value stored in UUID class.
     // The problem is that normal HashMap uses `hash()` of UUID<{type}> object itself, which is not
     // consistent between UUID2<{type}> objects.
     // This class uses UUID2<T> for the keys, but the hash is the common UUID value stored in UUID class.
-    static class HashMap<TUUID2 extends IUUID2, TEntity> extends java.util.HashMap<UUID, TEntity> {
+    public static class HashMap<TUUID2 extends IUUID2, TEntity> extends java.util.HashMap<UUID, TEntity> {
         private static final long serialVersionUID = 0x7723L;
 
-        HashMap() {
+        public HashMap() {
             super();
         }
 
@@ -210,5 +184,36 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
             return uuid2Set;
         }
+    }
+
+
+    private String normalizeUuid2TypeString(String uuid2TypeStr) {
+        if(uuid2TypeStr == null) {
+            return "UUID"; // unspecified-type
+        }
+
+        // Change any '$' in path of `uuid2TypeStr` into a '.'
+        // - For some(?) reason Java returns delimiter `$` with: Model.Domain.BookInfo.class.getName();
+        //   And returns returns `.` with: this.getClass().getName();
+        StringBuilder normalizedTypeStr = new StringBuilder();
+        for(int i = 0; i < uuid2TypeStr.length(); i++) {
+            if(uuid2TypeStr.charAt(i) == '$') {
+                normalizedTypeStr.append('.');
+            } else {
+                normalizedTypeStr.append(uuid2TypeStr.charAt(i));
+            }
+        }
+
+        return normalizedTypeStr.toString();
+    }
+    private String getLast3SegmentsOfTypeStrPath(String uuid2TypeStr) {
+        String[] segments = uuid2TypeStr.split("\\.");
+        if(segments.length < 3) {
+            return uuid2TypeStr;
+        }
+
+        return segments[segments.length - 3] + "." +
+                segments[segments.length - 2] + "." +
+                segments[segments.length - 1];
     }
 }

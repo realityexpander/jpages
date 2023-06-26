@@ -1,4 +1,7 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.data;
+
+import org.elegantobjects.jpages.App2.*;
+import org.elegantobjects.jpages.App2.data.IDatabase;
 
 import java.util.HashMap;
 import java.util.Map;

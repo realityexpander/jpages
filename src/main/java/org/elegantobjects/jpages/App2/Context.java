@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.data.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
+import org.elegantobjects.jpages.App2.presentation.ILog;
+import org.elegantobjects.jpages.App2.presentation.Log;
 
 import static org.elegantobjects.jpages.App2.Context.ContextType.PRODUCTION;
 
@@ -24,7 +26,7 @@ public class Context implements IContext {
     private final Repo.LibraryInfo libraryInfoRepo;
 
     // Utility Singletons
-    protected final Gson gson;
+    public final Gson gson;
     public final ILog log;
 
     public enum ContextType {

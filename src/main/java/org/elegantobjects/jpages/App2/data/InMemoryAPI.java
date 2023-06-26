@@ -1,18 +1,11 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.data;
+
+import org.elegantobjects.jpages.App2.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-// API uses Model.DTOs
-interface IAPI<TUUID2 extends IUUID2, TDTOInfo> {
-    Result<TDTOInfo> getDtoInfo(UUID2<TUUID2> id);
-    Result<TDTOInfo> getDtoInfo(String id);
-    Result<TDTOInfo> addDtoInfo(TDTOInfo dtoInfo);
-    Result<TDTOInfo> updateDtoInfo(TDTOInfo dtoInfo);
-    Result<TDTOInfo> upsertDtoInfo(TDTOInfo dtoInfo);
-    Result<TDTOInfo> deleteDtoInfo(TDTOInfo dtoInfo);
-}
 @SuppressWarnings("FieldCanBeLocal")
 public
 class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends Model.DTO> implements IAPI<TUUID2, TDTOInfo> {

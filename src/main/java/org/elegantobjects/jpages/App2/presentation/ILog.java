@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.presentation;
 
 // Simple Logging Operations
 public interface ILog {

@@ -9,7 +9,7 @@ import java.util.UUID;
 // Info object stores the "business data" for the Domain object.
 // It is the "single source of truth" for the Domain object.
 // Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
-interface Info<TInfo> {
+public interface Info<TInfo> {
     // TInfo info;                        // Requires a field named "info" of type TInfo (is there a way to enforce this in java?
 
     UUID2<?> id();                        // Returns the UUID2 of the Info object

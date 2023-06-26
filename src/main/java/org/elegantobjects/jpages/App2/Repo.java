@@ -6,6 +6,8 @@ import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.domain.Book;
 import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
+import org.elegantobjects.jpages.App2.presentation.ILog;
+import org.elegantobjects.jpages.App2.presentation.Log;
 
 import java.util.Map;
 

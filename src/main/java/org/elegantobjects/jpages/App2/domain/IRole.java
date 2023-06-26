@@ -1,6 +1,7 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.domain;
 
 import com.google.gson.JsonSyntaxException;
+import org.elegantobjects.jpages.App2.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;

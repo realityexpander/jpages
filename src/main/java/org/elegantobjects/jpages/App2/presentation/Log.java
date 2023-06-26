@@ -1,6 +1,4 @@
-package org.elegantobjects.jpages.App2;
-
-import org.jetbrains.annotations.NotNull;
+package org.elegantobjects.jpages.App2.presentation;
 
 public class Log implements ILog {
     private void d(String tag, String msg) {
