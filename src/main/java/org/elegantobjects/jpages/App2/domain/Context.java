@@ -2,11 +2,11 @@ package org.elegantobjects.jpages.App2.domain;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.elegantobjects.jpages.App2.data.BookInfoApi;
-import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
-import org.elegantobjects.jpages.App2.core.log.ILog;
-import org.elegantobjects.jpages.App2.core.log.Log;
-import org.elegantobjects.jpages.App2.domain.core.IContext;
+import org.elegantobjects.jpages.App2.data.network.BookInfoApi;
+import org.elegantobjects.jpages.App2.data.local.BookInfoDatabase;
+import org.elegantobjects.jpages.App2.common.util.log.ILog;
+import org.elegantobjects.jpages.App2.common.util.log.Log;
+import org.elegantobjects.jpages.App2.domain.common.IContext;
 
 import static org.elegantobjects.jpages.App2.domain.Context.ContextType.PRODUCTION;
 
@@ -28,11 +28,12 @@ public class Context implements IContext {
     }
 
     Context(
-            Repo.BookInfo bookInfoRepo,
-            Repo.UserInfo userInfoRepo,
-            Repo.LibraryInfo libraryInfoRepo,
-            Gson gson,
-            ILog log) {
+        Repo.BookInfo bookInfoRepo,
+        Repo.UserInfo userInfoRepo,
+        Repo.LibraryInfo libraryInfoRepo,
+        Gson gson,
+        ILog log
+    ) {
         this.bookInfoRepo = bookInfoRepo;
         this.userInfoRepo = userInfoRepo;
         this.libraryInfoRepo = libraryInfoRepo;

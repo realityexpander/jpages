@@ -1,14 +1,21 @@
 package org.elegantobjects.jpages.App2.presentation;
 
 
-import org.elegantobjects.jpages.App2.data.DTO;
-import org.elegantobjects.jpages.App2.core.Result;
-import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
+import org.elegantobjects.jpages.App2.common.util.Result;
+import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.*;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainUserInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+// Notes:
+// - Intentionally using multiple returns. Makes error handling easier.
+
 
 class LibraryApp {
 
@@ -37,9 +44,9 @@ class LibraryApp {
             ctx.log.d(this,book.fetchInfoResult().toString());
 
             // Update info for a book
-            final Result<Domain.BookInfo> bookInfoResult =
+            final Result<DomainBookInfo> bookInfoResult =
                     book.updateInfo(
-                            new Domain.BookInfo(
+                            new DomainBookInfo(
                                     book.id,
                                     "The Updated Title",
                                     "The Updated Author",
@@ -48,7 +55,7 @@ class LibraryApp {
             ctx.log.d(this,book.fetchInfoResult().toString());
 
             // Get the bookInfo (null if not loaded)
-            Domain.BookInfo bookInfo3 = book.fetchInfo();
+            DomainBookInfo bookInfo3 = book.fetchInfo();
             if (bookInfo3 == null) {
                 ctx.log.d(this,"Book Missing --> " +
                         "book id: " + book.id() + " >> " +
@@ -65,11 +72,11 @@ class LibraryApp {
             if (book2.fetchInfoResult() instanceof Result.Failure) {
                 ctx.log.d(this,"Get Book FAILURE --> " +
                         "book id: " + book2.id + " >> " +
-                        ((Result.Failure<Domain.BookInfo>) book2.fetchInfoResult())
+                        ((Result.Failure<DomainBookInfo>) book2.fetchInfoResult())
                 );
             } else {
                 ctx.log.d(this,"Book ERxists --> " +
-                        ((Result.Success<Domain.BookInfo>) book2.fetchInfoResult()).value()
+                        ((Result.Success<DomainBookInfo>) book2.fetchInfoResult()).value()
                 );
             }
 
@@ -83,26 +90,26 @@ class LibraryApp {
             ////////////////////////////////////////
 
             // Create & populate a Library in the Library Repo
-            final Result<Domain.LibraryInfo> libraryInfo = createFakeLibraryInfoInContextLibraryRepo(1, ctx);
+            final Result<DomainLibraryInfo> libraryInfo = createFakeLibraryInfoInContextLibraryRepo(1, ctx);
             if (libraryInfo instanceof Result.Failure) {
                 ctx.log.d(this,"Create Library FAILURE --> " +
-                        ((Result.Failure<Domain.LibraryInfo>) libraryInfo)
+                        ((Result.Failure<DomainLibraryInfo>) libraryInfo)
                 );
 
                 break Populate_the_library_and_user_DBs;
             }
-            UUID2<Library> library1InfoId = ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id();
+            UUID2<Library> library1InfoId = ((Result.Success<DomainLibraryInfo>) libraryInfo).value().id();
             ctx.log.d(this,"Library Created --> id: " +
-                    ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id() +
+                    ((Result.Success<DomainLibraryInfo>) libraryInfo).value().id() +
                     ", name: "+
-                    ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().name()
+                    ((Result.Success<DomainLibraryInfo>) libraryInfo).value().name()
             );
 
             // Populate the library
             ctx.libraryRepo().populateWithFakeBooks(library1InfoId, 10);
 
             // Create & populate User 1 in the User Repo
-            final Domain.UserInfo user1Info = createFakeUserInfoInContextUserRepo(1, ctx);
+            final DomainUserInfo user1Info = createFakeUserInfoInContextUserRepo(1, ctx);
 
             //////////////////////////////////
             // Actual App functionality     //
@@ -174,16 +181,16 @@ class LibraryApp {
                     final UUID2<Book> bookId = availableBook.getKey().id;
                     final Book book3 = new Book(bookId, ctx);
 
-                    final Result<Domain.BookInfo> bookInfoResult = book3.fetchInfoResult();
+                    final Result<DomainBookInfo> bookInfoResult = book3.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
                         ctx.log.d(this,
                                 "Book Error: " +
-                                        ((Result.Failure<Domain.BookInfo>) bookInfoResult)
+                                        ((Result.Failure<DomainBookInfo>) bookInfoResult)
                                                 .exception().getMessage()
                         );
                     } else {
                         ctx.log.d(this,
-                                ((Result.Success<Domain.BookInfo>) bookInfoResult).value() +
+                                ((Result.Success<DomainBookInfo>) bookInfoResult).value() +
                                         " >> num available: " + availableBook.getValue()
                         );
                     }
@@ -211,16 +218,16 @@ class LibraryApp {
                 // Print checked out books
                 ctx.log.d(this,"\nChecked Out Books for User [" + user1.fetchInfo().name() + ", " + user1.id + "]:");
                 for (Book book : checkedOutBooks) {
-                    final Result<Domain.BookInfo> bookInfoResult = book.fetchInfoResult();
+                    final Result<DomainBookInfo> bookInfoResult = book.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
                         ctx.log.d(this,
                                 "Book Error: " +
-                                        ((Result.Failure<Domain.BookInfo>) bookInfoResult)
+                                        ((Result.Failure<DomainBookInfo>) bookInfoResult)
                                                 .exception().getMessage()
                         );
                     } else {
                         ctx.log.d(this,
-                                ((Result.Success<Domain.BookInfo>) bookInfoResult).value().toString()
+                                ((Result.Success<DomainBookInfo>) bookInfoResult).value().toString()
                         );
                     }
                 }
@@ -262,7 +269,7 @@ class LibraryApp {
                                 "    \"00000000-0000-0000-0000-000000000001\": [\n" +
                                 "      {\n" +
                                 "        \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.core.Model.Domain.BookInfo\"\n" +
+                                "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.common.Model.Domain.BookInfo\"\n" +
                                 "      }\n" +
                                 "    ]\n" +
                                 "  },\n" +
@@ -280,17 +287,17 @@ class LibraryApp {
                                 "  },\n" +
                                 "  \"id\": {\n" +
                                 "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.core.Model.Domain.LibraryInfo\"\n" +
+                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.common.Model.Domain.LibraryInfo\"\n" +
                                 "  }\n" +
                                 "}";
 
                 // Check JSON loaded properly
                 if(true) {
-                    Result<Domain.LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
+                    Result<DomainLibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
 
                         // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
-                        ctx.log.d(this, ((Result.Failure<Domain.LibraryInfo>) library2Result).exception().getMessage());
+                        ctx.log.d(this, ((Result.Failure<DomainLibraryInfo>) library2Result).exception().getMessage());
 
                         // The JSON was still loaded properly
                         ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
@@ -305,10 +312,10 @@ class LibraryApp {
                 // Create a Library Domain Object from the Info
                 if(true) {
                     try {
-                        Domain.LibraryInfo libraryInfo3 =
+                        DomainLibraryInfo libraryInfo3 =
                                 Library.createDomainInfoFromJson(
                                         json,
-                                        Domain.LibraryInfo.class,
+                                        DomainLibraryInfo.class,
                                         ctx
                                 );
 
@@ -330,7 +337,7 @@ class LibraryApp {
                         "{\n" +
                                 "  \"id\": {\n" +
                                 "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.core.Model.DTO.BookInfo\"\n" +
+                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.common.Model.DTO.BookInfo\"\n" +
                                 "  },\n" +
                                 "  \"title\": \"The Great Gatsby\",\n" +
                                 "  \"author\": \"F. Scott Fitzgerald\",\n" +
@@ -339,9 +346,9 @@ class LibraryApp {
                                 "}";
 
                 try {
-                    DTO.BookInfo bookInfo3 = new DTO.BookInfo(json, ctx);
+                    DTOBookInfo bookInfo3 = new DTOBookInfo(json, ctx);
 //                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx);
-                    Book book3 = new Book(new Domain.BookInfo(bookInfo3), ctx);
+                    Book book3 = new Book(new DomainBookInfo(bookInfo3), ctx);
 
                     ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
@@ -352,15 +359,15 @@ class LibraryApp {
             Check_out_Book_via_User:
             if (true) {
                 final User user2 = new User(createFakeUserInfoInContextUserRepo(2, ctx), ctx);
-                final Result<Domain.BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
+                final Result<DomainBookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
 
                 if (book12Result instanceof Result.Failure) {
                     ctx.log.d(this,"Book Error: " +
-                            ((Result.Failure<Domain.BookInfo>) book12Result).exception().getMessage()
+                            ((Result.Failure<DomainBookInfo>) book12Result).exception().getMessage()
                     );
                 } else {
 
-                    final UUID2<Book> book12id = ((Result.Success<Domain.BookInfo>) book12Result).value().id();
+                    final UUID2<Book> book12id = ((Result.Success<DomainBookInfo>) book12Result).value().id();
                     final Book book12 = new Book(book12id, ctx);
 
                     ctx.log.d(this,"\nCheck out book " + book12id + " to user " + user1.id);
@@ -389,15 +396,15 @@ class LibraryApp {
             if(true) {
                 final User user01 = new User(createFakeUserInfoInContextUserRepo(1, ctx), ctx);
                 final User user2 = new User(createFakeUserInfoInContextUserRepo(2, ctx), ctx);
-                final Result<Domain.BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
+                final Result<DomainBookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
 
                 if (book12Result instanceof Result.Failure) {
                     ctx.log.d(this,"Book Error: " +
-                        ((Result.Failure<Domain.BookInfo>) book12Result).exception().getMessage()
+                        ((Result.Failure<DomainBookInfo>) book12Result).exception().getMessage()
                     );
                 } else {
 
-                    final UUID2<Book> book12id = ((Result.Success<Domain.BookInfo>) book12Result).value().id();
+                    final UUID2<Book> book12id = ((Result.Success<DomainBookInfo>) book12Result).value().id();
                     final Book book12 = new Book(book12id, ctx);
 
                     // If book was checked out, it is still checked out by the first person. todo if its checked out of a library, have the library perform a "checkout" transfer
@@ -449,7 +456,7 @@ class LibraryApp {
         System.out.print("\n");
     }
 
-    private Result<Domain.LibraryInfo> createFakeLibraryInfoInContextLibraryRepo(
+    private Result<DomainLibraryInfo> createFakeLibraryInfoInContextLibraryRepo(
             final Integer id,
             Context context
     ) {
@@ -458,14 +465,14 @@ class LibraryApp {
 
         return context.libraryRepo()
                 .upsertLibraryInfo(
-                        new Domain.LibraryInfo(
-                                UUID2.createFakeUUID2(someNumber, Domain.LibraryInfo.class.getName()),
+                        new DomainLibraryInfo(
+                                UUID2.createFakeUUID2(someNumber, DomainLibraryInfo.class.getName()),
                                 "Library " + someNumber
                         )
                 );
     }
 
-    private Domain.UserInfo createFakeUserInfoInContextUserRepo(
+    private DomainUserInfo createFakeUserInfoInContextUserRepo(
             final Integer id,
             Context context
     ) {
@@ -474,24 +481,24 @@ class LibraryApp {
 
         return context.userRepo()
                 .upsertUserInfo(
-                        new Domain.UserInfo(
-                                UUID2.createFakeUUID2(someNumber, Domain.UserInfo.class.getName()),
+                        new DomainUserInfo(
+                                UUID2.createFakeUUID2(someNumber, DomainUserInfo.class.getName()),
                                 "User " + someNumber,
                                 "user" + someNumber + "@gmail.com"
                         ));
     }
 
-    private Result<Domain.BookInfo> addFakeBookInfoInContextBookRepo(
+    private Result<DomainBookInfo> addFakeBookInfoInContextBookRepo(
             final Integer id,
             Context context
     ) {
-        final Domain.BookInfo bookInfo = createFakeBookInfo(null, id);
+        final DomainBookInfo bookInfo = createFakeBookInfo(null, id);
 
         return context.bookRepo()
                 .upsertBookInfo(bookInfo);
     }
 
-    private Domain.BookInfo createFakeBookInfo(String uuidStr, final Integer id) {
+    private DomainBookInfo createFakeBookInfo(String uuidStr, final Integer id) {
         Integer fakeId = id;
         if (fakeId == null) fakeId = 1;
 
@@ -501,7 +508,7 @@ class LibraryApp {
         else
             uuid = UUID2.fromString(uuidStr);
 
-        return new Domain.BookInfo(
+        return new DomainBookInfo(
                 uuid,
                 "Book " + fakeId,
                 "Author " + fakeId,

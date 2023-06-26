@@ -1,15 +1,19 @@
 package org.elegantobjects.jpages.App2.domain;
 
 
-import org.elegantobjects.jpages.App2.data.Entity;
-import org.elegantobjects.jpages.App2.data.DTO;
-import org.elegantobjects.jpages.App2.core.Result;
-import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.BookInfoApi;
-import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
-import org.elegantobjects.jpages.App2.core.log.ILog;
-import org.elegantobjects.jpages.App2.core.log.Log;
-import org.elegantobjects.jpages.App2.domain.core.IRepo;
+import org.elegantobjects.jpages.App2.common.util.Result;
+import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.local.EntityBookInfo;
+import org.elegantobjects.jpages.App2.data.network.BookInfoApi;
+import org.elegantobjects.jpages.App2.data.local.BookInfoDatabase;
+import org.elegantobjects.jpages.App2.common.util.log.ILog;
+import org.elegantobjects.jpages.App2.common.util.log.Log;
+import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
+import org.elegantobjects.jpages.App2.domain.common.IRepo;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainUserInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -28,8 +32,8 @@ public class Repo implements IRepo {
         private final BookInfoDatabase database;
 
         public BookInfo(BookInfoApi api,
-                        BookInfoDatabase database,
-                        ILog log
+            BookInfoDatabase database,
+            ILog log
         ) {
             super(log);
             this.api = api;
@@ -38,33 +42,33 @@ public class Repo implements IRepo {
         public BookInfo() { this(new BookInfoApi(), new BookInfoDatabase(), new Log()); }
 
         @Override
-        public Result<Domain.BookInfo> fetchBookInfo(UUID2<Book> id) {
+        public Result<DomainBookInfo> fetchBookInfo(UUID2<Book> id) {
             log.d(this,"Repo.BookRepo.fetchBookInfo " + id);
 
             // Make the request to API
-            Result<DTO.BookInfo> bookInfoApiResult = api.getBookInfo(id);
+            Result<DTOBookInfo> bookInfoApiResult = api.getBookInfo(id);
             if (bookInfoApiResult instanceof Result.Failure) {
 
                 // If API fails, try to get from cached DB
-                Result<Entity.BookInfo> bookInfoResult = database.getBookInfo(id);
+                Result<EntityBookInfo> bookInfoResult = database.getBookInfo(id);
                 if (bookInfoResult instanceof Result.Failure) {
-                    Exception exception = ((Result.Failure<Entity.BookInfo>) bookInfoResult).exception();
-                    return new Result.Failure<Domain.BookInfo>(exception);
+                    Exception exception = ((Result.Failure<EntityBookInfo>) bookInfoResult).exception();
+                    return new Result.Failure<DomainBookInfo>(exception);
                 }
 
-                Entity.BookInfo bookInfo = ((Result.Success<Entity.BookInfo>) bookInfoResult).value();
+                EntityBookInfo bookInfo = ((Result.Success<EntityBookInfo>) bookInfoResult).value();
                 return new Result.Success<>(bookInfo.toDeepCopyDomainInfo());
             }
 
             // Convert to Domain Model
-            Domain.BookInfo bookInfo = ((Result.Success<DTO.BookInfo>) bookInfoApiResult)
+            DomainBookInfo bookInfo = ((Result.Success<DTOBookInfo>) bookInfoApiResult)
                     .value()
                     .toDeepCopyDomainInfo();
 
             // Cache to Local DB
-            Result<Entity.BookInfo> resultDB = database.updateBookInfo(bookInfo.toEntity());
+            Result<EntityBookInfo> resultDB = database.updateBookInfo(bookInfo.toEntity());
             if (resultDB instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<Entity.BookInfo>) resultDB).exception();
+                Exception exception = ((Result.Failure<EntityBookInfo>) resultDB).exception();
                 return new Result.Failure<>(exception);
             }
 
@@ -72,12 +76,12 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Result<Domain.BookInfo> updateBookInfo(Domain.BookInfo bookInfo) {
+        public Result<DomainBookInfo> updateBookInfo(DomainBookInfo bookInfo) {
             log.d(this,"Repo.BookRepo - Updating BookInfo: " + bookInfo);
 
-            Result<Domain.BookInfo> bookResult = saveBookToApiAndDB(bookInfo, Repo.BookInfo.UpdateType.UPDATE);
+            Result<DomainBookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.UPDATE);
             if (bookResult instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<Domain.BookInfo>) bookResult).exception();
+                Exception exception = ((Result.Failure<DomainBookInfo>) bookResult).exception();
                 return new Result.Failure<>(exception);
             }
 
@@ -85,12 +89,12 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Result<Domain.BookInfo> addBookInfo(Domain.BookInfo bookInfo) {
+        public Result<DomainBookInfo> addBookInfo(DomainBookInfo bookInfo) {
             log.d(this,"Repo.BookRepo - Adding book info: " + bookInfo);
 
-            Result<Domain.BookInfo> bookResult = saveBookToApiAndDB(bookInfo, Repo.BookInfo.UpdateType.ADD);
+            Result<DomainBookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.ADD);
             if (bookResult instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<Domain.BookInfo>) bookResult).exception();
+                Exception exception = ((Result.Failure<DomainBookInfo>) bookResult).exception();
                 return new Result.Failure<>(exception);
             }
 
@@ -98,7 +102,7 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Result<Domain.BookInfo> upsertBookInfo(Domain.BookInfo bookInfo) {
+        public Result<DomainBookInfo> upsertBookInfo(DomainBookInfo bookInfo) {
             log.d(this,"Repo.Book - Upserting book id: " + bookInfo.id());
 
             if (database.getBookInfo(bookInfo.id()) != null) {
@@ -112,22 +116,22 @@ public class Repo implements IRepo {
         // Private Helper Methods
         ///////////////////////////////////
 
-        private enum UpdateType {
+        private enum UpdateKind {
             ADD,
             UPDATE,
             UPSERT,
             DELETE
         }
 
-        private Result<Domain.BookInfo> saveBookToApiAndDB(
-                Domain.BookInfo bookInfo,
-                Repo.BookInfo.UpdateType updateType
+        private Result<DomainBookInfo> saveBookToApiAndDB(
+            @NotNull DomainBookInfo bookInfo,
+            @NotNull Repo.BookInfo.UpdateKind updateKind
         ) {
-            log.d(this,"updateType: " + updateType + ", id: " + bookInfo.id());
+            log.d(this,"updateType: " + updateKind + ", id: " + bookInfo.id());
 
             // Make the API request
-            Result<DTO.BookInfo> resultApi;
-            switch (updateType) {
+            Result<DTOBookInfo> resultApi;
+            switch (updateKind) {
                 case UPDATE:
                     resultApi = api.updateBookInfo(bookInfo.toDTO());
                     break;
@@ -135,17 +139,17 @@ public class Repo implements IRepo {
                     resultApi = api.addBookInfo(bookInfo.toDTO());
                     break;
                 default:
-                    return new Result.Failure<>(new Exception("UpdateType not supported: " + updateType));
+                    return new Result.Failure<>(new Exception("UpdateType not supported: " + updateKind));
             }
 
             if (resultApi instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<DTO.BookInfo>) resultApi).exception();
+                Exception exception = ((Result.Failure<DTOBookInfo>) resultApi).exception();
                 return new Result.Failure<>(exception);
             }
 
             // Save to Local DB
-            Result<Entity.BookInfo> resultDB;
-            switch (updateType) {
+            Result<EntityBookInfo> resultDB;
+            switch (updateKind) {
                 case UPDATE:
                     resultDB = database.updateBookInfo(bookInfo.toEntity());
                     break;
@@ -153,11 +157,11 @@ public class Repo implements IRepo {
                     resultDB = database.addBookInfo(bookInfo.toEntity());
                     break;
                 default:
-                    return new Result.Failure<>(new Exception("UpdateType not supported: " + updateType));
+                    return new Result.Failure<>(new Exception("UpdateType not supported: " + updateKind));
             }
 
             if (resultDB instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<Entity.BookInfo>) resultDB).exception();
+                Exception exception = ((Result.Failure<EntityBookInfo>) resultDB).exception();
                 return new Result.Failure<>(exception);
             }
 
@@ -173,8 +177,8 @@ public class Repo implements IRepo {
         public void populateDatabaseWithFakeBookInfo() {
             for (int i = 0; i < 10; i++) {
                 database.addBookInfo(
-                        new Entity.BookInfo(
-                                UUID2.createFakeUUID2(i, Entity.BookInfo.class.getName()),
+                        new EntityBookInfo(
+                                UUID2.createFakeUUID2(i, EntityBookInfo.class.getName()),
                                 "Title " + i,
                                 "Author " + i,
                                 "Description " + i)
@@ -184,9 +188,9 @@ public class Repo implements IRepo {
 
         public void populateApiWithFakeBookInfo() {
             for (int i = 0; i < 10; i++) {
-                Result<DTO.BookInfo> result = api.addBookInfo(
-                        new DTO.BookInfo(
-                                UUID2.createFakeUUID2(i, DTO.BookInfo.class.getName()),
+                Result<DTOBookInfo> result = api.addBookInfo(
+                        new DTOBookInfo(
+                                UUID2.createFakeUUID2(i, DTOBookInfo.class.getName()),
                                 "Title " + i,
                                 "Author " + i,
                                 "Description " + i,
@@ -194,20 +198,20 @@ public class Repo implements IRepo {
                 );
 
                 if (result instanceof Result.Failure) {
-                    Exception exception = ((Result.Failure<DTO.BookInfo>) result).exception();
+                    Exception exception = ((Result.Failure<DTOBookInfo>) result).exception();
                     log.d(this,exception.getMessage());
                 }
             }
         }
 
         public void printDB() {
-            for (Map.Entry<UUID2<Book>, Entity.BookInfo> entry : database.getAllBookInfos().entrySet()) {
+            for (Map.Entry<UUID2<Book>, EntityBookInfo> entry : database.getAllBookInfos().entrySet()) {
                 log.d(this,entry.getKey() + " = " + entry.getValue());
             }
         }
 
         public void printAPI() {
-            for (Map.Entry<UUID2<Book>, DTO.BookInfo> entry : api.getAllBookInfos().entrySet()) {
+            for (Map.Entry<UUID2<Book>, DTOBookInfo> entry : api.getAllBookInfos().entrySet()) {
                 log.d(this,entry.getKey() + " = " + entry.getValue());
             }
         }
@@ -216,14 +220,14 @@ public class Repo implements IRepo {
     // Holds User info for all users in the system (simple CRUD operations)
     public static class UserInfo extends Repo implements IRepo.UserInfo {
         // Simulate a database on a server somewhere
-        private final UUID2.HashMap<User, Domain.UserInfo> database = new UUID2.HashMap<>();
+        private final UUID2.HashMap<User, DomainUserInfo> database = new UUID2.HashMap<>();
 
         public UserInfo(ILog log) {
             super(log);
         }
 
         @Override
-        public Result<Domain.UserInfo> fetchUserInfo(UUID2<User> id) {
+        public Result<DomainUserInfo> fetchUserInfo(UUID2<User> id) {
             log.d(this,"Repo.UserInfo - Fetching user info: " + id);
 
             // Simulate network/database
@@ -235,7 +239,7 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Result<Domain.UserInfo> updateUserInfo(Domain.UserInfo userInfo) {
+        public Result<DomainUserInfo> updateUserInfo(DomainUserInfo userInfo) {
             String method = Thread.currentThread().getStackTrace()[2].getMethodName();
             log.d(this, "Repo.User - " + method + " - Updating user info: " + userInfo);
 
@@ -249,7 +253,7 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Domain.UserInfo upsertUserInfo(Domain.UserInfo userInfo) {
+        public DomainUserInfo upsertUserInfo(DomainUserInfo userInfo) {
             log.d(this,"Repo.UserInfo - Upserting user info: " + userInfo);
 
             database.put(userInfo.id(), userInfo);
@@ -261,14 +265,14 @@ public class Repo implements IRepo {
     // Holds Library info for all the libraries in the system (simple CRUD operations)
     public static class LibraryInfo extends Repo implements IRepo.LibraryInfo {
         // simulate a database on server (UUID2<Library> is the key)
-        private final UUID2.HashMap<Library, Domain.LibraryInfo> database = new UUID2.HashMap<>();
+        private final UUID2.HashMap<Library, DomainLibraryInfo> database = new UUID2.HashMap<>();
 
         public LibraryInfo(ILog log) {
             super(log);
         }
 
         @Override
-        public Result<Domain.LibraryInfo> fetchLibraryInfo(UUID2<Library> id) {
+        public Result<DomainLibraryInfo> fetchLibraryInfo(UUID2<Library> id) {
             log.d(this,"Repo.LibraryInfo - Fetching library info: " + id);
 
             // Simulate network/database
@@ -280,7 +284,7 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Result<Domain.LibraryInfo> updateLibraryInfo(Domain.LibraryInfo libraryInfo) {
+        public Result<DomainLibraryInfo> updateLibraryInfo(DomainLibraryInfo libraryInfo) {
             log.d(this,"Repo.LibraryInfo - Updating library info: " + libraryInfo.id());
 
             // Simulate network/database
@@ -294,7 +298,7 @@ public class Repo implements IRepo {
         }
 
         @Override
-        public Result<Domain.LibraryInfo> upsertLibraryInfo(Domain.LibraryInfo libraryInfo) {
+        public Result<DomainLibraryInfo> upsertLibraryInfo(DomainLibraryInfo libraryInfo) {
             log.d(this,"Repo.LibraryInfo - Upsert library info: " + libraryInfo.id());
 
             // Simulate network/database
@@ -309,7 +313,7 @@ public class Repo implements IRepo {
 
         public void populateWithFakeBooks(UUID2<Library> libraryId, int numberOfBooksToCreate) {
             log.d(this,"libraryId: " + libraryId + ", numberOfBooksToCreate: " + numberOfBooksToCreate);
-            Domain.LibraryInfo library = database.get(libraryId);
+            DomainLibraryInfo library = database.get(libraryId);
 
             for (int i = 0; i < numberOfBooksToCreate; i++) {
                 Result<UUID2<Book>> result = library.addTestBook(UUID2.createFakeUUID2(i, Book.class.getName()), 1);

@@ -1,18 +1,19 @@
 package org.elegantobjects.jpages.App2.domain;
 
-import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
-import org.elegantobjects.jpages.App2.core.Result;
-import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.core.IRole;
+import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
+import org.elegantobjects.jpages.App2.common.util.Result;
+import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.common.IRole;
+import org.elegantobjects.jpages.App2.domain.repoData.DomainBookInfo;
 import org.jetbrains.annotations.NotNull;
 
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
-public class Book extends IRole<Domain.BookInfo> implements IUUID2 {
+public class Book extends IRole<DomainBookInfo> implements IUUID2 {
     public final UUID2<Book> id;
     private final Repo.BookInfo repo;
 
     public Book(
-        @NotNull Domain.BookInfo info,
+        @NotNull DomainBookInfo info,
         Context context
     ) {
         super(info, context);
@@ -24,7 +25,7 @@ public class Book extends IRole<Domain.BookInfo> implements IUUID2 {
     }
     public Book(
         String json,
-        Class<Domain.BookInfo> clazz,
+        Class<DomainBookInfo> clazz,
         Context context
     ) {
         super(json, clazz, context);
@@ -46,10 +47,10 @@ public class Book extends IRole<Domain.BookInfo> implements IUUID2 {
         context.log.d(this, "Book (" + this.id + ") created using id with no Info");
     }
     public Book(String json, Context context) {
-        this(json, Domain.BookInfo.class, context);
+        this(json, DomainBookInfo.class, context);
     }
     public Book(Context context) {
-        this(new Domain.BookInfo(UUID2.randomUUID2().uuid()), context);
+        this(new DomainBookInfo(UUID2.randomUUID2().uuid()), context);
     }
     // LEAVE for reference, for static Context instance implementation
     // Book(UUID2<Book id) {
@@ -61,7 +62,7 @@ public class Book extends IRole<Domain.BookInfo> implements IUUID2 {
     /////////////////////////////////////
 
     @Override
-    public Result<Domain.BookInfo> fetchInfoResult() {
+    public Result<DomainBookInfo> fetchInfoResult() {
         // context.log.d(this,"Book (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
         infoResult = this.repo.fetchBookInfo(this.id);
@@ -69,24 +70,24 @@ public class Book extends IRole<Domain.BookInfo> implements IUUID2 {
             return infoResult;
         }
 
-        this.info = ((Result.Success<Domain.BookInfo>) infoResult).value();
+        this.info = ((Result.Success<DomainBookInfo>) infoResult).value();
 
         return infoResult;
     }
 
     @Override
-    public Result<Domain.BookInfo> updateInfo(Domain.BookInfo updatedInfo) {
+    public Result<DomainBookInfo> updateInfo(DomainBookInfo updatedInfo) {
         // Update self optimistically
         super.updateInfo(updatedInfo);
 
         // Update the repo
-        Result<Domain.BookInfo> infoResult = this.repo.updateBookInfo(updatedInfo);
+        Result<DomainBookInfo> infoResult = this.repo.updateBookInfo(updatedInfo);
         if (infoResult instanceof Result.Failure) {
             return infoResult;
         }
 
         // Update self with repo result
-        this.info = ((Result.Success<Domain.BookInfo>) infoResult).value();
+        this.info = ((Result.Success<DomainBookInfo>) infoResult).value();
         return infoResult;
     }
 
@@ -100,18 +101,18 @@ public class Book extends IRole<Domain.BookInfo> implements IUUID2 {
     // - Methods to modify it's BookInfo  //
     ////////////////////////////////////////
 
-    public Result<Domain.BookInfo> updateAuthor(String authorName) {
-        Domain.BookInfo updatedInfo = this.info.withAuthor(authorName);
+    public Result<DomainBookInfo> updateAuthor(String authorName) {
+        DomainBookInfo updatedInfo = this.info.withAuthor(authorName);
         return this.updateInfo(updatedInfo);
     }
 
-    public Result<Domain.BookInfo> updateTitle(String title) {
-        Domain.BookInfo updatedInfo = this.info.withTitle(title);
+    public Result<DomainBookInfo> updateTitle(String title) {
+        DomainBookInfo updatedInfo = this.info.withTitle(title);
         return this.updateInfo(updatedInfo);
     }
 
-    public Result<Domain.BookInfo> updateDescription(String description) {
-        Domain.BookInfo updatedInfo = this.info.withDescription(description);
+    public Result<DomainBookInfo> updateDescription(String description) {
+        DomainBookInfo updatedInfo = this.info.withDescription(description);
         return this.updateInfo(updatedInfo);
     }
 }
