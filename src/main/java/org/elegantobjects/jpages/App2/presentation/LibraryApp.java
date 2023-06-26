@@ -35,7 +35,7 @@ class LibraryApp {
         PopulateFakeBookInfoInContextBookRepoDBandAPI(ctx);
 
         Populate_And_Poke_Book:
-        if(true) {
+        if (true) {
             ctx.log.d(this, "----------------------------------");
             ctx.log.d(this, "Populate_And_Poke_Book");
 
@@ -329,7 +329,7 @@ class LibraryApp {
             }
 
             // Load Book from DTO Json
-            if(true) {
+            if (true) {
                 ctx.log.d(this, "----------------------------------");
                 ctx.log.d(this,"Load BookInfo from DTO Json: ");
 
@@ -393,7 +393,7 @@ class LibraryApp {
             }
 
             Give_Book_To_User:
-            if(true) {
+            if (true) {
                 final User user01 = new User(createFakeUserInfoInContextUserRepo(1, ctx), ctx);
                 final User user2 = new User(createFakeUserInfoInContextUserRepo(2, ctx), ctx);
                 final Result<DomainBookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);

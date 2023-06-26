@@ -19,11 +19,11 @@ public class DomainLibraryInfo extends Domain
     final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
     final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // books known & available in this library
 
-    DomainLibraryInfo(@NotNull
-                UUID2<Library> id,
-                      String name,
-                      UUID2.HashMap<User, ArrayList<UUID2<Book>>> checkoutUserBookMap,
-                      UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap
+    public DomainLibraryInfo(
+        @NotNull UUID2<Library> id,
+        String name,
+        UUID2.HashMap<User, ArrayList<UUID2<Book>>> checkoutUserBookMap,
+        UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap
     ) {
         super(id, DomainLibraryInfo.class.getName());
         this.name = name;
@@ -31,32 +31,27 @@ public class DomainLibraryInfo extends Domain
         this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
         this.id = id;
     }
-
     public DomainLibraryInfo(UUID2<Library> id, String name) {
         this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
     }
-
-    DomainLibraryInfo(DomainLibraryInfo libraryInfo) {
-        this(libraryInfo.id,
-                libraryInfo.name,
-                libraryInfo.userIdToCheckedOutBookIdMap,
-                libraryInfo.bookIdToNumBooksAvailableMap);
+    public DomainLibraryInfo(@NotNull DomainLibraryInfo libraryInfo) {
+        this(
+            libraryInfo.id,
+            libraryInfo.name,
+            libraryInfo.userIdToCheckedOutBookIdMap,
+            libraryInfo.bookIdToNumBooksAvailableMap
+        );
     }
-
-    DomainLibraryInfo(UUID uuid, String name) {
+    public DomainLibraryInfo(UUID uuid, String name) {
         this(new UUID2<Library>(uuid), name);
     }
-
-    DomainLibraryInfo(String id, String name) {
+    public DomainLibraryInfo(String id, String name) {
         this(UUID.fromString(id), name);
     }
 
     @Override
     public String toString() {
         return this.toPrettyJson();
-//                return "Library: " + this.name + " (" + this.id + ")" + "\n" +
-//                        "  Available Books: " + this.bookIdToNumBooksAvailableMap + "\n" +
-//                        "  Checkout Map: " + this.userIdToCheckedOutBookMap;
     }
 
     ///////////////////////////////
@@ -149,10 +144,8 @@ public class DomainLibraryInfo extends Domain
     public Result<HashMap<UUID2<Book>, Integer>> calculateAvailableBookIdToCountOfAvailableBooksList() {
         HashMap<UUID2<Book>, Integer> availableBookIdToNumBooksAvailableMap = new HashMap<>();
 
-//                HashSet<Book> bookSet = new HashSet<>();
         Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keys();
 
-//                for(UUID2<Book> bookId : this.bookIdToNumBooksAvailableMap.keys()) {
         for (UUID2<Book> bookId : bookSet) {
             if (isBookIdAvailable(bookId)) {
                 int numBooksAvail = this.bookIdToNumBooksAvailableMap.get(bookId);

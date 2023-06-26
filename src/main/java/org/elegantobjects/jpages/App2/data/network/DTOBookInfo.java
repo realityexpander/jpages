@@ -13,19 +13,20 @@ public class DTOBookInfo extends DTO
         Model.ToDomain<DomainBookInfo>,
         Model.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,
         Info.ToInfo<DTOBookInfo>,
-        Info.hasToDeepCopyInfo<DTOBookInfo> {
+        Info.hasToDeepCopyInfo<DTOBookInfo>
+{
     final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
     public final String title;
     public final String author;
     public final String description;
-    final String extraFieldToShowThisIsADTO;
+    public final String extraFieldToShowThisIsADTO;
 
     public DTOBookInfo(
-            @NotNull UUID2<Book> id,
-            String title,
-            String author,
-            String description,
-            String extraFieldToShowThisIsADTO
+        @NotNull UUID2<Book> id,
+        String title,
+        String author,
+        String description,
+        String extraFieldToShowThisIsADTO
     ) {
         super(id.toDomainUUID2(), DTOBookInfo.class.getName());
         this.id = id;
@@ -39,26 +40,24 @@ public class DTOBookInfo extends DTO
             this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
         }
     }
-
     public DTOBookInfo(String json, Context context) {
         this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTO.BookInfo from the JSON
     }
 
-    // Note: Intentionally DON'T accept `Entity.BookInfo` (to keep DB layer separate from API layer)
+    // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
     DTOBookInfo(DTOBookInfo bookInfo) {
         this(new UUID2<Book>(bookInfo.id().uuid()),
-                bookInfo.title,
-                bookInfo.author,
-                bookInfo.description,
-                bookInfo.extraFieldToShowThisIsADTO);
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description,
+            bookInfo.extraFieldToShowThisIsADTO);
     }
-
     public DTOBookInfo(DomainBookInfo bookInfo) {
         this(new UUID2<Book>(bookInfo.id().uuid()),
-                bookInfo.title,
-                bookInfo.author,
-                bookInfo.description,
-                "Imported from Domain.BookInfo");
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description,
+            "Imported from Domain.BookInfo");
     }
     // todo - Is it better to have a constructor that takes in a DTO.BookInfo and throws an exception? Or to not have it at all?
     // BookInfo(Entity.BookInfo bookInfo) {

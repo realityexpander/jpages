@@ -24,8 +24,8 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     }
     InMemoryAPI() {
         this(
-                new URL("http://localhost:8080"),
-                new HttpClient()
+            new URL("http://localhost:8080"),
+            new HttpClient()
         );
     }
 
@@ -54,6 +54,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     @SuppressWarnings("unchecked")
     public Result<TDTOInfo> updateDtoInfo(TDTOInfo dtoInfo) {
         try {
+            // Simulate Network
             database.put((UUID2<TUUID2>) dtoInfo.id(), dtoInfo);
         } catch (Exception e) {
             return new Result.Failure<>(e);
@@ -65,6 +66,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     @Override
     @SuppressWarnings("unchecked")
     public Result<TDTOInfo> addDtoInfo(TDTOInfo dtoInfo) {
+        // Simulate Network
         if (database.containsKey((UUID2<TUUID2>) dtoInfo.id())) {
             return new Result.Failure<>(new Exception("API: DtoInfo already exists, use UPDATE, id=" + dtoInfo.id()));
         }
@@ -77,6 +79,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     @Override
     @SuppressWarnings("unchecked")
     public Result<TDTOInfo> upsertDtoInfo(TDTOInfo dtoInfo) {
+        // Simulate Network
         if (database.containsKey((UUID2<TUUID2>) dtoInfo.id())) {
             return updateDtoInfo(dtoInfo);
         } else {
@@ -87,6 +90,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     @Override
     @SuppressWarnings("unchecked")
     public Result<TDTOInfo> deleteDtoInfo(TDTOInfo dtoInfo) {
+        // Simulate Network
         if (database.remove((UUID2<TUUID2>) dtoInfo.id()) == null) {
             return new Result.Failure<>(new Exception("API: Failed to delete DtoInfo"));
         }
@@ -97,6 +101,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     public Map<UUID2<TUUID2>, TDTOInfo> getAllDtoInfos() {
         Map<UUID2<TUUID2>, TDTOInfo> map = new HashMap<>();
 
+        // Simulate Network
         for (Map.Entry<UUID, TDTOInfo> entry : database.entrySet()) {
             map.put(new UUID2<>(entry.getKey()), entry.getValue());
         }

@@ -181,7 +181,9 @@ public class Repo implements IRepo {
                                 UUID2.createFakeUUID2(i, EntityBookInfo.class.getName()),
                                 "Title " + i,
                                 "Author " + i,
-                                "Description " + i)
+                                "Description " + i,
+                                "Some extra info from the Entity" + i
+                                )
                 );
             }
         }

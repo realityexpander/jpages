@@ -18,27 +18,34 @@ public class EntityBookInfo extends Entity
     public final String title;
     public final String author;
     public final String description;
-    final String extraFieldToShowThisIsAnEntity = "This is an Entity";
+    public final String extraFieldToShowThisIsAnEntity;
 
     public EntityBookInfo(
         @NotNull UUID2<Book> id,
         String title,
         String author,
-        String description
+        String description,
+        String extraFieldToShowThisIsAnEntity
     ) {
         super(id.toDomainUUID2(), EntityBookInfo.class.getName());
         this.id = id;
         this.title = title;
         this.author = author;
         this.description = description;
+
+        if(extraFieldToShowThisIsAnEntity == null) {
+            this.extraFieldToShowThisIsAnEntity = "This is an Entity";
+        } else {
+            this.extraFieldToShowThisIsAnEntity = extraFieldToShowThisIsAnEntity;
+        }
     }
 
     // Note: Intentionally DON'T accept `DTO.BookInfo` (to keep DB layer separate from API layer)
     public EntityBookInfo(@NotNull EntityBookInfo bookInfo) {
-        this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);
+        this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description, bookInfo.extraFieldToShowThisIsAnEntity);
     }
     public EntityBookInfo(@NotNull DomainBookInfo bookInfo) {
-        this(bookInfo.id(), bookInfo.title, bookInfo.author, bookInfo.description);
+        this(bookInfo.id(), bookInfo.title, bookInfo.author, bookInfo.description, "Imported from Domain.DomainBookInfo");
     }
     // todo Is it better to have a constructor that takes in a DTO.BookInfo and throws an exception? Or to not have it at all?
     // BookInfo(DTO.BookInfo bookInfo) {
@@ -49,7 +56,10 @@ public class EntityBookInfo extends Entity
 
     @Override
     public String toString() {
-        return "Book (" + this.id + ") : " + this.title + " by " + this.author + ", " + this.description;
+        return "Book (" + this.id + ") : "
+                + this.title + " by " + this.author + ", " +
+                this.extraFieldToShowThisIsAnEntity + ", " +
+                this.description;
     }
 
     ////////////////////////////////////////////

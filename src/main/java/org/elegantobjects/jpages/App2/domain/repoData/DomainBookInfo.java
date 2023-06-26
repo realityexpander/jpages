@@ -47,7 +47,7 @@ public class DomainBookInfo extends Domain
     }
 
     // Domain Must accept both `DTO.BookInfo` and `Entity.BookInfo` (and convert to Domain.BookInfo)
-    public DomainBookInfo(DTOBookInfo bookInfo) {
+    public DomainBookInfo(@NotNull DTOBookInfo bookInfo) {
         // Converts from DTO to Domain
         // todo validation here
 
@@ -57,7 +57,7 @@ public class DomainBookInfo extends Domain
                 bookInfo.author,
                 bookInfo.description);
     }
-    public DomainBookInfo(EntityBookInfo bookInfo) {
+    public DomainBookInfo(@NotNull EntityBookInfo bookInfo) {
         // Converts from Entity to Domain
         // todo validation here
 
