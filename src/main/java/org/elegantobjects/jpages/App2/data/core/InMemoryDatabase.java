@@ -1,9 +1,9 @@
 package org.elegantobjects.jpages.App2.data.core;
 
-import org.elegantobjects.jpages.App2.*;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.Result;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @SuppressWarnings("FieldCanBeLocal")
 public
-class InMemoryDatabase<TEntity extends Model.Entity, TUUID2 extends IUUID2> implements IDatabase<TUUID2, TEntity> {
+class InMemoryDatabase<TEntity extends Entity, TUUID2 extends IUUID2> implements IDatabase<TUUID2, TEntity> {
     private final URL url;
     private final String user;
     private final String password;

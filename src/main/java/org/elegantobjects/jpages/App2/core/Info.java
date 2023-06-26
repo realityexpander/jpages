@@ -3,7 +3,7 @@ package org.elegantobjects.jpages.App2.core;
 import com.google.gson.Gson;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.Model;
+import org.elegantobjects.jpages.App2.domain.Domain;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
@@ -71,7 +71,7 @@ public interface Info<TInfo> {
             return obj;
         } catch (Exception e) {
             context.log.d( "IDomainObject:createDomainInfoFromJson()", "Failed to createDomainInfoObjectFromJson() for " +
-                    "class: " + Model.Domain.LibraryInfo.class.getName() + ", " +
+                    "class: " + Domain.LibraryInfo.class.getName() + ", " +
                     "json: " + json + ", " +
                     "exception: " + e.toString());
 

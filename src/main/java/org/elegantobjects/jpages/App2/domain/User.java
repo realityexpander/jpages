@@ -1,6 +1,5 @@
 package org.elegantobjects.jpages.App2.domain;
 
-import org.elegantobjects.jpages.App2.*;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.Result;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
@@ -10,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 // User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
-public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
+public class User extends IRole<Domain.UserInfo> implements IUUID2 {
     public final UUID2<User> id;
     private final Repo.UserInfo repo;
 
     public User(
-        @NotNull Model.Domain.UserInfo info,
+        @NotNull Domain.UserInfo info,
         Context context
     ) {
         super(info, context);
@@ -38,7 +37,7 @@ public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
     }
     public User(
         String json,
-        Class<Model.Domain.UserInfo> clazz,
+        Class<Domain.UserInfo> clazz,
         Context context
     ) {
         super(json, clazz, context);
@@ -49,7 +48,7 @@ public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id.toString() + ") created Json with class: " + clazz.getName());
     }
     public User(String json, Context context) {
-        this(json, Model.Domain.UserInfo.class, context);
+        this(json, Domain.UserInfo.class, context);
     }
     public User(Context context) {
         this(UUID2.randomUUID2(), context);
@@ -64,7 +63,7 @@ public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
     /////////////////////////////////////
 
     @Override
-    public Result<Model.Domain.UserInfo> fetchInfoResult() {
+    public Result<Domain.UserInfo> fetchInfoResult() {
         // context.log.d(this,"User (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
         infoResult = this.repo.fetchUserInfo(this.id);
@@ -72,25 +71,25 @@ public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
             return infoResult;
         }
 
-        this.info = ((Result.Success<Model.Domain.UserInfo>) infoResult).value();
+        this.info = ((Result.Success<Domain.UserInfo>) infoResult).value();
         return infoResult;
     }
 
     @Override
-    public Result<Model.Domain.UserInfo> updateInfo(Model.Domain.UserInfo updatedUserInfo) {
+    public Result<Domain.UserInfo> updateInfo(Domain.UserInfo updatedUserInfo) {
         context.log.d(this,"User (" + this.id + "),  userInfo: " + updatedUserInfo);
 
         // Update self optimistically
         super.updateInfo(updatedUserInfo);
 
         // Update the repo
-        Result<Model.Domain.UserInfo> infoResult = this.repo.updateUserInfo(updatedUserInfo);
+        Result<Domain.UserInfo> infoResult = this.repo.updateUserInfo(updatedUserInfo);
         if (infoResult instanceof Result.Failure) {
             return infoResult;
         }
 
         // Update self with Repo result
-        this.info = ((Result.Success<Model.Domain.UserInfo>) infoResult).value();
+        this.info = ((Result.Success<Domain.UserInfo>) infoResult).value();
         return infoResult;
     }
 
@@ -113,9 +112,9 @@ public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) acceptResult).exception());
 
 
-        Result<Model.Domain.UserInfo> result = this.updateInfo(this.info);
+        Result<Domain.UserInfo> result = this.updateInfo(this.info);
         if (result instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<Model.Domain.UserInfo>) result).exception());
+            return new Result.Failure<>(((Result.Failure<Domain.UserInfo>) result).exception());
 
         return findAllAcceptedBooks();
     }
@@ -129,9 +128,9 @@ public class User extends IRole<Model.Domain.UserInfo> implements IUUID2 {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptResult).exception());
         }
 
-        Result<Model.Domain.UserInfo> result = this.updateInfo(this.info);
+        Result<Domain.UserInfo> result = this.updateInfo(this.info);
         if (result instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<Model.Domain.UserInfo>) result).exception());
+            return new Result.Failure<>(((Result.Failure<Domain.UserInfo>) result).exception());
         }
 
         return unacceptResult;

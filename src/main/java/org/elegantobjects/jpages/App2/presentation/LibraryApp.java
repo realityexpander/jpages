@@ -1,18 +1,14 @@
 package org.elegantobjects.jpages.App2.presentation;
 
 
+import org.elegantobjects.jpages.App2.data.DTO;
 import org.elegantobjects.jpages.App2.core.Result;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.Book;
-import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.Library;
-import org.elegantobjects.jpages.App2.domain.User;
+import org.elegantobjects.jpages.App2.domain.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.elegantobjects.jpages.App2.Model.*;
 
 class LibraryApp {
 

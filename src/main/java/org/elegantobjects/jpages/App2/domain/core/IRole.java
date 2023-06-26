@@ -7,14 +7,13 @@ import org.elegantobjects.jpages.App2.core.Info;
 import org.elegantobjects.jpages.App2.core.Result;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
+import org.elegantobjects.jpages.App2.domain.Domain;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.UUID;
-
-import static org.elegantobjects.jpages.App2.Model.*;
 
 /////////////////////////////////////////////////////
 // Domain Role - Common Domain Role Abstract class

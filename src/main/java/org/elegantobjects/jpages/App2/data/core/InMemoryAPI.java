@@ -1,9 +1,9 @@
 package org.elegantobjects.jpages.App2.data.core;
 
-import org.elegantobjects.jpages.App2.*;
 import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.core.Result;
 import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.DTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @SuppressWarnings("FieldCanBeLocal")
 public
-class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends Model.DTO> implements IAPI<TUUID2, TDTOInfo> {
+class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<TUUID2, TDTOInfo> {
     private final URL url;
     private final HttpClient client;
 
