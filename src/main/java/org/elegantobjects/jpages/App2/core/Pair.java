@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.core;
 
 class Pair<T, U> {
     private final T first;

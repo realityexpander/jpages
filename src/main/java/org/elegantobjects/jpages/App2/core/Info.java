@@ -1,6 +1,9 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.core;
 
 import com.google.gson.Gson;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.Context;
+import org.elegantobjects.jpages.App2.Model;
 
 import java.lang.reflect.Type;
 import java.util.UUID;

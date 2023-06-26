@@ -1,7 +1,12 @@
 package org.elegantobjects.jpages.App2;
 
 import com.google.gson.GsonBuilder;
+import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
+import org.elegantobjects.jpages.App2.core.Info;
+import org.elegantobjects.jpages.App2.core.Result;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
 import org.jetbrains.annotations.NotNull;
@@ -108,11 +113,11 @@ public class Model {
             private final String author;
             private final String description;
 
-            BookInfo(@NotNull
-                     UUID2<Book> id,
-                     String title,
-                     String author,
-                     String description
+            public BookInfo(@NotNull
+                            UUID2<Book> id,
+                            String title,
+                            String author,
+                            String description
             ) {
                 super(id, Model.Domain.BookInfo.class.getName());
                 this.title = title;
@@ -120,13 +125,13 @@ public class Model {
                 this.description = description;
                 this.id = id;
             }
-            BookInfo(UUID uuid, String title, String author, String description) {
+            public BookInfo(UUID uuid, String title, String author, String description) {
                 this(new UUID2<Book>(uuid), title, author, description);
             }
-            BookInfo(String id, String title, String author, String description) {
+            public BookInfo(String id, String title, String author, String description) {
                 this(UUID.fromString(id), title, author, description);
             }
-            BookInfo(Model.Domain.BookInfo bookInfo) {
+            public BookInfo(Model.Domain.BookInfo bookInfo) {
                 // todo validation
                 this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);
             }
@@ -137,25 +142,25 @@ public class Model {
             // Domain Must accept both `DTO.BookInfo` and `Entity.BookInfo` (and convert to Domain.BookInfo)
             // Domain decides what to include from the DTOs/Entities
             // todo - should the DTO/Entites decide what to include?
-            BookInfo(Model.DTO.BookInfo bookInfo) {
+            public BookInfo(Model.DTO.BookInfo bookInfo) {
                 // Converts from DTO to Domain
                 // todo validation here
                 this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description); // Domain decides what to include from the DTOs
             }
-            BookInfo( Model.Entity.BookInfo bookInfo) {
+            public BookInfo( Model.Entity.BookInfo bookInfo) {
                 // Converts from Entity to Domain
                 // todo validation here
                 this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description);  // Domain decides what to include from the Entities
             }
-
-            @Override
-            public UUID2<Book> id() { return this.id; }
 
             ///////////////////////////////////////////
             // BookInfo Business Logic Methods       //
             // - All Info manipulation logic is      //
             //   done here.                          //
             ///////////////////////////////////////////
+
+            @Override
+            public UUID2<Book> id() { return this.id; }
 
             public Model.Domain.BookInfo withTitle(String title) {
                 return new Model.Domain.BookInfo(this.id, title, this.author, this.description);
@@ -183,9 +188,9 @@ public class Model {
                 return new Model.Entity.BookInfo(this);
             }
 
-            /////////////////////////////////
+            ///////////////////////////
             // ToInfo implementation //
-            /////////////////////////////////
+            ///////////////////////////
 
             @Override
             public Model.Domain.BookInfo toDeepCopyDomainInfo() {
@@ -361,7 +366,7 @@ public class Model {
             UserInfo(String id, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, Model.Domain.UserInfo.Account account) {
                 this(UUID.fromString(id), name, email, acceptedBooks, account);
             }
-            UserInfo(UUID2<User> id, String name, String email) {
+            public UserInfo(UUID2<User> id, String name, String email) {
                 this(id, name, email, new ArrayList<UUID2<Book>>(), new Model.Domain.UserInfo.Account());
             }
             UserInfo(UUID uuid, String name, String email) {
@@ -459,7 +464,7 @@ public class Model {
 
         static public class LibraryInfo extends Model.Domain implements Model.ToDomainInfo<Model.Domain.LibraryInfo> {
             private final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
-            final String name;
+            final private String name;
             final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
             final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // books known & available in this library
 
@@ -475,7 +480,7 @@ public class Model {
                 this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
                 this.id = id;
             }
-            LibraryInfo(UUID2<Library> id, String name) {
+            public LibraryInfo(UUID2<Library> id, String name) {
                 this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
             }
             LibraryInfo(Model.Domain.LibraryInfo libraryInfo) {
@@ -502,6 +507,10 @@ public class Model {
             @Override
             public UUID2<Library> id() {
                 return id;
+            }
+
+            public String name() {
+                return this.name;
             }
 
             /////////////////////////////////////////////
@@ -817,12 +826,12 @@ public class Model {
             final String description;
             final String extraFieldToShowThisIsADTO;
 
-            BookInfo(@NotNull
-                     UUID2<Book> id,
-                     String title,
-                     String author,
-                     String description,
-                     String extraFieldToShowThisIsADTO
+            public BookInfo(@NotNull
+                            UUID2<Book> id,
+                            String title,
+                            String author,
+                            String description,
+                            String extraFieldToShowThisIsADTO
             ) {
                 super(id.toDomainUUID2(), Model.DTO.BookInfo.class.getName());
                 this.id = id;
@@ -836,7 +845,7 @@ public class Model {
                     this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
                 }
             }
-            BookInfo(String json, Context context) {
+            public BookInfo(String json, Context context) {
                 this(context.gson.fromJson(json, Model.DTO.BookInfo.class));  // creates a DTO.BookInfo from the JSON
             }
 
@@ -921,7 +930,7 @@ public class Model {
             final String description;
             final String extraFieldToShowThisIsAnEntity = "This is an Entity";
 
-            BookInfo(
+            public BookInfo(
                     @NotNull UUID2<Book> id,
                     String title,
                     String author,

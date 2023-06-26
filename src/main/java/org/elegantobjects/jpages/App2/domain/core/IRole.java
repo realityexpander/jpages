@@ -1,7 +1,12 @@
-package org.elegantobjects.jpages.App2.domain;
+package org.elegantobjects.jpages.App2.domain.core;
 
 import com.google.gson.JsonSyntaxException;
 import org.elegantobjects.jpages.App2.*;
+import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
+import org.elegantobjects.jpages.App2.core.Info;
+import org.elegantobjects.jpages.App2.core.Result;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;

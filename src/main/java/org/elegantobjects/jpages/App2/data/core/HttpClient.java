@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2.data;
+package org.elegantobjects.jpages.App2.data.core;
 
 public class HttpClient {
     private final String client;

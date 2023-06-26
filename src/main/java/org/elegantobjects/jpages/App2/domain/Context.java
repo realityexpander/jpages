@@ -1,22 +1,15 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.domain;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.data.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
-import org.elegantobjects.jpages.App2.presentation.ILog;
-import org.elegantobjects.jpages.App2.presentation.Log;
+import org.elegantobjects.jpages.App2.core.log.ILog;
+import org.elegantobjects.jpages.App2.core.log.Log;
+import org.elegantobjects.jpages.App2.domain.core.IContext;
 
-import static org.elegantobjects.jpages.App2.Context.ContextType.PRODUCTION;
+import static org.elegantobjects.jpages.App2.domain.Context.ContextType.PRODUCTION;
 
-// Context is a singleton class that holds all the repositories and global objects like Gson
-interface IContext {
-    Repo.BookInfo bookInfoRepo = null;
-    Repo.UserInfo userInfoRepo = null;
-    Repo.LibraryInfo libraryInfoRepo = null;
-    Gson gson = null;
-    ILog log = null;
-}
 public class Context implements IContext {
     // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
 

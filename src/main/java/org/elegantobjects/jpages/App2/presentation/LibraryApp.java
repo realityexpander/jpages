@@ -1,7 +1,10 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.presentation;
 
 
+import org.elegantobjects.jpages.App2.core.Result;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.Library;
 import org.elegantobjects.jpages.App2.domain.User;
 
@@ -52,7 +55,7 @@ class LibraryApp {
             Domain.BookInfo bookInfo3 = book.fetchInfo();
             if (bookInfo3 == null) {
                 ctx.log.d(this,"Book Missing --> " +
-                        "book id: " + bookInfo3.id() + " >> " +
+                        "book id: " + book.id() + " >> " +
                         " is null"
                 );
             } else {
@@ -96,7 +99,7 @@ class LibraryApp {
             ctx.log.d(this,"Library Created --> id: " +
                     ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().id() +
                     ", name: "+
-                    ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().name
+                    ((Result.Success<Domain.LibraryInfo>) libraryInfo).value().name()
             );
 
             // Populate the library
@@ -418,7 +421,15 @@ class LibraryApp {
                     }
                 }
             }
+
         }
+
+        ctx.log.d(this,
+    "\n\n" +
+            "*****************************\n" +
+            "Tests Completed Successfully\n" +
+            "*****************************\n"
+        );
     }
 
     //////////////////////////////////////////////////////////////////////

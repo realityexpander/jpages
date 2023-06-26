@@ -1,40 +1,17 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.domain;
 
 
+import org.elegantobjects.jpages.App2.Model;
+import org.elegantobjects.jpages.App2.core.Result;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.BookInfoDatabase;
-import org.elegantobjects.jpages.App2.domain.Book;
-import org.elegantobjects.jpages.App2.domain.Library;
-import org.elegantobjects.jpages.App2.domain.User;
-import org.elegantobjects.jpages.App2.presentation.ILog;
-import org.elegantobjects.jpages.App2.presentation.Log;
+import org.elegantobjects.jpages.App2.core.log.ILog;
+import org.elegantobjects.jpages.App2.core.log.Log;
+import org.elegantobjects.jpages.App2.domain.core.IRepo;
 
 import java.util.Map;
 
-// Repo only accepts/returns Domain Models, and internally converts to/from DTOs/Entities/Domains
-// - works with the network API & local database to perform CRUD operations, and also performs validation.
-// - can also be used to implement caching.
-// The Repo can easily accept fake APIs & Database for testing.
-interface IRepo {
-    interface BookInfo extends IRepo {
-        Result<Model.Domain.BookInfo> fetchBookInfo(UUID2<Book> id);
-        Result<Model.Domain.BookInfo> addBookInfo(Model.Domain.BookInfo bookInfo);
-        Result<Model.Domain.BookInfo> updateBookInfo(Model.Domain.BookInfo bookInfo);
-        Result<Model.Domain.BookInfo> upsertBookInfo(Model.Domain.BookInfo bookInfo);
-    }
-
-    interface UserInfo extends IRepo {
-        Result<Model.Domain.UserInfo> fetchUserInfo(UUID2<User> id);
-        Result<Model.Domain.UserInfo> updateUserInfo(Model.Domain.UserInfo userInfo);
-        Model.Domain.UserInfo upsertUserInfo(Model.Domain.UserInfo userInfo);
-    }
-
-    interface LibraryInfo extends IRepo {
-        Result<Model.Domain.LibraryInfo> fetchLibraryInfo(UUID2<Library> id);
-        Result<Model.Domain.LibraryInfo> updateLibraryInfo(Model.Domain.LibraryInfo libraryInfo);
-        Result<Model.Domain.LibraryInfo> upsertLibraryInfo(Model.Domain.LibraryInfo libraryInfo);
-    }
-}
 public class Repo implements IRepo {
     protected final ILog log;
 
@@ -47,9 +24,9 @@ public class Repo implements IRepo {
         private final BookInfoApi api;
         private final BookInfoDatabase database;
 
-        BookInfo(BookInfoApi api,
-                 BookInfoDatabase database,
-                 ILog log
+        public BookInfo(BookInfoApi api,
+                        BookInfoDatabase database,
+                        ILog log
         ) {
             super(log);
             this.api = api;
@@ -238,7 +215,7 @@ public class Repo implements IRepo {
         // Simulate a database on a server somewhere
         private final UUID2.HashMap<User, Model.Domain.UserInfo> database = new UUID2.HashMap<>();
 
-        UserInfo(ILog log) {
+        public UserInfo(ILog log) {
             super(log);
         }
 
@@ -283,7 +260,7 @@ public class Repo implements IRepo {
         // simulate a database on server (UUID2<Library> is the key)
         private final UUID2.HashMap<Library, Model.Domain.LibraryInfo> database = new UUID2.HashMap<>();
 
-        LibraryInfo(ILog log) {
+        public LibraryInfo(ILog log) {
             super(log);
         }
 

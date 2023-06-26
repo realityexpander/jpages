@@ -1,9 +1,9 @@
-package org.elegantobjects.jpages.App2.data;
+package org.elegantobjects.jpages.App2.data.core;
 
-import org.elegantobjects.jpages.App2.IUUID2;
+import org.elegantobjects.jpages.App2.core.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.Model;
-import org.elegantobjects.jpages.App2.Result;
-import org.elegantobjects.jpages.App2.UUID2;
+import org.elegantobjects.jpages.App2.core.Result;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
 
 import java.util.Map;
 

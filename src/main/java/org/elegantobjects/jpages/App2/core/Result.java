@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.core;
 
 public class Result<T> {
     public static class Success<T> extends Result<T> {

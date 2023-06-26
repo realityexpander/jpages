@@ -1,6 +1,11 @@
 package org.elegantobjects.jpages.App2.data;
 
 import org.elegantobjects.jpages.App2.*;
+import org.elegantobjects.jpages.App2.core.Result;
+import org.elegantobjects.jpages.App2.core.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.core.IDatabase;
+import org.elegantobjects.jpages.App2.data.core.InMemoryDatabase;
+import org.elegantobjects.jpages.App2.data.core.URL;
 import org.elegantobjects.jpages.App2.domain.Book;
 
 import java.util.Map;

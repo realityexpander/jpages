@@ -1,4 +1,6 @@
-package org.elegantobjects.jpages.App2.presentation;
+package org.elegantobjects.jpages.App2.core.log;
+
+import org.elegantobjects.jpages.App2.core.log.ILog;
 
 public class Log implements ILog {
     private void d(String tag, String msg) {

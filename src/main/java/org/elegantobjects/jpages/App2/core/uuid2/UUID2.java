@@ -1,9 +1,8 @@
-package org.elegantobjects.jpages.App2;
+package org.elegantobjects.jpages.App2.core.uuid2;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
