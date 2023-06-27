@@ -1,13 +1,12 @@
 package org.elegantobjects.jpages.App2.domain.common;
 
 import com.google.gson.JsonSyntaxException;
-import org.elegantobjects.jpages.App2.common.ModelInfo;
+import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.library.DomainLibraryInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.ParameterizedType;
@@ -33,7 +32,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
     // Singletons
     protected final Context context;
 
-    // Clazz of the Info<TDomain> (for Gson serialization)
+    // Class of the Info<TDomain> info object (for Gson serialization)
     @SuppressWarnings("unchecked")
     private final Class<TDomainInfo> infoClazz =
             (Class<TDomainInfo>) ((ParameterizedType) getClass()
@@ -55,12 +54,10 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
             @NotNull Context context
     ) {
         this.id = id; // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
-//        this.id._setUUID2TypeStr(infoClazz.getSimpleName());
-        this.id._setUUID2TypeStr(info.id().getUUID2TypeStr());
         this.info = info;
         this.context = context;
     }
-    protected <TDomainInfo_ extends ModelInfo.ToDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
+    protected <TDomainInfo_ extends Model.ToDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
     IRole(
         @NotNull String domainInfoJson,
         Class<TDomainInfo_> classType,
@@ -78,8 +75,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
         @NotNull TDomainInfo_ info,
         Context context
     ) {
-        this(info.id().uuid(), info, context);
-        this.id._setUUID2TypeStr(info.id().getUUID2TypeStr()); // todo is this correct way? Do we want the Model id to have a typestr?
+        this(info.id(), info, context);
     }
     protected IRole(
         @NotNull UUID2<?> id,
@@ -108,7 +104,6 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
         return this.id;
     }
 
-    // Todo refactor to use Info.createInfoFromJson interface instead of this method
     // Creates new `Domain.{Domain}Info` object with id from JSON string of `Domain.{Domain}Info` object
     // - Implemented as a static method bc it can be called from a constructor.
     //   (Can't call instance methods from constructor in java.)
@@ -121,7 +116,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
     @SuppressWarnings("unchecked") // for _setIdFromImportedJson() call
     public static <
             TDomain extends DomainInfo,  // restrict to Domain subclasses, ie: Domain.BookInfo
-            TDomainInfo extends ModelInfo.ToDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
+            TDomainInfo extends Model.ToDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
             TToInfo extends ToInfo<?>
             > TDomainInfo createDomainInfoFromJson(
             String json,
@@ -133,7 +128,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
             context.log.d("IDomainObject:createDomainInfoFromJson()", "obj = " + obj);
 
             // Set the UUID2 typeStr to match the type of the TDomainInfo object
-            String domainInfoClazzName = domainInfoClazz.getName();
+            String domainInfoClazzName = UUID2.getUUID2TypeStr(domainInfoClazz);
             domainInfoClazz.cast(obj)
                     .getDomainInfoId()
                     ._setUUID2TypeStr(domainInfoClazzName);
@@ -145,8 +140,8 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
 
             return obj;
         } catch (Exception e) {
-            context.log.d( "IDomainObject:createDomainInfoFromJson()", "Failed to createDomainInfoObjectFromJson() for " +
-                    "class: " + DomainLibraryInfo.class.getName() + ", " +
+            context.log.d( "IRole:createDomainInfoFromJson()", "Failed to createDomainInfoFromJson() for " +
+                    "class: " + domainInfoClazz.getName() + ", " +
                     "json: " + json + ", " +
                     "exception: " + e.toString());
 
@@ -172,7 +167,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
 
             // Set Domain "Model" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
             infoFromJson._setIdFromImportedJson(
-                new UUID2<>(infoFromJson.id(), domainInfoClazz.getName())
+                new UUID2<>(infoFromJson.id(), UUID2.getUUID2TypeStr(domainInfoClazz))
             );
 
             // Update the info object with the new info

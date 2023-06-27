@@ -3,16 +3,16 @@ package org.elegantobjects.jpages.App2.domain.user;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.ModelInfo;
+import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class DomainUserInfo extends DomainInfo
+public class UserInfo extends DomainInfo
     implements
-        ModelInfo.ToDomain<DomainUserInfo>
+        Model.ToDomain<UserInfo>
 {
     private final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
     private final String name;
@@ -157,42 +157,44 @@ public class DomainUserInfo extends DomainInfo
         }
     }
 
-    DomainUserInfo(
+    UserInfo(
             @NotNull
-            UUID2<User> id,
+            UUID2<User> id,        // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
             String name,
             String email,
             ArrayList<UUID2<Book>> acceptedBooks,
             Account account
     ) {
-        super(id.toDomainUUID2(), DomainUserInfo.class.getName());
+        super(id);
         this.id = id;
         this.name = name;
         this.email = email;
         this.acceptedBooks = acceptedBooks;
         this.account = account;
     }
-    DomainUserInfo(DomainUserInfo userInfo) {
-        this(userInfo.id,
-                userInfo.name,
-                userInfo.email,
-                userInfo.acceptedBooks,
-                userInfo.account);
+    UserInfo(@NotNull UserInfo userInfo) {
+        this(
+            userInfo.id,
+            userInfo.name,
+            userInfo.email,
+            userInfo.acceptedBooks,
+            userInfo.account
+        );
     }
-    DomainUserInfo(UUID uuid, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, Account account) {
-        this(new UUID2<User>(uuid), name, email, acceptedBooks, account);
+    UserInfo(UUID uuid, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, Account account) {
+        this(new UUID2<User>(uuid, User.class), name, email, acceptedBooks, account);
     }
-    DomainUserInfo(String id, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, Account account) {
-        this(UUID.fromString(id), name, email, acceptedBooks, account);
+    UserInfo(String uuid, String name, String email, ArrayList<UUID2<Book>> acceptedBooks, Account account) {
+        this(UUID.fromString(uuid), name, email, acceptedBooks, account);
     }
-    public DomainUserInfo(UUID2<User> id, String name, String email) {
-        this(id, name, email, new ArrayList<UUID2<Book>>(), new Account());
+    public UserInfo(UUID2<User> uuid2, String name, String email) {
+        this(uuid2, name, email, new ArrayList<UUID2<Book>>(), new Account());
     }
-    DomainUserInfo(UUID uuid, String name, String email) {
-        this(new UUID2<User>(uuid), name, email);
+    UserInfo(UUID uuid, String name, String email) {
+        this(new UUID2<User>(uuid, User.class), name, email);
     }
-    DomainUserInfo(String id, String name, String email) {
-        this(UUID.fromString(id), name, email);
+    UserInfo(String uuid, String name, String email) {
+        this(UUID.fromString(uuid), name, email);
     }
 
     ///////////////////////////////
@@ -263,14 +265,14 @@ public class DomainUserInfo extends DomainInfo
 
     // note: no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
     @Override
-    public DomainUserInfo toDeepCopyDomainInfo() {
+    public UserInfo toDeepCopyDomainInfo() {
         // Note: Must return a deep copy (no original references)
-        DomainUserInfo domainInfoCopy = new DomainUserInfo(this);
+        UserInfo domainInfoCopy = new UserInfo(this);
 
         // deep copy of acceptedBooks
         domainInfoCopy.acceptedBooks.clear();
         for (UUID2<Book> bookId : this.acceptedBooks) {
-            domainInfoCopy.acceptedBooks.add(new UUID2<Book>(bookId.uuid()));
+            domainInfoCopy.acceptedBooks.add(new UUID2<Book>(bookId.uuid(), Book.class));
         }
 
         return domainInfoCopy;

@@ -2,52 +2,52 @@ package org.elegantobjects.jpages.App2.domain.book;
 
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.ModelInfo;
-import org.elegantobjects.jpages.App2.data.book.local.EntityBookInfo;
-import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
+import org.elegantobjects.jpages.App2.common.Model;
+import org.elegantobjects.jpages.App2.data.book.local.BookInfoEntity;
+import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class DomainBookInfo extends DomainInfo
+public class BookInfo extends DomainInfo
     implements
-        ModelInfo.ToEntity<EntityBookInfo>,
-        ModelInfo.ToDTO<DTOBookInfo>,
-        ModelInfo.ToDomain<DomainBookInfo>
+        Model.ToEntity<BookInfoEntity>,
+        Model.ToDTO<BookInfoDTO>,
+        Model.ToDomain<BookInfo>
 {
     private final UUID2<Book> id; // note this is a UUID2<Book> not a UUID2<BookInfo>, it is the id of the Book.
     public final String title;
     public final String author;
     public final String description;
 
-    public DomainBookInfo(
-        @NotNull UUID2<Book> id,
+    public BookInfo(
+        @NotNull UUID2<Book> id,  // Note: This is a UUID2<Book> not a UUID2<BookInfo>
         String title,
         String author,
         String description
     ) {
-        super(id, DomainBookInfo.class.getName());
+        super(id);
         this.title = title;
         this.author = author;
         this.description = description;
         this.id = id;
     }
-    public DomainBookInfo(UUID uuid, String title, String author, String description) {
-        this(new UUID2<Book>(uuid), title, author, description);
+    public BookInfo(UUID uuid, String title, String author, String description) {
+        this(new UUID2<Book>(uuid, Book.class), title, author, description);
     }
-    public DomainBookInfo(String id, String title, String author, String description) {
+    public BookInfo(String id, String title, String author, String description) {
         this(UUID.fromString(id), title, author, description);
     }
-    public DomainBookInfo(@NotNull DomainBookInfo bookInfo) {
+    public BookInfo(@NotNull BookInfo bookInfo) {
         // todo validation
         this(bookInfo.id(), bookInfo.title, bookInfo.author, bookInfo.description);
     }
-    public DomainBookInfo(UUID id) {
+    public BookInfo(UUID id) {
         this(id, "", "", "");
     }
 
     // Domain Must accept both `DTO.BookInfo` and `Entity.BookInfo` (and convert to Domain.BookInfo)
-    public DomainBookInfo(@NotNull DTOBookInfo bookInfo) {
+    public BookInfo(@NotNull BookInfoDTO bookInfo) {
         // Converts from DTO to Domain
         // todo validation here
 
@@ -57,7 +57,7 @@ public class DomainBookInfo extends DomainInfo
                 bookInfo.author,
                 bookInfo.description);
     }
-    public DomainBookInfo(@NotNull EntityBookInfo bookInfo) {
+    public BookInfo(@NotNull BookInfoEntity bookInfo) {
         // Converts from Entity to Domain
         // todo validation here
 
@@ -78,16 +78,16 @@ public class DomainBookInfo extends DomainInfo
         return this.id;
     }
 
-    public DomainBookInfo withTitle(String title) {
-        return new DomainBookInfo(this.id, title, this.author, this.description);
+    public BookInfo withTitle(String title) {
+        return new BookInfo(this.id, title, this.author, this.description);
     }
 
-    public DomainBookInfo withAuthor(String authorName) {
-        return new DomainBookInfo(this.id, this.title, authorName, this.description);
+    public BookInfo withAuthor(String authorName) {
+        return new BookInfo(this.id, this.title, authorName, this.description);
     }
 
-    public DomainBookInfo withDescription(String description) {
-        return new DomainBookInfo(this.id, this.title, this.author, description);
+    public BookInfo withDescription(String description) {
+        return new BookInfo(this.id, this.title, this.author, description);
     }
 
     @Override
@@ -100,13 +100,13 @@ public class DomainBookInfo extends DomainInfo
     /////////////////////////////////////
 
     @Override
-    public DTOBookInfo toDTO() {
-        return new DTOBookInfo(this);
+    public BookInfoDTO toDTO() {
+        return new BookInfoDTO(this);
     }
 
     @Override
-    public EntityBookInfo toEntity() {
-        return new EntityBookInfo(this);
+    public BookInfoEntity toEntity() {
+        return new BookInfoEntity(this);
     }
 
     /////////////////////////////
@@ -114,9 +114,9 @@ public class DomainBookInfo extends DomainInfo
     /////////////////////////////
 
     @Override
-    public DomainBookInfo toDeepCopyDomainInfo() {
+    public BookInfo toDeepCopyDomainInfo() {
         // shallow copy OK here bc its flat
-        return new DomainBookInfo(this);
+        return new BookInfo(this);
     }
 
     @Override

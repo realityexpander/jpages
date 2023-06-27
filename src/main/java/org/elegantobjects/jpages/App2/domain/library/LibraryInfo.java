@@ -3,38 +3,38 @@ package org.elegantobjects.jpages.App2.domain.library;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.ModelInfo;
+import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class DomainLibraryInfo extends DomainInfo
+public class LibraryInfo extends DomainInfo
         implements
-        ModelInfo.ToDomain<DomainLibraryInfo>
+        Model.ToDomain<LibraryInfo>
 {
     private final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     final private String name;
     final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
     final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // books known & available in this library
 
-    public DomainLibraryInfo(
+    public LibraryInfo(
         @NotNull UUID2<Library> id,
         String name,
         UUID2.HashMap<User, ArrayList<UUID2<Book>>> checkoutUserBookMap,
         UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap
     ) {
-        super(id, DomainLibraryInfo.class.getName());
+        super(id);
         this.name = name;
         this.userIdToCheckedOutBookIdMap = checkoutUserBookMap;
         this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
         this.id = id;
     }
-    public DomainLibraryInfo(UUID2<Library> id, String name) {
+    public LibraryInfo(UUID2<Library> id, String name) {
         this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
     }
-    public DomainLibraryInfo(@NotNull DomainLibraryInfo libraryInfo) {
+    public LibraryInfo(@NotNull LibraryInfo libraryInfo) {
         this(
             libraryInfo.id,
             libraryInfo.name,
@@ -42,10 +42,10 @@ public class DomainLibraryInfo extends DomainInfo
             libraryInfo.bookIdToNumBooksAvailableMap
         );
     }
-    public DomainLibraryInfo(UUID uuid, String name) {
-        this(new UUID2<Library>(uuid), name);
+    public LibraryInfo(UUID uuid, String name) {
+        this(new UUID2<Library>(uuid, Library.class), name);
     }
-    public DomainLibraryInfo(String id, String name) {
+    public LibraryInfo(String id, String name) {
         this(UUID.fromString(id), name);
     }
 
@@ -361,9 +361,9 @@ public class DomainLibraryInfo extends DomainInfo
 
     // note: currently no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
     @Override
-    public DomainLibraryInfo toDeepCopyDomainInfo() {
+    public LibraryInfo toDeepCopyDomainInfo() {
         // Note: *MUST* return a deep copy
-        DomainLibraryInfo libraryInfoDeepCopy = new DomainLibraryInfo(this.id, this.name);
+        LibraryInfo libraryInfoDeepCopy = new LibraryInfo(this.id, this.name);
 
         // Deep copy the bookIdToNumBooksAvailableMap
         libraryInfoDeepCopy.bookIdToNumBooksAvailableMap.putAll(this.bookIdToNumBooksAvailableMap);

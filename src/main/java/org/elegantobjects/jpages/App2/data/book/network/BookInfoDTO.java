@@ -1,20 +1,20 @@
 package org.elegantobjects.jpages.App2.data.book.network;
 
-import org.elegantobjects.jpages.App2.common.ModelInfo;
+import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.common.network.DTOInfo;
+import org.elegantobjects.jpages.App2.data.common.network.DTO;
 import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.book.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
 
-public class DTOBookInfo extends DTOInfo
+public class BookInfoDTO extends DTO
         implements
-        ModelInfo.ToDomain<DomainBookInfo>,
-        ModelInfo.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,
-        Info.ToInfo<DTOBookInfo>,
-        Info.hasToDeepCopyInfo<DTOBookInfo>
+        Model.ToDomain<BookInfo>,
+        Model.ToDomain.hasToDeepCopyDomainInfo<BookInfo>,
+        Info.ToInfo<BookInfoDTO>,
+        Info.hasToDeepCopyInfo<BookInfoDTO>
 {
     final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
     public final String title;
@@ -22,14 +22,15 @@ public class DTOBookInfo extends DTOInfo
     public final String description;
     public final String extraFieldToShowThisIsADTO;
 
-    public DTOBookInfo(
+    public BookInfoDTO(
         @NotNull UUID2<Book> id,
         String title,
         String author,
         String description,
         String extraFieldToShowThisIsADTO
     ) {
-        super(id.toDomainUUID2(), DTOBookInfo.class.getName());
+//        super(id.toDomainUUID2(), DTOBookInfo.class.getName());
+        super(id);
         this.id = id;
         this.title = title;
         this.author = author;
@@ -41,20 +42,20 @@ public class DTOBookInfo extends DTOInfo
             this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
         }
     }
-    public DTOBookInfo(String json, @NotNull Context context) {
-        this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTO.BookInfo from the JSON
+    public BookInfoDTO(String json, @NotNull Context context) {
+        this(context.gson.fromJson(json, BookInfoDTO.class));  // creates a DTO.BookInfo from the JSON
     }
 
     // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
-    DTOBookInfo(@NotNull DTOBookInfo bookInfo) {
-        this(new UUID2<Book>(bookInfo.id().uuid()),
+    BookInfoDTO(@NotNull BookInfoDTO bookInfo) {
+        this(new UUID2<Book>(bookInfo.id().uuid(), Book.class),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
             bookInfo.extraFieldToShowThisIsADTO);
     }
-    public DTOBookInfo(@NotNull DomainBookInfo bookInfo) {
-        this(new UUID2<Book>(bookInfo.id().uuid()),
+    public BookInfoDTO(@NotNull BookInfo bookInfo) {
+        this(new UUID2<Book>(bookInfo.id().uuid(), Book.class),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
@@ -81,9 +82,9 @@ public class DTOBookInfo extends DTOInfo
     ///////////////////////////////////
 
     @Override
-    public DomainBookInfo toDeepCopyDomainInfo() {
+    public BookInfo toDeepCopyDomainInfo() {
         // note: implement deep copy, if required.
-        return new DomainBookInfo(
+        return new BookInfo(
                 this.id,
                 this.title,
                 this.author,
@@ -101,9 +102,9 @@ public class DTOBookInfo extends DTOInfo
     /////////////////////////////
 
     @Override
-    public DTOBookInfo toDeepCopyInfo() {
+    public BookInfoDTO toDeepCopyInfo() {
         // note: implement deep copy, if needed.
-        return new DTOBookInfo(this);
+        return new BookInfoDTO(this);
     }
 
     @Override

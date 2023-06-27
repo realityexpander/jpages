@@ -16,30 +16,28 @@ import java.util.Map;
 import static java.lang.String.format;
 
 // Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
-public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
+public class Library extends IRole<LibraryInfo> implements IUUID2 {
     public final UUID2<Library> id;
     private final LibraryInfoRepo repo;
 
     public Library(
-        @NotNull DomainLibraryInfo info,
+        @NotNull LibraryInfo info,
         Context context
     ) {
         super(info, context);
         this.repo = this.context.libraryRepo();
         this.id = info.id();
-        this.id._setUUID2TypeStr(this.getUUID2TypeStr());
 
         context.log.d(this,"Library (" + this.id + ") created from Info");
     }
     public Library(
         String json,
-        Class<DomainLibraryInfo> clazz,
+        Class<LibraryInfo> clazz,
         Context context
     ) {
         super(json, clazz, context);
         this.repo = this.context.libraryRepo();
         this.id = this.info.id();
-        this.id._setUUID2TypeStr(this.getUUID2TypeStr());
 
         context.log.d(this,"Library (" + this.id + ") created from Json with class: " + clazz.getName());
     }
@@ -50,11 +48,10 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
         super(id, context);
         this.repo = this.context.libraryRepo();
         this.id = id;
-        this.id._setUUID2TypeStr(this.getUUID2TypeStr());
 
         context.log.d(this,"Library (" + this.id + ") created using id with no Info");
     }
-    public Library(String json, Context context) { this(json, DomainLibraryInfo.class, context); }
+    public Library(String json, Context context) { this(json, LibraryInfo.class, context); }
     public Library(Context context) {
         this(UUID2.randomUUID2(), context);
     }
@@ -68,7 +65,7 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
     /////////////////////////////////////
 
     @Override
-    public Result<DomainLibraryInfo> fetchInfoResult() {
+    public Result<LibraryInfo> fetchInfoResult() {
         // context.log.d(this,"Library (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
         infoResult = this.repo.fetchLibraryInfo(this.id);
@@ -76,26 +73,26 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
             return infoResult;
         }
 
-        this.info = ((Result.Success<DomainLibraryInfo>) infoResult).value();
+        this.info = ((Result.Success<LibraryInfo>) infoResult).value();
 
         return infoResult;
     }
 
     @Override
-    public Result<DomainLibraryInfo> updateInfo(DomainLibraryInfo updatedInfo) {
+    public Result<LibraryInfo> updateInfo(LibraryInfo updatedInfo) {
         // context.log.d(this,"Library (" + this.id.toString() + ") - updateInfo, newInfo: " + newInfo.toString());  // LEAVE for debugging
 
         // Update self optimistically
         super.updateInfo(updatedInfo);
 
         // Update the Repo
-        Result<DomainLibraryInfo> infoResult = this.repo.updateLibraryInfo(updatedInfo);
+        Result<LibraryInfo> infoResult = this.repo.updateLibraryInfo(updatedInfo);
         if (infoResult instanceof Result.Failure) {
             return infoResult;
         }
 
         // Update self with Repo result
-        super.updateInfo(((Result.Success<DomainLibraryInfo>) infoResult).value());
+        super.updateInfo(((Result.Success<LibraryInfo>) infoResult).value());
         return infoResult;
     }
 
@@ -130,9 +127,9 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
         }
 
         // Update the Info
-        Result<DomainLibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
         if (updateInfoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<DomainLibraryInfo>) updateInfoResult).exception());
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
         }
 
         return new Result.Success<>(book);
@@ -157,9 +154,9 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
         }
 
         // Update the Info
-        Result<DomainLibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
         if (updateInfoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<DomainLibraryInfo>) updateInfoResult).exception());
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
         }
 
         return new Result.Success<>(book);
@@ -259,9 +256,9 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
         }
 
         // Update the Info
-        Result<DomainLibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
         if (updateInfoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<DomainLibraryInfo>) updateInfoResult).exception());
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
         }
 
         return new Result.Success<>(book);

@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2.common.util.uuid2;
+ package org.elegantobjects.jpages.App2.common.util.uuid2;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -26,12 +26,24 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             this.uuid2TypeStr = "UUID"; // Default to untyped UUID
         }
     }
+    public UUID2(TUUID2 uuid2, Class<?> clazz) {
+        this(uuid2, UUID2.getUUID2TypeStr(clazz));
+    }
     public UUID2(UUID uuid) {
         this.uuid = uuid;
         this.uuid2TypeStr = "UUID";  // untyped UUID
     }
-    UUID2(TUUID2 uuid2) {
+    public UUID2(TUUID2 uuid2) {
         this(uuid2, uuid2.getUUID2TypeStr());
+    }
+
+    @SuppressWarnings("unchecked")
+    public UUID2(UUID2<?> uuid2) {
+        this((TUUID2) uuid2, uuid2.getUUID2TypeStr());
+    }
+    @SuppressWarnings("unchecked")
+    public UUID2(UUID uuid, Class<?> clazz) {
+        this((TUUID2) UUID2.fromUUID(uuid), clazz);
     }
 
     @Override
@@ -70,6 +82,20 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return new UUID2<>(UUID.randomUUID());
     }
 
+    public static String getUUID2TypeStr(Class<?> clazz) {
+
+        // Climbs the class hierarchy for the clazz (ie: `ModelInfo.{Domaininfo}.{EntityInfo}`)
+        String modelClassPathStr = clazz.getSuperclass().getSuperclass().toString();
+        String domainClassPathStr = clazz.getSuperclass().toString();
+        String entityClassPathStr = clazz.getName();
+
+        String model = UUID2.getLastSegmentOfTypeStrPath(modelClassPathStr);
+        String domain = UUID2.getLastSegmentOfTypeStrPath(domainClassPathStr);
+        String entity = UUID2.getLastSegmentOfTypeStrPath(entityClassPathStr);
+
+        return model + "." + domain + "." + entity;
+    }
+
     @Override
     public String getUUID2TypeStr() {
         return uuid2TypeStr;
@@ -93,19 +119,23 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     //////////////////////////////////////////////////
 
     @SuppressWarnings("unchecked")
-    public static <TDomainUUID2 extends IUUID2>
-    @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id, String className) {
+    private static <TDomainUUID2 extends IUUID2>
+    @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id, String clazzPathStr) {
         Integer nonNullId = id;
-        if (nonNullId == null) nonNullId = 1;
+        if (nonNullId == null) nonNullId = 0; // default value
 
         final String idPaddedWith11LeadingZeroes = format("%011d", nonNullId);
         final UUID2<TDomainUUID2> uuid2 = fromString("00000000-0000-0000-0000-" + idPaddedWith11LeadingZeroes);
 
-        return new UUID2<>((TDomainUUID2) uuid2, className);
+        return new UUID2<>((TDomainUUID2) uuid2, clazzPathStr);
+    }
+    public static <TDomainUUID2 extends IUUID2>
+    @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id, Class<?> clazz) {
+        return createFakeUUID2(id, getUUID2TypeStr(clazz));
     }
     public static <TDomainUUID2 extends IUUID2>
     @NotNull UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
-        return createFakeUUID2(id, null);
+        return createFakeUUID2(id, IUUID2.class);
     }
 
     // Utility HashMap class for mapping UUID2<T> to Objects.
@@ -217,5 +247,14 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return segments[segments.length - 3] + "." +
                 segments[segments.length - 2] + "." +
                 segments[segments.length - 1];
+    }
+
+    private static String getLastSegmentOfTypeStrPath(String classPath) {
+        String[] segments = classPath.split("\\.");
+        if(segments.length == 1) {
+            return classPath;
+        }
+
+        return segments[segments.length - 1];
     }
 }

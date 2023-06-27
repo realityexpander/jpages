@@ -3,9 +3,9 @@ package org.elegantobjects.jpages.App2.domain.common;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
-import org.elegantobjects.jpages.App2.domain.book.DomainBookInfo;
-import org.elegantobjects.jpages.App2.domain.library.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.user.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.book.BookInfo;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
+import org.elegantobjects.jpages.App2.domain.user.UserInfo;
 import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.user.User;
 
@@ -14,29 +14,29 @@ import org.elegantobjects.jpages.App2.domain.user.User;
 // - can also be used to implement caching.
 // The Repo can easily accept fake APIs & Database for testing.
 public interface IRepo {
-    interface BookInfo extends IRepo {
-        Result<DomainBookInfo> fetchBookInfo(UUID2<Book> id);
+    interface BookInfoRepo extends IRepo {
+        Result<BookInfo> fetchBookInfo(UUID2<Book> id);
 
-        Result<DomainBookInfo> addBookInfo(DomainBookInfo bookInfo);
+        Result<BookInfo> addBookInfo(BookInfo bookInfo);
 
-        Result<DomainBookInfo> updateBookInfo(DomainBookInfo bookInfo);
+        Result<BookInfo> updateBookInfo(BookInfo bookInfo);
 
-        Result<DomainBookInfo> upsertBookInfo(DomainBookInfo bookInfo);
+        Result<BookInfo> upsertBookInfo(BookInfo bookInfo);
     }
 
-    interface UserInfo extends IRepo {
-        Result<DomainUserInfo> fetchUserInfo(UUID2<User> id);
+    interface UserInfoRepo extends IRepo {
+        Result<UserInfo> fetchUserInfo(UUID2<User> id);
 
-        Result<DomainUserInfo> updateUserInfo(DomainUserInfo userInfo);
+        Result<UserInfo> updateUserInfo(UserInfo userInfo);
 
-        DomainUserInfo upsertUserInfo(DomainUserInfo userInfo);
+        Result<UserInfo> upsertUserInfo(UserInfo userInfo);
     }
 
-    interface LibraryInfo extends IRepo {
-        Result<DomainLibraryInfo> fetchLibraryInfo(UUID2<Library> id);
+    interface LibraryInfoRepo extends IRepo {
+        Result<LibraryInfo> fetchLibraryInfo(UUID2<Library> id);
 
-        Result<DomainLibraryInfo> updateLibraryInfo(DomainLibraryInfo libraryInfo);
+        Result<LibraryInfo> updateLibraryInfo(LibraryInfo libraryInfo);
 
-        Result<DomainLibraryInfo> upsertLibraryInfo(DomainLibraryInfo libraryInfo);
+        Result<LibraryInfo> upsertLibraryInfo(LibraryInfo libraryInfo);
     }
 }

@@ -3,8 +3,8 @@ package org.elegantobjects.jpages.App2.common;
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.common.network.DTOInfo;
-import org.elegantobjects.jpages.App2.data.common.local.EntityInfo;
+import org.elegantobjects.jpages.App2.data.common.network.DTO;
+import org.elegantobjects.jpages.App2.data.common.local.Entity;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.jetbrains.annotations.NotNull;
@@ -16,11 +16,11 @@ import org.jetbrains.annotations.NotNull;
 // - {Domain}Info hold the Info state that is on the server/api.
 // - {DTO}Info hold the API transfer "dumb" objects and Validation layer for the Domain objects.
 // - {Entity}Info hold the Database transfer "dumb" objects. Validation can occur here too, but usually not necessary.
-public class ModelInfo {
-    transient protected UUID2<IUUID2> _id; // Can't make final bc need to set it during JSON deserialization. :(
+public class Model {
+    transient protected UUID2<?> _id; // Can't make final bc need to set it during JSON deserialization. :(
 
-    protected ModelInfo(UUID2<?> id, String uuidTypeStr) {
-        this._id = new UUID2<>(id, uuidTypeStr);
+    protected Model(UUID2<?> id) {
+        this._id = new UUID2<>(id);
     }
 
     ///////////////////////////////
@@ -57,10 +57,10 @@ public class ModelInfo {
             }
         }
     }
-    public interface ToEntity<T extends EntityInfo> {
+    public interface ToEntity<T extends Entity> {
         T toEntity(); // Should return a deep copy (no original references)
     }
-    public interface ToDTO<T extends DTOInfo> {
+    public interface ToDTO<T extends DTO> {
         T toDTO();    // Should return a deep copy (no original references)
     }
 

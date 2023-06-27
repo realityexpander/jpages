@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @SuppressWarnings("FieldCanBeLocal")
 public
-class InMemoryDatabase<TEntity extends EntityInfo, TUUID2 extends IUUID2> implements IDatabase<TUUID2, TEntity> {
+class InMemoryDatabase<TEntity extends Entity, TUUID2 extends IUUID2> implements IDatabase<TUUID2, TEntity> {
     private final URL url;
     private final String user;
     private final String password;

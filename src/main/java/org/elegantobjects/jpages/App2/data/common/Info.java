@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.library.DomainLibraryInfo;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
@@ -64,15 +63,15 @@ public interface Info<TInfo> {
             context.log.d("Info:createInfoFromJson()", "obj = " + obj);
 
             // Set the UUID2 typeStr to match the Info Class name
-            String infoClazzName = infoClazz.getName();
+            String infoClazzName = UUID2.getUUID2TypeStr(infoClazz);
             infoClazz.cast(obj)
                     .getInfoId()
                     ._setUUID2TypeStr(infoClazzName);
 
             return obj;
         } catch (Exception e) {
-            context.log.d( "IDomainObject:createInfoFromJson()", "Failed to createDomainInfoObjectFromJson() for " +
-                    "class: " + DomainLibraryInfo.class.getName() + ", " +
+            context.log.d( "Info:createInfoFromJson()", "Failed to createInfoFromJson() for " +
+                    "class: " + infoClazz.getName() + ", " +
                     "json: " + json + ", " +
                     "exception: " + e.toString());
 
