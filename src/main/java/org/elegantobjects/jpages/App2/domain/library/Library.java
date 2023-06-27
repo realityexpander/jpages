@@ -1,11 +1,12 @@
-package org.elegantobjects.jpages.App2.domain;
+package org.elegantobjects.jpages.App2.domain.library;
 
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.user.User;
+import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.repo.LibraryInfoRepo;
+import org.elegantobjects.jpages.App2.domain.Context;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class Library extends IRole<DomainLibraryInfo> implements IUUID2 {
         this.id = id;
         this.id._setUUID2TypeStr(this.getUUID2TypeStr());
 
-        context.log.d(this,"Library (" + this.id + ") created by id with no Info");
+        context.log.d(this,"Library (" + this.id + ") created using id with no Info");
     }
     public Library(String json, Context context) { this(json, DomainLibraryInfo.class, context); }
     public Library(Context context) {

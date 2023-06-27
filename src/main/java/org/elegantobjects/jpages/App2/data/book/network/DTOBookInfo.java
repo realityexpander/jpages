@@ -1,14 +1,15 @@
-package org.elegantobjects.jpages.App2.data.network;
+package org.elegantobjects.jpages.App2.data.book.network;
 
 import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.common.network.DTOInfo;
 import org.elegantobjects.jpages.App2.data.common.Info;
-import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.book.DomainBookInfo;
 import org.jetbrains.annotations.NotNull;
 
-public class DTOBookInfo extends DTO
+public class DTOBookInfo extends DTOInfo
         implements
         ModelInfo.ToDomain<DomainBookInfo>,
         ModelInfo.ToDomain.hasToDeepCopyDomainInfo<DomainBookInfo>,

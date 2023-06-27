@@ -21,7 +21,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         this.uuid = ((UUID2<?>) uuid2).uuid();
 
         if(uuid2TypeStr != null) {
-            this.uuid2TypeStr = normalizeUuid2TypeString(uuid2TypeStr);
+            this.uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
         } else {
             this.uuid2TypeStr = "UUID"; // Default to untyped UUID
         }
@@ -77,7 +77,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     // Note: Should only be used when importing JSON
     public void _setUUID2TypeStr(String uuid2TypeStr) {
-        this.uuid2TypeStr = normalizeUuid2TypeString(uuid2TypeStr);
+        this.uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
     }
 
     @Override
@@ -187,8 +187,9 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     ////////////////////////////
     ///// Private helpers //////
+    ////////////////////////////
 
-    private String normalizeUuid2TypeString(String uuid2TypeStr) {
+    private String getNormalizedUuid2TypeString(String uuid2TypeStr) {
         if(uuid2TypeStr == null) {
             return "UUID"; // unspecified-type
         }

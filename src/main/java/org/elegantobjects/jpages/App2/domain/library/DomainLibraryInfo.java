@@ -1,12 +1,11 @@
-package org.elegantobjects.jpages.App2.domain.domainInfo;
+package org.elegantobjects.jpages.App2.domain.library;
 
-import org.elegantobjects.jpages.App2.common.DomainInfo;
+import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.common.ModelInfo;
-import org.elegantobjects.jpages.App2.domain.Book;
-import org.elegantobjects.jpages.App2.domain.Library;
-import org.elegantobjects.jpages.App2.domain.User;
+import org.elegantobjects.jpages.App2.domain.book.Book;
+import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

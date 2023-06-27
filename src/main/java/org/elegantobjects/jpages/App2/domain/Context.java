@@ -2,14 +2,14 @@ package org.elegantobjects.jpages.App2.domain;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.elegantobjects.jpages.App2.data.network.BookInfoApi;
-import org.elegantobjects.jpages.App2.data.local.BookInfoDatabase;
+import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
+import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.domain.common.IContext;
-import org.elegantobjects.jpages.App2.domain.repo.BookInfoRepo;
-import org.elegantobjects.jpages.App2.domain.repo.LibraryInfoRepo;
-import org.elegantobjects.jpages.App2.domain.repo.UserInfoRepo;
+import org.elegantobjects.jpages.App2.domain.book.BookInfoRepo;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
+import org.elegantobjects.jpages.App2.domain.user.UserInfoRepo;
 
 import static org.elegantobjects.jpages.App2.domain.Context.ContextType.PRODUCTION;
 

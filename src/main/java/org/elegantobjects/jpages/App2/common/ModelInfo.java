@@ -3,9 +3,10 @@ package org.elegantobjects.jpages.App2.common;
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.network.DTO;
-import org.elegantobjects.jpages.App2.data.local.Entity;
+import org.elegantobjects.jpages.App2.data.common.network.DTOInfo;
+import org.elegantobjects.jpages.App2.data.common.local.EntityInfo;
 import org.elegantobjects.jpages.App2.domain.Context;
+import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.jetbrains.annotations.NotNull;
 
 // "{Model}Info" Data Holders held inside each App Domain Object.
@@ -56,10 +57,10 @@ public class ModelInfo {
             }
         }
     }
-    public interface ToEntity<T extends Entity> {
+    public interface ToEntity<T extends EntityInfo> {
         T toEntity(); // Should return a deep copy (no original references)
     }
-    public interface ToDTO<T extends DTO> {
+    public interface ToDTO<T extends DTOInfo> {
         T toDTO();    // Should return a deep copy (no original references)
     }
 

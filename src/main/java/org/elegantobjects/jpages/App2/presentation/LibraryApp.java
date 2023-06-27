@@ -1,13 +1,16 @@
 package org.elegantobjects.jpages.App2.presentation;
 
 
-import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.*;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainUserInfo;
+import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
+import org.elegantobjects.jpages.App2.domain.book.Book;
+import org.elegantobjects.jpages.App2.domain.Context;
+import org.elegantobjects.jpages.App2.domain.book.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.library.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.user.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

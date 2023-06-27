@@ -1,17 +1,17 @@
-package org.elegantobjects.jpages.App2.domain.repo;
+package org.elegantobjects.jpages.App2.domain.book;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.local.BookInfoDatabase;
-import org.elegantobjects.jpages.App2.data.local.EntityBookInfo;
-import org.elegantobjects.jpages.App2.data.network.BookInfoApi;
-import org.elegantobjects.jpages.App2.data.network.DTOBookInfo;
-import org.elegantobjects.jpages.App2.domain.Book;
+import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
+import org.elegantobjects.jpages.App2.data.book.local.EntityBookInfo;
+import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
+import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
+import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.IRepo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.book.DomainBookInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;

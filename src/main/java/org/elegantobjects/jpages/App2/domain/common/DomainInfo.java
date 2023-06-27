@@ -1,8 +1,8 @@
-package org.elegantobjects.jpages.App2.common;
+package org.elegantobjects.jpages.App2.domain.common;
 
+import org.elegantobjects.jpages.App2.common.ModelInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.common.ModelInfo;
 
 import java.util.*;
 

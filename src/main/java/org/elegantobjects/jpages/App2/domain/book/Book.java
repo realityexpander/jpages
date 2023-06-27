@@ -1,11 +1,10 @@
-package org.elegantobjects.jpages.App2.domain;
+package org.elegantobjects.jpages.App2.domain.book;
 
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.repo.BookInfoRepo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
 import org.jetbrains.annotations.NotNull;
 
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects

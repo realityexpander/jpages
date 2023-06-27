@@ -2,10 +2,12 @@ package org.elegantobjects.jpages.App2.domain.common;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.*;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainBookInfo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.book.Book;
+import org.elegantobjects.jpages.App2.domain.book.DomainBookInfo;
+import org.elegantobjects.jpages.App2.domain.library.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.user.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.user.User;
 
 // Repo only accepts/returns Domain Models, and internally converts to/from DTOs/Entities/Domains
 // - works with the network API & local database to perform CRUD operations, and also performs validation.

@@ -1,12 +1,12 @@
-package org.elegantobjects.jpages.App2.domain.repo;
+package org.elegantobjects.jpages.App2.domain.user;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.User;
+import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.common.IRepo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainUserInfo;
+import org.elegantobjects.jpages.App2.domain.user.DomainUserInfo;
 
 // Holds User info for all users in the system (simple CRUD operations)
 public class UserInfoRepo extends Repo implements IRepo.UserInfo {

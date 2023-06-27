@@ -1,13 +1,13 @@
-package org.elegantobjects.jpages.App2.domain.repo;
+package org.elegantobjects.jpages.App2.domain.library;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.Book;
-import org.elegantobjects.jpages.App2.domain.Library;
+import org.elegantobjects.jpages.App2.domain.book.Book;
+import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.common.IRepo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
-import org.elegantobjects.jpages.App2.domain.domainInfo.DomainLibraryInfo;
+import org.elegantobjects.jpages.App2.domain.library.DomainLibraryInfo;
 
 // Holds Library info for all the libraries in the system (simple CRUD operations)
 public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfo {
