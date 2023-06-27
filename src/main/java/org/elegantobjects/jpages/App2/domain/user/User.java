@@ -181,10 +181,12 @@ public class User extends IRole<UserInfo> implements IUUID2 {
         return unacceptBookResult;
     }
 
+    // Convenience method to checkout a Book from a Library
     public Result<UUID2<Book>> checkoutBookFromLibrary(Book book, Library library) {
         context.log.d(this,"User (" + this.id + "), book: " + this.id + ", library: " + library.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
+        // Note: Simply delegating to the Library Role Object
         Result<Book> bookResult = library.checkOutBookToUser(book, this);
         if (bookResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<Book>) bookResult).exception());

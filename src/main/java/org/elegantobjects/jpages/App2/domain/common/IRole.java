@@ -57,7 +57,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
         this.info = info;
         this.context = context;
     }
-    protected <TDomainInfo_ extends Model.ToDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
+    protected <TDomainInfo_ extends Model.ToInfoDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
     IRole(
         @NotNull String domainInfoJson,
         Class<TDomainInfo_> classType,
@@ -116,7 +116,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
     @SuppressWarnings("unchecked") // for _setIdFromImportedJson() call
     public static <
             TDomain extends DomainInfo,  // restrict to Domain subclasses, ie: Domain.BookInfo
-            TDomainInfo extends Model.ToDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
+            TDomainInfo extends Model.ToInfoDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
             TToInfo extends ToInfo<?>
             > TDomainInfo createDomainInfoFromJson(
             String json,

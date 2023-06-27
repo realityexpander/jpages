@@ -12,22 +12,22 @@ import java.util.*;
 
 public class LibraryInfo extends DomainInfo
         implements
-        Model.ToDomain<LibraryInfo>
+        Model.ToInfoDomain<LibraryInfo>
 {
     private final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     final private String name;
     final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
-    final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // books known & available in this library
+    final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // known books & number available in this library
 
     public LibraryInfo(
         @NotNull UUID2<Library> id,
         String name,
-        UUID2.HashMap<User, ArrayList<UUID2<Book>>> checkoutUserBookMap,
+        UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap,
         UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap
     ) {
         super(id);
         this.name = name;
-        this.userIdToCheckedOutBookIdMap = checkoutUserBookMap;
+        this.userIdToCheckedOutBookIdMap = userIdToCheckedOutBookIdMap;
         this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
         this.id = id;
     }

@@ -57,7 +57,7 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
                 .toDeepCopyDomainInfo();
 
         // Cache to Local DB
-        Result<BookInfoEntity> resultDB = database.updateBookInfo(bookInfo.toEntity());
+        Result<BookInfoEntity> resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
         if (resultDB instanceof Result.Failure) {
             Exception exception = ((Result.Failure<BookInfoEntity>) resultDB).exception();
             return new Result.Failure<>(exception);
@@ -125,10 +125,10 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
         Result<BookInfoDTO> resultApi;
         switch (updateKind) {
             case UPDATE:
-                resultApi = api.updateBookInfo(bookInfo.toDTO());
+                resultApi = api.updateBookInfo(bookInfo.toInfoDTO());
                 break;
             case ADD:
-                resultApi = api.addBookInfo(bookInfo.toDTO());
+                resultApi = api.addBookInfo(bookInfo.toInfoDTO());
                 break;
             default:
                 return new Result.Failure<>(new Exception("UpdateType not supported: " + updateKind));
@@ -143,10 +143,10 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
         Result<BookInfoEntity> resultDB;
         switch (updateKind) {
             case UPDATE:
-                resultDB = database.updateBookInfo(bookInfo.toEntity());
+                resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
                 break;
             case ADD:
-                resultDB = database.addBookInfo(bookInfo.toEntity());
+                resultDB = database.addBookInfo(bookInfo.toInfoEntity());
                 break;
             default:
                 return new Result.Failure<>(new Exception("UpdateType not supported: " + updateKind));

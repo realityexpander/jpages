@@ -30,7 +30,7 @@ public class Model {
     // - DTO.{Domain}Info
     ///////////////////////////////
 
-    public interface ToDomain<TDomainInfo extends DomainInfo> {
+    public interface ToInfoDomain<TDomainInfo extends DomainInfo> {
         UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
         @SuppressWarnings("unchecked")
@@ -46,7 +46,7 @@ public class Model {
         // This interface enforces all DomainInfo objects to include a deepCopyDomainInfo() method
         // - Just add "implements ToDomainInfo.deepCopyDomainInfo<ToDomainInfo<Domain>>" to the class
         //   definition, and the deepCopy() method will be added.
-        interface hasToDeepCopyDomainInfo<TToInfo extends ToDomain<? extends DomainInfo>> {
+        interface hasToDeepCopyDomainInfo<TToInfo extends ToInfoDomain<? extends DomainInfo>> {
 
             @SuppressWarnings("unchecked")
             default <TDomainInfo extends DomainInfo>
@@ -57,11 +57,11 @@ public class Model {
             }
         }
     }
-    public interface ToEntity<T extends Entity> {
-        T toEntity(); // Should return a deep copy (no original references)
+    public interface ToInfoEntity<T extends Entity> {
+        T toInfoEntity(); // Should return a deep copy (no original references)
     }
-    public interface ToDTO<T extends DTO> {
-        T toDTO();    // Should return a deep copy (no original references)
+    public interface ToInfoDTO<T extends DTO> {
+        T toInfoDTO();    // Should return a deep copy (no original references)
     }
 
     public String toPrettyJson() {

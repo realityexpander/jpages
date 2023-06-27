@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class BookInfoDTO extends DTO
         implements
-        Model.ToDomain<BookInfo>,
-        Model.ToDomain.hasToDeepCopyDomainInfo<BookInfo>,
+        Model.ToInfoDomain<BookInfo>,
+        Model.ToInfoDomain.hasToDeepCopyDomainInfo<BookInfo>,
         Info.ToInfo<BookInfoDTO>,
         Info.hasToDeepCopyInfo<BookInfoDTO>
 {

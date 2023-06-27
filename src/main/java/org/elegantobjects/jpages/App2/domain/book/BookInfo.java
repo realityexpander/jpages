@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public class BookInfo extends DomainInfo
     implements
-        Model.ToEntity<BookInfoEntity>,
-        Model.ToDTO<BookInfoDTO>,
-        Model.ToDomain<BookInfo>
+        Model.ToInfoEntity<BookInfoEntity>,
+        Model.ToInfoDTO<BookInfoDTO>,
+        Model.ToInfoDomain<BookInfo>
 {
     private final UUID2<Book> id; // note this is a UUID2<Book> not a UUID2<BookInfo>, it is the id of the Book.
     public final String title;
@@ -46,7 +46,9 @@ public class BookInfo extends DomainInfo
         this(id, "", "", "");
     }
 
-    // Domain Must accept both `DTO.BookInfo` and `Entity.BookInfo` (and convert to Domain.BookInfo)
+    // DomainInfo objects Must:
+    // - Accept both `DTO.BookInfo` and `Entity.BookInfo`
+    // - Convert to Domain.BookInfo
     public BookInfo(@NotNull BookInfoDTO bookInfo) {
         // Converts from DTO to Domain
         // todo validation here
@@ -77,15 +79,12 @@ public class BookInfo extends DomainInfo
     public UUID2<Book> id() {
         return this.id;
     }
-
     public BookInfo withTitle(String title) {
         return new BookInfo(this.id, title, this.author, this.description);
     }
-
     public BookInfo withAuthor(String authorName) {
         return new BookInfo(this.id, this.title, authorName, this.description);
     }
-
     public BookInfo withDescription(String description) {
         return new BookInfo(this.id, this.title, this.author, description);
     }
@@ -100,12 +99,11 @@ public class BookInfo extends DomainInfo
     /////////////////////////////////////
 
     @Override
-    public BookInfoDTO toDTO() {
+    public BookInfoDTO toInfoDTO() {
         return new BookInfoDTO(this);
     }
-
     @Override
-    public BookInfoEntity toEntity() {
+    public BookInfoEntity toInfoEntity() {
         return new BookInfoEntity(this);
     }
 

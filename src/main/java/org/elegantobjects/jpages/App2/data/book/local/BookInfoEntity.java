@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class BookInfoEntity extends Entity
     implements
-        Model.ToDomain<BookInfo>,
-        Model.ToDomain.hasToDeepCopyDomainInfo<BookInfo>,
+        Model.ToInfoDomain<BookInfo>,
+        Model.ToInfoDomain.hasToDeepCopyDomainInfo<BookInfo>,
         Info.ToInfo<BookInfoEntity>,
         Info.hasToDeepCopyInfo<BookInfoEntity>
 {
