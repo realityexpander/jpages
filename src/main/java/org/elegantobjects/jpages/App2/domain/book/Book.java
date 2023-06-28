@@ -4,11 +4,11 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.common.IRole;
+import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.jetbrains.annotations.NotNull;
 
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
-public class Book extends IRole<BookInfo> implements IUUID2 {
+public class Book extends Role<BookInfo> implements IUUID2 {
     public final UUID2<Book> id;
     private final BookInfoRepo repo;
 

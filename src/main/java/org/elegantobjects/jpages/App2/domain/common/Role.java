@@ -16,7 +16,7 @@ import java.util.UUID;
 
 /////////////////////////////////////////////////////
 // Domain Role - Common Domain Role Abstract class
-public abstract class IRole<TDomainInfo extends DomainInfo>
+public abstract class Role<TDomainInfo extends DomainInfo>
         implements
         Info<TDomainInfo>,
         IUUID2
@@ -39,7 +39,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
                     .getGenericSuperclass())
                     .getActualTypeArguments()[0];
 
-    private IRole(
+    private Role(
             @NotNull UUID id,
             TDomainInfo info,
             @NotNull Context context
@@ -48,7 +48,7 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
         this.info = info;
         this.context = context;
     }
-    private IRole(
+    private Role(
             @NotNull UUID2<?> id,
             TDomainInfo info,
             @NotNull Context context
@@ -58,32 +58,32 @@ public abstract class IRole<TDomainInfo extends DomainInfo>
         this.context = context;
     }
     protected <TDomainInfo_ extends Model.ToInfoDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
-    IRole(
+    Role(
         @NotNull String domainInfoJson,
         Class<TDomainInfo_> classType,
         Context context
     ) {
         this(
             Objects.requireNonNull(
-                IRole.createDomainInfoFromJson(domainInfoJson, classType, context)
+                Role.createDomainInfoFromJson(domainInfoJson, classType, context)
             ).getDomainInfo(),
             context
         );
     }
     protected <TDomainInfo_ extends TDomainInfo>
-    IRole(
+    Role(
         @NotNull TDomainInfo_ info,
         Context context
     ) {
         this(info.id(), info, context);
     }
-    protected IRole(
+    protected Role(
         @NotNull UUID2<?> id,
         Context context
     ) {
         this(id.toUUID(), null, context);
     }
-    IRole(Context context) {
+    Role(Context context) {
         this(UUID.randomUUID(), null, context);
     }
     // LEAVE for reference, for static Context instance implementation

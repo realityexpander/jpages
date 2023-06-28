@@ -4,19 +4,13 @@ import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.book.Book;
-import org.elegantobjects.jpages.App2.domain.common.IRole;
-import org.elegantobjects.jpages.App2.domain.user.User;
+import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static java.lang.String.format;
 
 // Account Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
-public class Account extends IRole<AccountInfo> implements IUUID2 {
+public class Account extends Role<AccountInfo> implements IUUID2 {
     public final UUID2<Account> id;
     private final AccountInfoRepo repo;
 

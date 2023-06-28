@@ -7,7 +7,7 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.account.Account;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
-import org.elegantobjects.jpages.App2.domain.common.IRole;
+import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 
 // User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
-public class User extends IRole<UserInfo> implements IUUID2 {
+public class User extends Role<UserInfo> implements IUUID2 {
     public final UUID2<User> id;
     private final UserInfoRepo repo;
 

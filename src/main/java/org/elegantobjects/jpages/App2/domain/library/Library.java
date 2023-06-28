@@ -6,7 +6,7 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.book.Book;
-import org.elegantobjects.jpages.App2.domain.common.IRole;
+import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ import java.util.Map;
 import static java.lang.String.format;
 
 // Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
-public class Library extends IRole<LibraryInfo> implements IUUID2 {
+public class Library extends Role<LibraryInfo> implements IUUID2 {
     public final UUID2<Library> id;
     private final LibraryInfoRepo repo;
 
@@ -118,11 +118,11 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
         }
 
-        if (!user.isAccountActive()) {
+        if (!user.isAccountActive()) { // this calls a wrapper to the User's Account domain object
             return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
         }
 
-        if (user.hasReachedMaxNumAcceptedBooks()) {
+        if (user.hasReachedMaxNumAcceptedBooks()) {  // this calls a wrapper to the User's Account domain object
             return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
         }
 
@@ -149,7 +149,7 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) receiveBookResult).exception());
         }
 
-        // Update the Info
+        // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
         if (updateInfoResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
