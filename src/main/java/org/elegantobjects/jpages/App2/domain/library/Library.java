@@ -114,7 +114,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) - checkOutBookToUser, userId: %s, bookId: %s", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if (isUnableToFindOrAddUser(user)) {
+        if (isUnableToFindOrRegisterUser(user)) {
             return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
         }
 
@@ -162,7 +162,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) - checkInBookFromUser, bookId %s from userID %s\n", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if (isUnableToFindOrAddUser(user)) {
+        if (isUnableToFindOrRegisterUser(user)) {
             return new Result.Failure<>(new Exception("User is not known, id: " + user.id));
         }
 
@@ -189,8 +189,9 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     // Published Helper Methods    //
     /////////////////////////////////
 
-    // This Library DomainObject enforces the rule: if a User is not known, they are added as a new user.
-    public boolean isUnableToFindOrAddUser(User user) {
+    // Note: This Library Role Object enforces the rule:
+    //   - if a User is not known, they are added as a new user.
+    public boolean isUnableToFindOrRegisterUser(User user) {
         context.log.d(this, format("Library (%s) for user: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return true;
 
@@ -198,7 +199,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return false;
         }
 
-        // Create a new User entry in the Library
+        // Automatically register a new User entry in the Library (if not already known)
         Result<UUID2<User>> addRegisteredUserResult = this.info.registerUser(user.id);
         //noinspection RedundantIfStatement
         if (addRegisteredUserResult instanceof Result.Failure) {
@@ -238,7 +239,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Make sure User is Known
-        if (isUnableToFindOrAddUser(user)) {
+        if (isUnableToFindOrRegisterUser(user)) {
             return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
         }
 
@@ -300,8 +301,8 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
 
     public void DumpDB(Context context) {
-        context.log.d(this,"\nDumping Library DB:");
+        context.log.d(this,"Dumping Library DB:");
         context.log.d(this,this.toJson());
-        context.log.d(this,"\n");
+        System.out.println();
     }
 }

@@ -128,8 +128,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // - Methods to modify it's DomainUserInfo //
     /////////////////////////////////////////////
 
-    // Note: This delegates to its internal Account object.
-    // - User has no intimate knowledge of the AccountInfo object, other than
+    // Note: This delegates to this User's internal Account Role object.
+    // - User has no intimate knowledge of the Account object, other than
     //   its public methods.
     public Boolean isAccountActive() {
         context.log.d(this,"User (" + this.id + ")");
@@ -143,7 +143,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return accountinfo.isAccountActive();
     }
 
-    // Note: This delegates to its internal Account object.
+    // Note: This delegates to its internal Account Role object.
     // - User has no intimate knowledge of the AccountInfo object, other than
     //   its public methods.
     // - Method shows how to combine User and Account Roles to achieve functionality.

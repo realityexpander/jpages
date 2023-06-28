@@ -130,7 +130,7 @@ class LibraryApp {
             final AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo1Result).value(); // assume success
             final AccountInfo accountInfo2 = ((Result.Success<AccountInfo>) accountInfo2Result).value(); // assume success
 
-            // Create & populate User 1 in the User Repo
+            // Create & populate User1 in the User Repo for the Context
             final Result<UserInfo> user1InfoResult = createFakeUserInfoInContextUserRepo(1, ctx);
             assert user1InfoResult != null;  // assume success
             final UserInfo user1Info = ((Result.Success<UserInfo>) user1InfoResult).value(); // assume success

@@ -14,7 +14,7 @@ public class UserInfo extends DomainInfo
     implements
         Model.ToInfoDomain<UserInfo>
 {
-    private final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
+    public final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
     private final String name;
     private final String email;
     private final ArrayList<UUID2<Book>> acceptedBooks;

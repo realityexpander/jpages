@@ -18,7 +18,7 @@ public class UserInfoRepo extends Repo implements IRepo.UserInfoRepo {
 
     @Override
     public Result<UserInfo> fetchUserInfo(UUID2<User> id) {
-        log.d(this, "Fetching userId: " + id);
+        log.d(this, "userId: " + id);
 
         // Simulate network/database
         if (database.containsKey(id)) {
@@ -31,7 +31,7 @@ public class UserInfoRepo extends Repo implements IRepo.UserInfoRepo {
     @Override
     public Result<UserInfo> updateUserInfo(UserInfo userInfo) {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
-        log.d(this, method + " - user info: " + userInfo);
+        log.d(this, method + ", userId:" + userInfo.id);
 
         // Simulate network/database
         if (database.containsKey(userInfo.id())) {
@@ -44,7 +44,8 @@ public class UserInfoRepo extends Repo implements IRepo.UserInfoRepo {
 
     @Override
     public Result<UserInfo> upsertUserInfo(UserInfo userInfo) {
-        log.d(this, "Upserting user info: " + userInfo);
+        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
+        log.d(this, method + ", userId:" + userInfo.id);
 
         // Simulate network/database
         database.put(userInfo.id(), userInfo);
