@@ -1,5 +1,6 @@
 package org.elegantobjects.jpages.App2.domain.user;
 
+import org.elegantobjects.jpages.App2.common.util.Pair;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
@@ -18,7 +19,7 @@ public class User extends IRole<UserInfo> implements IUUID2 {
     public final UUID2<User> id;
     private final UserInfoRepo repo;
 
-    private final Account account;
+    private final Account account; // User's Account Domain Object
 
     public User(
         @NotNull UserInfo info,
@@ -70,7 +71,12 @@ public class User extends IRole<UserInfo> implements IUUID2 {
     public String toString() {
         return "User (" + this.id.toString() + ") - " +
                 "info=" + this.info.toString() + ", " +
-                "account=" + this.account.info().toString();
+                "accountInfo=" + this.account.info().toString();
+    }
+
+    public String toJson() {
+        Pair<UserInfo, AccountInfo> pair = new Pair<>(info, account.info());
+        return context.gson.toJson(pair);
     }
 
     /////////////////////////////////////

@@ -394,6 +394,7 @@ public class AccountInfo extends DomainInfo
     }
     private void addAuditLogEntry(Long timeStampMillis, String operation, Object value) {
         accountAuditLog.put(timeStampMillis, "{ \"" + operation + "\": \"" + value + "\" }");
+//        accountAuditLog.put(timeStampMillis, "{ " + operation + ": " + value + " }");
     }
     private void addAuditLogEntry(Long timeStampMillis, String operation, String key1, Object value1, String key2, Object value2) {
         accountAuditLog.put(timeStampMillis,
