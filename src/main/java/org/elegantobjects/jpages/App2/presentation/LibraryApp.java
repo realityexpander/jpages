@@ -124,8 +124,8 @@ class LibraryApp {
 
             // create Accounts for Users
             final Result<AccountInfo> accountInfo1Result = createFakeAccountInfoInContextAccountRepo(1, ctx);
-            assert accountInfo1Result != null;  // assume success
             final Result<AccountInfo> accountInfo2Result = createFakeAccountInfoInContextAccountRepo(2, ctx);
+            assert accountInfo1Result != null;  // assume success
             assert accountInfo2Result != null;  // assume success
             final AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo1Result).value(); // assume success
             final AccountInfo accountInfo2 = ((Result.Success<AccountInfo>) accountInfo2Result).value(); // assume success
@@ -524,7 +524,7 @@ class LibraryApp {
         return context.libraryInfoRepo()
             .upsertLibraryInfo(
                 new LibraryInfo(
-                    UUID2.createFakeUUID2(someNumber, Library.class), // info contains the DOMAIN id
+                    UUID2.createFakeUUID2(someNumber, Library.class), // uses DOMAIN id
                     "Library " + someNumber
                 )
             );
@@ -538,13 +538,25 @@ class LibraryApp {
         Integer someNumber = id;
         if (someNumber == null) someNumber = 1;
 
-        return context.accountInfoRepo()
+        Result<AccountInfo> accountInfoResult = context.accountInfoRepo()
             .upsertAccountInfo(
                 new AccountInfo(
-                    UUID2.createFakeUUID2(someNumber, Account.class), // info contains the DOMAIN id
-                    "Account " + someNumber
+                    UUID2.createFakeUUID2(someNumber, Account.class), // uses DOMAIN id
+                    "Account for User " + someNumber
                 )
             );
+
+        if (accountInfoResult instanceof Result.Failure) {
+            context.log.d(this,"Account Error: " +
+                ((Result.Failure<AccountInfo>) accountInfoResult).exception().getMessage()
+            );
+            return null;
+        }
+
+        AccountInfo accountInfo = ((Result.Success<AccountInfo>) accountInfoResult).value();
+        accountInfo.addTestAuditLogMessage("AccountInfo created for User " + someNumber);
+
+        return accountInfoResult;
     }
     private Result<UserInfo> createFakeUserInfoInContextUserRepo(
             final Integer id,
@@ -557,7 +569,7 @@ class LibraryApp {
             context.userInfoRepo()
                 .upsertUserInfo(
                     new UserInfo(
-                        UUID2.createFakeUUID2(someNumber, User.class),  // info contains the DOMAIN id
+                        UUID2.createFakeUUID2(someNumber, User.class),  // uses DOMAIN id
                         "User " + someNumber,
                         "user" + someNumber + "@gmail.com"
                     ));

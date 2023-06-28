@@ -18,7 +18,7 @@ public class UserInfoRepo extends Repo implements IRepo.UserInfoRepo {
 
     @Override
     public Result<UserInfo> fetchUserInfo(UUID2<User> id) {
-        log.d(this, "Fetching user info: " + id);
+        log.d(this, "Fetching userId: " + id);
 
         // Simulate network/database
         if (database.containsKey(id)) {

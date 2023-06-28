@@ -67,6 +67,12 @@ public class User extends IRole<UserInfo> implements IUUID2 {
     //     this(id, null);
     // }
 
+    public String toString() {
+        return "User (" + this.id.toString() + ") - " +
+                "info=" + this.info.toString() + ", " +
+                "account=" + this.account.info().toString();
+    }
+
     /////////////////////////////////////
     // IRole/UUID2 Required Overrides  //
     /////////////////////////////////////
@@ -80,7 +86,9 @@ public class User extends IRole<UserInfo> implements IUUID2 {
             return infoResult;
         }
 
+        // Success, so update self.
         this.info = ((Result.Success<UserInfo>) infoResult).value();
+
         return infoResult;
     }
 
@@ -114,6 +122,9 @@ public class User extends IRole<UserInfo> implements IUUID2 {
     // - Methods to modify it's DomainUserInfo //
     /////////////////////////////////////////////
 
+    // Note: This delegates to its internal Account object.
+    // - User has no intimate knowledge of the AccountInfo object, other than
+    //   its public methods.
     public Boolean isAccountActive() {
         context.log.d(this,"User (" + this.id + ")");
         AccountInfo accountinfo = this.account.info();
@@ -126,6 +137,13 @@ public class User extends IRole<UserInfo> implements IUUID2 {
         return accountinfo.isAccountActive();
     }
 
+    // Note: This delegates to its internal Account object.
+    // - User has no intimate knowledge of the AccountInfo object, other than
+    //   its public methods.
+    // - Method shows how to combine User and Account Roles to achieve functionality.
+    // - This method uses the UserInfo object to calculate the number of books the user has
+    //   and then delegates to the AccountInfo object to determine if the
+    //   number of books has reached the max.
     public Boolean hasReachedMaxNumAcceptedBooks() {
         context.log.d(this,"User (" + this.id + ")");
         AccountInfo accountInfo = this.account.info();
@@ -135,9 +153,8 @@ public class User extends IRole<UserInfo> implements IUUID2 {
             return false;
         }
 
-        return accountInfo.hasReachedMaxBooks(
-            this.info.calculateNumBooksAccepted()
-        );
+        int numBooksAcceptedByUser = this.info.calculateAmountOfAcceptedBooks();
+        return accountInfo.hasReachedMaxBooks(numBooksAcceptedByUser);
     }
 
     public AccountInfo getUserAccountInfo() {

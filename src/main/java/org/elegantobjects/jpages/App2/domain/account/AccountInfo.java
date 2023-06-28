@@ -381,17 +381,26 @@ public class AccountInfo extends DomainInfo
     }
 
     private void addAuditLogEntry(String operation) {
-        accountAuditLog.put(System.currentTimeMillis(), operation);
+        addAuditLogEntry(System.currentTimeMillis(), operation);
     }
     private void addAuditLogEntry(String operation, Object value) {
-        accountAuditLog.put(System.currentTimeMillis(), "{ \"" + operation + "\": " + value + " }");
+        addAuditLogEntry(System.currentTimeMillis(), operation, value);
     }
     private void addAuditLogEntry(String operation, String key1, Object value1, String key2, Object value2) {
-        accountAuditLog.put(System.currentTimeMillis(),
+        addAuditLogEntry(System.currentTimeMillis(), operation, key1, value1, key2, value2);
+    }
+    private void addAuditLogEntry(Long timeStampMillis, String operation) {
+        accountAuditLog.put(timeStampMillis, operation);
+    }
+    private void addAuditLogEntry(Long timeStampMillis, String operation, Object value) {
+        accountAuditLog.put(timeStampMillis, "{ \"" + operation + "\": \"" + value + "\" }");
+    }
+    private void addAuditLogEntry(Long timeStampMillis, String operation, String key1, Object value1, String key2, Object value2) {
+        accountAuditLog.put(timeStampMillis,
             "{ \"" + operation + "\": " +
                 "{" +
-                    "\"" + key1 + "\": " + value1 + "," +
-                    "\"" + key2 + "\": " + value2 +
+                    "\"" + key1 + "\": \"" + value1 + "\"," +
+                    "\"" + key2 + "\": \"" + value2 + "\"" +
                 "}" +
             "}"
         );

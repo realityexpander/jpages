@@ -73,7 +73,8 @@ public class UserInfo extends DomainInfo
 
     @Override
     public String toString() {
-        return "User: " + this.name + " (" + this.email + "), acceptedBooks: " + this.acceptedBooks;
+        //return "User: " + this.name + " (" + this.email + "), acceptedBooks: " + this.acceptedBooks;
+        return toPrettyJson();
     }
 
     ////////////////////////////////////////
@@ -116,7 +117,7 @@ public class UserInfo extends DomainInfo
         return this.acceptedBooks.contains(bookId);
     }
 
-    public int calculateNumBooksAccepted() {
+    public int calculateAmountOfAcceptedBooks() {
         return this.acceptedBooks.size();
     }
 
