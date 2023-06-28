@@ -15,7 +15,7 @@ public class BookInfoEntity extends Entity
         Info.ToInfo<BookInfoEntity>,
         Info.hasToDeepCopyInfo<BookInfoEntity>
 {
-    final UUID2<Book> id;  // note this is a UUID2<Book> and not a UUID2<BookInfo>
+    public final UUID2<Book> id;  // note this is a UUID2<Book> and not a UUID2<BookInfo>
     public final String title;
     public final String author;
     public final String description;

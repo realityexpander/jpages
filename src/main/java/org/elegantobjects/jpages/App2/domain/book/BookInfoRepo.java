@@ -34,7 +34,7 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
 
     @Override
     public Result<BookInfo> fetchBookInfo(UUID2<Book> id) {
-        log.d(this, "Repo.BookRepo.fetchBookInfo " + id);
+        log.d(this, "bookId " + id);
 
         // Make the request to API
         Result<BookInfoDTO> bookInfoApiResult = api.getBookInfo(id);
@@ -68,7 +68,7 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
 
     @Override
     public Result<BookInfo> updateBookInfo(BookInfo bookInfo) {
-        log.d(this, "Repo.BookRepo - Updating BookInfo: " + bookInfo);
+        log.d(this, "bookInfo: " + bookInfo);
 
         Result<BookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.UPDATE);
         if (bookResult instanceof Result.Failure) {
@@ -81,7 +81,7 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
 
     @Override
     public Result<BookInfo> addBookInfo(BookInfo bookInfo) {
-        log.d(this, "Repo.BookRepo - Adding book info: " + bookInfo);
+        log.d(this, "bookInfo: " + bookInfo);
 
         Result<BookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.ADD);
         if (bookResult instanceof Result.Failure) {
@@ -94,7 +94,7 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
 
     @Override
     public Result<BookInfo> upsertBookInfo(BookInfo bookInfo) {
-        log.d(this, "Repo.Book - Upserting book id: " + bookInfo.id());
+        log.d(this, "bookId: " + bookInfo.id());
 
         if (database.getBookInfo(bookInfo.id()) != null) {
             return updateBookInfo(bookInfo);

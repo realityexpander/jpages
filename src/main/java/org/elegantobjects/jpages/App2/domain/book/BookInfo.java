@@ -54,20 +54,24 @@ public class BookInfo extends DomainInfo
         // todo validation here
 
         // Domain decides what to include from the DTO
-        this(bookInfo.getInfoId(),
-                bookInfo.title,
-                bookInfo.author,
-                bookInfo.description);
+        this(
+            new UUID2<Book>(bookInfo.id.uuid(), Book.class), // change to domain type
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description
+        );
     }
     public BookInfo(@NotNull BookInfoEntity bookInfo) {
         // Converts from Entity to Domain
         // todo validation here
 
         // Domain decides what to include from the Entities
-        this(bookInfo.getInfoId(),
-                bookInfo.title,
-                bookInfo.author,
-                bookInfo.description);
+        this(
+            new UUID2<Book>(bookInfo.id.uuid(), Book.class), // change to domain type
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description
+        );
     }
 
     /////////////////////////////////////////////////

@@ -18,6 +18,7 @@ class InMemoryDatabase<TEntity extends Entity, TUUID2 extends IUUID2> implements
     private final String password;
 
     // Simulate a local database
+//    private final UUID2.HashMap<TUUID2, TEntity> database = new UUID2.HashMap<>(IUUID2.class);
     private final UUID2.HashMap<TUUID2, TEntity> database = new UUID2.HashMap<>();
 
     public InMemoryDatabase(URL url, String user, String password) {

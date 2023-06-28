@@ -116,6 +116,10 @@ public class UserInfo extends DomainInfo
         return this.acceptedBooks.contains(bookId);
     }
 
+    public int calculateNumBooksAccepted() {
+        return this.acceptedBooks.size();
+    }
+
     ///////////////////////////////
     // ToDomain implementation   //
     ///////////////////////////////
@@ -139,4 +143,5 @@ public class UserInfo extends DomainInfo
     public UUID2<?> getDomainInfoId() {
         return this.id;
     }
+
 }

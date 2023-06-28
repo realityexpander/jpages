@@ -4,6 +4,8 @@ package org.elegantobjects.jpages.App2.presentation;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
+import org.elegantobjects.jpages.App2.domain.account.Account;
+import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.book.BookInfo;
@@ -38,10 +40,18 @@ class LibraryApp {
         ctx.log.d(this,"Populating Book DB and API");
         PopulateFakeBookInfoInContextBookRepoDBandAPI(ctx);
 
+        // Create fake AccountInfo
+        AccountInfo accountInfo = new AccountInfo(
+            UUID2.createFakeUUID2(1, Account.class),
+            "User Name 1"
+        );
+
         Populate_And_Poke_Book:
-        if (true) {
-            ctx.log.d(this, "----------------------------------");
+        if (true)
+        {
+            System.out.println();
             ctx.log.d(this, "Populate_And_Poke_Book");
+            ctx.log.d(this, "----------------------------------");
 
             // Create a book object (it only has an id)
             Book book = new Book(UUID2.createFakeUUID2(1, Book.class), ctx);
@@ -110,7 +120,15 @@ class LibraryApp {
             );
 
             // Populate the library
-            ctx.libraryRepo().populateWithFakeBooks(library1InfoId, 10);
+            ctx.libraryInfoRepo().populateWithFakeBooks(library1InfoId, 10);
+
+            // create Accounts for Users
+            final Result<AccountInfo> accountInfo1Result = createFakeAccountInfoInContextAccountRepo(1, ctx);
+            assert accountInfo1Result != null;  // assume success
+            final Result<AccountInfo> accountInfo2Result = createFakeAccountInfoInContextAccountRepo(2, ctx);
+            assert accountInfo2Result != null;  // assume success
+            final AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo1Result).value(); // assume success
+            final AccountInfo accountInfo2 = ((Result.Success<AccountInfo>) accountInfo2Result).value(); // assume success
 
             // Create & populate User 1 in the User Repo
             final Result<UserInfo> user1InfoResult = createFakeUserInfoInContextUserRepo(1, ctx);
@@ -122,38 +140,43 @@ class LibraryApp {
             //////////////////////////////////
 
             // Create the App objects
-            final User user1 = new User(user1Info, ctx);
+            final Account account1 = new Account(accountInfo1, ctx);
+            final Account account2 = new Account(accountInfo2, ctx);
+            final User user1 = new User(user1Info, account1, ctx);
             final Library library1 = new Library(library1InfoId, ctx);
             final Book book1 = new Book(UUID2.createFakeUUID2(1, Book.class), ctx);
             final Book book2 = new Book(UUID2.createFakeUUID2(2, Book.class), ctx);
 
             // print User 1
+            System.out.println();
             ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
             Checkout_2_Books_to_User:
             if (true) {
-                ctx.log.d(this, "----------------------------------");
+                System.out.println();
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
+                ctx.log.d(this, "----------------------------------");
 
                 final Result<Book> bookResult = library1.checkOutBookToUser(book1, user1);
                 if (bookResult instanceof Result.Failure) {
                     ctx.log.d(this,"Checked out book FAILURE--> " +
-                            ((Result.Failure<Book>) bookResult).exception().getMessage()
+                        ((Result.Failure<Book>) bookResult).exception().getMessage()
                     );
                 } else {
                     ctx.log.d(this,"Checked out book SUCCESS --> " +
-                            ((Result.Success<Book>) bookResult).value().id
+                        ((Result.Success<Book>) bookResult).value().id
                     );
                 }
 
+                System.out.println();
                 final Result<Book> bookResult2 = library1.checkOutBookToUser(book2, user1);
                 if (bookResult2 instanceof Result.Failure) {
                     ctx.log.d(this,"Checked out book FAILURE--> " +
-                            ((Result.Failure<Book>) bookResult2).exception().getMessage()
+                        ((Result.Failure<Book>) bookResult2).exception().getMessage()
                     );
                 } else {
                     ctx.log.d(this,"Checked out book SUCCESS --> " +
-                            ((Result.Success<Book>) bookResult2).value().id
+                        ((Result.Success<Book>) bookResult2).value().id
                     );
                 }
 
@@ -162,8 +185,9 @@ class LibraryApp {
 
             Get_available_Books_and_Inventory_Counts_in_Library:
             if (true) {
-                ctx.log.d(this, "----------------------------------");
+                System.out.println();
                 ctx.log.d(this,"\nGetting available books and counts in library:");
+                ctx.log.d(this, "----------------------------------");
 
                 final Result<HashMap<Book, Integer>> availableBookToNumAvailableResult =
                         library1.calculateAvailableBookIdToNumberAvailableList();
@@ -182,33 +206,34 @@ class LibraryApp {
                         ((Result.Success<HashMap<Book, Integer>>) availableBookToNumAvailableResult).value();
 
                 // Print out available books
-                ctx.log.d(this,"\nAvailable Books in Library:");
+                System.out.println();
+                ctx.log.d(this,"Available Books in Library:");
                 for (Map.Entry<Book, Integer> availableBook : availableBooks.entrySet()) {
-                    final UUID2<Book> bookId = availableBook.getKey().id;
-                    final Book book3 = new Book(bookId, ctx);
 
-                    final Result<BookInfo> bookInfoResult = book3.fetchInfoResult();
+                    final Result<BookInfo> bookInfoResult =
+                            availableBook.getKey()
+                                .fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
                         ctx.log.d(this,
-                                "Book Error: " +
-                                        ((Result.Failure<BookInfo>) bookInfoResult)
-                                                .exception().getMessage()
+                        "Book Error: " +
+                            ((Result.Failure<BookInfo>) bookInfoResult)
+                                .exception().getMessage()
                         );
                     } else {
                         ctx.log.d(this,
-                                ((Result.Success<BookInfo>) bookInfoResult).value() +
-                                        " >> num available: " + availableBook.getValue()
+                        ((Result.Success<BookInfo>) bookInfoResult).value() +
+                            " >> num available: " + availableBook.getValue()
                         );
                     }
                 }
                 ctx.log.d(this,"Total Available Books (unique UUIDs): " + availableBooks.size());
-                ctx.log.d(this,"\n");
             }
 
             Get_Books_checked_out_by_User:
             if (true) {
+                System.out.println();
+                ctx.log.d(this,"Getting books checked out by user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
-                ctx.log.d(this,"\nGetting books checked out by user " + user1.id);
 
                 final Result<ArrayList<Book>> checkedOutBooksResult = library1.findBooksCheckedOutByUser(user1);
                 if (checkedOutBooksResult instanceof Result.Failure) {
@@ -222,7 +247,8 @@ class LibraryApp {
                 ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
 
                 // Print checked out books
-                ctx.log.d(this,"\nChecked Out Books for User [" + user1.fetchInfo().name() + ", " + user1.id + "]:");
+                System.out.println();
+                ctx.log.d(this,"Checked Out Books for User [" + user1.fetchInfo().name() + ", " + user1.id + "]:");
                 for (Book book : checkedOutBooks) {
                     final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
@@ -237,13 +263,13 @@ class LibraryApp {
                         );
                     }
                 }
-                System.out.print("\n");
             }
 
             Check_In_Book_from_User_to_Library:
             if (true) {
-                ctx.log.d(this, "----------------------------------");
+                System.out.println();
                 ctx.log.d(this,"\nCheck in book:" + book1.id + ", from user: " + user1.id + ", to library:" + library1.id);
+                ctx.log.d(this, "----------------------------------");
 
                 final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1, user1);
                 if (checkInBookResult instanceof Result.Failure) {
@@ -261,8 +287,9 @@ class LibraryApp {
 
             // Load Library from Json
             if (true) {
-                ctx.log.d(this, "----------------------------------");
+                System.out.println();
                 ctx.log.d(this,"Load Library from Json: ");
+                ctx.log.d(this, "----------------------------------");
 
                 // Library library2 = new Library(ctx); // uses random UUID, will cause expected error due to unknown UUID
                 Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
@@ -275,7 +302,7 @@ class LibraryApp {
                     "    \"00000000-0000-0000-0000-000000000001\": [\n" +
                     "      {\n" +
                     "        \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                    "        \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.common.Model.Domain.BookInfo\"\n" +
+                    "        \"uuid2TypeStr\": \"Object.IRole.Book\"\n" +
                     "      }\n" +
                     "    ]\n" +
                     "  },\n" +
@@ -293,12 +320,16 @@ class LibraryApp {
                     "  },\n" +
                     "  \"id\": {\n" +
                     "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                    "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.common.Model.Domain.LibraryInfo\"\n" +
+                    "    \"uuid2TypeStr\": \"Object.IRole.Library\"\n" +
                     "  }\n" +
                     "}";
 
                 // Check JSON loaded properly
                 if(true) {
+                    System.out.println();
+                    ctx.log.d(this,"Check JSON loaded properly: ");
+                    ctx.log.d(this, "----------------------------------");
+
                     Result<LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
 
@@ -317,6 +348,10 @@ class LibraryApp {
 
                 // Create a Library Domain Object from the Info
                 if(true) {
+                    System.out.println();
+                    ctx.log.d(this,"Create Library from LibraryInfo: ");
+                    ctx.log.d(this, "----------------------------------");
+
                     try {
                         LibraryInfo libraryInfo3 =
                                 Library.createDomainInfoFromJson(
@@ -336,25 +371,26 @@ class LibraryApp {
 
             // Load Book from DTO Json
             if (true) {
-                ctx.log.d(this, "----------------------------------");
+                System.out.println();
                 ctx.log.d(this,"Load BookInfo from DTO Json: ");
+                ctx.log.d(this, "----------------------------------");
 
                 String json =
-                        "{\n" +
-                                "  \"id\": {\n" +
-                                "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "    \"uuid2TypeStr\": \"org.elegantobjects.jpages.App2.common.Model.DTO.BookInfo\"\n" +
-                                "  },\n" +
-                                "  \"title\": \"The Great Gatsby\",\n" +
-                                "  \"author\": \"F. Scott Fitzgerald\",\n" +
-                                "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
-                                "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
-                                "}";
+                    "{\n" +
+                    "  \"id\": {\n" +
+                    "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
+                    "    \"uuid2TypeStr\": \"Model.DTO.BookInfo\"\n" +
+                    "  },\n" +
+                    "  \"title\": \"The Great Gatsby\",\n" +
+                    "  \"author\": \"F. Scott Fitzgerald\",\n" +
+                    "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
+                    "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
+                    "}";
 
                 try {
-                    BookInfoDTO bookInfo3 = new BookInfoDTO(json, ctx);
-//                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx);
-                    Book book3 = new Book(new BookInfo(bookInfo3), ctx);
+                    BookInfoDTO bookInfoDTO3 = new BookInfoDTO(json, ctx);
+//                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx); // keep & add to test
+                    Book book3 = new Book(new BookInfo(bookInfoDTO3), ctx);
 
                     ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
@@ -364,21 +400,26 @@ class LibraryApp {
 
             Check_out_Book_via_User:
             if (true) {
+                System.out.println();
+                ctx.log.d(this,"Check_out_Book_via_User: ");
+                ctx.log.d(this, "----------------------------------");
+
                 final Result<UserInfo> user2InfoResult = createFakeUserInfoInContextUserRepo(2, ctx);
                 assert user2InfoResult != null;
-                final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), ctx);
+                final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2 , ctx);
                 final Result<BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
 
                 if (book12Result instanceof Result.Failure) {
                     ctx.log.d(this,"Book Error: " +
-                            ((Result.Failure<BookInfo>) book12Result).exception().getMessage()
+                        ((Result.Failure<BookInfo>) book12Result).exception().getMessage()
                     );
                 } else {
 
                     final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12Result).value().id();
                     final Book book12 = new Book(book12id, ctx);
 
-                    ctx.log.d(this,"\nCheck out book " + book12id + " to user " + user1.id);
+                    System.out.println();
+                    ctx.log.d(this,"Check out book " + book12id + " to user " + user1.id);
 
                     final Result<Book> book12UpsertResult = library1.addTestBookToLibrary(book12, 1);
                     if (book12UpsertResult instanceof Result.Failure) {
@@ -402,21 +443,26 @@ class LibraryApp {
 
             Give_Book_To_User:
             if (true) {
+                System.out.println();
+                ctx.log.d(this,"Give_Book_To_User: ");
+                ctx.log.d(this, "----------------------------------");
+
                 final Result<UserInfo> user01InfoResult = createFakeUserInfoInContextUserRepo(1, ctx);
                 assert user01InfoResult != null;
-                final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), ctx);
-                final Result<UserInfo> user2InfoResult = createFakeUserInfoInContextUserRepo(1, ctx);
-                assert user2InfoResult != null;
-                final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), ctx);
-                final Result<BookInfo> book12Result = addFakeBookInfoInContextBookRepo(12, ctx);
+                final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), account1 , ctx);
 
-                if (book12Result instanceof Result.Failure) {
+                final Result<UserInfo> user2InfoResult = createFakeUserInfoInContextUserRepo(2, ctx);
+                assert user2InfoResult != null;
+                final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
+                final Result<BookInfo> book12InfoResult = addFakeBookInfoInContextBookRepo(12, ctx);
+
+                if (book12InfoResult instanceof Result.Failure) {
                     ctx.log.d(this,"Book Error: " +
-                        ((Result.Failure<BookInfo>) book12Result).exception().getMessage()
+                        ((Result.Failure<BookInfo>) book12InfoResult).exception().getMessage()
                     );
                 } else {
 
-                    final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12Result).value().id();
+                    final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
                     final Book book12 = new Book(book12id, ctx);
 
                     // If book was checked out, it is still checked out by the first person. todo if its checked out of a library, have the library perform a "checkout" transfer
@@ -452,18 +498,18 @@ class LibraryApp {
     //////////////////////////////////////////////////////////////////////
 
     private void PopulateFakeBookInfoInContextBookRepoDBandAPI(Context context) {
-        context.bookRepo().populateDatabaseWithFakeBookInfo();
-        context.bookRepo().populateApiWithFakeBookInfo();
+        context.bookInfoRepo().populateDatabaseWithFakeBookInfo();
+        context.bookInfoRepo().populateApiWithFakeBookInfo();
     }
 
     private void DumpBookDBandAPI(Context context) {
         System.out.print("\n");
         context.log.d(this,"DB Dump");
-        context.bookRepo().printDB();
+        context.bookInfoRepo().printDB();
 
         System.out.print("\n");
         context.log.d(this,"API Dump");
-        context.bookRepo().printAPI();
+        context.bookInfoRepo().printAPI();
 
         System.out.print("\n");
     }
@@ -475,7 +521,7 @@ class LibraryApp {
         Integer someNumber = id;
         if (someNumber == null) someNumber = 1;
 
-        return context.libraryRepo()
+        return context.libraryInfoRepo()
             .upsertLibraryInfo(
                 new LibraryInfo(
                     UUID2.createFakeUUID2(someNumber, Library.class), // info contains the DOMAIN id
@@ -484,6 +530,22 @@ class LibraryApp {
             );
     }
 
+
+    private Result<AccountInfo> createFakeAccountInfoInContextAccountRepo(
+            final Integer id,
+            Context context
+    ) {
+        Integer someNumber = id;
+        if (someNumber == null) someNumber = 1;
+
+        return context.accountInfoRepo()
+            .upsertAccountInfo(
+                new AccountInfo(
+                    UUID2.createFakeUUID2(someNumber, Account.class), // info contains the DOMAIN id
+                    "Account " + someNumber
+                )
+            );
+    }
     private Result<UserInfo> createFakeUserInfoInContextUserRepo(
             final Integer id,
             Context context
@@ -492,7 +554,7 @@ class LibraryApp {
         if (someNumber == null) someNumber = 1;
 
         Result<UserInfo> upsertUserInfoResult =
-            context.userRepo()
+            context.userInfoRepo()
                 .upsertUserInfo(
                     new UserInfo(
                         UUID2.createFakeUUID2(someNumber, User.class),  // info contains the DOMAIN id
@@ -514,23 +576,18 @@ class LibraryApp {
             final Integer id,
             Context context
     ) {
-        final BookInfo bookInfo = createFakeBookInfo(null, id);
+        final BookInfo bookInfo = createFakeBookInfo(id);
 
-        return context.bookRepo()
+        return context.bookInfoRepo()
                 .upsertBookInfo(bookInfo);
     }
 
-    private BookInfo createFakeBookInfo(String uuidStr, final Integer id) {
+    private BookInfo createFakeBookInfo(final Integer id) {
         Integer fakeId = id;
         if (fakeId == null) fakeId = 1;
 
         UUID2<Book> uuid2;
-        if (uuidStr == null)
-            uuid2 = UUID2.createFakeUUID2(fakeId, Book.class);
-        else {
-            uuid2 = UUID2.fromString(uuidStr);
-            uuid2._setUUID2TypeStr(UUID2.getUUID2TypeStr(Book.class));
-        }
+        uuid2 = UUID2.createFakeUUID2(fakeId, Book.class);
 
         return new BookInfo(
                 uuid2,

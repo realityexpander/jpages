@@ -3,6 +3,8 @@ package org.elegantobjects.jpages.App2.domain.user;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.account.Account;
+import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
 import org.elegantobjects.jpages.App2.domain.Context;
@@ -16,22 +18,27 @@ public class User extends IRole<UserInfo> implements IUUID2 {
     public final UUID2<User> id;
     private final UserInfoRepo repo;
 
+    private final Account account;
+
     public User(
         @NotNull UserInfo info,
+        Account account,
         Context context
     ) {
         super(info.id(), context);
-        this.repo = context.userRepo();
+        this.account = account;
+        this.repo = context.userInfoRepo();
         this.id = info.id();
 
         context.log.d(this,"User (" + this.id.toString() + ") created from Info");
     }
     public User(
         @NotNull UUID2<User> id,
-        Context context
+        Account account, Context context
     ) {
         super(id.toDomainUUID2(), context);
-        this.repo = context.userRepo();
+        this.account = account;
+        this.repo = context.userInfoRepo();
         this.id = id;
 
         context.log.d(this,"User (" + this.id.toString() + ") created from id with no Info");
@@ -39,19 +46,21 @@ public class User extends IRole<UserInfo> implements IUUID2 {
     public User(
             String json,
             Class<UserInfo> clazz,  // class type of json object
+            Account account,
             Context context
     ) {
         super(json, clazz, context);
-        this.repo = context.userRepo();
+        this.account = account;
+        this.repo = context.userInfoRepo();
         this.id = this.info.id();
 
         context.log.d(this,"User (" + this.id.toString() + ") created Json with class: " + clazz.getName());
     }
-    public User(String json, Context context) {
-        this(json, UserInfo.class, context);
+    public User(String json, Account account, Context context) {
+        this(json, UserInfo.class, account, context);
     }
-    public User(Context context) {
-        this(UUID2.randomUUID2(), context);
+    public User(Account account, Context context) {
+        this(UUID2.randomUUID2(), account, context);
     }
     // LEAVE for reference, for static Context instance implementation
     // User(UserUUID id) {
@@ -95,13 +104,46 @@ public class User extends IRole<UserInfo> implements IUUID2 {
 
     @Override
     public String getUUID2TypeStr() {
-        return this.getClass().getName();
+//        return this.getClass().getName();
+//        return UUID2.getUUID2TypeStr(User.class);
+        return UUID2.getUUID2TypeStr(this.getClass()); // todo test does this work?
     }
 
     /////////////////////////////////////////////
     // User Domain Business Logic Methods      //
     // - Methods to modify it's DomainUserInfo //
     /////////////////////////////////////////////
+
+    public Boolean isAccountActive() {
+        context.log.d(this,"User (" + this.id + ")");
+        AccountInfo accountinfo = this.account.info();
+
+        if (accountinfo == null) {
+            context.log.w(this,"User (" + this.id + ") - AccountInfo is null");
+            return false;
+        }
+
+        return accountinfo.isAccountActive();
+    }
+
+    public Boolean hasReachedMaxNumAcceptedBooks() {
+        context.log.d(this,"User (" + this.id + ")");
+        AccountInfo accountInfo = this.account.info();
+
+        if (accountInfo == null) {
+            context.log.w(this,"User (" + this.id + ") - AccountInfo is null");
+            return false;
+        }
+
+        return accountInfo.hasReachedMaxBooks(
+            this.info.calculateNumBooksAccepted()
+        );
+    }
+
+    public AccountInfo getUserAccountInfo() {
+        context.log.d(this,"User (" + this.id + ") should expose AccountInfo only to other Domain Objects");
+        return this.account.info();
+    }
 
     public Result<ArrayList<Book>> acceptBook(Book book) {
         context.log.d(this,"User (" + this.id.toString() + "),  book: " + this.id.toString());

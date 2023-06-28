@@ -6,6 +6,7 @@ import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.log.Log;
+import org.elegantobjects.jpages.App2.domain.account.AccountInfoRepo;
 import org.elegantobjects.jpages.App2.domain.common.IContext;
 import org.elegantobjects.jpages.App2.domain.book.BookInfoRepo;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
@@ -20,6 +21,7 @@ public class Context implements IContext {
     private final BookInfoRepo bookInfoRepo;
     private final UserInfoRepo userInfoRepo;
     private final LibraryInfoRepo libraryInfoRepo;
+    private final AccountInfoRepo accountInfoRepo;
 
     // Utility Singletons
     public final Gson gson;
@@ -31,17 +33,19 @@ public class Context implements IContext {
     }
 
     Context(
-        BookInfoRepo bookInfoRepo,
-        UserInfoRepo userInfoRepo,
-        LibraryInfoRepo libraryInfoRepo,
-        Gson gson,
-        ILog log
+            BookInfoRepo bookInfoRepo,
+            UserInfoRepo userInfoRepo,
+            LibraryInfoRepo libraryInfoRepo,
+            AccountInfoRepo accountInfoRepo,
+            Gson gson,
+            ILog log
     ) {
         this.bookInfoRepo = bookInfoRepo;
         this.userInfoRepo = userInfoRepo;
         this.libraryInfoRepo = libraryInfoRepo;
-        this.gson = gson;
+        this.accountInfoRepo = accountInfoRepo;
         this.log = log;
+        this.gson = gson;
     }
 
     public static Context setupProductionInstance() {
@@ -64,15 +68,16 @@ public class Context implements IContext {
     private static Context generateDefaultProductionContext() {
         ILog log = new Log();
         return new Context(
-                new BookInfoRepo(
-                        new BookInfoApi(),
-                        new BookInfoDatabase(),
-                        log
-                ),
-                new UserInfoRepo(log),
-                new LibraryInfoRepo(log),
-                new GsonBuilder().setPrettyPrinting().create(),
+            new BookInfoRepo(
+                new BookInfoApi(),
+                new BookInfoDatabase(),
                 log
+            ),
+            new UserInfoRepo(log),
+            new LibraryInfoRepo(log),
+            new AccountInfoRepo(log),
+            new GsonBuilder().setPrettyPrinting().create(),
+            log
         );
     }
 
@@ -96,13 +101,16 @@ public class Context implements IContext {
 //        return setupINSTANCE(null);
 //    }
 
-    public BookInfoRepo bookRepo() {
+    public BookInfoRepo bookInfoRepo() {
         return this.bookInfoRepo;
     }
-    public UserInfoRepo userRepo() {
+    public UserInfoRepo userInfoRepo() {
         return this.userInfoRepo;
     }
-    public LibraryInfoRepo libraryRepo() {
+    public LibraryInfoRepo libraryInfoRepo() {
         return this.libraryInfoRepo;
+    }
+    public AccountInfoRepo accountInfoRepo() {
+        return this.accountInfoRepo;
     }
 }

@@ -16,7 +16,7 @@ public class BookInfoDTO extends DTO
         Info.ToInfo<BookInfoDTO>,
         Info.hasToDeepCopyInfo<BookInfoDTO>
 {
-    final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
+    public final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
     public final String title;
     public final String author;
     public final String description;
@@ -48,7 +48,7 @@ public class BookInfoDTO extends DTO
 
     // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
     BookInfoDTO(@NotNull BookInfoDTO bookInfo) {
-        this(new UUID2<Book>(bookInfo.id().uuid(), Book.class),
+        this(new UUID2<Book>(bookInfo.id.uuid(), Book.class),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
@@ -83,13 +83,8 @@ public class BookInfoDTO extends DTO
 
     @Override
     public BookInfo toDeepCopyDomainInfo() {
-        // note: implement deep copy, if required.
-        return new BookInfo(
-                this.id,
-                this.title,
-                this.author,
-                this.description
-        );
+        // note: implement deep copy, if class is not flat.
+        return new BookInfo(this);
     }
 
     @Override

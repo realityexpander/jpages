@@ -14,7 +14,7 @@ public class LibraryInfo extends DomainInfo
         implements
         Model.ToInfoDomain<LibraryInfo>
 {
-    private final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
+    public final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     final private String name;
     final private UUID2.HashMap<User, ArrayList<UUID2<Book>>> userIdToCheckedOutBookIdMap;  // registered users of this library
     final private UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // known books & number available in this library

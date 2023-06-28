@@ -10,6 +10,7 @@ import org.elegantobjects.jpages.App2.domain.common.Repo;
 // Holds Library info for all the libraries in the system (simple CRUD operations)
 public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfoRepo {
     // simulate a database on server (UUID2<Library> is the key)
+//    private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>(Library.class);
     private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>();
 
     public LibraryInfoRepo(ILog log) {
@@ -18,7 +19,7 @@ public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfoRepo {
 
     @Override
     public Result<LibraryInfo> fetchLibraryInfo(UUID2<Library> id) {
-        log.d(this, "Repo.LibraryInfo - Fetching library info: " + id);
+        log.d(this, "libraryId: " + id);
 
         // Simulate network/database
         if (database.containsKey(id)) {
@@ -30,7 +31,7 @@ public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfoRepo {
 
     @Override
     public Result<LibraryInfo> updateLibraryInfo(LibraryInfo libraryInfo) {
-        log.d(this, "Repo.LibraryInfo - Updating library info: " + libraryInfo.id());
+        log.d(this, "libraryInfo.id: " + libraryInfo.id);
 
         // Simulate network/database
         if (database.containsKey(libraryInfo.id())) {
@@ -44,7 +45,7 @@ public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfoRepo {
 
     @Override
     public Result<LibraryInfo> upsertLibraryInfo(LibraryInfo libraryInfo) {
-        log.d(this, "Repo.LibraryInfo - Upsert library info: " + libraryInfo.id());
+        log.d(this, "libraryInfo.id: " + libraryInfo.id);
 
         // Simulate network/database
         database.put(libraryInfo.id(), libraryInfo);

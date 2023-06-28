@@ -2,6 +2,8 @@ package org.elegantobjects.jpages.App2.domain.common;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.account.Account;
+import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.book.BookInfo;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
@@ -38,5 +40,13 @@ public interface IRepo {
         Result<LibraryInfo> updateLibraryInfo(LibraryInfo libraryInfo);
 
         Result<LibraryInfo> upsertLibraryInfo(LibraryInfo libraryInfo);
+    }
+
+    interface AccountInfoRepo extends IRepo {
+        Result<AccountInfo> fetchAccountInfo(UUID2<Account> id);
+
+        Result<AccountInfo> updateAccountInfo(AccountInfo accountInfo);
+
+        Result<AccountInfo> upsertAccountInfo(AccountInfo accountInfo);
     }
 }

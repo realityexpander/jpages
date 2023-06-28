@@ -1,5 +1,6 @@
 package org.elegantobjects.jpages.App2.common.util.log;
 
+// Logs to the system console
 public class Log implements ILog {
     private void d(String tag, String msg) {
         System.out.println(tag + ": " + msg);

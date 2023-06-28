@@ -9,6 +9,7 @@ import org.elegantobjects.jpages.App2.domain.common.Repo;
 // Holds User info for all users in the system (simple CRUD operations)
 public class UserInfoRepo extends Repo implements IRepo.UserInfoRepo {
     // Simulate a database on a server somewhere
+//    private final UUID2.HashMap<User, UserInfo> database = new UUID2.HashMap<>(User.class);
     private final UUID2.HashMap<User, UserInfo> database = new UUID2.HashMap<>();
 
     public UserInfoRepo(ILog log) {

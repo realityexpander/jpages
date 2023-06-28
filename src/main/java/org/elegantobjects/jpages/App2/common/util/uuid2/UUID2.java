@@ -84,7 +84,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public static String getUUID2TypeStr(Class<?> clazz) {
 
-        // Climbs the class hierarchy for the clazz (ie: `ModelInfo.{Domaininfo}.{EntityInfo}`)
+        // Climbs the class hierarchy for the clazz, ie: `Model.{Domain}.{Entity}Info`
         String modelClassPathStr = clazz.getSuperclass().getSuperclass().toString();
         String domainClassPathStr = clazz.getSuperclass().toString();
         String entityClassPathStr = clazz.getName();
@@ -143,44 +143,50 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     // The problem is that normal HashMap uses `hash()` of UUID<{type}> object itself, which is not
     // consistent between UUID2<{type}> objects.
     // This class uses UUID2<T> for the keys, but the hash is the common UUID value stored in UUID class.
+    // todo allow UUID2<?> as the key
     public static class HashMap<TUUID2 extends IUUID2, TEntity> extends java.util.HashMap<UUID, TEntity> {
         private static final long serialVersionUID = 0x7723L;
+//        transient private Class<?> keyClazz;
 
+//        public HashMap(Class<?> keyClazz) {
         public HashMap() {
             super();
+//            this.keyClazz = keyClazz;
         }
 
         // Creates a database from another database
         public <TKey extends TUUID2, TValue extends TEntity>
+//            HashMap(UUID2.HashMap<UUID2<TKey>, TValue> sourceDatabase, Class<TUUID2> keyClazz) {
             HashMap(UUID2.HashMap<UUID2<TKey>, TValue> sourceDatabase) {
             super();
+//            this.keyClazz = keyClazz;
             this.putAll(sourceDatabase);
         }
 
-        public TEntity get(String uuid2Str) {
-            return get(UUID.fromString(uuid2Str));
+        public TEntity get(String uuidStr) {
+            return get(UUID.fromString(uuidStr));
         }
-        public TEntity get(UUID2<TUUID2> uuid2) {
+        public TEntity get(@NotNull UUID2<TUUID2> uuid2) {
             return get(uuid2.uuid);
         }
         public TEntity get(UUID uuid) { // allow UUIDs to be used as keys, but not recommended.
             return super.get(uuid);
         }
 
-        public TEntity put(String uuid2Str, TEntity value) {
-            return put(UUID2.fromString(uuid2Str), value);
+        public TEntity put(String uuidStr, TEntity value) {
+            return put(UUID2.fromString(uuidStr), value);
         }
-        public TEntity put(UUID2<TUUID2> uuid2, TEntity value) {
+        public TEntity put(@NotNull UUID2<TUUID2> uuid2, TEntity value) {
             return put(uuid2.uuid, value);
         }
         public TEntity put(UUID uuid, TEntity value) { // allow UUIDs to be used as keys, but not recommended.
             return super.put(uuid, value);
         }
 
-        public TEntity remove(String uuid2Str) {
-            return remove(UUID.fromString(uuid2Str));
+        public TEntity remove(String uuidStr) {
+            return remove(UUID.fromString(uuidStr));
         }
-        public TEntity remove(UUID2<TUUID2> uuid2) {
+        public TEntity remove(@NotNull UUID2<TUUID2> uuid2) {
             return remove(uuid2.uuid);
         }
         public TEntity remove(UUID uuid) { // allow UUIDs to be used as keys, but not recommended.
@@ -203,6 +209,9 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
                     @SuppressWarnings({"unchecked"})
 //                    UUID2<TUUID2> uuid2 = (UUID2<TUUID2>) UUID2.fromUUID(uuid);
                     UUID2<TKey> uuid2 = UUID2.fromUUID(uuid);
+//                    UUID2<TKey> uuid2 = (UUID2<TKey>) UUID2.fromUUID(uuid).toUUID2();
+//                    uuid2._setUUID2TypeStr(UUID2.getUUID2TypeStr(keyClazz));
+
                     uuid2Set.add(uuid2);
                 }
             } catch (Exception e) {

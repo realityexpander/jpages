@@ -17,7 +17,7 @@ public class Book extends IRole<BookInfo> implements IUUID2 {
         Context context
     ) {
         super(info, context);
-        this.repo = this.context.bookRepo();
+        this.repo = this.context.bookInfoRepo();
         this.id = info.id();
 
         context.log.d(this, "Book (" + this.id + ") created from Info");
@@ -28,7 +28,7 @@ public class Book extends IRole<BookInfo> implements IUUID2 {
         Context context
     ) {
         super(json, clazz, context);
-        this.repo = this.context.bookRepo();
+        this.repo = this.context.bookInfoRepo();
         this.id = this.info.id();
 
         context.log.d(this, "Book (" + this.id + ") created from JSON using class:" + clazz.getName());
@@ -38,7 +38,7 @@ public class Book extends IRole<BookInfo> implements IUUID2 {
         Context context
     ) {
         super(id.toDomainUUID2(), context);
-        this.repo = this.context.bookRepo();
+        this.repo = this.context.bookInfoRepo();
         this.id = id;
 
         context.log.d(this, "Book (" + this.id + ") created using id with no Info");
@@ -90,7 +90,9 @@ public class Book extends IRole<BookInfo> implements IUUID2 {
 
     @Override
     public String getUUID2TypeStr() {
-        return this.getClass().getName();
+//        return this.getClass().getName();
+//        return UUID2.getUUID2TypeStr(Book.class);
+        return UUID2.getUUID2TypeStr(this.getClass()); // todo test does this work?
     }
 
     ////////////////////////////////////////

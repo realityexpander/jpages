@@ -3,6 +3,7 @@ package org.elegantobjects.jpages.App2.domain.library;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.IRole;
@@ -25,7 +26,7 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
         Context context
     ) {
         super(info, context);
-        this.repo = this.context.libraryRepo();
+        this.repo = this.context.libraryInfoRepo();
         this.id = info.id();
 
         context.log.d(this,"Library (" + this.id + ") created from Info");
@@ -36,7 +37,7 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
         Context context
     ) {
         super(json, clazz, context);
-        this.repo = this.context.libraryRepo();
+        this.repo = this.context.libraryInfoRepo();
         this.id = this.info.id();
 
         context.log.d(this,"Library (" + this.id + ") created from Json with class: " + clazz.getName());
@@ -46,7 +47,7 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
         Context context
     ) {
         super(id, context);
-        this.repo = this.context.libraryRepo();
+        this.repo = this.context.libraryInfoRepo();
         this.id = id;
 
         context.log.d(this,"Library (" + this.id + ") created using id with no Info");
@@ -98,8 +99,11 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
 
     @Override
     public String getUUID2TypeStr() {
-        return this.getClass().getName();
+//        return this.getClass().getName();
+        //        return UUID2.getUUID2TypeStr(Library.class);
+        return UUID2.getUUID2TypeStr(this.getClass()); // todo test does this work?
     }
+
 
     ///////////////////////////////////////////
     // Library Domain Business Logic Methods //
@@ -107,11 +111,30 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
     ///////////////////////////////////////////
 
     public Result<Book> checkOutBookToUser(Book book, User user) {
-        context.log.d(this, format("Library (%s) - checkOutBookToUser, user: %s, book: %s", this.id, this.id.toString(), this.id.toString()));
+        context.log.d(this, format("Library (%s) - checkOutBookToUser, userId: %s, bookId: %s", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         if (isUnableToFindOrAddUser(user)) {
-            return new Result.Failure<>(new Exception("User is not known, id: " + this.id));
+            return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
+        }
+
+        if (!user.isAccountActive()) {
+            return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
+        }
+
+        if (user.hasReachedMaxNumAcceptedBooks()) {
+            return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
+        }
+
+        // Get the User's AccountInfo object
+        AccountInfo userAccountInfo = user.getUserAccountInfo();
+        if (userAccountInfo == null) {
+            return new Result.Failure<>(new Exception("User AccountInfo is null, userId: " + user.id));
+        }
+
+        // Check user fines are not exceeded
+        if (userAccountInfo.isMaxFineExceeded()) {
+            return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id));
         }
 
         // Check out Book to User
@@ -136,11 +159,11 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
     }
 
     public Result<Book> checkInBookFromUser(Book book, User user) {
-        context.log.d(this, format("Library (%s) - checkInBookFromUser, book %s from user %s\n", this.id, this.id, this.id));
+        context.log.d(this, format("Library (%s) - checkInBookFromUser, bookId %s from userID %s\n", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         if (isUnableToFindOrAddUser(user)) {
-            return new Result.Failure<>(new Exception("User is not known, id: " + this.id));
+            return new Result.Failure<>(new Exception("User is not known, id: " + user.id));
         }
 
         Result<Book> checkInBookResult = this.info.checkInBookFromUser(book, user);
@@ -162,9 +185,13 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
         return new Result.Success<>(book);
     }
 
+    /////////////////////////////////
+    // Published Helper Methods    //
+    /////////////////////////////////
+
     // This Library DomainObject enforces the rule: if a User is not known, they are added as a new user.
     public boolean isUnableToFindOrAddUser(User user) {
-        context.log.d(this, format("Library (%s) user: %s", this.id, this.id));
+        context.log.d(this, format("Library (%s) for user: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return true;
 
         if (isKnownUser(user)) {
@@ -202,13 +229,17 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
         return this.info.isBookIdAvailable(book);
     }
 
+    /////////////////////////////////////////
+    // Published Domain Reporting Methods  //
+    /////////////////////////////////////////
+
     public Result<ArrayList<Book>> findBooksCheckedOutByUser(User user) {
         context.log.d(this, format("Library (%s) User id: %s\n", this.id, user));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Make sure User is Known
         if (isUnableToFindOrAddUser(user)) {
-            return new Result.Failure<>(new Exception("User is not known, id: " + this.id));
+            return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
         }
 
         Result<ArrayList<UUID2<Book>>> entriesResult = this.info.findBooksCheckedOutByUserId(user.id);
@@ -245,6 +276,10 @@ public class Library extends IRole<LibraryInfo> implements IUUID2 {
 
         return new Result.Success<>(bookToNumberAvailable);
     }
+
+    /////////////////////////////////////////
+    // Published Testing Helper Methods    //
+    /////////////////////////////////////////
 
     public Result<Book> addTestBookToLibrary(Book book, Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));

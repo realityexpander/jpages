@@ -2,6 +2,7 @@ package org.elegantobjects.jpages.App2.domain.common;
 
 import com.google.gson.Gson;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
+import org.elegantobjects.jpages.App2.domain.account.AccountInfoRepo;
 import org.elegantobjects.jpages.App2.domain.book.BookInfoRepo;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.elegantobjects.jpages.App2.domain.user.UserInfoRepo;
@@ -11,6 +12,7 @@ public interface IContext {
     BookInfoRepo bookInfoRepo = null;
     UserInfoRepo userInfoRepo = null;
     LibraryInfoRepo libraryInfoRepo = null;
+    AccountInfoRepo accountInfoRepo = null;
     Gson gson = null;
     ILog log = null;
 }
