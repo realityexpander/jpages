@@ -2,7 +2,6 @@ package org.elegantobjects.jpages.App2.domain.account;
 
 import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.common.util.Result;
-import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
@@ -25,9 +24,9 @@ public class AccountInfo extends DomainInfo
                                       // - it's UUID matches the UUID of the UUID2<User> for this Account. // todo should this be a UUID2<User> instead?
     // final UUID2<User> userId;      // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User. // should this be used?
     public final String name;
-    public final AccountStatus accountStatus;  // status of account (active, inactive, suspended, etc.)
+    public final AccountStatus accountStatus;  // status of Account (active, inactive, suspended, etc.)
     public final int currentFinePennies;       // current fine amount in pennies
-    public final int maxBooks;                 // max books allowed to be checked out
+    public final int maxAcceptedBooks;         // max Books allowed to be checked out by this User
     public final int maxFinePennies;           // max fine amount allowed before account is suspended
 
     final private HashMap<Long, String> accountAuditLog; // timestamp_ms -> message as json
@@ -50,7 +49,7 @@ public class AccountInfo extends DomainInfo
         String name,
         AccountStatus accountStatus,
         int currentFinePennies,
-        int maxBooks,
+        int maxAcceptedBooksForUser,
         int maxFinePennies,
         HashMap<Long, String> accountAuditLog
     ) {
@@ -59,7 +58,7 @@ public class AccountInfo extends DomainInfo
         this.name = name;
         this.accountStatus = accountStatus;
         this.currentFinePennies = currentFinePennies;
-        this.maxBooks = maxBooks;
+        this.maxAcceptedBooks = maxAcceptedBooksForUser;
         this.maxFinePennies = maxFinePennies;
         this.accountAuditLog = accountAuditLog;
     }
@@ -80,7 +79,7 @@ public class AccountInfo extends DomainInfo
             accountInfo.name,
             accountInfo.accountStatus,
             accountInfo.currentFinePennies,
-            accountInfo.maxBooks,
+            accountInfo.maxAcceptedBooks,
             accountInfo.maxFinePennies,
             accountInfo.accountAuditLog
         );
@@ -125,7 +124,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 AccountStatus.ACTIVE,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -142,7 +141,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 AccountStatus.INACTIVE,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -159,7 +158,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 AccountStatus.SUSPENDED,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -176,7 +175,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 AccountStatus.CLOSED,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -198,7 +197,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 updatedAccountStatus,
                 this.currentFinePennies + fineAmountPennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -217,7 +216,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 updatedAccountStatus,
                 this.currentFinePennies - fineAmountPennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -236,7 +235,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 updatedAccountStatus,
                 newCurrentFineAmount,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -266,7 +265,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 this.accountStatus,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 maxFine,
                 this.accountAuditLog));
     }
@@ -336,7 +335,7 @@ public class AccountInfo extends DomainInfo
         return this.currentFinePennies >= this.maxFinePennies;
     }
     public boolean hasReachedMaxBooks(int numberOfBooksInPosession) {
-        return numberOfBooksInPosession >= this.maxBooks;
+        return numberOfBooksInPosession >= this.maxAcceptedBooks;
     }
 
     /////////////////////////////////////////
@@ -423,7 +422,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 newAccountStatus,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -437,7 +436,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 this.accountStatus,
                 newCurrentFineAmountPennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 this.accountAuditLog
         ));
@@ -470,7 +469,7 @@ public class AccountInfo extends DomainInfo
                 this.name,
                 this.accountStatus,
                 this.currentFinePennies,
-                this.maxBooks,
+                this.maxAcceptedBooks,
                 this.maxFinePennies,
                 new HashMap<>(this.accountAuditLog)
         );
