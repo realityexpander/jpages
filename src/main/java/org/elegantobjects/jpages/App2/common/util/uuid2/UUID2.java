@@ -46,6 +46,10 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         this((TUUID2) UUID2.fromUUID(uuid), clazz);
     }
 
+    public static UUID2<?> fromUUID2(UUID2<?> id, Class<?> clazz) {
+        return new UUID2<>(id, clazz);
+    }
+
     @Override
     public String toString() {
         return  "<" + getLast3SegmentsOfTypeStrPath(uuid2TypeStr) + ">" + uuid;
@@ -80,6 +84,10 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public static <TDomainUUID2 extends IUUID2>
     UUID2<TDomainUUID2> randomUUID2() {
         return new UUID2<>(UUID.randomUUID());
+    }
+    public static <TDomainUUID2 extends IUUID2>
+    UUID2<TDomainUUID2> randomUUID2(Class<TDomainUUID2> clazz) {
+        return new UUID2<>(UUID.randomUUID(), clazz);
     }
 
     public static String getUUID2TypeStr(Class<?> clazz) {

@@ -92,25 +92,24 @@ public interface Info<TInfo> {
         }
     }
 
-    default Result<TInfo> checkInfoIdMatchesJsonInfoId(TInfo infoFromJson, Class<?> infoClazz) {
+    default Result<TInfo> checkJsonInfoIdMatchesThisInfoId(TInfo infoFromJson, Class<?> infoClazz) {
 
         try {
             // Ensure JSON Info object has an id field
             Object idField = infoClazz.getDeclaredField("id").get(infoFromJson);
             if(idField == null) {
-                return new Result.Failure<>(new Exception("checkInfoIdMatchesJsonId(): Info class does not have an id field"));
+                return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an id field"));
             }
 
-            String idStr = idField.toString();
-            UUID infoFromJsonId = UUID.fromString(idStr);
+            UUID idFromJson = ((UUID2<?>)idField).uuid();
 
-            if (!infoFromJsonId.equals(this.id().uuid())) {
-                return new Result.Failure<>(new Exception("checkInfoIdMatchesJsonId(): Info id does not match json id, " +
+            if (!idFromJson.equals(this.id().uuid())) {
+                return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info id does not match json id, " +
                         "info id: " + this.id() + ", " +
-                        "json id: " + idStr));
+                        "json id: " + idFromJson));
             }
         } catch (NoSuchFieldException e) {
-            return new Result.Failure<>(new Exception("checkInfoIdMatchesJsonId(): Info class does not have an id field"));
+            return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an id field"));
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }

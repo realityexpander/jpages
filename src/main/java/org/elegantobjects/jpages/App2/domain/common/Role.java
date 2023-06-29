@@ -35,9 +35,24 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // Class of the Info<TDomain> info object (for Gson serialization)
     @SuppressWarnings("unchecked")
     private final Class<TDomainInfo> infoClazz =
-            (Class<TDomainInfo>) ((ParameterizedType) getClass()
+            getClass().getGenericSuperclass() instanceof ParameterizedType
+                ? (Class<TDomainInfo>) ((ParameterizedType) getClass()
                     .getGenericSuperclass())
-                    .getActualTypeArguments()[0];
+                    .getActualTypeArguments()[0]
+//                : null;
+//                : (Class<TDomainInfo>) getClass()
+//                    .getSuperclass()
+//                    .getGenericSuperclass();
+                : (Class<TDomainInfo>) (
+                        (ParameterizedType) (
+                            (Class<?>) (
+                                this.getClass()
+                                    .getGenericSuperclass()
+                            )
+                        ).getGenericSuperclass()
+                  ).getActualTypeArguments()[0];
+
+//    private final Class<?> infoClazz = this.getClass();
 
     private Role(
             @NotNull UUID id,
@@ -81,7 +96,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         @NotNull UUID2<?> id,
         Context context
     ) {
-        this(id.toUUID(), null, context);
+//        this(id.toUUID(), null, context);
+        this(id, null, context);
     }
     Role(Context context) {
         this(UUID.randomUUID(), null, context);
@@ -156,11 +172,13 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                 "id: " + this.id());
 
         try {
+//            Class<TDomainInfo> domainInfoClazz = this.infoClazz;
             Class<TDomainInfo> domainInfoClazz = this.infoClazz;
             TDomainInfo infoFromJson = this.context.gson.fromJson(json, domainInfoClazz);
             assert infoFromJson.getClass() == this.info.getClass();
 
-            Result<TDomainInfo> checkResult = checkInfoIdMatchesJsonInfoId(infoFromJson, domainInfoClazz);
+//            Result<TDomainInfo> checkResult = checkInfoIdMatchesJsonInfoId(infoFromJson, domainInfoClazz);
+            Result<TDomainInfo> checkResult = checkJsonInfoIdMatchesThisInfoId(infoFromJson, domainInfoClazz);
             if (checkResult instanceof Result.Failure) {
                 return checkResult;
             }

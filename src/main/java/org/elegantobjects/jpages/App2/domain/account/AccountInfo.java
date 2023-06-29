@@ -313,16 +313,29 @@ public class AccountInfo extends DomainInfo
         return this.accountStatus == AccountStatus.CLOSED;
     }
     public boolean isAccountInGoodStanding() {
-        return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.INACTIVE;
+        return this.accountStatus == AccountStatus.ACTIVE
+            && !this.isMaxFineExceeded();
     }
     public boolean isAccountInBadStanding() {
-        return this.accountStatus == AccountStatus.SUSPENDED || this.accountStatus == AccountStatus.CLOSED;
+        return this.accountStatus == AccountStatus.SUSPENDED
+            || this.accountStatus == AccountStatus.CLOSED
+            || this.accountStatus == AccountStatus.INACTIVE
+            || this.isMaxFineExceeded();
     }
-    public boolean isAccountInGoodStandingWithNoFines() {
-        return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.INACTIVE && this.currentFinePennies == 0;
+    public boolean isAccountInGoodStandingWithNoFines()  {
+        return this.accountStatus == AccountStatus.ACTIVE
+                && hasNoFines();
     }
     public boolean isAccountInGoodStandingWithFines() {
-        return this.accountStatus == AccountStatus.ACTIVE || this.accountStatus == AccountStatus.INACTIVE && this.currentFinePennies > 0;
+        return this.accountStatus == AccountStatus.ACTIVE
+                || this.accountStatus == AccountStatus.INACTIVE
+                && this.currentFinePennies > 0
+                && !this.isMaxFineExceeded();
+    }
+    public boolean isAccountInGoodStandingAndAbleToBorrowBooks(int numberOfBooksInPossession) {
+        return this.accountStatus == AccountStatus.ACTIVE
+            && !this.isMaxFineExceeded()
+            && !this.hasReachedMaxBorrowedBooks(numberOfBooksInPossession);
     }
 
     public boolean hasFines() {
@@ -334,8 +347,8 @@ public class AccountInfo extends DomainInfo
     public boolean isMaxFineExceeded() {
         return this.currentFinePennies >= this.maxFinePennies;
     }
-    public boolean hasReachedMaxBooks(int numberOfBooksInPosession) {
-        return numberOfBooksInPosession >= this.maxAcceptedBooks;
+    public boolean hasReachedMaxBorrowedBooks(int numberOfBooksInPossession) {
+        return numberOfBooksInPossession >= this.maxAcceptedBooks; // todo should count only books that are from this library
     }
 
     /////////////////////////////////////////

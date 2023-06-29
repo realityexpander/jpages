@@ -54,7 +54,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
     public Library(String json, Context context) { this(json, LibraryInfo.class, context); }
     public Library(Context context) {
-        this(UUID2.randomUUID2(), context);
+        this(UUID2.randomUUID2(Library.class), context);
     }
     // LEAVE for reference, for static Context instance implementation
     // Library() {
@@ -114,46 +114,32 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) - checkOutBookToUser, userId: %s, bookId: %s", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if (isUnableToFindOrRegisterUser(user)) {
-            return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
-        }
+        if (isUnableToFindOrRegisterUser(user)) return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
 
-        if (!user.isAccountActive()) { // this calls a wrapper to the User's Account domain object
-            return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
-        }
+        // this calls a wrapper to the User's Account domain object
+        if (!user.isAccountActive()) return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
 
-        if (user.hasReachedMaxNumAcceptedBooks()) {  // this calls a wrapper to the User's Account domain object
-            return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
-        }
+        // this calls a wrapper to the User's Account domain object
+        if (user.hasReachedMaxNumAcceptedBooks()) return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
 
         // Get the User's AccountInfo object
-        AccountInfo userAccountInfo = user.getUserAccountInfo();
-        if (userAccountInfo == null) {
-            return new Result.Failure<>(new Exception("User AccountInfo is null, userId: " + user.id));
-        }
+        AccountInfo userAccountInfo = user.accountInfo();
+        if (userAccountInfo == null) return new Result.Failure<>(new Exception("User AccountInfo is null, userId: " + user.id));
 
         // Check user fines are not exceeded
-        if (userAccountInfo.isMaxFineExceeded()) {
-            return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id));
-        }
+        if (userAccountInfo.isMaxFineExceeded()) return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id));
 
         // Check out Book to User
         Result<Book> checkOutBookresult = this.info.checkOutBookToUser(book, user);
-        if (checkOutBookresult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
-        }
+        if (checkOutBookresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
 
         // User receives Book
         Result<ArrayList<Book>> receiveBookResult = user.acceptBook(book);
-        if (receiveBookResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) receiveBookResult).exception());
-        }
+        if (receiveBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) receiveBookResult).exception());
 
         // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
-        if (updateInfoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
-        }
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
     }
@@ -162,25 +148,17 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) - checkInBookFromUser, bookId %s from userID %s\n", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if (isUnableToFindOrRegisterUser(user)) {
-            return new Result.Failure<>(new Exception("User is not known, id: " + user.id));
-        }
+        if (isUnableToFindOrRegisterUser(user)) return new Result.Failure<>(new Exception("User is not known, id: " + user.id));
 
         Result<Book> checkInBookResult = this.info.checkInBookFromUser(book, user);
-        if (checkInBookResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
-        }
+        if (checkInBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
 
         Result<ArrayList<UUID2<Book>>> userReturnedBookResult = user.unacceptBook(book);
-        if (userReturnedBookResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) userReturnedBookResult).exception());
-        }
+        if (userReturnedBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) userReturnedBookResult).exception());
 
-        // Update the Info
+        // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
-        if (updateInfoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
-        }
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
     }
@@ -213,21 +191,21 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library(%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookIdKnown(book);
+        return this.info.isBookKnown(book);
     }
 
     public boolean isKnownUser(User user) {
         context.log.d(this, format("Library (%s) User id: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isUserIdKnown(user);
+        return this.info.isUserKnown(user);
     }
 
     public boolean isBookAvailable(Book book) {
         context.log.d(this, format("Library (%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookIdAvailable(book);
+        return this.info.isBookAvailable(book);
     }
 
     /////////////////////////////////////////
@@ -252,7 +230,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         ArrayList<UUID2<Book>> bookIds = ((Result.Success<ArrayList<UUID2<Book>>>) entriesResult).value();
         ArrayList<Book> books = new ArrayList<>();
         for (UUID2<Book> entry : bookIds) {
-            books.add(new Book(entry, context));
+            books.add(new Book(entry, this, context));
         }
 
         return new Result.Success<>(books);
@@ -269,10 +247,14 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         // Convert list of UUID2<Book> to list of Book
         // Note: the BookInfo is not fetched, so the Book only contains the id. This is by design.
-        HashMap<UUID2<Book>, Integer> bookIdToNumberAvailable = ((Result.Success<HashMap<UUID2<Book>, Integer>>) entriesResult).value();
+        HashMap<UUID2<Book>, Integer> bookIdToNumberAvailable =
+                ((Result.Success<HashMap<UUID2<Book>, Integer>>) entriesResult).value();
         HashMap<Book, Integer> bookToNumberAvailable = new HashMap<>();
         for (Map.Entry<UUID2<Book>, Integer> entry : bookIdToNumberAvailable.entrySet()) {
-            bookToNumberAvailable.put(new Book(entry.getKey(), context), entry.getValue());
+            bookToNumberAvailable.put(
+                new Book(entry.getKey(), this, context),
+                entry.getValue()
+            );
         }
 
         return new Result.Success<>(bookToNumberAvailable);
@@ -287,15 +269,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         Result<UUID2<Book>> addBookResult =  this.info.addTestBook(book.id, count);
-        if (addBookResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<UUID2<Book>>) addBookResult).exception());
-        }
+        if (addBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<UUID2<Book>>) addBookResult).exception());
 
         // Update the Info
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
-        if (updateInfoResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
-        }
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
     }
@@ -306,3 +284,4 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         System.out.println();
     }
 }
+

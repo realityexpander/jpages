@@ -10,9 +10,11 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.library.PrivateLibrary;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 // User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
 public class User extends Role<UserInfo> implements IUUID2 {
@@ -160,10 +162,10 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         int numBooksAcceptedByUser = this.info.calculateAmountOfAcceptedBooks();
-        return accountInfo.hasReachedMaxBooks(numBooksAcceptedByUser);
+        return accountInfo.hasReachedMaxBorrowedBooks(numBooksAcceptedByUser);
     }
 
-    public AccountInfo getUserAccountInfo() {
+    public AccountInfo accountInfo() {
         context.log.d(this,"User (" + this.id + ") should expose AccountInfo only to other Domain Objects");
         return this.account.info();
     }
@@ -184,7 +186,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return findAllAcceptedBooks();
     }
 
-    public Result<ArrayList<UUID2<Book>>> unacceptBook(Book book) {
+    public Result<ArrayList<UUID2<Book>>> unacceptBook(@NotNull Book book) {
         context.log.d(this,"User (" + this.id + "), book: " + book.id.toString());
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -208,17 +210,49 @@ public class User extends Role<UserInfo> implements IUUID2 {
         // Create Book Domain list from the list of Book UUID2s
         ArrayList<Book> books = new ArrayList<>();
         for (UUID2<Book> bookId : this.info.findAllAcceptedBooks()) {
-            books.add(new Book(bookId, this.context));
+            books.add(new Book(bookId, null, this.context));
         }
 
         return new Result.Success<>(books);
+    }
+
+    // Include all books from a Library (ie: no private books)
+    public Result<ArrayList<Book>> findAllAcceptedLibraryBooks() { // todo test
+        context.log.d(this,"User (" + this.id + ")");
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Create Book Domain list from the list of Book UUID2s
+        Result<ArrayList<Book>> allAcceptedBooksresult = findAllAcceptedBooks();
+        if (allAcceptedBooksresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) allAcceptedBooksresult).exception());
+
+        // Filter out books that are not from a Library
+        ArrayList<Book> acceptedLibraryBooks = ((Result.Success<ArrayList<Book>>) allAcceptedBooksresult).value();
+        acceptedLibraryBooks.removeIf(book -> !book.isPrivateBook());
+
+        return new Result.Success<>(acceptedLibraryBooks);
+    }
+
+    // Include all books from a Library (ie: no private books)
+    public Result<ArrayList<Book>> findAllAcceptedPrivateLibraryBooks() {  // todo test
+        context.log.d(this,"User (" + this.id + ")");
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Create Book Domain list from the list of Book UUID2s
+        Result<ArrayList<Book>> allAcceptedBooksresult = findAllAcceptedBooks();
+        if (allAcceptedBooksresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) allAcceptedBooksresult).exception());
+
+        // Filter out books that are not from a Library
+        ArrayList<Book> acceptedPrivateLibraryBooks = ((Result.Success<ArrayList<Book>>) allAcceptedBooksresult).value();
+        acceptedPrivateLibraryBooks.removeIf(Book::isPrivateBook);
+
+        return new Result.Success<>(acceptedPrivateLibraryBooks);
     }
 
     // Note: *ONLY* the Domain Objects can take a Book from one User and give it to another User.
     // - Also notice that we are politely asking each Domain object to accept and unaccept a Book.
     // - No where is there any databases being accessed directly.
     // - All interactions are SOLELY directed via the Domain object's public methods.
-    public Result<ArrayList<UUID2<Book>>> giveBookToUser(Book book, User receivingUser) {
+    public Result<ArrayList<UUID2<Book>>> giveBookToUser(@NotNull Book book, @NotNull User receivingUser) {
         context.log.d(this,"User (" + this.id + ") - book: " + book.id + ", to receivingUser: " + receivingUser.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -226,15 +260,34 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (!this.info.isBookAcceptedByUser(book.id))
             return new Result.Failure<>(new Exception("User (" + this.id + ") does not have book (" + book.id + ")"));
 
-        // Add the Book to the receiving User (the receiving User will automatically update their own Info)
-        Result<ArrayList<Book>> acceptBookResult = receivingUser.acceptBook(book);
-        if (acceptBookResult instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception());
+        // If book is not checked out from a normal library
+        if(book.sourceLibrary instanceof PrivateLibrary) {
 
-        // Remove the Book from this User
-        Result<ArrayList<UUID2<Book>>> unacceptBookResult = this.unacceptBook(book);
-        if (unacceptBookResult instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception());
+            // Add the Book to the receiving User (the receiving User will automatically update their own Info)
+            Result<ArrayList<Book>> acceptBookResult = receivingUser.acceptBook(book);
+            if (acceptBookResult instanceof Result.Failure)
+                return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception());
+
+            // Remove the Book from this User
+            Result<ArrayList<UUID2<Book>>> remainingBooksResult = this.unacceptBook(book);
+            if (remainingBooksResult instanceof Result.Failure)
+                return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) remainingBooksResult).exception());
+
+            return remainingBooksResult;
+        }
+
+        // Have Library Swap the checkout of Book from this User to the receiving User
+        Result<Book> swapCheckoutResult =
+                book.sourceLibrary.info()
+                    .swapBookCheckoutFromUserToUser(
+                          book,
+                          this,
+                          receivingUser
+                    );
+        if (swapCheckoutResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<Book>) swapCheckoutResult).exception());
+
+        return new Result.Success<>(new ArrayList<>(Arrays.asList(book.id)));
 
         // // LEAVE FOR REFERENCE
         // // Update UserInfo // no update needed as each method used performs its own updates.
@@ -242,8 +295,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         // Result<Model.Domain.UserInfo> result = this.updateInfo(this.info);
         // if (result instanceof Result.Failure)
         //    return new Result.Failure<>(((Result.Failure<Model.Domain.UserInfo>) result).exception());
-
-        return unacceptBookResult;
     }
 
     // Convenience method to checkout a Book from a Library

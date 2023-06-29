@@ -5,6 +5,7 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.data.book.local.BookInfoEntity;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
+import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -51,9 +52,9 @@ public class BookInfo extends DomainInfo
     // - Convert to Domain.BookInfo
     public BookInfo(@NotNull BookInfoDTO bookInfo) {
         // Converts from DTO to Domain
-        // todo validation here
 
         // Domain decides what to include from the DTO
+        // todo validation here
         this(
             new UUID2<Book>(bookInfo.id.uuid(), Book.class), // change to domain type
             bookInfo.title,
@@ -63,9 +64,9 @@ public class BookInfo extends DomainInfo
     }
     public BookInfo(@NotNull BookInfoEntity bookInfo) {
         // Converts from Entity to Domain
-        // todo validation here
 
         // Domain decides what to include from the Entities
+        // todo validation here
         this(
             new UUID2<Book>(bookInfo.id.uuid(), Book.class), // change to domain type
             bookInfo.title,

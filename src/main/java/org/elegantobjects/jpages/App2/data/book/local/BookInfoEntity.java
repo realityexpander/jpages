@@ -28,7 +28,6 @@ public class BookInfoEntity extends Entity
         String description,
         String extraFieldToShowThisIsAnEntity
     ) {
-//        super(id.toDomainUUID2(), EntityBookInfo.class.getName());
         super(id);
         this.id = id;
         this.title = title;

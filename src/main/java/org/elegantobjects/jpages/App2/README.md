@@ -2,6 +2,14 @@
 
 ## Design Goals
 
+### Inspiration
+- Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
+
+### Developer Experience
+- Architected by layer, and each layer is grouped by feature, which allows convenenient and
+  easy to understand navigation of the code.
+- Built to test from start
+
 ### Encapsulation
 - No setters
 - No getters
@@ -37,13 +45,6 @@
   - [Role -> DomainRole] for the Role objects
 - Minimal use of Interfaces
 - One abstract class to define the Role Object class
-
-### Inspiration
-- Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
-
-### Developer Experience
-- Architected by layer, and each layer is grouped by feature, which allows convenenient and 
-  easy to understand navigation of the code.
   
 ### Static Methods
 - Use of Static methods is severely limited to only those that are:
@@ -58,8 +59,12 @@
     - DTO's and Entities are still useful to maintain separation of concerns and to communicate with
       outside world, and allows independent updating and maintaining of the domain objects.
 
-- built to test from start
+### Extremely Limit use of If/Else
+  - Only for specific exceptional cases.
+  - Normally check for conditions and return early if condition is not met.
+  - Last return is always "happy path" success return (unless for rare exceptional cases.)
 
+### Result Object for Errors & Exceptions
 - Use of Result object to return success or failure, encapsulating the error message and exception.
 
 ### Design Patterns avoided
@@ -73,3 +78,23 @@
 
 ### Single Responsibility of Role
 - BOOP makes clear separation of concerns easy.
+
+
+
+## Architecture
+  - Model
+    - Domain
+      - Account - Handles library account details for the user, like fines, status, max books, etc. (NO BOOKS TRACKED HERE)
+      - Book    - Handles book details, like title, author, source library, etc.
+      - User    - Handles user details, like name, email, books held, can give books to other users, etc.
+      - Library - Handles library details, lists of books on hand, users registered to it, checking books in and out,
+    
+    - Repo - Handles persistence of Info referenced by Domain objects
+      - BookInfoRepo - Handles persistence of BookInfo objects
+      - AccountInfoRepo - Handles persistence of AccountInfo objects
+      - UserInfoRepo - Handles persistence of UserInfo objects
+      - LibraryInfoRepo - Handles persistence of LibraryInfo objects
+    - Entity
+      - BookInfoEntity - Handles transfer of BookInfo objects to database
+    - DTO
+      - BookInfoDTO  - Handles transfer of BookInfo objects to 

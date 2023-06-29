@@ -54,18 +54,18 @@ class LibraryApp {
             ctx.log.d(this, "----------------------------------");
 
             // Create a book object (it only has an id)
-            Book book = new Book(UUID2.createFakeUUID2(1, Book.class), ctx);
+            Book book = new Book(UUID2.createFakeUUID2(1, Book.class), null, ctx);
             ctx.log.d(this, book.fetchInfoResult().toString());
 
             // Update info for a book
             final Result<BookInfo> bookInfoResult =
-                    book.updateInfo(
-                        new BookInfo(
-                            book.id,
-                            "The Updated Title",
-                            "The Updated Author",
-                            "The Updated Description"
-                        ));
+                book.updateInfo(
+                    new BookInfo(
+                        book.id,
+                        "The Updated Title",
+                        "The Updated Author",
+                        "The Updated Description"
+                    ));
             ctx.log.d(this, book.fetchInfoResult().toString());
 
             // Get the bookInfo (null if not loaded)
@@ -82,7 +82,7 @@ class LibraryApp {
             }
 
             // Try to get a book id that doesn't exist
-            Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), ctx);
+            Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
             if (book2.fetchInfoResult() instanceof Result.Failure) {
                 // should fail
                 ctx.log.d(this,"Get Book FAILURE --> " +
@@ -144,15 +144,15 @@ class LibraryApp {
             final Account account2 = new Account(accountInfo2, ctx);
             final User user1 = new User(user1Info, account1, ctx);
             final Library library1 = new Library(library1InfoId, ctx);
-            final Book book1 = new Book(UUID2.createFakeUUID2(1, Book.class), ctx);
-            final Book book2 = new Book(UUID2.createFakeUUID2(2, Book.class), ctx);
+            final Book book1 = new Book(UUID2.createFakeUUID2(1, Book.class), null, ctx);
+            final Book book2 = new Book(UUID2.createFakeUUID2(2, Book.class), null, ctx);
 
             // print User 1
             System.out.println();
             ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
             Checkout_2_Books_to_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -184,7 +184,7 @@ class LibraryApp {
             }
 
             Get_available_Books_and_Inventory_Counts_in_Library:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"\nGetting available books and counts in library:");
                 ctx.log.d(this, "----------------------------------");
@@ -230,7 +230,7 @@ class LibraryApp {
             }
 
             Get_Books_checked_out_by_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Getting books checked out by user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -266,7 +266,7 @@ class LibraryApp {
             }
 
             Check_In_Book_from_User_to_Library:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"\nCheck in book:" + book1.id + ", from user: " + user1.id + ", to library:" + library1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -278,7 +278,7 @@ class LibraryApp {
                     );
                 } else {
                     ctx.log.d(this,"Returned Book SUCCESS --> book id:" +
-                            ((Result.Success<Book>) checkInBookResult).value()
+                            ((Result.Success<Book>) checkInBookResult).value().id
                     );
                 }
 
@@ -286,7 +286,7 @@ class LibraryApp {
             }
 
             // Load Library from Json
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Load Library from Json: ");
                 ctx.log.d(this, "----------------------------------");
@@ -302,7 +302,7 @@ class LibraryApp {
                     "    \"00000000-0000-0000-0000-000000000001\": [\n" +
                     "      {\n" +
                     "        \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                    "        \"uuid2TypeStr\": \"Object.IRole.Book\"\n" +
+                    "        \"uuid2TypeStr\": \"Object.Role.Book\"\n" +
                     "      }\n" +
                     "    ]\n" +
                     "  },\n" +
@@ -320,7 +320,7 @@ class LibraryApp {
                     "  },\n" +
                     "  \"id\": {\n" +
                     "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                    "    \"uuid2TypeStr\": \"Object.IRole.Library\"\n" +
+                    "    \"uuid2TypeStr\": \"Object.Role.Library\"\n" +
                     "  }\n" +
                     "}";
 
@@ -370,7 +370,7 @@ class LibraryApp {
             }
 
             // Load Book from DTO Json
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Load BookInfo from DTO Json: ");
                 ctx.log.d(this, "----------------------------------");
@@ -390,7 +390,7 @@ class LibraryApp {
                 try {
                     BookInfoDTO bookInfoDTO3 = new BookInfoDTO(json, ctx);
 //                    Book book3 = new Book(bookInfo3.toDeepCopyDomainInfo(), ctx); // keep & add to test
-                    Book book3 = new Book(new BookInfo(bookInfoDTO3), ctx);
+                    Book book3 = new Book(new BookInfo(bookInfoDTO3), null, ctx);
 
                     ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
@@ -399,7 +399,7 @@ class LibraryApp {
             }
 
             Check_out_Book_via_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Check_out_Book_via_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -416,7 +416,7 @@ class LibraryApp {
                 } else {
 
                     final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12Result).value().id();
-                    final Book book12 = new Book(book12id, ctx);
+                    final Book book12 = new Book(book12id, null, ctx);
 
                     System.out.println();
                     ctx.log.d(this,"Check out book " + book12id + " to user " + user1.id);
@@ -442,7 +442,7 @@ class LibraryApp {
             }
 
             Give_Book_To_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Give_Book_To_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -454,6 +454,7 @@ class LibraryApp {
                 final Result<UserInfo> user2InfoResult = createFakeUserInfoInContextUserRepo(2, ctx);
                 assert user2InfoResult != null;
                 final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
+
                 final Result<BookInfo> book12InfoResult = addFakeBookInfoInContextBookRepo(12, ctx);
 
                 if (book12InfoResult instanceof Result.Failure) {
@@ -463,9 +464,8 @@ class LibraryApp {
                 } else {
 
                     final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
-                    final Book book12 = new Book(book12id, ctx);
+                    final Book book12 = new Book(book12id, null, ctx);
 
-                    // If book was checked out, it is still checked out by the first person. todo if its checked out of a library, have the library perform a "checkout" transfer
                     user2.acceptBook(book12); // no library involved.
 
                     ctx.log.d(this,"User (2):" + user2.id + " Give Book:" + book12id + " to User(1):" + user01.id);
@@ -481,6 +481,71 @@ class LibraryApp {
                         );
                     }
                 }
+            }
+
+            Give_Checked_Out_Book_From_User_To_User:
+            if (true) {
+                System.out.println();
+                ctx.log.d(this,"Transfer_Checked_Out_Book_From_User_To_User: ");
+                ctx.log.d(this, "----------------------------------");
+
+                final Result<UserInfo> user01InfoResult = createFakeUserInfoInContextUserRepo(1, ctx);
+                assert user01InfoResult != null;
+                final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), account1 , ctx);
+
+                final Result<UserInfo> user2InfoResult = createFakeUserInfoInContextUserRepo(2, ctx);
+                assert user2InfoResult != null;
+                final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
+
+                final Result<BookInfo> book12InfoResult = addFakeBookInfoInContextBookRepo(12, ctx);
+                assert book12InfoResult != null;
+                final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
+                final Book book12 = new Book(book12id, library1, ctx);
+
+                // Add book12 to library1
+                final Result<Book> book12UpsertResult = library1.addTestBookToLibrary(book12, 1);
+                if (book12UpsertResult instanceof Result.Failure) {
+                    ctx.log.d(this,"Upsert Book Error: " +
+                        ((Result.Failure<Book>) book12UpsertResult).exception().getMessage()
+                    );
+                }
+
+                // Add user1 to library1
+                final Result<UUID2<User>> user01UpsertResult = library1.info().registerUser(user01.id);
+                if (user01UpsertResult instanceof Result.Failure) {
+                    ctx.log.d(this,"Upsert User Error: " +
+                        ((Result.Failure<UUID2<User>>) user01UpsertResult).exception().getMessage()
+                    );
+                }
+
+                // Check out book12 from library1 to user2
+                final Result<UUID2<Book>> checkedOutBookResult = user2.checkoutBookFromLibrary(book12, library1);
+                if (checkedOutBookResult instanceof Result.Failure) {
+                    ctx.log.d(this,"Checkout book FAILURE --> " +
+                        ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage()
+                    );
+                } else {
+                    ctx.log.d(this,"Checkout Book SUCCESS --> checkedOutBook:" +
+                        ((Result.Success<UUID2<Book>>) checkedOutBookResult).value()
+                    );
+                }
+
+                // Give book from user2 to user01
+                ctx.log.d(this,"User (2):" + user2.id + " Transfer Book:" + book12id + " to User(1):" + user01.id);
+
+                // Note: The Library that the book is checked out from transfers the checkout to the new user.
+                // Will only allow the transfer to complete if the receiving user has an account in good standing (ie: no fines, etc.)
+                final Result<ArrayList<UUID2<Book>>> transferBookToUserResult = user2.giveBookToUser(book12, user01);
+                if (transferBookToUserResult instanceof Result.Failure) {
+                    ctx.log.d(this,"Transfer book FAILURE --> Book:" +
+                        ((Result.Failure<ArrayList<UUID2<Book>>>) transferBookToUserResult).exception().getMessage()
+                    );
+                } else {
+                    ctx.log.d(this,"Transfer Book SUCCESS --> Book:" +
+                        ((Result.Success<ArrayList<UUID2<Book>>>) transferBookToUserResult).value()
+                    );
+                }
+
             }
 
         }
