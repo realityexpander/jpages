@@ -246,22 +246,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (!this.info.isBookAcceptedByThisUser(book.id))
             return new Result.Failure<>(new Exception("User (" + this.id + ") does not have book (" + book.id + ")"));
 
-//        // If book is not checked out from a normal library  // todo remove
-//        if(book.sourceLibrary() instanceof PrivateLibrary) {
-//
-//            // Add the Book to the receiving User (the receiving User will automatically update their own Info)
-//            Result<ArrayList<Book>> acceptBookResult = receivingUser.acceptBook(book);
-//            if (acceptBookResult instanceof Result.Failure)
-//                return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception());
-//
-//            // Remove the Book from this User
-//            Result<ArrayList<UUID2<Book>>> remainingBooksResult = this.unacceptBook(book);
-//            if (remainingBooksResult instanceof Result.Failure)
-//                return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) remainingBooksResult).exception());
-//
-//            return remainingBooksResult;
-//        }
-
         // Have Library Swap the checkout of Book from this User to the receiving User
         Result<Book> swapCheckoutResult =
                 book.sourceLibrary().info()
@@ -277,7 +261,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         this.unacceptBook(book);
         receivingUser.acceptBook(book);
 
-        Result<UserInfo> result = this.updateInfo(this.info);
+        Result<UserInfo> result = this.updateInfo(this.info); // todo check if this is needed
         if (result instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
 
@@ -286,9 +270,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         // // LEAVE FOR REFERENCE
         // // Update UserInfo // no update needed as each method used performs its own updates.
         // // But if a different Local Object (like a hashmap) was changed after this event, an .updateInfo(…) would need to be performed.
-        // Result<Model.Domain.UserInfo> result = this.updateInfo(this.info);
-        // if (result instanceof Result.Failure)
-        //    return new Result.Failure<>(((Result.Failure<Model.Domain.UserInfo>) result).exception());
     }
 
     // Convenience method to checkout a Book from a Library

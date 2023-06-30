@@ -23,15 +23,24 @@ public class PrivateLibrary extends Library implements IUUID2 {
     // ie: It is a Personal Library, a library for a single found book,
     // or a Library for a newly created book, etc.
     //
-    // This is a system design alternative to :
-    //   - Using `null` to represent a Book which is not part of any Library.
-    //   - or naming it "NoLibrary" or "PersonalLibrary" or "UnassignedLibrary"
-    //
-    // This not a system Library, so it doesn't use the Account Role Object for any checks.
+    // This not a system Library, so it doesn't access the Account Role Object for any account checks.
     // Any user can access this Library.
     //
-    // If a Private Library is created based on a BookId, then it is for ONLY 1 Book.
-    // This is called an ORPHAN Private Library.
+    // This is a system design alternative to:
+    //   - Using `null` to represent a Book which is not part of any Library.
+    //   - or naming it "NoLibrary" or "PersonalLibrary" or "UnassignedLibrary"
+    //   - Instead of using "null" we create an object that conveys the intention behind what "null" means in this context.
+    //     ie: what is the concept of a "null" Library? Maybe it is a Library which is not part of any system Library?
+    //     How about a Library which is not part of any system Library is called a "PrivateLibrary"?
+
+
+    // ORPHAN Private Library:
+    //   - ORPHAN definition: An orphan is a child that has no parent. (It has no source Library)
+    //   - If a Private Library is created based on a BookId, it is called an ORPHAN Private Library
+    //     and it is sole duty is to hold ONLY 1 Book particular Book Id and no other Book Ids.
+    //   - It can only ever hold 1 Book.
+    //   - System Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
+    //     but that would have added complexity to the system for an edge use case.
     private final Boolean isForOnlyOneBook;
 
     public PrivateLibrary(

@@ -503,9 +503,9 @@ class LibraryApp {
                 final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
                 final Book book12 = new Book(book12id, library1, ctx);
 
+                // todo add test for this
                 user2.acceptBook(book100);
                 user2.giveBookToUser(book100, user01);
-
 
                 // Add book12 to library1
                 final Result<Book> book12UpsertResult = library1.addTestBookToLibrary(book12, 1);
