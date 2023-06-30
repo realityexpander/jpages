@@ -551,6 +551,10 @@ class LibraryApp {
                     );
                 }
 
+                // todo add test for this
+                user2.checkOutBookFromLibrary(book100, book100.sourceLibrary());
+                System.out.println("User2 has book100 checked out from library1" + user2);
+
             }
 
         }

@@ -205,7 +205,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookAvailable(book);
+        return this.info.isBookAvailableToCheckout(book);
     }
 
     /////////////////////////////////////////

@@ -73,13 +73,17 @@ public class LibraryInfo extends DomainInfo
             if (checkedOutUUID2Book instanceof Result.Failure)
                 return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) checkedOutUUID2Book).exception().getMessage()));
 
+            user.acceptBook(book); // todo check result
+
             return new Result.Success<>(book);
         }
 
-        // Private library book check outs skip Account checks.
+        // Private library book check-outs skip Account checks.
         Result<Void> checkOutBookResult = checkOutBookIdToUserId(book.id, user.id);
         if (checkOutBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkOutBookResult).exception().getMessage()));
+
+        user.acceptBook(book); // todo check result
 
         return new Result.Success<>(book);
     }
@@ -88,8 +92,8 @@ public class LibraryInfo extends DomainInfo
             return new Result.Failure<>(new IllegalArgumentException("BookId is not known. bookId: " + bookId));
         if (!isUserKnown(userId))
             return new Result.Failure<>(new IllegalArgumentException("UserId is not known, userId: " + userId));
-        if (!isBookAvailable(bookId))
-            return new Result.Failure<>(new IllegalArgumentException("Book is not available, bookId: " + bookId));
+        if (!isBookAvailableToCheckout(bookId))
+            return new Result.Failure<>(new IllegalArgumentException("Book is not in inventory, bookId: " + bookId));
         if (isBookCheckedOutByUser(bookId, userId))
             return new Result.Failure<>(new IllegalArgumentException("Book is already checked out by User, bookId: " + bookId + ", userId: " + userId));
 
@@ -108,6 +112,8 @@ public class LibraryInfo extends DomainInfo
             if (returnedBookIdResult instanceof Result.Failure)
                 return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) returnedBookIdResult).exception().getMessage()));
 
+            user.unacceptBook(book); // todo check result
+
             return new Result.Success<>(book);
         }
 
@@ -116,12 +122,14 @@ public class LibraryInfo extends DomainInfo
         if (checkInBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkInBookResult).exception().getMessage()));
 
+        user.unacceptBook(book); // todo check result
+
         return new Result.Success<>(book);
     }
 
     public Result<UUID2<Book>> checkInPublicLibraryBookFromUser(UUID2<Book> bookId, UUID2<User> userId) {
         if (!isBookKnown(bookId))
-            return new Result.Failure<>(new IllegalArgumentException("BookId is not known, bookId: " + bookId));
+            return new Result.Failure<>(new IllegalArgumentException("BookId is not known, bookId: " + bookId));  // todo - do we allow unknown books to be checked in, and just add them to the list?
         if (!isUserKnown(userId))
             return new Result.Failure<>(new IllegalArgumentException("UserId is not known, userId: " + userId));
         if (!isBookCheckedOutByUser(bookId, userId))
@@ -136,7 +144,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
 
-    public Result<Book> transferBookCheckoutFromUserToUser(
+    public Result<Book> transferBookAndCheckoutFromUserToUser(
         @NotNull Book book,
         @NotNull User fromUser,
         @NotNull User toUser
@@ -166,16 +174,18 @@ public class LibraryInfo extends DomainInfo
 
 
         Result<Book> returnedBookResult = checkInBookFromUser(book, fromUser);
-        if (returnedBookResult instanceof Result.Failure) {
+        if (returnedBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Book>) returnedBookResult).exception().getMessage()));
-        }
-
-        // todo fix info is not being loaded
 
         Result<Book> checkedOutBookIdResult = checkOutBookToUser(book, toUser);
-        if (checkedOutBookIdResult instanceof Result.Failure) {
+        if (checkedOutBookIdResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Book>) checkedOutBookIdResult).exception().getMessage()));
-        }
+
+        // remove book from `fromUser` list of checked out books
+        fromUser.unacceptBook(book); // todo check Result
+
+        // add book to `toUser` list of checked out books
+        toUser.acceptBook(book);  // todo check Result
 
         return new Result.Success<>(book);
     }
@@ -196,7 +206,7 @@ public class LibraryInfo extends DomainInfo
         Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keys();
 
         for (UUID2<Book> bookId : bookSet) {
-            if (isBookAvailable(bookId)) {
+            if (isBookKnown(bookId)) {
                 int numBooksAvail = this.bookIdToNumBooksAvailableMap.get(bookId);
                 availableBookIdToNumBooksAvailableMap.put(bookId, numBooksAvail);
             }
@@ -223,11 +233,11 @@ public class LibraryInfo extends DomainInfo
         return isUserKnown(user.id);
     }
 
-    public boolean isBookAvailable(UUID2<Book> bookId) {
+    public boolean isBookAvailableToCheckout(UUID2<Book> bookId) {
         return bookIdToNumBooksAvailableMap.get(bookId) > 0;
     }
-    public boolean isBookAvailable(@NotNull Book book) {
-        return isBookAvailable(book.id);
+    public boolean isBookAvailableToCheckout(@NotNull Book book) {
+        return isBookAvailableToCheckout(book.id);
     }
 
     public boolean isBookCheckedOutByUser(UUID2<Book> bookId, @NotNull UUID2<User> userId) {
@@ -273,6 +283,9 @@ public class LibraryInfo extends DomainInfo
     }
 
     private Result<Void> checkOutBookIdToUserId(UUID2<Book> bookId, UUID2<User> userId) {
+        if(!isBookAvailableToCheckout(bookId))
+            return new Result.Failure<>(new IllegalArgumentException("Book is not in inventory, bookId: " + bookId));
+
         try {
             removeBookIdFromInventory(bookId, 1);
             return new Result.Success<>(null);

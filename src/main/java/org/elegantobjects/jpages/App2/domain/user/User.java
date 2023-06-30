@@ -156,7 +156,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if(acceptResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) acceptResult).exception());
 
-
         Result<UserInfo> result = this.updateInfo(this.info);
         if (result instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
@@ -249,7 +248,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         // Have Library Swap the checkout of Book from this User to the receiving User
         Result<Book> swapCheckoutResult =
                 book.sourceLibrary().info()
-                    .transferBookCheckoutFromUserToUser(
+                    .transferBookAndCheckoutFromUserToUser(
                           book,
                           this,
                           receivingUser
@@ -261,15 +260,13 @@ public class User extends Role<UserInfo> implements IUUID2 {
         this.unacceptBook(book);
         receivingUser.acceptBook(book);
 
-        Result<UserInfo> result = this.updateInfo(this.info); // todo check if this is needed
-        if (result instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
+        // LEAVE FOR REFERENCE
+        // Note: no update needed as each Domain method used performs its own updates, as needed.
+        // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
+        //   need to be performed.
 
+        //noinspection ArraysAsListWithZeroOrOneArgument
         return new Result.Success<>(new ArrayList<>(Arrays.asList(book.id)));
-
-        // // LEAVE FOR REFERENCE
-        // // Update UserInfo // no update needed as each method used performs its own updates.
-        // // But if a different Local Object (like a hashmap) was changed after this event, an .updateInfo(…) would need to be performed.
     }
 
     // Convenience method to checkout a Book from a Library
@@ -284,6 +281,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (bookResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<Book>) bookResult).exception());
         }
+
+        // LEAVE FOR REFERENCE
+        // Note: no update needed as each Domain method used performs its own updates, as needed.
+        // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
+        //   need to be performed.
 
         return new Result.Success<>(((Result.Success<Book>) bookResult).value().id);
     }

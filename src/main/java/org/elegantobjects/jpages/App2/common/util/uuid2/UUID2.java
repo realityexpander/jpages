@@ -210,15 +210,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         Set<UUID2<TKey>> keys() throws RuntimeException {
             Set<UUID> uuidSet = super.keySet();
             Set<UUID2<TKey>> uuid2Set = new HashSet<>();
+//            Set<UUID2<IUUID2>> uuid2Set = new HashSet<>();
 
             // Convert UUIDs to TDomainUUIDs
             try {
                 for (UUID uuid : uuidSet) {
-                    @SuppressWarnings({"unchecked"})
-//                    UUID2<TUUID2> uuid2 = (UUID2<TUUID2>) UUID2.fromUUID(uuid);
                     UUID2<TKey> uuid2 = UUID2.fromUUID(uuid);
-//                    UUID2<TKey> uuid2 = (UUID2<TKey>) UUID2.fromUUID(uuid).toUUID2();
-//                    uuid2._setUUID2TypeStr(UUID2.getUUID2TypeStr(keyClazz));
 
                     uuid2Set.add(uuid2);
                 }

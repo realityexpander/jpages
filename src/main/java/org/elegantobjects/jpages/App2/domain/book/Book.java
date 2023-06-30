@@ -126,19 +126,26 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
     public Result<BookInfo> updateAuthor(String author) {
         BookInfo updatedInfo = this.info.withAuthor(author);
-        return this.updateInfo(updatedInfo);
+        return this.updateInfo(updatedInfo); // delegate to Info Object
     }
     public Result<BookInfo> updateTitle(String title) {
         BookInfo updatedInfo = this.info.withTitle(title);
-        return this.updateInfo(updatedInfo);
+        return this.updateInfo(updatedInfo); // delegate to Info Object
     }
     public Result<BookInfo> updateDescription(String description) {
         BookInfo updatedInfo = this.info.withDescription(description);
-        return this.updateInfo(updatedInfo);
+        return this.updateInfo(updatedInfo); // delegate to Info Object
     }
-    public Result<Book> updateSourceLibrary(Library library) {
-        Book updatedBook = new Book(this.info, library, this.context);
-        return new Result.Success<>(updatedBook);  // todo test
+
+    // Domain Role-specific business logic in a Role Object.
+    public Result<Book> updateSourceLibrary(Library sourceLibrary) {
+        // NOTE: This method is only used by the Library Domain Object when moving a Book from one Library to another.
+        // It is NOT saved with the BookInfo, as it only applies to the Book Role Object.
+        // - shows example of Domain Role-specific business logic in a Role Object.
+        // - ie: sourceLibrary only exists in the Domain. BookInfo does not have a sourceLibrary field.
+
+        Book updatedBook = new Book(this.info, sourceLibrary, this.context);  // todo test
+        return new Result.Success<>(updatedBook);
     }
 
     ////////////////////////////////////////
