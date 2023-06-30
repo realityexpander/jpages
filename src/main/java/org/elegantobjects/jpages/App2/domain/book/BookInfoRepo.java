@@ -8,14 +8,13 @@ import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.data.book.local.BookInfoEntity;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
-import org.elegantobjects.jpages.App2.domain.common.IRepo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 // Business logic for Book Repo (simple CRUD operations; converts to/from DTOs/Entities/Domains)
-public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
+public class BookInfoRepo extends Repo implements IBookInfoRepo {
     private final BookInfoApi api;
     private final BookInfoDatabase database;
 
@@ -170,11 +169,11 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
         for (int i = 0; i < 10; i++) {
             database.addBookInfo(
                     new BookInfoEntity(
-                            UUID2.createFakeUUID2(i, BookInfoEntity.class),
-                            "Title " + i,
-                            "Author " + i,
-                            "Description " + i,
-                            "Some extra info from the Entity" + i
+                            UUID2.createFakeUUID2(i*100, BookInfoEntity.class),
+                            "Title " + i*100,
+                            "Author " + i*100,
+                            "Description " + i*100,
+                            "Some extra info from the Entity" + i*100
                     )
             );
         }
@@ -184,11 +183,11 @@ public class BookInfoRepo extends Repo implements IRepo.BookInfoRepo {
         for (int i = 0; i < 10; i++) {
             Result<BookInfoDTO> result = api.addBookInfo(
                     new BookInfoDTO(
-                            UUID2.createFakeUUID2(i, BookInfoDTO.class),
-                            "Title " + i,
-                            "Author " + i,
-                            "Description " + i,
-                            "Some extra info from the DTO" + i)
+                            UUID2.createFakeUUID2(i*100, BookInfoDTO.class),
+                            "Title " + i*100,
+                            "Author " + i*100,
+                            "Description " + i*100,
+                            "Some extra info from the DTO" + i*100)
             );
 
             if (result instanceof Result.Failure) {

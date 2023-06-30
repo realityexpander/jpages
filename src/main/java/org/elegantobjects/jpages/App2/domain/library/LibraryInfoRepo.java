@@ -4,11 +4,10 @@ import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
-import org.elegantobjects.jpages.App2.domain.common.IRepo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
 
 // Holds Library info for all the libraries in the system (simple CRUD operations)
-public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfoRepo {
+public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     // simulate a database on server (UUID2<Library> is the key)
 //    private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>(Library.class);
     private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>();
@@ -62,7 +61,7 @@ public class LibraryInfoRepo extends Repo implements IRepo.LibraryInfoRepo {
         LibraryInfo library = database.get(libraryId);
 
         for (int i = 0; i < numberOfBooksToCreate; i++) {
-            Result<UUID2<Book>> result = library.addTestBook(UUID2.createFakeUUID2(i, Book.class), 1);
+            Result<UUID2<Book>> result = library.addTestBook(UUID2.createFakeUUID2(i*100, Book.class), 1);
 
             if (result instanceof Result.Failure) {
                 Exception exception = ((Result.Failure<UUID2<Book>>) result).exception();

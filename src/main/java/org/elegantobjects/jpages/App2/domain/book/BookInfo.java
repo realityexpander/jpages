@@ -1,5 +1,6 @@
 package org.elegantobjects.jpages.App2.domain.book;
 
+import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.common.Model;
@@ -45,6 +46,10 @@ public class BookInfo extends DomainInfo
     }
     public BookInfo(UUID id) {
         this(id, "", "", "");
+    }
+    public <TDomainUUID2 extends IUUID2>
+        BookInfo(UUID2<TDomainUUID2> uuid2) {
+        this(uuid2.uuid(), "", "", "");
     }
 
     // DomainInfo objects Must:

@@ -47,7 +47,7 @@ class LibraryApp {
         );
 
         Populate_And_Poke_Book:
-        if (true)
+        if (false)
         {
             System.out.println();
             ctx.log.d(this, "Populate_And_Poke_Book");
@@ -108,7 +108,7 @@ class LibraryApp {
             final Result<LibraryInfo> libraryInfo = createFakeLibraryInfoInContextLibraryRepo(1, ctx);
             if (libraryInfo instanceof Result.Failure) {
                 ctx.log.d(this,"Create Library FAILURE --> " +
-                        ((Result.Failure<LibraryInfo>) libraryInfo)
+                    ((Result.Failure<LibraryInfo>) libraryInfo)
                 );
 
                 break Populate_the_library_and_user_DBs;
@@ -116,7 +116,7 @@ class LibraryApp {
             UUID2<Library> library1InfoId = ((Result.Success<LibraryInfo>) libraryInfo).value().id();
             ctx.log.d(this,"Library Created --> id: " +
                 ((Result.Success<LibraryInfo>) libraryInfo).value().id() +
-                ", name: "+ ((Result.Success<LibraryInfo>) libraryInfo).value().name()
+                ", name: "+ ((Result.Success<LibraryInfo>) libraryInfo).value().name
             );
 
             // Populate the library
@@ -144,8 +144,9 @@ class LibraryApp {
             final Account account2 = new Account(accountInfo2, ctx);
             final User user1 = new User(user1Info, account1, ctx);
             final Library library1 = new Library(library1InfoId, ctx);
-            final Book book1 = new Book(UUID2.createFakeUUID2(1, Book.class), null, ctx);
-            final Book book2 = new Book(UUID2.createFakeUUID2(2, Book.class), null, ctx);
+            final Book book100 = new Book(UUID2.createFakeUUID2(100, Book.class), null, ctx); // create ORPHANED book
+            final Book book200 = new Book(UUID2.createFakeUUID2(200, Book.class), library1, ctx);
+            library1.addBookToLibrary(book200, 1);
 
             // print User 1
             System.out.println();
@@ -157,7 +158,7 @@ class LibraryApp {
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<Book> bookResult = library1.checkOutBookToUser(book1, user1);
+                final Result<Book> bookResult = library1.checkOutBookToUser(book100, user1);
                 if (bookResult instanceof Result.Failure) {
                     ctx.log.d(this,"Checked out book FAILURE--> " +
                         ((Result.Failure<Book>) bookResult).exception().getMessage()
@@ -169,7 +170,7 @@ class LibraryApp {
                 }
 
                 System.out.println();
-                final Result<Book> bookResult2 = library1.checkOutBookToUser(book2, user1);
+                final Result<Book> bookResult2 = library1.checkOutBookToUser(book200, user1);
                 if (bookResult2 instanceof Result.Failure) {
                     ctx.log.d(this,"Checked out book FAILURE--> " +
                         ((Result.Failure<Book>) bookResult2).exception().getMessage()
@@ -248,7 +249,7 @@ class LibraryApp {
 
                 // Print checked out books
                 System.out.println();
-                ctx.log.d(this,"Checked Out Books for User [" + user1.fetchInfo().name() + ", " + user1.id + "]:");
+                ctx.log.d(this,"Checked Out Books for User [" + user1.fetchInfo().name + ", " + user1.id + "]:");
                 for (Book book : checkedOutBooks) {
                     final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
                     if (bookInfoResult instanceof Result.Failure) {
@@ -268,10 +269,10 @@ class LibraryApp {
             Check_In_Book_from_User_to_Library:
             if (false) {
                 System.out.println();
-                ctx.log.d(this,"\nCheck in book:" + book1.id + ", from user: " + user1.id + ", to library:" + library1.id);
+                ctx.log.d(this,"\nCheck in book:" + book100.id + ", from user: " + user1.id + ", to library:" + library1.id);
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1, user1);
+                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book100, user1);
                 if (checkInBookResult instanceof Result.Failure) {
                     ctx.log.d(this,"Check In book FAILURE --> book id:" +
                             ((Result.Failure<Book>) checkInBookResult).exception().getMessage()
@@ -428,7 +429,7 @@ class LibraryApp {
                         );
                     }
 
-                    final Result<UUID2<Book>> checkedOutBookResult = user2.checkoutBookFromLibrary(book12, library1);
+                    final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, library1);
                     if (checkedOutBookResult instanceof Result.Failure) {
                         ctx.log.d(this,"Checkout book FAILURE --> " +
                             ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage()
@@ -502,6 +503,10 @@ class LibraryApp {
                 final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
                 final Book book12 = new Book(book12id, library1, ctx);
 
+                user2.acceptBook(book100);
+                user2.giveBookToUser(book100, user01);
+
+
                 // Add book12 to library1
                 final Result<Book> book12UpsertResult = library1.addTestBookToLibrary(book12, 1);
                 if (book12UpsertResult instanceof Result.Failure) {
@@ -518,8 +523,8 @@ class LibraryApp {
                     );
                 }
 
-                // Check out book12 from library1 to user2
-                final Result<UUID2<Book>> checkedOutBookResult = user2.checkoutBookFromLibrary(book12, library1);
+                // Make user2 checkout book12 from library1
+                final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, library1);
                 if (checkedOutBookResult instanceof Result.Failure) {
                     ctx.log.d(this,"Checkout book FAILURE --> " +
                         ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage()
@@ -530,9 +535,9 @@ class LibraryApp {
                     );
                 }
 
-                // Give book from user2 to user01
-                ctx.log.d(this,"User (2):" + user2.id + " Transfer Book:" + book12id + " to User(1):" + user01.id);
+                ctx.log.d(this,"User (2):" + user2.id + " Transfer Checked-Out Book:" + book12id + " to User(1):" + user01.id);
 
+                // Give book from user2 to user01
                 // Note: The Library that the book is checked out from transfers the checkout to the new user.
                 // Will only allow the transfer to complete if the receiving user has an account in good standing (ie: no fines, etc.)
                 final Result<ArrayList<UUID2<Book>>> transferBookToUserResult = user2.giveBookToUser(book12, user01);

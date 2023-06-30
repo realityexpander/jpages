@@ -96,7 +96,6 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         @NotNull UUID2<?> id,
         Context context
     ) {
-//        this(id.toUUID(), null, context);
         this(id, null, context);
     }
     Role(Context context) {

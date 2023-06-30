@@ -3,11 +3,10 @@ package org.elegantobjects.jpages.App2.domain.account;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.common.IRepo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
 
 // Holds Account info for all the users in the system (simple CRUD operations)
-public class AccountInfoRepo extends Repo implements IRepo.AccountInfoRepo {
+public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
 
     // simulate a local database on server (UUID2<Account> is the key)
 //    private final UUID2.HashMap<Account, AccountInfo> database = new UUID2.HashMap<>(Account.class);

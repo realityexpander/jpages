@@ -29,6 +29,8 @@ public class AccountInfo extends DomainInfo
     public final int maxAcceptedBooks;         // max Books allowed to be checked out by this User
     public final int maxFinePennies;           // max fine amount allowed before account is suspended
 
+    // Showing object can use internal ways to track its own data that will not be directly exposed to the outside world.
+    // ie: we could have used a "Log" role here, but instead we just use a HashMap. // todo should this be a Log role instead?
     final private HashMap<Long, String> accountAuditLog; // timestamp_ms -> message as json
 
     // final int maxDays;               // max number of days a book can be checked out
@@ -335,7 +337,7 @@ public class AccountInfo extends DomainInfo
     public boolean isAccountInGoodStandingAndAbleToBorrowBooks(int numberOfBooksInPossession) {
         return this.accountStatus == AccountStatus.ACTIVE
             && !this.isMaxFineExceeded()
-            && !this.hasReachedMaxBorrowedBooks(numberOfBooksInPossession);
+            && !this.hasReachedMaxAmountOfAcceptedLibraryBooks(numberOfBooksInPossession);
     }
 
     public boolean hasFines() {
@@ -347,9 +349,11 @@ public class AccountInfo extends DomainInfo
     public boolean isMaxFineExceeded() {
         return this.currentFinePennies >= this.maxFinePennies;
     }
-    public boolean hasReachedMaxBorrowedBooks(int numberOfBooksInPossession) {
-        return numberOfBooksInPossession >= this.maxAcceptedBooks; // todo should count only books that are from this library
+    public boolean hasReachedMaxAmountOfAcceptedLibraryBooks(int numberOfBooksInPossession) {
+        return numberOfBooksInPossession >= this.maxAcceptedBooks;
     }
+
+    // todo - calculate fines based on time passed since book was due, etc.
 
     /////////////////////////////////////////
     // Published Testing Helper Methods    //

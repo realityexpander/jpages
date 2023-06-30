@@ -111,22 +111,22 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     ///////////////////////////////////////////
 
     public Result<Book> checkOutBookToUser(Book book, User user) {
-        context.log.d(this, format("Library (%s) - checkOutBookToUser, userId: %s, bookId: %s", this.id, book.id, user.id));
+        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         if (isUnableToFindOrRegisterUser(user)) return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
 
-        // this calls a wrapper to the User's Account domain object
-        if (!user.isAccountActive()) return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
+        // Note: this calls a wrapper to the User's Account domain object
+        if (!user.isAccountInGoodStanding()) return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
 
-        // this calls a wrapper to the User's Account domain object
-        if (user.hasReachedMaxNumAcceptedBooks()) return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
+        // Note: this calls a wrapper to the User's Account domain object
+        if (user.hasReachedMaxAmountOfAcceptedLibraryBooks()) return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
 
-        // Get the User's AccountInfo object
+        // Get User's AccountInfo object
         AccountInfo userAccountInfo = user.accountInfo();
         if (userAccountInfo == null) return new Result.Failure<>(new Exception("User AccountInfo is null, userId: " + user.id));
 
-        // Check user fines are not exceeded
+        // Check User fines are not exceeded
         if (userAccountInfo.isMaxFineExceeded()) return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id));
 
         // Check out Book to User
@@ -264,7 +264,12 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     // Published Testing Helper Methods    //
     /////////////////////////////////////////
 
+    // Intention revealing method name
     public Result<Book> addTestBookToLibrary(Book book, Integer count) {
+        context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
+        return addBookToLibrary(book, count);
+    }
+    public Result<Book> addBookToLibrary(Book book, Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 

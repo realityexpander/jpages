@@ -14,8 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class Book extends Role<BookInfo> implements IUUID2 {
     public final UUID2<Book> id;
     private final BookInfoRepo repo;
-
-    public final Library sourceLibrary; // Book's Source Library Domain Object (if any)
+    private final Library sourceLibrary; // Book's source Library Domain Object - owns this Book.
 
     public Book(
         @NotNull BookInfo info,
@@ -61,12 +60,16 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         this(json, BookInfo.class, null, context);
     }
     public Book(Context context) {
-        this(new BookInfo(UUID2.randomUUID2().uuid()), null, context);
+        this(new BookInfo(UUID2.randomUUID2(Book.class)), null, context);
     }
-    // LEAVE for reference, for static Context instance implementation
-    // Book(UUID2<Book id) {
-    //     this(id, null);
-    // }
+
+    ////////////////////////////////
+    // Published Getters          //
+    ////////////////////////////////
+
+    public Library sourceLibrary() {
+        return sourceLibrary;
+    }
 
     /////////////////////////////////////
     // IRole/UUID2 Required Overrides  //
@@ -114,6 +117,13 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     // - Methods to modify it's BookInfo  //
     ////////////////////////////////////////
 
+    public boolean isBookFromPrivateLibrary() {
+        return this.sourceLibrary instanceof PrivateLibrary;
+    }
+    public boolean isBookFromPublicLibrary() {
+        return !this.isBookFromPrivateLibrary();
+    }
+
     public Result<BookInfo> updateAuthor(String author) {
         BookInfo updatedInfo = this.info.withAuthor(author);
         return this.updateInfo(updatedInfo);
@@ -126,7 +136,6 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         BookInfo updatedInfo = this.info.withDescription(description);
         return this.updateInfo(updatedInfo);
     }
-
     public Result<Book> updateSourceLibrary(Library library) {
         Book updatedBook = new Book(this.info, library, this.context);
         return new Result.Success<>(updatedBook);  // todo test
@@ -141,28 +150,25 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         UUID2<Book> bookId,
         Context context
     ) {
+        // If a sourceLibrary was not provided, create a new ORPHAN PrivateLibrary for this Book.
         if(sourceLibrary == null) {
-            // Create a new PrivateLibrary for this Book
-            Library privateLibrary = new PrivateLibrary(context);
+            // Create a new ORPHAN PrivateLibrary just for this one Book
+            Library privateLibrary = new PrivateLibrary(bookId, true, context);
             context.libraryInfoRepo()
                 .upsertLibraryInfo(
                     new LibraryInfo(
                         privateLibrary.id,
-                        "Private Library " + privateLibrary.id
+                        "ORPHAN Private Library only for one Book, BookId: " + bookId.uuid()
                     )
                 );
 
-            // Add this Book to the new PrivateLibrary
-            Result<UUID2<Book>> ignoreResult = privateLibrary.info()
-                .addPrivateBook(bookId, 1);
+            // Add this Book to the new ORPHAN PrivateLibrary
+            Result<UUID2<Book>> ignoreThisResult = privateLibrary.info()
+                .addPrivateBookToInventory(bookId, 1);
 
             return privateLibrary;
         }
 
         return sourceLibrary;
-    }
-
-    public boolean isPrivateBook() {
-        return this.sourceLibrary instanceof PrivateLibrary;
     }
 }

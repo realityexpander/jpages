@@ -1,14 +1,16 @@
 package org.elegantobjects.jpages.App2.domain.user;
 
-import org.elegantobjects.jpages.App2.domain.book.BookInfo;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.domain.book.Book;
+import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.library.PrivateLibrary;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class UserInfo extends DomainInfo
@@ -16,39 +18,36 @@ public class UserInfo extends DomainInfo
         Model.ToInfoDomain<UserInfo>
 {
     public final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
-    private final String name;
-    private final String email;
-    private final ArrayList<UUID2<Book>> acceptedBooks;
+    public final String name;
+    public final String email;
+    private final HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap; // BookId -> LibraryId
 
     UserInfo(
             @NotNull
             UUID2<User> id,        // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
             String name,
             String email,
-            ArrayList<UUID2<Book>> acceptedBooks
+            HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap
     ) {
         super(id);
         this.id = id;
         this.name = name;
         this.email = email;
-        this.acceptedBooks = acceptedBooks;
+        this.acceptedBookIdToSourceLibraryIdMap = acceptedBookIdToSourceLibraryIdMap;
     }
     UserInfo(@NotNull UserInfo userInfo) {
         this(
             userInfo.id,
             userInfo.name,
             userInfo.email,
-            userInfo.acceptedBooks
+            userInfo.acceptedBookIdToSourceLibraryIdMap
         );
     }
-    UserInfo(UUID uuid, String name, String email, ArrayList<UUID2<Book>> acceptedBooks) {
-        this(new UUID2<User>(uuid, User.class), name, email, acceptedBooks);
-    }
-    UserInfo(String uuid, String name, String email, ArrayList<UUID2<Book>> acceptedBooks) {
-        this(UUID.fromString(uuid), name, email);
+    UserInfo(UUID uuid, String name, String email, HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap) {
+        this(new UUID2<User>(uuid, User.class), name, email, acceptedBookIdToSourceLibraryIdMap);
     }
     public UserInfo(UUID2<User> uuid2, String name, String email) {
-        this(uuid2, name, email, new ArrayList<UUID2<Book>>());
+        this(uuid2, name, email, new HashMap<>());
     }
     UserInfo(UUID uuid, String name, String email) {
         this(new UUID2<User>(uuid, User.class), name, email);
@@ -65,12 +64,6 @@ public class UserInfo extends DomainInfo
     public UUID2<User> id() {
         return id;
     }
-    public String name() {
-        return this.name;
-    }
-    public String email() {
-        return this.email;
-    }
 
     @Override
     public String toString() {
@@ -82,44 +75,88 @@ public class UserInfo extends DomainInfo
     // User Info Business Logic Methods   //
     ////////////////////////////////////////
 
-    public Result<ArrayList<UUID2<Book>>> acceptBook(UUID2<Book> bookId) {
-        if (this.acceptedBooks.contains(bookId)) {
+    public boolean isBookAcceptedByThisUser(UUID2<Book> bookId) {
+        return this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId);
+    }
+
+    public Result<ArrayList<UUID2<Book>>> acceptBook(UUID2<Book> bookId, UUID2<Library> LibraryId) {
+        if (this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId)) {
             return new Result.Failure<>(new Exception("Book already accepted by user, book id:" + bookId));
         }
 
         try {
-            this.acceptedBooks.add(bookId);
+            this.acceptedBookIdToSourceLibraryIdMap.put(bookId, LibraryId);
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
 
-        return new Result.Success<>(findAllAcceptedBooks());
+        return new Result.Success<>(findAllAcceptedBookIds());
     }
 
     public Result<ArrayList<UUID2<Book>>> unacceptBook(UUID2<Book> bookId) {
-        if (!this.acceptedBooks.contains(bookId)) {
-            return new Result.Failure<>(new Exception("Book not in acceptedBooks List for user, book id:" + bookId));
+        if (!this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId)) {
+            return new Result.Failure<>(new Exception("Book not in accepted Books List for user, book id:" + bookId));
         }
 
         try {
-            this.acceptedBooks.remove(bookId);
+            this.acceptedBookIdToSourceLibraryIdMap.remove(bookId);
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
 
-        return new Result.Success<>(findAllAcceptedBooks());
+        return new Result.Success<>(findAllAcceptedBookIds());
     }
 
-    public ArrayList<UUID2<Book>> findAllAcceptedBooks() {
-        return new ArrayList<UUID2<Book>>(this.acceptedBooks);
+    ////////////////////////////////////////
+    // Published Reporting Methods        //
+    ////////////////////////////////////////
+
+    public ArrayList<UUID2<Book>> findAllAcceptedBookIds() {
+        return new ArrayList<UUID2<Book>>(
+            this.acceptedBookIdToSourceLibraryIdMap.keySet()
+        );
     }
 
-    public boolean isBookAcceptedByUser(UUID2<Book> bookId) {
-        return this.acceptedBooks.contains(bookId);
+    public HashMap<UUID2<Book>, UUID2<Library>> findAllAcceptedBookIdToLibraryIdMap() {
+        return new HashMap<>(this.acceptedBookIdToSourceLibraryIdMap);
+    }
+
+    public ArrayList<UUID2<Book>> findAllAcceptedNonPrivateLibraryBookIds() {
+        ArrayList<UUID2<Book>> acceptedNonPrivateLibraryBookIds = new ArrayList<>();
+        for (UUID2<Book> bookId : this.acceptedBookIdToSourceLibraryIdMap.keySet()) {
+            if (this.acceptedBookIdToSourceLibraryIdMap
+                    .get(bookId)
+                    .getUUID2TypeStr()
+                    .equals(UUID2.getUUID2TypeStr(Library.class))
+            ) {
+                acceptedNonPrivateLibraryBookIds.add(bookId);
+            }
+        }
+        return acceptedNonPrivateLibraryBookIds;
+    }
+
+    public ArrayList<UUID2<Book>> findAllAcceptedPrivateLibraryBookIds() {
+        ArrayList<UUID2<Book>> acceptedPrivateLibraryBookIds = new ArrayList<>();
+        for (UUID2<Book> bookId : this.acceptedBookIdToSourceLibraryIdMap.keySet()) {
+            if (this.acceptedBookIdToSourceLibraryIdMap
+                    .get(bookId)
+                    .getUUID2TypeStr()
+                    .equals(UUID2.getUUID2TypeStr(PrivateLibrary.class))
+            ) {
+                acceptedPrivateLibraryBookIds.add(bookId);
+            }
+        }
+        return acceptedPrivateLibraryBookIds;
     }
 
     public int calculateAmountOfAcceptedBooks() {
-        return this.acceptedBooks.size();
+        return this.acceptedBookIdToSourceLibraryIdMap.size();
+    }
+    public int calculateAmountOfAcceptedLibraryBooks() {
+        return findAllAcceptedNonPrivateLibraryBookIds().size();
+    }
+    public int calculateAmountOfAcceptedPrivateLibraryBooks() {
+        return findAllAcceptedPrivateLibraryBookIds().size();
     }
 
     ///////////////////////////////
@@ -133,9 +170,13 @@ public class UserInfo extends DomainInfo
         UserInfo domainInfoCopy = new UserInfo(this);
 
         // deep copy of acceptedBooks
-        domainInfoCopy.acceptedBooks.clear();
-        for (UUID2<Book> bookId : this.acceptedBooks) {
-            domainInfoCopy.acceptedBooks.add(new UUID2<Book>(bookId.uuid(), Book.class));
+        domainInfoCopy.acceptedBookIdToSourceLibraryIdMap.clear();
+        for (UUID2<Book> bookId : this.acceptedBookIdToSourceLibraryIdMap.keySet()) {
+            domainInfoCopy.acceptedBookIdToSourceLibraryIdMap
+                .put(
+                    bookId,
+                    this.acceptedBookIdToSourceLibraryIdMap.get(bookId)
+                );
         }
 
         return domainInfoCopy;

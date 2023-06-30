@@ -10,17 +10,16 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.library.Library;
-import org.elegantobjects.jpages.App2.domain.library.PrivateLibrary;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 // User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
 public class User extends Role<UserInfo> implements IUUID2 {
     public final UUID2<User> id;
     private final UserInfoRepo repo;
-
     private final Account account; // User's Account Domain Object
 
     public User(
@@ -65,15 +64,21 @@ public class User extends Role<UserInfo> implements IUUID2 {
     public User(Account account, Context context) {
         this(UUID2.randomUUID2(), account, context);
     }
-    // LEAVE for reference, for static Context instance implementation
-    // User(UserUUID id) {
-    //     this(id, null);
-    // }
 
     public String toString() {
-        return "User (" + this.id.toString() + ") - " +
-                "info=" + this.info.toString() + ", " +
-                "accountInfo=" + this.account.info().toString();
+        String str = "User (" + this.id.toString() + ") - ";
+
+        if (null != this.info)
+            str += "info=" + this.info.toPrettyJson();
+        else
+            str += "info=null";
+
+        if (null != this.account)
+            str += ", account=" + this.account;
+        else
+            str += ", account=null";
+
+        return str;
     }
 
     public String toJson() {
@@ -130,21 +135,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // - Methods to modify it's DomainUserInfo //
     /////////////////////////////////////////////
 
-    // Note: This delegates to this User's internal Account Role object.
-    // - User has no intimate knowledge of the Account object, other than
-    //   its public methods.
-    public Boolean isAccountActive() {
-        context.log.d(this,"User (" + this.id + ")");
-        AccountInfo accountinfo = this.account.info();
-
-        if (accountinfo == null) {
-            context.log.w(this,"User (" + this.id + ") - AccountInfo is null");
-            return false;
-        }
-
-        return accountinfo.isAccountActive();
-    }
-
     // Note: This delegates to its internal Account Role object.
     // - User has no intimate knowledge of the AccountInfo object, other than
     //   its public methods.
@@ -152,29 +142,17 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // - This method uses the UserInfo object to calculate the number of books the user has
     //   and then delegates to the AccountInfo object to determine if the
     //   number of books has reached the max.
-    public Boolean hasReachedMaxNumAcceptedBooks() {
-        context.log.d(this,"User (" + this.id + ")");
-        AccountInfo accountInfo = this.account.info();
-
-        if (accountInfo == null) {
-            context.log.w(this,"User (" + this.id + ") - AccountInfo is null");
-            return false;
-        }
-
-        int numBooksAcceptedByUser = this.info.calculateAmountOfAcceptedBooks();
-        return accountInfo.hasReachedMaxBorrowedBooks(numBooksAcceptedByUser);
-    }
-
-    public AccountInfo accountInfo() {
-        context.log.d(this,"User (" + this.id + ") should expose AccountInfo only to other Domain Objects");
-        return this.account.info();
-    }
-
     public Result<ArrayList<Book>> acceptBook(Book book) {
-        context.log.d(this,"User (" + this.id.toString() + "),  book: " + this.id.toString());
+        context.log.d(this,"User (" + this.id + "),  bookId: " + book.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<ArrayList<UUID2<Book>>> acceptResult = this.info.acceptBook(book.id);
+        if(hasReachedMaxAmountOfAcceptedLibraryBooks()) return new Result.Failure<>(new Exception("User (" + this.id + ") has reached maximum amount of accepted Library Books"));
+
+        Result<ArrayList<UUID2<Book>>> acceptResult =
+                this.info.acceptBook(
+                    book.id,
+                    book.sourceLibrary().id
+                );
         if(acceptResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) acceptResult).exception());
 
@@ -187,7 +165,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
 
     public Result<ArrayList<UUID2<Book>>> unacceptBook(@NotNull Book book) {
-        context.log.d(this,"User (" + this.id + "), book: " + book.id.toString());
+        context.log.d(this,"User (" + this.id + "), bookId: " + book.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         Result<ArrayList<UUID2<Book>>> unacceptResult = this.info.unacceptBook(book.id);
@@ -203,49 +181,57 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return unacceptResult;
     }
 
+    public AccountInfo accountInfo() {
+        return this.account.info();
+    }
+
+    // Note: This delegates to this User's internal Account Role object.
+    // - User has no intimate knowledge of the Account object, other than
+    //   its public methods.
+    public Boolean isAccountInGoodStanding() {
+        context.log.d(this,"User (" + this.id + ")");
+        AccountInfo accountinfo = this.account.info();
+        if (accountinfo == null) {
+            context.log.e(this,"User (" + this.id + ") - AccountInfo is null");
+            return false;
+        }
+
+        return accountinfo.isAccountInGoodStanding();
+    }
+
+    // Note: This delegates to this User's internal Account Role object.
+    public Boolean hasReachedMaxAmountOfAcceptedLibraryBooks() {
+        context.log.d(this,"User (" + this.id + ")");
+        AccountInfo accountInfo = this.accountInfo();
+        if (accountInfo == null) {
+            context.log.e(this,"User (" + this.id + ") - AccountInfo is null");
+            return false;
+        }
+
+        int numLibraryBooksAcceptedByUser = this.info.calculateAmountOfAcceptedLibraryBooks();
+
+        // Note: This User Role Object delegates to its internal Account Role Object.
+        return accountInfo.hasReachedMaxAmountOfAcceptedLibraryBooks(numLibraryBooksAcceptedByUser);
+    }
+
     public Result<ArrayList<Book>> findAllAcceptedBooks() {
         context.log.d(this,"User (" + this.id + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        // Create Book Domain list from the list of Book UUID2s
+        // Create  list of Domain Books from the list of Accepted Book ids
         ArrayList<Book> books = new ArrayList<>();
-        for (UUID2<Book> bookId : this.info.findAllAcceptedBooks()) {
-            books.add(new Book(bookId, null, this.context));
+        for (Map.Entry<UUID2<Book>, UUID2<Library>> entry :
+                this.info.findAllAcceptedBookIdToLibraryIdMap().entrySet()
+        ) {
+            UUID2<Book> bookId = entry.getKey();
+            UUID2<Library> libraryId = entry.getValue();
+
+            Book book = new Book(bookId, new Library(libraryId, context), context);
+
+            books.add(book);
         }
 
         return new Result.Success<>(books);
-    }
-
-    // Include all books from a Library (ie: no private books)
-    public Result<ArrayList<Book>> findAllAcceptedLibraryBooks() { // todo test
-        context.log.d(this,"User (" + this.id + ")");
-        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
-
-        // Create Book Domain list from the list of Book UUID2s
-        Result<ArrayList<Book>> allAcceptedBooksresult = findAllAcceptedBooks();
-        if (allAcceptedBooksresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) allAcceptedBooksresult).exception());
-
-        // Filter out books that are not from a Library
-        ArrayList<Book> acceptedLibraryBooks = ((Result.Success<ArrayList<Book>>) allAcceptedBooksresult).value();
-        acceptedLibraryBooks.removeIf(book -> !book.isPrivateBook());
-
-        return new Result.Success<>(acceptedLibraryBooks);
-    }
-
-    // Include all books from a Library (ie: no private books)
-    public Result<ArrayList<Book>> findAllAcceptedPrivateLibraryBooks() {  // todo test
-        context.log.d(this,"User (" + this.id + ")");
-        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
-
-        // Create Book Domain list from the list of Book UUID2s
-        Result<ArrayList<Book>> allAcceptedBooksresult = findAllAcceptedBooks();
-        if (allAcceptedBooksresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) allAcceptedBooksresult).exception());
-
-        // Filter out books that are not from a Library
-        ArrayList<Book> acceptedPrivateLibraryBooks = ((Result.Success<ArrayList<Book>>) allAcceptedBooksresult).value();
-        acceptedPrivateLibraryBooks.removeIf(Book::isPrivateBook);
-
-        return new Result.Success<>(acceptedPrivateLibraryBooks);
     }
 
     // Note: *ONLY* the Domain Objects can take a Book from one User and give it to another User.
@@ -257,35 +243,43 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Check this User has the Book
-        if (!this.info.isBookAcceptedByUser(book.id))
+        if (!this.info.isBookAcceptedByThisUser(book.id))
             return new Result.Failure<>(new Exception("User (" + this.id + ") does not have book (" + book.id + ")"));
 
-        // If book is not checked out from a normal library
-        if(book.sourceLibrary instanceof PrivateLibrary) {
-
-            // Add the Book to the receiving User (the receiving User will automatically update their own Info)
-            Result<ArrayList<Book>> acceptBookResult = receivingUser.acceptBook(book);
-            if (acceptBookResult instanceof Result.Failure)
-                return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception());
-
-            // Remove the Book from this User
-            Result<ArrayList<UUID2<Book>>> remainingBooksResult = this.unacceptBook(book);
-            if (remainingBooksResult instanceof Result.Failure)
-                return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) remainingBooksResult).exception());
-
-            return remainingBooksResult;
-        }
+//        // If book is not checked out from a normal library  // todo remove
+//        if(book.sourceLibrary() instanceof PrivateLibrary) {
+//
+//            // Add the Book to the receiving User (the receiving User will automatically update their own Info)
+//            Result<ArrayList<Book>> acceptBookResult = receivingUser.acceptBook(book);
+//            if (acceptBookResult instanceof Result.Failure)
+//                return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception());
+//
+//            // Remove the Book from this User
+//            Result<ArrayList<UUID2<Book>>> remainingBooksResult = this.unacceptBook(book);
+//            if (remainingBooksResult instanceof Result.Failure)
+//                return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) remainingBooksResult).exception());
+//
+//            return remainingBooksResult;
+//        }
 
         // Have Library Swap the checkout of Book from this User to the receiving User
         Result<Book> swapCheckoutResult =
-                book.sourceLibrary.info()
-                    .swapBookCheckoutFromUserToUser(
+                book.sourceLibrary().info()
+                    .transferBookCheckoutFromUserToUser(
                           book,
                           this,
                           receivingUser
                     );
         if (swapCheckoutResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<Book>) swapCheckoutResult).exception());
+
+        // Now transfer the BookId from the fromUser to the toUser
+        this.unacceptBook(book);
+        receivingUser.acceptBook(book);
+
+        Result<UserInfo> result = this.updateInfo(this.info);
+        if (result instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
 
         return new Result.Success<>(new ArrayList<>(Arrays.asList(book.id)));
 
@@ -298,7 +292,9 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
 
     // Convenience method to checkout a Book from a Library
-    public Result<UUID2<Book>> checkoutBookFromLibrary(Book book, Library library) {
+    // - Is it OK to also have this method in the Library Role Object?
+    //   I'm siding with yes, since it just delegates to the Library Role Object.
+    public Result<UUID2<Book>> checkOutBookFromLibrary(Book book, Library library) {
         context.log.d(this,"User (" + this.id + "), book: " + this.id + ", library: " + library.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
