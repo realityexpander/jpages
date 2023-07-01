@@ -152,7 +152,7 @@ class LibraryApp {
             ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
             Checkout_2_Books_to_User:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -184,7 +184,7 @@ class LibraryApp {
             }
 
             Get_available_Books_and_Inventory_Counts_in_Library:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"\nGetting available books and counts in library:");
                 ctx.log.d(this, "----------------------------------");
@@ -230,7 +230,7 @@ class LibraryApp {
             }
 
             Get_Books_checked_out_by_User:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Getting books checked out by user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -266,27 +266,24 @@ class LibraryApp {
             }
 
             Check_In_Book_from_User_to_Library:
-            if (false) {
+            if (true) {
                 System.out.println();
-                ctx.log.d(this,"\nCheck in book:" + book1100.id + ", from user: " + user1.id + ", to library:" + library1.id);
+                ctx.log.d(this,"Check in book:" + book1200.id + ", from user: " + user1.id + ", to library:" + library1.id);
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1100, user1);
-                if (checkInBookResult instanceof Result.Failure) {
-                    ctx.log.e(this,"Check In book FAILURE --> book id:" +
-                        ((Result.Failure<Book>) checkInBookResult).exception().getMessage()
-                    );
-                } else {
-                    ctx.log.d(this,"Returned Book SUCCESS --> book id:" +
-                        ((Result.Success<Book>) checkInBookResult).value().id
-                    );
-                }
+                user1.checkOutBookFromLibrary(book1200, library1);
+
+                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1200, user1);
+                if (checkInBookResult instanceof Result.Failure)
+                    ctx.log.e(this, "Check In book FAILURE --> book id:" + ((Result.Failure<Book>) checkInBookResult).exception().getMessage());
+                else
+                    ctx.log.d(this, "Returned Book SUCCESS --> book id:" + ((Result.Success<Book>) checkInBookResult).value().id);
 
                 library1.DumpDB(ctx);
             }
 
             // Load Library from Json
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Load Library from Json: ");
                 ctx.log.d(this, "----------------------------------");
@@ -332,6 +329,7 @@ class LibraryApp {
 
                     Result<LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
+                        // NOTE: FAILURE IS EXPECTED HERE
 
                         // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
                         ctx.log.d(this, ((Result.Failure<LibraryInfo>) library2Result).exception().getMessage());
@@ -370,7 +368,7 @@ class LibraryApp {
             }
 
             // Load Book from DTO Json
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Load BookInfo from DTO Json: ");
                 ctx.log.d(this, "----------------------------------");
@@ -399,7 +397,7 @@ class LibraryApp {
             }
 
             Check_out_Book_via_User:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Check_out_Book_via_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -442,7 +440,7 @@ class LibraryApp {
             }
 
             Give_Book_To_User:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Give_Book_To_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -484,7 +482,7 @@ class LibraryApp {
             }
 
             Give_Checked_Out_Book_From_User_To_User:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Transfer_Checked_Out_Book_From_User_To_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -542,7 +540,7 @@ class LibraryApp {
             }
 
             Give_Book_From_User_To_User:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this, "Give_Book_From_User_To_User: ");
                 ctx.log.d(this, "----------------------------------");

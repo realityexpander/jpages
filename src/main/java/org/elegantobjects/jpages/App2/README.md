@@ -1,9 +1,10 @@
-# Library App using BOOP
+# Library App using BOOP Style
 
 ## Design Goals
 
 ### Inspiration
 - Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
+  - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Note: BOOP is a design pattern that is inspired by Alan Kay's OO style & lectures, and Yegor Bugayenko's book Elegant Objects.
 
 ### Developer Experience
@@ -17,43 +18,59 @@
 Attempting to make the Domain layer code as idiomatic as possible, and to make it easy to read and understand.
 Strive to make it look like regular English, and to be able to read it without an IDE and make domain layer use regular java.
 
-### Encapsulation via methods
+### Encapsulation of Data via Intention-named methods
+  - Set and Get methods are not used, instead methods are named for their intention.
+  - Problem: The English word `set` and `get` are _extremely_ generic 
+    - Hundreds of definitions, each with many subtle different meanings, based on context.
+    - `set` and `get` do not reveal the underlying intention of the method. 
+    - It's a very convenient generic short-hand for the code-writer, but not for the code-reader.
 - No setters
-  - Only immutable copies of objects are returned
+  - All changes must be made via intention-named methods.
+  - Only immutable copies of objects are returned, for read-only purposes.
 - No Direct Reference Getters 
   - No references to internal mutable objects (all fields are `final`)
   - Only return copies of information
-  - Never reveal internal structures - always return curated copies for a specific purpose
+  - Never reveal internal structures - always return _curated_ copies for a specific intended purpose.
   - Returning/Exposing `Role` objects or `id's` is OK
   - Never return `null`
-    - Return an intention revealing object instead, like a `Boolean` or `Result` or `Empty` object.
+    - Return an intention-revealing object instead
+    - Prefer `Result` or `Empty` object instead of `null`
+    - `boolean` is acceptable, over `null`.
 - Methods that require network or CPU time should be labeled
   - ie: `calculateTotalCost()` is preferred over `getTotalCost()`
   - ie: `fetchInfo()` is preferred over `getInfo()`
-- When the getter just returns a simple field, no need to use get.
-  - Prefer `id()` over `getId()` for readability
+- When the method is a simple data-accessor that just returns a simple field, no need to use get.
+  - Prefer `id()` over `getId()` for readability and simplicity.
   - ie: `info()` is preferred over `getInfo()`
   - ie: `id()` is preferred over `getId()`
 
 ### No Nulls in Domain
 - Nulls only allowed to be passed in constructors
-- Nulls are checked for in constructors only
+  - in order to indicate "use a default value for this"
+- Nulls are checked for in constructors only, usually to create a reasonable default value.
 - Nulls are not allowed to be returned from methods
   - return "Empty" objects instead
-- Use sensible objects that show intent
-  - ie: `PrivateLibrary` instead of a `null` `sourceLibrary`
-- One exception: "null" is returned from fetches when no error has occurred. 
+- Use intention-named objects that indicate the reason for a `null` case.
+  - ie: `PrivateLibrary` instead of a `null` source Library
+
+- Important Exception
+  - `null` is returned from `fetchInfo()` when no error has occurred. 
   - If there is an error, it is returned in a `Result` object.
-  - This is for convenience, allows the fetch info and error handling to happen in one line.
+  - This is for convenience: 
+    - It allows the `fetchInfo()` and error handling to be a single line.
 
 ### Intention Revealing Error Messages
 - Error messages should be human-readable, clearly reveal the problem encountered
 - include ids of associated object(s) in message.
 
 ### No Global State
+- No shared mutable state
 - No static/global variables
-- No accessing global state
+- No global accessing state of App (except via passed-in Context object)
+
+### No Dependency Injection Framework
 - All dependencies passed in constructors
+- Singleton objects reside in the Context object, and are passed in constructors.
 
 ### All Objects Immutable
 - All objects are immutable, except for the `UUID2` `id` and `UUIDType` values for all objects.
@@ -164,9 +181,11 @@ Strive to make it look like regular English, and to be able to read it without a
   - No need for a separate `update()` method, in most cases.
 
 ### Use Early Return
-- Multiple early returns for ease of error handling 
-  - unhappy path errors return immediately
-- one success return at the end
+- Multiple early `returns` for ease of error handling 
+  - Unhappy path errors `return` immediately
+- One success `return` at the end is preferred.
+- Note: multiple Success `returns` are acceptable, but discouraged. 
+  - Maybe break up into 2 functions?
 
 ### Single Responsibility of Role
 - BOOP makes clear separation of concerns easy and understandable.
@@ -185,6 +204,9 @@ Strive to make it look like regular English, and to be able to read it without a
   - They all can be instantiated by others.
   - Their `Info` gets pulled in from their Repository on demand with a call to `info()`.
   - `Role` objects are essentially smart pointers to their `Info` objects & other `Role` objects.
+
+### Minimal Annotations
+- Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, etc.
 
 ### Acceptable Acronyms
   - `Id` - for Id's
@@ -213,15 +235,36 @@ Strive to make it look like regular English, and to be able to read it without a
     - `DTOInfo`
       - `BookInfoDTO`  - Handles transfer of `BookInfo` objects to API
 - ### Role
-  - `User` - Handles `User` actions, like `giveBookToUser`, `checkoutBook`, `checkinBook`, etc.
+  - `User` - Handles `User` actions, like `giveBookToUser()`, `checkOutBook()`, `checkInBook()`, etc.
     - `User` contains an `Account` object, which contains an `AccountInfo` object.  
     - `Account` - Handles `Account` actions, like paying fines, checking status, etc.
   - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
   - `Book` - Handles `Book` actions like changing `title`, `author`, `description`, `sourceLibrary`, etc.
       
-## Design decisions
+## Arbitrary Domain Design decisions
 
-Some decisions have been made capricious and mandatory to see how much domain complexity can be modeled using BOOP.
+
+
+### Arbitrary Rules
+
+_"Modeling the capricousness of the Real World..."_ 
+
+Some decisions have been made capriciously and with somewhat irrational discretion  in order 
+to see how much domain complexity can be modeled using BOOP. This is not a criticism of BOOP, but rather a test of its
+flexibility and power.
+
+- Like the fact that `Users` of the system can have `PrivateLibrary`, and can give `Books` to other `Users`.
+- Or a `User` can create their own book and add it to the their library first, then to a public library.
+- Or a `User` can "find" a book, and add it to their `PrivateLibrary`, and then give it to a public library. 
+- So some books need to respect system Account rules, and others dont.
+- A normal library system would likely not be set up like this, but would also have other arbitrary rules that would
+  need to be modeled.
+
+#### Flat Hierarchies
+- In order to keep the hierarchies flat and adhere to other design considerations, some decisions break
+  the strict BOOP paradigm and opt for a functional or procedural approach internal to Role objects.
+  - the further away from the `Domain` core layer, the more functional/procedural the code becomes. 
+- `Role` objects themselves adhere strictly to BOOP when interacting in the `Domain` layer.
 
 ### Books & Libraries 
 - Possession of a `Book` are primarily by the `User` and partially tracked by the `Library`. 

@@ -167,12 +167,10 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                 "id: " + this.id());
 
         try {
-//            Class<TDomainInfo> domainInfoClazz = this.infoClazz;
             Class<TDomainInfo> domainInfoClazz = this.infoClazz;
             TDomainInfo infoFromJson = this.context.gson.fromJson(json, domainInfoClazz);
             assert infoFromJson.getClass() == this.info.getClass();
 
-//            Result<TDomainInfo> checkResult = checkInfoIdMatchesJsonInfoId(infoFromJson, domainInfoClazz);
             Result<TDomainInfo> checkResult = checkJsonInfoIdMatchesThisInfoId(infoFromJson, domainInfoClazz);
             if (checkResult instanceof Result.Failure) {
                 return checkResult;

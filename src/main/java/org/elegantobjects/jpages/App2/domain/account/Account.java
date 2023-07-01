@@ -97,8 +97,9 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     ///////////////////////////////////////////
 
     public void DumpDB(Context context) {
-        context.log.d(this,"\nDumping Account DB:");
+        System.out.println();
+        context.log.d(this,"Dumping Account DB:");
         context.log.d(this, this.toJson());
-        context.log.d(this,"\n");
+        System.out.println();
     }
 }

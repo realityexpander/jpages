@@ -149,9 +149,6 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         Result<Book> checkInBookResult = this.info.checkInBookFromUser(book, user);
         if (checkInBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
 
-        Result<ArrayList<UUID2<Book>>> userReturnedBookResult = user.unacceptBook(book);
-        if (userReturnedBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) userReturnedBookResult).exception());
-
         // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
@@ -294,7 +291,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         // get the User's id from the Book checkout record
         Result<UUID2<User>> userIdResult =
-                this.info.getUserIdOfCheckedOutBook(book);
+                this.info.findUserIdOfCheckedOutBook(book);
         if (userIdResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<User>>) userIdResult).exception());
         UUID2<User> userId = ((Result.Success<UUID2<User>>) userIdResult).value();

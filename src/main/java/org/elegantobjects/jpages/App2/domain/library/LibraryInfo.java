@@ -218,7 +218,7 @@ public class LibraryInfo extends DomainInfo
     /////////////////////////////////
 
     public Result<UUID2<User>> registerUser(UUID2<User> userId) {
-        return insertUserId(userId);
+        return upsertUserId(userId);
     }
 
     public boolean isBookKnown(@NotNull Book book) {
@@ -258,7 +258,7 @@ public class LibraryInfo extends DomainInfo
                 .anyMatch(bookIds -> bookIds.contains(bookId));
     }
 
-    public Result<UUID2<User>> getUserIdOfCheckedOutBookId(UUID2<Book> bookId) {
+    public Result<UUID2<User>> findUserIdOfCheckedOutBookId(UUID2<Book> bookId) {
         if (!isBookIdCheckedOutByAnyUser(bookId))
             return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
 
@@ -269,8 +269,8 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
     }
-    public Result<UUID2<User>> getUserIdOfCheckedOutBook(Book book) {
-        return getUserIdOfCheckedOutBookId(book.id);
+    public Result<UUID2<User>> findUserIdOfCheckedOutBook(Book book) {
+        return findUserIdOfCheckedOutBookId(book.id);
     }
 
     // Convenience method - Called from PrivateLibrary class ONLY
