@@ -194,7 +194,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
             // Add this Book to the new ORPHAN PrivateLibrary
             Result<UUID2<Book>> ignoreThisResult = privateLibrary.info()
-                .addPrivateBookToInventory(bookId, 1);
+                .addPrivateBookIdToInventory(bookId, 1);
 
             return privateLibrary;
         }

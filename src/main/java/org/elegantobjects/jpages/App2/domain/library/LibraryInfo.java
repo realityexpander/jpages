@@ -167,7 +167,7 @@ public class LibraryInfo extends DomainInfo
                 return new Result.Failure<>(new IllegalArgumentException("toUser is not known, toUser: " + toUser.id));
             if (!toUser.accountInfo().isAccountInGoodStanding())
                 return new Result.Failure<>(new IllegalArgumentException("toUser Account is not in good standing, toUser: " + toUser.id));
-            if (toUser.hasReachedMaxAmountOfAcceptedLibraryBooks())
+            if (toUser.hasReachedMaxAmountOfAcceptedPublicLibraryBooks())
                 return new Result.Failure<>(new IllegalArgumentException("toUser has reached max number of accepted Books, toUser: " + toUser.id));
         }
 
@@ -221,34 +221,37 @@ public class LibraryInfo extends DomainInfo
         return insertUserId(userId);
     }
 
-    public boolean isBookIdKnown(UUID2<Book> bookId) {
-        return bookIdToNumBooksAvailableMap.containsKey(bookId);
-    }
     public boolean isBookKnown(@NotNull Book book) {
         return isBookIdKnown(book.id);
     }
-
-    public boolean isUserIdKnown(UUID2<User> userId) {
-        return registeredUserIdToCheckedOutBookIdMap.containsKey(userId);
+    public boolean isBookIdKnown(UUID2<Book> bookId) {
+        return bookIdToNumBooksAvailableMap.containsKey(bookId);
     }
+
     public boolean isUserKnown(@NotNull User user) {
         return isUserIdKnown(user.id);
     }
-
-    public boolean isBookIdAvailableToCheckout(UUID2<Book> bookId) {
-        return bookIdToNumBooksAvailableMap.get(bookId) > 0;
+    public boolean isUserIdKnown(UUID2<User> userId) {
+        return registeredUserIdToCheckedOutBookIdMap.containsKey(userId);
     }
+
     public boolean isBookAvailableToCheckout(@NotNull Book book) {
         return isBookIdAvailableToCheckout(book.id);
     }
-
-    public boolean isBookIdCheckedOutByUserId(UUID2<Book> bookId, @NotNull UUID2<User> userId) {
-        return registeredUserIdToCheckedOutBookIdMap.get(userId.uuid()).contains(bookId);
+    public boolean isBookIdAvailableToCheckout(UUID2<Book> bookId) {
+        return bookIdToNumBooksAvailableMap.get(bookId) > 0;
     }
+
     public boolean isBookCheckedOutByUser(@NotNull Book book, @NotNull User user) {
         return isBookIdCheckedOutByUserId(book.id, user.id);
     }
+    public boolean isBookIdCheckedOutByUserId(UUID2<Book> bookId, @NotNull UUID2<User> userId) {
+        return registeredUserIdToCheckedOutBookIdMap.get(userId.uuid()).contains(bookId);
+    }
 
+    public boolean isBookCheckedOutByAnyUser(Book book) {
+        return isBookIdCheckedOutByAnyUser(book.id);
+    }
     public boolean isBookIdCheckedOutByAnyUser(UUID2<Book> bookId) {
         return registeredUserIdToCheckedOutBookIdMap.values()
                 .stream()
@@ -266,10 +269,21 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
     }
+    public Result<UUID2<User>> getUserIdOfCheckedOutBook(Book book) {
+        return getUserIdOfCheckedOutBookId(book.id);
+    }
 
     // Convenience method - Called from PrivateLibrary class ONLY
-    public Result<UUID2<Book>> addPrivateBookToInventory(UUID2<Book> bookId, int quantity) {
+    public Result<UUID2<Book>> addPrivateBookIdToInventory(UUID2<Book> bookId, int quantity) {
         return addBookIdToInventory(bookId, quantity);
+    }
+
+    protected Result<UUID2<Book>> removeTransferringBookFromInventory(Book bookToTransfer) {
+        return removeBookIdFromInventory(bookToTransfer.id, 1);
+    }
+
+    protected Result<UUID2<Book>> addTransferringBookToInventory(Book bookToTransfer) {
+        return addBookIdToInventory(bookToTransfer.id, 1);
     }
 
     /////////////////////////////////////////
@@ -283,14 +297,6 @@ public class LibraryInfo extends DomainInfo
 
     protected Result<UUID2<User>> upsertTestUser(UUID2<User> userId) {
         return upsertUserId(userId);
-    }
-
-    protected Result<UUID2<Book>> removeTransferringBookFromInventory(Book bookToTransfer) {
-        return removeBookIdFromInventory(bookToTransfer.id, 1);
-    }
-
-    public Result<UUID2<Book>> addTransferringBookToInventory(Book bookToTransfer) {
-        return addBookIdToInventory(bookToTransfer.id, 1);
     }
 
     //////////////////////////////

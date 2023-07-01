@@ -3,13 +3,11 @@ package org.elegantobjects.jpages.App2.domain.library;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.account.Account;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.user.UserInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -122,7 +120,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (!user.isAccountInGoodStanding()) return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
 
         // Note: this calls a wrapper to the User's Account domain object
-        if (user.hasReachedMaxAmountOfAcceptedLibraryBooks()) return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
+        if (user.hasReachedMaxAmountOfAcceptedPublicLibraryBooks()) return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
 
         // Get User's AccountInfo object
         AccountInfo userAccountInfo = user.accountInfo();
@@ -202,7 +200,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("Book is not known at from Source Library, bookId: " + bookToTransfer.id));
 
 
-        // • Remove Book from Library Inventory of Books at `from` Source Library
+        // Remove Book from Library Inventory of Books at `from` Source Library
         Result<UUID2<Book>> removeBookResult = fromSourceLibrary.info.removeTransferringBookFromInventory(bookToTransfer);
         if (removeBookResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<Book>>) removeBookResult).exception());
@@ -213,10 +211,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
 
-        // • Add Book to this Library's Inventory of Books
+        // Add Book to this Library's Inventory of Books
         Result<UUID2<Book>> addBookResult = this.info.addTransferringBookToInventory(bookToTransfer);
         if (addBookResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<Book>>) addBookResult).exception());
+
 
         // • Transfer Book's Source Library to this Library
         Result<Book> transferredBookResult = bookToTransfer.updateSourceLibrary(this); // note: this only modifies the Book Role object, not the BookInfo.
@@ -284,6 +283,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return this.info.isBookIdCheckedOutByAnyUser(book.id);
     }
 
+    // Note: This method creates a new User Object from the User id found in the Book checkout record.
     public Result<User> getUserOfCheckedOutBook(Book book) {
         context.log.d(this, format("Library (%s) Book id: %s", this.id, book));
         if (fetchInfoFailureReason() != null)
@@ -292,29 +292,19 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if(this instanceof PrivateLibrary)
             return new Result.Failure<>(new Exception("PrivateLibrary does not support registration of users, libraryId: " + this.id));
 
+        // get the User's id from the Book checkout record
         Result<UUID2<User>> userIdResult =
-                this.info.getUserIdOfCheckedOutBookId(book.id);
+                this.info.getUserIdOfCheckedOutBook(book);
         if (userIdResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<User>>) userIdResult).exception());
-
         UUID2<User> userId = ((Result.Success<UUID2<User>>) userIdResult).value();
-        Result<UserInfo> userInfoResult =
-                context.userInfoRepo().fetchUserInfo(userId);
-        if (userInfoResult instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<UserInfo>) userInfoResult).exception());
-        UserInfo userInfo = ((Result.Success<UserInfo>) userInfoResult).value();
 
-        @SuppressWarnings("unchecked")
-        UUID2<Account> accountId = (UUID2<Account>) UUID2.fromUUID2(userId, Account.class); // accountId is the same as userId
-        Result<AccountInfo> accountInfo =
-                context.accountInfoRepo().fetchAccountInfo(accountId);
-        if (accountInfo instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<AccountInfo>) accountInfo).exception());
+        Result<User> fetchUserResult = User.fetchUser(userId, context);
+        if (fetchUserResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<User>) fetchUserResult).exception());
+        User user = ((Result.Success<User>) fetchUserResult).value();
 
-        AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo).value();
-        Account account = new Account(accountInfo1, context);
-
-        return new Result.Success<>(new User(userInfo, account, context));
+        return new Result.Success<>(user);
     }
 
     /////////////////////////////////////////

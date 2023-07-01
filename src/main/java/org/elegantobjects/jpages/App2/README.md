@@ -179,6 +179,20 @@ Strive to make it look like regular English, and to be able to read it without a
 - Guard clauses are used to check for errors and return early if error is found.
 - Basic data validation
 
+### Domain Role Object can create other Domain Role Objects
+- This is acceptable for Domain objects!
+  - They all can instantiate themselves & others.
+  - They all can be instantiated by others.
+  - Their `Info` gets pulled in from their Repository on demand with a call to `info()`.
+  - `Role` objects are essentially smart pointers to their `Info` objects & other `Role` objects.
+
+### Acceptable Acronyms
+  - `Id` - for Id's
+  - `Info` - for objects that contain the Role object's domain information
+  - `Repo` - for repository objects
+  - `DTO` - for Data Transfer Objects
+  - 'num' - for numbers or counts or amounts
+
 ## Architecture
 
 - ### Data

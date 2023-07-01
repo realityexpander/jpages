@@ -36,7 +36,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
     public User(
         @NotNull UUID2<User> id,
-        Account account, Context context
+        Account account,
+        Context context
     ) {
         super(id.toDomainUUID2(), context);
         this.account = account;
@@ -65,6 +66,33 @@ public class User extends Role<UserInfo> implements IUUID2 {
         this(UUID2.randomUUID2(), account, context);
     }
 
+    public static Result<User> fetchUser(UUID2<User> id, Context context) {
+
+        // get the User's UserInfo
+        Result<UserInfo> userInfoResult =
+                context.userInfoRepo().fetchUserInfo(id);
+        if (userInfoResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UserInfo>) userInfoResult).exception());
+        UserInfo userInfo = ((Result.Success<UserInfo>) userInfoResult).value();
+
+        // get the User's Account id
+        @SuppressWarnings("unchecked")
+        UUID2<Account> accountId = (UUID2<Account>) UUID2.fromUUID2(id, Account.class); // accountId is the same as userId
+        Result<AccountInfo> accountInfo =
+                context.accountInfoRepo().fetchAccountInfo(accountId);
+        if (accountInfo instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<AccountInfo>) accountInfo).exception());
+
+        // Get the User's Account
+        AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo).value();
+        Account account = new Account(accountInfo1, context);
+
+        // Create the User
+        return new Result.Success<>(new User(userInfo, account, context));
+    }
+
+
+    @Override
     public String toString() {
         String str = "User (" + this.id.toString() + ") - ";
 
@@ -81,6 +109,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return str;
     }
 
+    @Override
     public String toJson() {
         Pair<UserInfo, AccountInfo> pair = new Pair<>(info, account.info());
         return context.gson.toJson(pair);
@@ -142,11 +171,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // - This method uses the UserInfo object to calculate the number of books the user has
     //   and then delegates to the AccountInfo object to determine if the
     //   number of books has reached the max.
-    public Result<ArrayList<Book>> acceptBook(Book book) {
+    public Result<ArrayList<Book>> acceptBook(@NotNull Book book) {
         context.log.d(this,"User (" + this.id + "),  bookId: " + book.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if(hasReachedMaxAmountOfAcceptedLibraryBooks()) return new Result.Failure<>(new Exception("User (" + this.id + ") has reached maximum amount of accepted Library Books"));
+        if(hasReachedMaxAmountOfAcceptedPublicLibraryBooks()) return new Result.Failure<>(new Exception("User (" + this.id + ") has reached maximum amount of accepted Library Books"));
 
         Result<ArrayList<UUID2<Book>>> acceptResult =
                 this.info.acceptBook(
@@ -199,7 +228,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
 
     // Note: This delegates to this User's internal Account Role object.
-    public Boolean hasReachedMaxAmountOfAcceptedLibraryBooks() {
+    public Boolean hasReachedMaxAmountOfAcceptedPublicLibraryBooks() {
         context.log.d(this,"User (" + this.id + ")");
         AccountInfo accountInfo = this.accountInfo();
         if (accountInfo == null) {
@@ -207,10 +236,10 @@ public class User extends Role<UserInfo> implements IUUID2 {
             return false;
         }
 
-        int numLibraryBooksAcceptedByUser = this.info.calculateAmountOfAcceptedLibraryBooks();
+        int numPublicLibraryBooksAccepted = this.info.calculateAmountOfAcceptedPublicLibraryBooks();
 
         // Note: This User Role Object delegates to its internal Account Role Object.
-        return accountInfo.hasReachedMaxAmountOfAcceptedLibraryBooks(numLibraryBooksAcceptedByUser);
+        return accountInfo.hasReachedMaxAmountOfAcceptedLibraryBooks(numPublicLibraryBooksAccepted);
     }
 
     public Result<ArrayList<Book>> findAllAcceptedBooks() {

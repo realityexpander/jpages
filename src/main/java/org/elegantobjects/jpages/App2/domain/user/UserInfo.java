@@ -121,18 +121,21 @@ public class UserInfo extends DomainInfo
         return new HashMap<>(this.acceptedBookIdToSourceLibraryIdMap);
     }
 
-    public ArrayList<UUID2<Book>> findAllAcceptedNonPrivateLibraryBookIds() {
-        ArrayList<UUID2<Book>> acceptedNonPrivateLibraryBookIds = new ArrayList<>();
+    public ArrayList<UUID2<Book>> findAllAcceptedPublicLibraryBookIds() {
+        ArrayList<UUID2<Book>> acceptedPublicLibraryBookIds = new ArrayList<>();
+
         for (UUID2<Book> bookId : this.acceptedBookIdToSourceLibraryIdMap.keySet()) {
-            if (this.acceptedBookIdToSourceLibraryIdMap
+            if (
+                this.acceptedBookIdToSourceLibraryIdMap
                     .get(bookId)
                     .getUUID2TypeStr()
                     .equals(UUID2.getUUID2TypeStr(Library.class))
             ) {
-                acceptedNonPrivateLibraryBookIds.add(bookId);
+                acceptedPublicLibraryBookIds.add(bookId);
             }
         }
-        return acceptedNonPrivateLibraryBookIds;
+
+        return acceptedPublicLibraryBookIds;
     }
 
     public ArrayList<UUID2<Book>> findAllAcceptedPrivateLibraryBookIds() {
@@ -152,8 +155,8 @@ public class UserInfo extends DomainInfo
     public int calculateAmountOfAcceptedBooks() {
         return this.acceptedBookIdToSourceLibraryIdMap.size();
     }
-    public int calculateAmountOfAcceptedLibraryBooks() {
-        return findAllAcceptedNonPrivateLibraryBookIds().size();
+    public int calculateAmountOfAcceptedPublicLibraryBooks() {
+        return findAllAcceptedPublicLibraryBookIds().size();
     }
     public int calculateAmountOfAcceptedPrivateLibraryBooks() {
         return findAllAcceptedPrivateLibraryBookIds().size();
