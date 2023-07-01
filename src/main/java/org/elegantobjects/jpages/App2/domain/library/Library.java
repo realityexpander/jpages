@@ -3,11 +3,13 @@ package org.elegantobjects.jpages.App2.domain.library;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.account.Account;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
+import org.elegantobjects.jpages.App2.domain.user.UserInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -133,10 +135,6 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         Result<Book> checkOutBookresult = this.info.checkOutBookToUser(book, user);
         if (checkOutBookresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
 
-        // User receives Book
-        Result<ArrayList<Book>> receiveBookResult = user.acceptBook(book);
-        if (receiveBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<ArrayList<Book>>) receiveBookResult).exception());
-
         // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
@@ -163,12 +161,83 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return new Result.Success<>(book);
     }
 
+    public Result<Book> transferCheckedOutBookSourceLibraryToThisLibrary(@NotNull Book bookToTransfer, @NotNull User user) {
+        context.log.d(this, format("Library (%s) - bookId %s, userId %s", this.id, bookToTransfer.id, user.id));
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Check in Book to current Source Library
+        Result<Book> checkInBookResult = checkInBookFromUser(bookToTransfer, user);
+        if (checkInBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
+
+        // Transfer Book to this Library
+        Result<Book> transferBookResult = this.transferBookSourceLibraryToThisLibrary(bookToTransfer);
+
+        // Check out Book to User from this Library
+        Result<Book> checkOutBookResult = checkOutBookToUser(bookToTransfer, user);
+        if (checkOutBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkOutBookResult).exception());
+
+        return new Result.Success<>(bookToTransfer);
+    }
+
+    // Note: this does not change the Checkout status of the User
+    public Result<Book> transferBookSourceLibraryToThisLibrary(@NotNull Book bookToTransfer) {
+        context.log.d(this, format("Library (%s) - bookId %s", this.id, bookToTransfer.id));
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Get the Book's Source Library
+        Library fromSourceLibrary = bookToTransfer.sourceLibrary();
+        if (fromSourceLibrary == null)
+            return new Result.Failure<>(new Exception("Book's Source Library is null, bookId: " + bookToTransfer.id));
+
+        // Check `from` Source Library is same as this Library
+        if (fromSourceLibrary.id.equals(this.id))
+            return new Result.Failure<>(new Exception("Book's Source Library is the same as this Library, bookId: " + bookToTransfer.id));
+
+        // Check if `from` Source Library is known
+        if (fromSourceLibrary.fetchInfoFailureReason() != null)
+            return new Result.Failure<>(new Exception("Book's Source Library is not known, bookId: " + bookToTransfer.id));
+
+        // Check if Book is known at `from` Source Library
+        if(!fromSourceLibrary.info.isBookKnown(bookToTransfer))
+            return new Result.Failure<>(new Exception("Book is not known at from Source Library, bookId: " + bookToTransfer.id));
+
+
+        // • Remove Book from Library Inventory of Books at `from` Source Library
+        Result<UUID2<Book>> removeBookResult = fromSourceLibrary.info.removeTransferringBookFromInventory(bookToTransfer);
+        if (removeBookResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UUID2<Book>>) removeBookResult).exception());
+
+        // Update `from` Source Library Info, bc data was modified for `from` Source Library
+        Result<LibraryInfo> updateInfoResult = fromSourceLibrary.updateInfo(fromSourceLibrary.info);
+        if (updateInfoResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
+
+
+        // • Add Book to this Library's Inventory of Books
+        Result<UUID2<Book>> addBookResult = this.info.addTransferringBookToInventory(bookToTransfer);
+        if (addBookResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UUID2<Book>>) addBookResult).exception());
+
+        // • Transfer Book's Source Library to this Library
+        Result<Book> transferredBookResult = bookToTransfer.updateSourceLibrary(this); // note: this only modifies the Book Role object, not the BookInfo.
+        if (transferredBookResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<Book>) transferredBookResult).exception());
+
+        // Update Info, bc data was modified for this Library
+        Result<LibraryInfo> updateInfoResult2 = this.updateInfo(this.info);
+        if (updateInfoResult2 instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult2).exception());
+
+
+        return transferredBookResult;
+    }
+
     /////////////////////////////////
     // Published Helper Methods    //
     /////////////////////////////////
 
     // Note: This Library Role Object enforces the rule:
-    //   - if a User is not known, they are added as a new user.
+    //   - if a User is not known, they are added as a new user.   // todo change to Result<> return type
     public boolean isUnableToFindOrRegisterUser(User user) {
         context.log.d(this, format("Library (%s) for user: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return true;
@@ -206,6 +275,46 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return false;
 
         return this.info.isBookAvailableToCheckout(book);
+    }
+
+    public boolean isBookCheckedOutByAnyUser(Book book) {  // todo return Result<>
+        context.log.d(this, format("Library (%s) Book id: %s", this.id, book.id));
+        if (fetchInfoFailureReason() != null) return false;
+
+        return this.info.isBookIdCheckedOutByAnyUser(book.id);
+    }
+
+    public Result<User> getUserOfCheckedOutBook(Book book) {
+        context.log.d(this, format("Library (%s) Book id: %s", this.id, book));
+        if (fetchInfoFailureReason() != null)
+            return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        if(this instanceof PrivateLibrary)
+            return new Result.Failure<>(new Exception("PrivateLibrary does not support registration of users, libraryId: " + this.id));
+
+        Result<UUID2<User>> userIdResult =
+                this.info.getUserIdOfCheckedOutBookId(book.id);
+        if (userIdResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UUID2<User>>) userIdResult).exception());
+
+        UUID2<User> userId = ((Result.Success<UUID2<User>>) userIdResult).value();
+        Result<UserInfo> userInfoResult =
+                context.userInfoRepo().fetchUserInfo(userId);
+        if (userInfoResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UserInfo>) userInfoResult).exception());
+        UserInfo userInfo = ((Result.Success<UserInfo>) userInfoResult).value();
+
+        @SuppressWarnings("unchecked")
+        UUID2<Account> accountId = (UUID2<Account>) UUID2.fromUUID2(userId, Account.class); // accountId is the same as userId
+        Result<AccountInfo> accountInfo =
+                context.accountInfoRepo().fetchAccountInfo(accountId);
+        if (accountInfo instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<AccountInfo>) accountInfo).exception());
+
+        AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo).value();
+        Account account = new Account(accountInfo1, context);
+
+        return new Result.Success<>(new User(userInfo, account, context));
     }
 
     /////////////////////////////////////////
@@ -288,5 +397,6 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this,this.toJson());
         System.out.println();
     }
+
 }
 

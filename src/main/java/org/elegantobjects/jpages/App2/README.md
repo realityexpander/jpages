@@ -10,20 +10,30 @@
 - Architected by layer, and each layer is grouped by feature, which allows convenient and
   easy to understand navigation of the code.
 - Built to test from start
-- Everything is fake-able and isolated for ease and speed of testing.
+- Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
 ## Code Style
+
+Attempting to make the Domain layer code as idiomatic as possible, and to make it easy to read and understand.
+Strive to make it look like regular English, and to be able to read it without an IDE and make domain layer use regular java.
 
 ### Encapsulation via methods
 - No setters
   - Only immutable copies of objects are returned
-- No getters 
+- No Direct Reference Getters 
   - No references to internal mutable objects (all fields are `final`)
   - Only return copies of information
   - Never reveal internal structures - always return curated copies for a specific purpose
   - Returning/Exposing `Role` objects or `id's` is OK
   - Never return `null`
     - Return an intention revealing object instead, like a `Boolean` or `Result` or `Empty` object.
+- Methods that require network or CPU time should be labeled
+  - ie: `calculateTotalCost()` is preferred over `getTotalCost()`
+  - ie: `fetchInfo()` is preferred over `getInfo()`
+- When the getter just returns a simple field, no need to use get.
+  - Prefer `id()` over `getId()` for readability
+  - ie: `info()` is preferred over `getInfo()`
+  - ie: `id()` is preferred over `getId()`
 
 ### No Nulls in Domain
 - Nulls only allowed to be passed in constructors
@@ -32,6 +42,9 @@
   - return "Empty" objects instead
 - Use sensible objects that show intent
   - ie: `PrivateLibrary` instead of a `null` `sourceLibrary`
+- One exception: "null" is returned from fetches when no error has occurred. 
+  - If there is an error, it is returned in a `Result` object.
+  - This is for convenience, allows the fetch info and error handling to happen in one line.
 
 ### Intention Revealing Error Messages
 - Error messages should be human-readable, clearly reveal the problem encountered
@@ -74,7 +87,14 @@
   - [IRepo -> Repo -> DomainRepo] for the `Repo` objects
   - [Role -> DomainRole] for the `Role` objects
 - Minimal use of Interfaces
+  - only where needed for testing via fakes/mocks 
 - One abstract class to define the `Role` Object class
+
+### Shallow Hierarchies
+- Keep hierarchies as flat as possible, as deep hierarchies are difficult to understand and maintain.
+- If reasonable parameterized behavior can be captured in a Role, it is better than 2 or more classes.
+  - example: [Library -> PrivateLibrary -> OrphanPrivateLibrary] vs [Library -> PrivateLibrary with `isOrphan` flag]
+  - prefer the shallower hierarchy with the `isOrphan` flag. 
   
 ### No `Static` Methods (with extremely limited exceptions)
 - Use of `Static` methods is severely limited to only those that are:
@@ -95,6 +115,37 @@
   - Only for specific exceptional rare cases use `else` blocks.
     - Always ask if it can be written in a way that doesnt use `else`. 
 
+### No `Void` Methods
+  - All methods return something, even if its just a `Boolean` or `Result` object.
+
+### No `Null` Checks
+  - Avoid if any way possible any `null` checks in code
+
+### Explicit Boolean Naming 
+- Boolean variables and methods are named explicitly
+  - `is{something}`
+  - `has{something}`
+  - Attempt to avoid using `!` operator
+    - Avoid using `isNot{something}` or `hasNot{something}`
+  - Attempt to convey intent
+    - ie: `isPrivate` is preferred over `isNotPublic`
+    - ie: `hasFines` is preferred over `isBalanceOverZero`
+
+### Variable Naming with Explicit Types
+  - The emphasis on reading without IDE assistance is important, and explicit type naming helps with this.
+  - `{Domain}Id` vs `{Domain}` Types
+      - Parameter names are explicit about if they are `{Domain}id` or `{Domain}` objects
+    - Id 
+      - Appending `Id` to the end of the parameter name is acceptable and encouraged
+      - ie: `userId` is preferred over `user`
+    - Domain
+      - If the object is a `Domain` object, then the name should be `{Domain}` and not `{Domain}Id`
+      - ie: `user` is preferred over `userId`
+  - `Info` vs `Role` Types
+    - Parameter names are explicit about whether they are `Info` or `Role` objects
+    - Appending `Info` to the end of the parameter name is acceptable and encouraged
+    - Using the plain `{Domain}` name is preferred if the object is a `Role` object
+
 ### Result Object for Errors & Exceptions
 - Use of `Result` object to return success or failure
   - encapsulate the error message and `Exception`.
@@ -104,10 +155,13 @@
 - No factory patterns
   - Just use constructors. 
 - No builder patterns
-  - Create a new object from the old object, and return the new object. 
-  - Use `with{someField}` to update `someField` field.
+  - Create a new object modified copy from the old object, and return the new object. 
+  - No need for a builder. 
+  - Use `.with{someField}(...)` method to update `someField` field.
 - No fluent interfaces
-  - Use `with{someField}` to update `someField` field. 
+  - Use `.with{someField}(...)` to update `someField` field. 
+- This architecture will update the info for the domain object automatically when the Role object Info field is updated.
+  - No need for a separate `update()` method, in most cases.
 
 ### Use Early Return
 - Multiple early returns for ease of error handling 

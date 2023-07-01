@@ -17,7 +17,7 @@ public class BookInfo extends DomainInfo
         Model.ToInfoDTO<BookInfoDTO>,
         Model.ToInfoDomain<BookInfo>
 {
-    private final UUID2<Book> id; // note this is a UUID2<Book> not a UUID2<BookInfo>, it is the id of the Book.
+    public final UUID2<Book> id; // note this is a UUID2<Book> not a UUID2<BookInfo>, it is the id of the Book.
     public final String title;
     public final String author;
     public final String description;
@@ -80,15 +80,25 @@ public class BookInfo extends DomainInfo
         );
     }
 
-    /////////////////////////////////////////////////
-    // BookInfo Business Logic Methods             //
-    // - All Info manipulation logic is done here. //
-    /////////////////////////////////////////////////
+    @Override
+    public String toString() {
+        return "Book (" + this.id + ") : " + this.title + " by " + this.author + ", " + this.description;
+    }
+
+    ////////////////////////////////
+    // Published Getters          //
+    ////////////////////////////////
 
     @Override
     public UUID2<Book> id() {
         return this.id;
     }
+
+    /////////////////////////////////////////////////
+    // BookInfo Business Logic Methods             //
+    // - All Info manipulation logic is done here. //
+    /////////////////////////////////////////////////
+
     public BookInfo withTitle(String title) {
         return new BookInfo(this.id, title, this.author, this.description);
     }
@@ -99,11 +109,6 @@ public class BookInfo extends DomainInfo
         return new BookInfo(this.id, this.title, this.author, description);
     }
 
-    @Override
-    public String toString() {
-        return "Book (" + this.id + ") : " + this.title + " by " + this.author + ", " + this.description;
-    }
-
     /////////////////////////////////////
     // ToEntity / ToDTO implementation //
     /////////////////////////////////////
@@ -112,6 +117,7 @@ public class BookInfo extends DomainInfo
     public BookInfoDTO toInfoDTO() {
         return new BookInfoDTO(this);
     }
+
     @Override
     public BookInfoEntity toInfoEntity() {
         return new BookInfoEntity(this);

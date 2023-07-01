@@ -67,7 +67,7 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
 
         for (int i = 0; i < numberOfBooksToCreate; i++) {
             Result<UUID2<Book>> result =
-                    libraryInfo.addTestBook(UUID2.createFakeUUID2(i*100, Book.class), 1);
+                    libraryInfo.addTestBook(UUID2.createFakeUUID2(1000+i*100, Book.class), 1);
 
             if (result instanceof Result.Failure) {
                 Exception exception = ((Result.Failure<UUID2<Book>>) result).exception();

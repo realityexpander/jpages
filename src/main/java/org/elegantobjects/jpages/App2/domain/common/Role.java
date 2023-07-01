@@ -39,10 +39,6 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                 ? (Class<TDomainInfo>) ((ParameterizedType) getClass()
                     .getGenericSuperclass())
                     .getActualTypeArguments()[0]
-//                : null;
-//                : (Class<TDomainInfo>) getClass()
-//                    .getSuperclass()
-//                    .getGenericSuperclass();
                 : (Class<TDomainInfo>) (
                         (ParameterizedType) (
                             (Class<?>) (

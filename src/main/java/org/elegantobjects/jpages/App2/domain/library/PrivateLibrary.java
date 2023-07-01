@@ -133,9 +133,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
         Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
         @SuppressWarnings("unchecked")
         UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0];  // there should only be 1 bookId
-        if (!firstBookId.equals(book.id)) {
+        if (!firstBookId.equals(book.id))
             return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id));
-        }
 
         return super.info()
                 .checkOutBookToUser(book, user); // note: we bypass all normal Library User Account checking

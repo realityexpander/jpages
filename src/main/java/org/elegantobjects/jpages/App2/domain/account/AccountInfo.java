@@ -33,6 +33,7 @@ public class AccountInfo extends DomainInfo
     // ie: we could have used a "Log" role here, but instead we just use a HashMap. // todo should this be a Log role instead?
     final private HashMap<Long, String> accountAuditLog; // timestamp_ms -> message as json
 
+    // LEAVE for future use
     // final int maxDays;               // max number of days a book can be checked out
     // final int maxRenewals;           // max number of renewals (per book)
     // final int maxRenewalDays;        // max number days for each renewal (per book)

@@ -8,6 +8,7 @@ import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
 import org.elegantobjects.jpages.App2.domain.library.PrivateLibrary;
+import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 
 // Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
@@ -124,27 +125,49 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return !this.isBookFromPrivateLibrary();
     }
 
+    public Result<Book> transferToLibrary(Library library) {
+        if(this.sourceLibrary == library) {
+            return new Result.Success<>(this);
+        }
+
+        if(this.isBookFromPrivateLibrary()) {
+            return library.transferBookSourceLibraryToThisLibrary(this);
+        }
+
+        if(sourceLibrary.isBookCheckedOutByAnyUser(this)) {
+            Result<User> userResult = sourceLibrary.getUserOfCheckedOutBook(this);
+            if(userResult instanceof Result.Failure)
+                return new Result.Failure<>(((Result.Failure<User>) userResult).exception());
+
+            User user = ((Result.Success<User>) userResult).value();
+            return library.transferCheckedOutBookSourceLibraryToThisLibrary(this, user);
+        }
+
+        return library.transferBookSourceLibraryToThisLibrary(this);
+    }
+
     public Result<BookInfo> updateAuthor(String author) {
-        BookInfo updatedInfo = this.info.withAuthor(author);
+        BookInfo updatedInfo = this.info().withAuthor(author);
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
     public Result<BookInfo> updateTitle(String title) {
-        BookInfo updatedInfo = this.info.withTitle(title);
+        BookInfo updatedInfo = this.info().withTitle(title);
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
     public Result<BookInfo> updateDescription(String description) {
-        BookInfo updatedInfo = this.info.withDescription(description);
+        BookInfo updatedInfo = this.info().withDescription(description);
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
 
     // Domain Role-specific business logic in a Role Object.
     public Result<Book> updateSourceLibrary(Library sourceLibrary) {
-        // NOTE: This method is only used by the Library Domain Object when moving a Book from one Library to another.
-        // It is NOT saved with the BookInfo, as it only applies to the Book Role Object.
+        // NOTE: This method is primarily used by the Library Domain Object when moving a Book from one Library
+        //   to another Library.
+        // It is NOT saved with the Book's BookInfo, as it only applies to the Book Domain Role Object.
         // - shows example of Domain Role-specific business logic in a Role Object.
         // - ie: sourceLibrary only exists in the Domain. BookInfo does not have a sourceLibrary field.
 
-        Book updatedBook = new Book(this.info, sourceLibrary, this.context);  // todo test
+        Book updatedBook = new Book(this.info(), sourceLibrary, this.context);  // todo test
         return new Result.Success<>(updatedBook);
     }
 

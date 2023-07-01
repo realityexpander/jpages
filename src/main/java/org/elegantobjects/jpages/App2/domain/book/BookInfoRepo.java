@@ -168,13 +168,13 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     public void populateDatabaseWithFakeBookInfo() {
         for (int i = 0; i < 10; i++) {
             database.addBookInfo(
-                    new BookInfoEntity(
-                            UUID2.createFakeUUID2(i*100, BookInfoEntity.class),
-                            "Title " + i*100,
-                            "Author " + i*100,
-                            "Description " + i*100,
-                            "Some extra info from the Entity" + i*100
-                    )
+                new BookInfoEntity(
+                    UUID2.createFakeUUID2(1000+i*100, BookInfoEntity.class),
+                    "Title " + 1000+i*100,
+                    "Author " + 1000+i*100,
+                    "Description " + 1000+i*100,
+                    "Some extra info from the Entity" + 1000+i*100
+                )
             );
         }
     }
@@ -182,12 +182,13 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     public void populateApiWithFakeBookInfo() {
         for (int i = 0; i < 10; i++) {
             Result<BookInfoDTO> result = api.addBookInfo(
-                    new BookInfoDTO(
-                            UUID2.createFakeUUID2(i*100, BookInfoDTO.class),
-                            "Title " + i*100,
-                            "Author " + i*100,
-                            "Description " + i*100,
-                            "Some extra info from the DTO" + i*100)
+                new BookInfoDTO(
+                    UUID2.createFakeUUID2(1000+i*100, BookInfoDTO.class),
+                    "Title " + 1000+i*100,
+                    "Author " + 1000+i*100,
+                    "Description " + 1000+i*100,
+                    "Some extra info from the DTO" + 1000+i*100
+                )
             );
 
             if (result instanceof Result.Failure) {
