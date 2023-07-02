@@ -223,9 +223,10 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
 
         public boolean containsKey(TUUID2 uuid2) {
-            UUID uuid = _uuid2ToUuidMap.get(uuid2);
+//            UUID uuid = _uuid2ToUuidMap.get(uuid2);
+//            return uuid != null && _uuidToEntityMap.containsKey(uuid2.uuid());
 
-            return uuid != null && _uuidToEntityMap.containsKey(uuid2.uuid());
+            return _uuidToEntityMap.containsKey(uuid2.uuid());
         }
 
         public boolean containsValue(TEntity entity) {
