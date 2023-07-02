@@ -134,7 +134,7 @@ class LibraryApp {
             ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
             Checkout_2_Books_to_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -158,7 +158,7 @@ class LibraryApp {
             }
 
             Get_available_Books_and_Inventory_Counts_in_Library:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"\nGetting available books and counts in library:");
                 ctx.log.d(this, "----------------------------------");
@@ -194,7 +194,7 @@ class LibraryApp {
             }
 
             Get_Books_checked_out_by_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Getting books checked out by user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -220,13 +220,18 @@ class LibraryApp {
                 }
             }
 
-            Check_In_Book_from_User_to_Library:
+            Check_Out_and_check_In_Book_from_User_to_Library:
             if (true) {
                 System.out.println();
                 ctx.log.d(this,"Check in book:" + book1200.id + ", from user: " + user1.id + ", to library:" + library1.id);
                 ctx.log.d(this, "----------------------------------");
 
-                user1.checkOutBookFromLibrary(book1200, library1);
+                // First check out a book
+                Result<UUID2<Book>> checkoutResult = user1.checkOutBookFromLibrary(book1200, library1);
+                if(checkoutResult instanceof Result.Success)
+                    ctx.log.d(this, "Checked out book SUCCESS --> book id:" + ((Result.Success<UUID2<Book>>) checkoutResult).value());
+                else
+                    ctx.log.e(this, "Checked out book FAILURE --> book id:" + ((Result.Failure<UUID2<Book>>) checkoutResult).exception().getMessage());
 
                 final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1200, user1);
                 if (checkInBookResult instanceof Result.Failure)
@@ -238,7 +243,7 @@ class LibraryApp {
             }
 
             // Load Library from Json
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Load Library from Json: ");
                 ctx.log.d(this, "----------------------------------");
@@ -276,6 +281,35 @@ class LibraryApp {
                     "    \"uuid2TypeStr\": \"Object.Role.Library\"\n" +
                     "  }\n" +
                     "}";
+
+                String json2 =
+                        "{\n" +
+                        "  \"id\": {\n" +
+                        "    \"uuid\": \"00000000-0000-0000-0000-000000000001\",\n" +
+                        "    \"_uuid2Type\": \"Object.Role.Library\"\n" +
+                        "  },\n" +
+                        "  \"name\": \"Library 1\",\n" +
+                        "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
+                        "    \"uuid2ToEntityMap\": {\n" +
+                        "      \"\\u003cObject.Role.User\\u003e00000000-0000-0000-0000-000000000001\": []\n" +
+                        "    }\n" +
+                        "  },\n" +
+                        "  \"bookIdToNumBooksAvailableMap\": {\n" +
+                        "    \"uuid2ToEntityMap\": {\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001000\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001100\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001200\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001300\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001400\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001500\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001600\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001700\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001800\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001900\": 1,\n" +
+                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001200\": 1\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}\n";
 
                 // Check JSON loaded properly
                 if(true) {
@@ -331,7 +365,7 @@ class LibraryApp {
             }
 
             // Load Book from DTO Json
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Load BookInfo from DTO Json: ");
                 ctx.log.d(this, "----------------------------------");
@@ -360,7 +394,7 @@ class LibraryApp {
             }
 
             // Load Book from DTO Json using DTO Book constructor
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Load Book from DTO Json using DTO Book constructor: ");
                 ctx.log.d(this, "----------------------------------");
@@ -389,7 +423,7 @@ class LibraryApp {
             }
 
             Check_out_Book_via_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Check_out_Book_via_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -424,7 +458,7 @@ class LibraryApp {
             }
 
             Give_Book_To_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Give_Book_To_User: ");
                 ctx.log.d(this, "----------------------------------");
@@ -575,7 +609,7 @@ class LibraryApp {
             }
 
             Test_UUID2_HashMap:
-            if (true) {
+            if (false) {
                 UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap = new UUID2.HashMap<>();
 
                 UUID2<Book> book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));

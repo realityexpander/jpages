@@ -52,7 +52,7 @@ public class AccountInfo extends DomainInfo
         String name,
         AccountStatus accountStatus,
         int currentFinePennies,
-        int maxAcceptedBooksForUser,
+        int maxAcceptedBooks,
         int maxFinePennies,
         HashMap<Long, String> accountAuditLog
     ) {
@@ -61,7 +61,7 @@ public class AccountInfo extends DomainInfo
         this.name = name;
         this.accountStatus = accountStatus;
         this.currentFinePennies = currentFinePennies;
-        this.maxAcceptedBooks = maxAcceptedBooksForUser;
+        this.maxAcceptedBooks = maxAcceptedBooks;
         this.maxFinePennies = maxFinePennies;
         this.accountAuditLog = accountAuditLog;
     }

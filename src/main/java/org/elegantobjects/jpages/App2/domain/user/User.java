@@ -218,7 +218,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     //   its public methods.
     public Boolean isAccountInGoodStanding() {
         context.log.d(this,"User (" + this.id + ")");
-        AccountInfo accountinfo = this.account.info();
+        AccountInfo accountinfo = this.accountInfo();
         if (accountinfo == null) {
             context.log.e(this,"User (" + this.id + ") - AccountInfo is null");
             return false;
@@ -298,15 +298,36 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return new Result.Success<>(new ArrayList<>(Arrays.asList(book.id)));
     }
 
-    // Convenience method to checkout a Book from a Library
+    // Convenience method to Check Out a Book from a Library
     // - Is it OK to also have this method in the Library Role Object?
     //   I'm siding with yes, since it just delegates to the Library Role Object.
     public Result<UUID2<Book>> checkOutBookFromLibrary(Book book, Library library) {
-        context.log.d(this,"User (" + this.id + "), book: " + this.id + ", library: " + library.id);
+        context.log.d(this,"User (" + this.id + "), book: " + book.id + ", library: " + library.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Note: Simply delegating to the Library Role Object
         Result<Book> bookResult = library.checkOutBookToUser(book, this);
+        if (bookResult instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<Book>) bookResult).exception());
+        }
+
+        // LEAVE FOR REFERENCE
+        // Note: no update needed as each Domain method used performs its own updates, as needed.
+        // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
+        //   need to be performed.
+
+        return new Result.Success<>(((Result.Success<Book>) bookResult).value().id);
+    }
+
+    // Convenience method to Check In a Book to a Library
+    // - Is it OK to also have this method in the Library Role Object?
+    //   I'm siding with yes, since it just delegates to the Library Role Object.
+    public Result<UUID2<Book>> checkInBookToLibrary(Book book, Library library) {
+        context.log.d(this,"User (" + this.id + "), book: " + book.id + ", library: " + library.id);
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Note: Simply delegating to the Library Role Object
+        Result<Book> bookResult = library.checkInBookFromUser(book, this);
         if (bookResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<Book>) bookResult).exception());
         }

@@ -8,17 +8,20 @@
   - Note: BOOP is a design pattern that is inspired by:
     - Alan Kay's OO style & lectures, HyperCard, the ideas behind Smalltalk. 
     - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
+  - Code that is easy to change & maintain and ready for separating out and 
+    independently horizontally scaling any domain object into a separate service or microservice.
 
 ### Developer Experience
 - Architected by layer, and each layer is grouped by feature, which allows convenient and
-  easy to understand navigation of the code.
-- Built to test from start
+  easy to comprehend navigation of the code.
+- Built to test from start!
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
 ## Code Style
 
-Attempting to make the Domain layer code as idiomatic as possible, and to make it easy to read and understand.
-Strive to make it look like regular English, and to be able to read it without an IDE and make domain layer use regular java.
+- Strive to make Domain layer code plain idiomatic Java as possible, and read like English prose.
+- Strive to make it read like regular English as possible, and to be able to understand it without 
+using IDE tools (like hover to find var types).
 
 ### Encapsulation of Data via Intention-named methods
   - Set and Get methods are not used, instead methods are named for their intention.
@@ -122,11 +125,11 @@ Strive to make it look like regular English, and to be able to read it without a
   - used to create objects from JSON, XML, etc.
   - no modification or creation of global state
 
-### Dumb Container Objects for Data Transfer
-- Dumb Container objects (DTO, Entity) are immutable and only used to pass data to/from outside domain
-  to domain "Role" objects.
-    - DTO's and Entities are still useful to maintain separation of concerns and to communicate with
-      outside world, and allows independent updating and maintaining of the domain objects.
+### Dumb Container Objects for Data Transfer Only to/from Domain
+- Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
+  to domain `Role` objects.
+- Note: DTO's and Entities are still useful to maintain separation of concerns and to communicate with
+  world outside domain, and allows independent changing and updating of the domain objects.
 
 ### Extremely Limit use of `Else` blocks
   - Code for conditions check first and return early if condition is not met.
@@ -144,7 +147,7 @@ Strive to make it look like regular English, and to be able to read it without a
   - Keep code as synchronous as possible, or looking synchronous.
   - If callbacks are needed, they should be wrapped to look synchronous.
 
-### Explicit Boolean Naming 
+### Encourage Explicit Boolean Naming 
 - Boolean variables and methods are named explicitly
   - `is{something}`
   - `has{something}`
@@ -154,7 +157,7 @@ Strive to make it look like regular English, and to be able to read it without a
     - ie: `isPrivate` is preferred over `isNotPublic`
     - ie: `hasFines` is preferred over `isBalanceOverZero`
 
-### Variable Naming with Explicit Types
+### Encourage Variable Naming with Explicit Types
   - The emphasis on reading without IDE assistance is important, and explicit type naming helps with this.
   - `{Domain}Id` vs `{Domain}` Types
       - Parameter names are explicit about if they are `{Domain}id` or `{Domain}` objects
@@ -169,10 +172,10 @@ Strive to make it look like regular English, and to be able to read it without a
     - Appending `Info` to the end of the parameter name is acceptable and encouraged
     - Using the plain `{Domain}` name is preferred if the object is a `Role` object
 
-### Result Object for Errors & Exceptions
+### Use Result Object for Errors & Exceptions
 - Use of `Result` object to return success or failure
-  - encapsulate the error message and `Exception`.
-  - instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
+  - Encapsulate the error message in an `Exception` object.
+  - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
 
 ### Avoid C++/Java Design Pattern Hacks
 - No factory patterns
@@ -203,6 +206,45 @@ Strive to make it look like regular English, and to be able to read it without a
   - This makes it possible to have a Role change independently of other Role objects. By defining communication
     protocols via methods.   
 
+### Reverse-scope-naming Style
+- Starts with the most specific adjective to more general adjectives, and ends with the name of the actual concrete type.
+- Domain objects are the most plain
+- Subtypes are always given an adjective name that differentiates it
+  - ie: `Library` and `PrivateLibary`
+- If it's a generic item, adding a descriptor is encouraged.
+  - ie: `accountStatus` is preferred over `status`
+  - ie: `currentFine` is preferred over `fine`
+- Concrete item is at the end of the name
+  - ie: `maxAcceptedPennies` instead of `maxPenniesAccepted`
+    - we want to refer to the  `Pennies` not `Accepted`s (whatever those are!)
+  - ie: `accountAuditLog` vs `log`
+    - We know it's a Log. 
+    - What kind of log? An Audit log. 
+    - What kind of audit log? An Account Audit Log. 
+- It is acceptable and preferred to chain more precise adjectives in the name first and 
+  move to more general adjectives.
+  - ie: `OrphanPrivateLibrary` is preferred over `Orphan`
+  - ie: `updatedAccountStatus` is preferred over `updated` or `status`
+
+### Naming of "Inverse" methods
+- Prefer using same verb and a short modifier, than to use two different verbs for inverse/opposite methods.
+- ie: Prefer `CheckIn` and `CheckOut` to `Borrow` and `Return`
+- ie: Prefer `Register` and `UnRegister` to `register` and `delete` (or `remove`)
+- ie: Prefer `Suspend` and `UnSuspend` to `suspend` and `reinstate`
+- ie: Prefer `Activate` and `DeActivate` to `activate` and `suspend` (or `disable`)
+  - Exceptions:
+  - For CRUD operations, it is acceptable to use standard opposite terms: `create`, `add`, `insert`, `delete`
+  - `Close` and `Open` are preferred over `Open` and `UnOpen` (unless the domain specifies it)
+  - `Push` and `Pop` are preferred over `Push` and `UnPush` (unless the domain specifies it)
+
+### Naming of "Transfer" methods
+- Use of `From` and `To` encouraged, to show explicit intent.
+  - ie: `checkOutBookToUser` is preferred over `checkOut` or `checkOutBook`
+  - ie: `transferBookSourceLibraryToThisLibrary` is preferred over `transferBook`
+    - yes, its wordier, but leaves no doubt as to what is going on. 
+- Use of `By` if there is an authorization, or a delegate.
+  - ie: `activateAccountByStaff` is preferred over `activateAccount`
+
 ### Guard Clauses
 - Guard clauses are used to check for errors and return early if error is found.
 - Basic data validation
@@ -223,6 +265,9 @@ Strive to make it look like regular English, and to be able to read it without a
   - `Repo` - for repository objects
   - `DTO` - for Data Transfer Objects
   - `num` - for things that refer to counts or amounts
+  - `max` & `min` - for limits
+  - `cur` - for `current` is gray area, prefer spelling out unless too pedantic for a local context.
+    - indicates the current value for the object.
   - `amt` - is in a gray area, as is `amnt`, prefer spelling out `amount`
   - `Kind` - Use in enums, instead of the word `Type` which is reserved specifically for the `Class<?>` types
   - `Str` - Append to a string variable name that represents a specific type
