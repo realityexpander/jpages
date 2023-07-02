@@ -5,16 +5,13 @@ import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 // Holds Library info for all the libraries in the system (simple CRUD operations)
 public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
-    // simulate a database on server (UUID2<Library> is the key)
-//    private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>(Library.class);
+    // simulate a database on server
     private final UUID2.HashMap<UUID2<Library>, LibraryInfo> database = new UUID2.HashMap<>();
 
     public LibraryInfoRepo(ILog log) {
@@ -34,7 +31,7 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     }
 
     @Override
-    public Result<LibraryInfo> updateLibraryInfo(LibraryInfo libraryInfo) {
+    public Result<LibraryInfo> updateLibraryInfo(@NotNull LibraryInfo libraryInfo) {
         log.d(this, "libraryInfo.id: " + libraryInfo.id);
 
         // Simulate network/database
@@ -48,7 +45,7 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     }
 
     @Override
-    public Result<LibraryInfo> upsertLibraryInfo(LibraryInfo libraryInfo) {
+    public Result<LibraryInfo> upsertLibraryInfo(@NotNull LibraryInfo libraryInfo) {
         log.d(this, "libraryInfo.id: " + libraryInfo.id);
 
         // Simulate network/database
@@ -81,10 +78,10 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
         log.d(this, "removeAllPrivateLibrariesWithNoBooksInInventory");
 
         for (UUID2<Library> entry : database.keySet()) {
-            String uuid2TypeStr = entry.getUUID2TypeStr();
+            String uuid2TypeStr = entry.uuid2TypeStr();
             LibraryInfo libraryInfo = database.get(entry);
 
-            if (Objects.equals(uuid2TypeStr, UUID2.getUUID2TypeStr(PrivateLibrary.class))
+            if (Objects.equals(uuid2TypeStr, UUID2.calcUUID2TypeStr(PrivateLibrary.class))
                     && libraryInfo.findAllKnownBookIds().isEmpty()) {
                 database.remove(entry);
             }

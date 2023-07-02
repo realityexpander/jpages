@@ -98,10 +98,10 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
 
     @Override
-    public String getUUID2TypeStr() {
+    public String uuid2TypeStr() {
 //        return this.getClass().getName();
         //        return UUID2.getUUID2TypeStr(Library.class);
-        return UUID2.getUUID2TypeStr(this.getClass()); // todo test does this work?
+        return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
     }
 
 

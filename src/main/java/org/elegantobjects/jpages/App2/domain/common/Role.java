@@ -139,7 +139,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             context.log.d("IDomainObject:createDomainInfoFromJson()", "obj = " + obj);
 
             // Set the UUID2 typeStr to match the type of the TDomainInfo object
-            String domainInfoClazzName = UUID2.getUUID2TypeStr(domainInfoClazz);
+            String domainInfoClazzName = UUID2.calcUUID2TypeStr(domainInfoClazz);
             domainInfoClazz.cast(obj)
                     .getDomainInfoId()
                     ._setUUID2TypeStr(domainInfoClazzName);
@@ -178,7 +178,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
 
             // Set Domain "Model" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
             infoFromJson._setIdFromImportedJson(
-                new UUID2<>(infoFromJson.id(), UUID2.getUUID2TypeStr(domainInfoClazz))
+                new UUID2<>(infoFromJson.id(), UUID2.calcUUID2TypeStr(domainInfoClazz))
             );
 
             // Update the info object with the new info

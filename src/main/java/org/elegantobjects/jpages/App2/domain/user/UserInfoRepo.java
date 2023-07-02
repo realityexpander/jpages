@@ -4,11 +4,11 @@ import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
+import org.jetbrains.annotations.NotNull;
 
 // Holds User info for all users in the system (simple CRUD operations)
 public class UserInfoRepo extends Repo implements IUserInfoRepo {
     // Simulate a database on a server somewhere
-//    private final UUID2.HashMap<User, UserInfo> database = new UUID2.HashMap<>(User.class);
     private final UUID2.HashMap<UUID2<User>, UserInfo> database = new UUID2.HashMap<>();
 
     public UserInfoRepo(ILog log) {
@@ -28,7 +28,7 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
     }
 
     @Override
-    public Result<UserInfo> updateUserInfo(UserInfo userInfo) {
+    public Result<UserInfo> updateUserInfo(@NotNull UserInfo userInfo) {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
         log.d(this, method + ", userId:" + userInfo.id);
 
@@ -42,7 +42,7 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
     }
 
     @Override
-    public Result<UserInfo> upsertUserInfo(UserInfo userInfo) {
+    public Result<UserInfo> upsertUserInfo(@NotNull UserInfo userInfo) {
         String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
         log.d(this, methodName + ", userId:" + userInfo.id);
 
@@ -51,7 +51,5 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
 
         return new Result.Success<>(userInfo);
     }
-
-
 
 }

@@ -63,7 +63,7 @@ public interface Info<TInfo> {
             context.log.d("Info:createInfoFromJson()", "obj = " + obj);
 
             // Set the UUID2 typeStr to match the Info Class name
-            String infoClazzName = UUID2.getUUID2TypeStr(infoClazz);
+            String infoClazzName = UUID2.calcUUID2TypeStr(infoClazz);
             infoClazz.cast(obj)
                     .getInfoId()
                     ._setUUID2TypeStr(infoClazzName);

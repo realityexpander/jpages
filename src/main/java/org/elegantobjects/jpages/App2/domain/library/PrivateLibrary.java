@@ -50,7 +50,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         Context context
     ) {
         super(info, context);
-        this.id._setUUID2TypeStr(UUID2.getUUID2TypeStr(PrivateLibrary.class));
+        this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
     public PrivateLibrary(
@@ -58,7 +58,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         Context context
     ) {
         super(id, context);
-        this.id._setUUID2TypeStr(UUID2.getUUID2TypeStr(PrivateLibrary.class));
+        this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
     @SuppressWarnings("unchecked")
@@ -69,7 +69,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
     ) {
         // Note: This creates an ORPHAN private library.
         super((UUID2<Library>) UUID2.fromUUID2(bookId, Library.class), context); // convert from BookId to LibraryId
-        this.id._setUUID2TypeStr(UUID2.getUUID2TypeStr(PrivateLibrary.class));
+        this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
 
         // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).
         // ORPHAN Private Library can contain only 1 Book,

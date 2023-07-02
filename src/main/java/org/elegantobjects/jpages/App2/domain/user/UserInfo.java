@@ -128,8 +128,8 @@ public class UserInfo extends DomainInfo
             if (
                 this.acceptedBookIdToSourceLibraryIdMap
                     .get(bookId)
-                    .getUUID2TypeStr()
-                    .equals(UUID2.getUUID2TypeStr(Library.class))
+                    .uuid2TypeStr()
+                    .equals(UUID2.calcUUID2TypeStr(Library.class))
             ) {
                 acceptedPublicLibraryBookIds.add(bookId);
             }
@@ -143,8 +143,8 @@ public class UserInfo extends DomainInfo
         for (UUID2<Book> bookId : this.acceptedBookIdToSourceLibraryIdMap.keySet()) {
             if (this.acceptedBookIdToSourceLibraryIdMap
                     .get(bookId)
-                    .getUUID2TypeStr()
-                    .equals(UUID2.getUUID2TypeStr(PrivateLibrary.class))
+                    .uuid2TypeStr()
+                    .equals(UUID2.calcUUID2TypeStr(PrivateLibrary.class))
             ) {
                 acceptedPrivateLibraryBookIds.add(bookId);
             }

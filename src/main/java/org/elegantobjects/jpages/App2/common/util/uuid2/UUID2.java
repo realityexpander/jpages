@@ -14,38 +14,67 @@ import static java.lang.String.format;
 // - IUUID2 is a marker interface for Domain objects that can be used with UUID2.
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;
-    private String uuid2TypeStr; // usually just the full class name of the Domain object // not final due to JSON deserialization needs to set this
+    private String _uuid2TypeStr; // usually just the last 3 segments of class name of the Domain object
+                                 // NOT final due to JSON deserialization needs to set this
 
-    public UUID2(TUUID2 uuid2, String uuid2TypeStr) {
+    public
+    UUID2(TUUID2 uuid2, String uuid2TypeStr) {
         this.uuid = ((UUID2<?>) uuid2).uuid();
 
         if(uuid2TypeStr != null) {
-            this.uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
+            this._uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
         } else {
-            this.uuid2TypeStr = "UUID"; // Default to untyped UUID
+            this._uuid2TypeStr = "UUID"; // Default to untyped UUID
         }
     }
-    public UUID2(TUUID2 uuid2, Class<?> clazz) {
-        this(uuid2, UUID2.getUUID2TypeStr(clazz));
+    public
+    UUID2(TUUID2 uuid2, Class<?> clazz) {
+        this(uuid2, UUID2.calcUUID2TypeStr(clazz));
     }
-    public UUID2(UUID uuid) {
+    public
+    UUID2(UUID uuid) {
         this.uuid = uuid;
-        this.uuid2TypeStr = "UUID";  // untyped UUID
+        this._uuid2TypeStr = "UUID";  // untyped UUID
     }
-    public UUID2(TUUID2 uuid2) {
-        this(uuid2, uuid2.getUUID2TypeStr());
-    }
-    @SuppressWarnings("unchecked")
-    public UUID2(UUID2<?> uuid2) {
-        this((TUUID2) uuid2, uuid2.getUUID2TypeStr());
+    public
+    UUID2(TUUID2 uuid2) {
+        this(uuid2, uuid2.uuid2TypeStr());
     }
     @SuppressWarnings("unchecked")
-    public UUID2(UUID uuid, Class<?> clazz) {
+    public
+    UUID2(@NotNull UUID2<?> uuid2) {
+        this((TUUID2) uuid2, uuid2.uuid2TypeStr());
+    }
+    @SuppressWarnings("unchecked")
+    public
+    UUID2(UUID uuid, Class<?> clazz) {
         this((TUUID2) UUID2.fromUUID(uuid), clazz);
     }
 
-    // simple getter
+    ////////////////////////////////
+    // Published Getters          //
+    ////////////////////////////////
+
     public UUID uuid() {return uuid;}
+
+    public @Override
+    String uuid2TypeStr() {
+        return _uuid2TypeStr;
+    }
+
+    public @Override
+    int hashCode() {
+        return uuid.hashCode();
+    }
+
+    public
+    boolean equals(@NotNull UUID2<TUUID2> other) {
+        return (other).uuid.equals(uuid);
+    }
+
+    ////////////////////////////////
+    // Converters                 //
+    ////////////////////////////////
 
     public static @NotNull
     UUID2<?> fromUUID2(UUID2<?> id, Class<?> clazz) {
@@ -67,30 +96,37 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return new UUID2<>(UUID.fromString(uuidStr));
     }
 
-    @Override
-    public String toString() {
-        return  "<" + getLast3SegmentsOfTypeStrPath(uuid2TypeStr) + ">" + uuid;
+    public @Override
+    String toString() {
+        return  "<" + getLast3SegmentsOfTypeStrPath(_uuid2TypeStr) + ">" + uuid;
     }
 
-    public UUID2<IUUID2> toDomainUUID2() {
-        return new UUID2<>(this, this.getUUID2TypeStr());
+    public
+    UUID2<IUUID2> toDomainUUID2() {
+        return new UUID2<>(this, this.uuid2TypeStr());
     }
 
-    public UUID2<?> toUUID2() {
+    public
+    UUID2<?> toUUID2() {
         return this;
     }
+
+    ////////////////////////////////
+    // Generators                 //
+    ////////////////////////////////
 
     public static <TDomainUUID2 extends IUUID2>
     UUID2<TDomainUUID2> randomUUID2() {
         return new UUID2<>(UUID.randomUUID());
     }
+
     public static <TDomainUUID2 extends IUUID2>
     UUID2<TDomainUUID2> randomUUID2(Class<TDomainUUID2> clazz) {
         return new UUID2<>(UUID.randomUUID(), clazz);
     }
 
     public static @NotNull
-    String getUUID2TypeStr(@NotNull Class<?> clazz) {
+    String calcUUID2TypeStr(@NotNull Class<?> clazz) {
 
         // Climbs the class hierarchy for the clazz, ie: `Model.{Domain}.{Entity}Info`
         String modelClassPathStr = clazz.getSuperclass().getSuperclass().toString();
@@ -104,22 +140,10 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return model + "." + domain + "." + entity;
     }
 
-    @Override
-    public String getUUID2TypeStr() {
-        return uuid2TypeStr;
-    }
-
     // Note: Should only be used when importing JSON
-    public void _setUUID2TypeStr(String uuid2TypeStr) {
-        this.uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
-    }
-
-    @Override
-    public int hashCode() {
-        return uuid.hashCode();
-    }
-    public boolean equals(@NotNull UUID2<TUUID2> other) {
-        return (other).uuid.equals(uuid);
+    public
+    void _setUUID2TypeStr(String uuid2TypeStr) {
+        this._uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
     }
 
     //////////////////////////////////////////////////
@@ -139,7 +163,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
     public static <TDomainUUID2 extends IUUID2> @NotNull
     UUID2<TDomainUUID2> createFakeUUID2(final Integer id, Class<?> clazz) {
-        return createFakeUUID2(id, getUUID2TypeStr(clazz));
+        return createFakeUUID2(id, calcUUID2TypeStr(clazz));
     }
     public static <TDomainUUID2 extends IUUID2> @NotNull
     UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
@@ -161,7 +185,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         //   UUID2<T> objects.
         // - The .hashCode() of UUID's is consistent between UUID objects of the same value.
         private final java.util.HashMap<TUUID2, TEntity> uuid2ToEntityMap = new java.util.HashMap<>(); // keeps the mapping of UUID2<T> to TEntity
-        transient private final java.util.HashMap<TUUID2, UUID> _uuid2ToUuidMap = new java.util.HashMap<>();
         transient private final java.util.HashMap<UUID, TEntity> _uuidToEntityMap = new java.util.HashMap<>();
 
         public HashMap() {}
@@ -190,7 +213,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
 
         public TEntity put(@NotNull TUUID2 uuid2, TEntity value) {
-            _uuid2ToUuidMap.put(uuid2, uuid2.uuid());
             uuid2ToEntityMap.put(uuid2, value);
             return _uuidToEntityMap.put(uuid2.uuid(), value);
         }
@@ -198,34 +220,26 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         public ArrayList<TEntity> putAll(@NotNull UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
             ArrayList<TEntity> entities = new ArrayList<>();
 
-            for (Map.Entry<TUUID2, UUID> entry : sourceDatabase._uuid2ToUuidMap.entrySet()) {
+            for (Map.Entry<TUUID2, TEntity> entry : sourceDatabase.uuid2ToEntityMap.entrySet()) {
                 TUUID2 uuid2 = entry.getKey();
-                UUID uuid = entry.getValue();
-
-                TEntity entity = sourceDatabase._uuidToEntityMap.get(uuid2.uuid());
+                TEntity entity = entry.getValue();
 
                 this.uuid2ToEntityMap.put(uuid2, entity);
-                this._uuid2ToUuidMap.put(uuid2, uuid);
                 this._uuidToEntityMap.put(uuid2.uuid(), entity);
 
                 entities.add(entity);
             }
 
-            this._uuidToEntityMap.putAll(sourceDatabase._uuidToEntityMap);
 
             return entities;
         }
 
         public TEntity remove(@NotNull TUUID2 uuid2) {
-            _uuid2ToUuidMap.remove(uuid2);
             uuid2ToEntityMap.remove(uuid2);
             return _uuidToEntityMap.remove(uuid2.uuid());
         }
 
-        public boolean containsKey(TUUID2 uuid2) {
-//            UUID uuid = _uuid2ToUuidMap.get(uuid2);
-//            return uuid != null && _uuidToEntityMap.containsKey(uuid2.uuid());
-
+        public boolean containsKey(@NotNull TUUID2 uuid2) {
             return _uuidToEntityMap.containsKey(uuid2.uuid());
         }
 
@@ -237,7 +251,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             Set<TUUID2> uuid2Set = new HashSet<>();
 
             try {
-                for (TUUID2 uuid2 : _uuid2ToUuidMap.keySet()) {
+                for (TUUID2 uuid2 : uuid2ToEntityMap.keySet()) {
                     //noinspection UseBulkOperation
                     uuid2Set.add(uuid2);
                 }
@@ -253,9 +267,9 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             Set<Map.Entry<TUUID2, TEntity>> uuid2Set = new HashSet<>();
 
             try {
-                for (Map.Entry<TUUID2, UUID> entry : _uuid2ToUuidMap.entrySet()) {
+                for (Map.Entry<TUUID2, TEntity> entry : uuid2ToEntityMap.entrySet()) {
                     TUUID2 uuid2 = entry.getKey();
-                    UUID uuid = entry.getValue();
+                    UUID uuid = uuid2.uuid();
 
                     TEntity entity = _uuidToEntityMap.get(uuid2.uuid());
 
@@ -287,12 +301,11 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
     }
 
-
     ////////////////////////////
     ///// Private helpers //////
     ////////////////////////////
 
-    private String getNormalizedUuid2TypeString(String uuid2TypeStr) {
+    private @NotNull String getNormalizedUuid2TypeString(String uuid2TypeStr) {
         if(uuid2TypeStr == null) {
             return "UUID"; // unspecified-type
         }
@@ -311,7 +324,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return normalizedTypeStr.toString();
     }
-    private String getLast3SegmentsOfTypeStrPath(String uuid2TypeStr) {
+    private String getLast3SegmentsOfTypeStrPath(@NotNull String uuid2TypeStr) {
         String[] segments = uuid2TypeStr.split("\\.");
         if(segments.length < 3) {
             return uuid2TypeStr;
@@ -322,7 +335,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
                 segments[segments.length - 1];
     }
 
-    private static String getLastSegmentOfTypeStrPath(String classPath) {
+    private static String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
         String[] segments = classPath.split("\\.");
         if(segments.length == 1) {
             return classPath;

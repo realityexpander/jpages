@@ -87,8 +87,8 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     }
 
     @Override
-    public String getUUID2TypeStr() {
-        return UUID2.getUUID2TypeStr(this.getClass()); // todo test does this work?
+    public String uuid2TypeStr() {
+        return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
     }
 
     ///////////////////////////////////////////
