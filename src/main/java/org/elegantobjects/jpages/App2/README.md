@@ -140,6 +140,10 @@ Strive to make it look like regular English, and to be able to read it without a
 ### No `Null` Checks
   - Avoid if any way possible any `null` checks in code
 
+### Synchronous Code
+  - Keep code as synchronous as possible, or looking synchronous.
+  - If callbacks are needed, they should be wrapped to look synchronous.
+
 ### Explicit Boolean Naming 
 - Boolean variables and methods are named explicitly
   - `is{something}`
@@ -193,8 +197,11 @@ Strive to make it look like regular English, and to be able to read it without a
 - BOOP makes clear separation of concerns easy and understandable.
 - Each Role has a single responsibility, and only handles that responsibility, and delegates all other responsibilities
   to other Roles.
-- Each Role has a many methods to handle its responsibility, and return encapsulated data to other Roles.
+- Each Role has a many methods to handle its responsibility, and return encapsulated intention-revealing data to other Roles.
 - No direct access to any other Role's data, all data is encapsulated and only accessed through methods.
+- All Role Info is returned as copies, never direct references.
+  - This makes it possible to have a Role change independently of other Role objects. By defining communication
+    protocols via methods.   
 
 ### Guard Clauses
 - Guard clauses are used to check for errors and return early if error is found.
@@ -215,7 +222,13 @@ Strive to make it look like regular English, and to be able to read it without a
   - `Info` - for objects that contain the Role object's domain information
   - `Repo` - for repository objects
   - `DTO` - for Data Transfer Objects
-  - 'num' - for numbers or counts or amounts
+  - `num` - for things that refer to counts or amounts
+  - `amt` - is in a gray area, as is `amnt`, prefer spelling out `amount`
+  - `Kind` - Use in enums, instead of the word `Type` which is reserved specifically for the `Class<?>` types
+  - `Str` - Append to a string variable name that represents a specific type
+    - ie: `UUID2TypeStr` is preferred over `UUID2Type` 
+      bc using the name `UUID2Type` would be considered a `Class<UUID2<?>>` in 
+      plain reading of the name in code (without looking it up)
 
 ## Architecture
 

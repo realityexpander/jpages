@@ -14,17 +14,17 @@ import static java.lang.String.format;
 // - IUUID2 is a marker interface for Domain objects that can be used with UUID2.
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;
-    private String _uuid2TypeStr; // usually just the last 3 segments of class name of the Domain object
-                                 // NOT final due to JSON deserialization needs to set this
+    private String _uuid2Type; // usually just the last 3 path segments of class name of the Domain object
+                               // NOT final due to JSON deserialization needs to set it. :(
 
     public
     UUID2(TUUID2 uuid2, String uuid2TypeStr) {
         this.uuid = ((UUID2<?>) uuid2).uuid();
 
         if(uuid2TypeStr != null) {
-            this._uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
+            this._uuid2Type = getNormalizedUuid2TypeString(uuid2TypeStr);
         } else {
-            this._uuid2TypeStr = "UUID"; // Default to untyped UUID
+            this._uuid2Type = "UUID"; // Default to untyped UUID
         }
     }
     public
@@ -34,7 +34,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public
     UUID2(UUID uuid) {
         this.uuid = uuid;
-        this._uuid2TypeStr = "UUID";  // untyped UUID
+        this._uuid2Type = "UUID";  // untyped UUID
     }
     public
     UUID2(TUUID2 uuid2) {
@@ -55,11 +55,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     // Published Getters          //
     ////////////////////////////////
 
-    public UUID uuid() {return uuid;}
+    public
+    UUID uuid() {return uuid;}
 
     public @Override
     String uuid2TypeStr() {
-        return _uuid2TypeStr;
+        return _uuid2Type;
     }
 
     public @Override
@@ -98,7 +99,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public @Override
     String toString() {
-        return  "<" + getLast3SegmentsOfTypeStrPath(_uuid2TypeStr) + ">" + uuid;
+        return  "<" + getLast3SegmentsOfTypeStrPath(_uuid2Type) + ">" + uuid;
     }
 
     public
@@ -141,18 +142,28 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     // Note: Should only be used when importing JSON
+    @SuppressWarnings("UnusedReturnValue")
     public
-    void _setUUID2TypeStr(String uuid2TypeStr) {
-        this._uuid2TypeStr = getNormalizedUuid2TypeString(uuid2TypeStr);
+    boolean _setUUID2TypeStr(String uuid2TypeStr) {
+        this._uuid2Type = getNormalizedUuid2TypeString(uuid2TypeStr);
+        return true; // always return `true` instead of a `void` return type
     }
 
     //////////////////////////////////////////////////
     // Methods for creating fake UUID's for testing //
     //////////////////////////////////////////////////
 
+    public static <TDomainUUID2 extends IUUID2> @NotNull
+    UUID2<TDomainUUID2> createFakeUUID2(final Integer id, Class<?> clazz) {
+        return _createFakeUUID2(id, calcUUID2TypeStr(clazz));
+    }
+    public static <TDomainUUID2 extends IUUID2> @NotNull
+    UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
+        return createFakeUUID2(id, IUUID2.class);
+    }
     @SuppressWarnings("unchecked")
     private static <TDomainUUID2 extends IUUID2> @NotNull
-    UUID2<TDomainUUID2> createFakeUUID2(final Integer id, String clazzPathStr) {
+    UUID2<TDomainUUID2> _createFakeUUID2(final Integer id, String clazzPathStr) {
         Integer nonNullId = id;
         if (nonNullId == null) nonNullId = 0; // default value
 
@@ -161,22 +172,21 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return new UUID2<>((TDomainUUID2) uuid2, clazzPathStr);
     }
-    public static <TDomainUUID2 extends IUUID2> @NotNull
-    UUID2<TDomainUUID2> createFakeUUID2(final Integer id, Class<?> clazz) {
-        return createFakeUUID2(id, calcUUID2TypeStr(clazz));
-    }
-    public static <TDomainUUID2 extends IUUID2> @NotNull
-    UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
-        return createFakeUUID2(id, IUUID2.class);
-    }
 
 
-    // Utility HashMap class for mapping UUID2<T> to Objects.
-    // Wrapper for HashMap where the `key` hash is the common UUID value stored in UUID class.
-    //  - The problem is that normal HashMap uses `hashCode()` of UUID<{type}> object itself, which is not
-    //    consistent between UUID2<{type}> objects.
-    //  - This class uses UUID2<T> for the keys, but the hashCode() used is from the common UUID value
-    //    stored in UUID2 class.
+    /**
+     Utility HashMap class for mapping UUID2<T> to Objects.<br>
+     <br>
+     Wrapper for HashMap where the `key` hash is the common UUID value stored in UUID class.
+     <ol>
+      <li>
+        The problem is that java `HashMap` uses `hashCode()` of `UUID2<T>` object itself, which is _not_
+        consistent between `UUID2<T>` objects of the same value.
+      </li>
+      - This class uses `UUID2<T>` for the keys, but the `hashCode()` used is from the common `UUID` value
+        stored in `UUID2` class.
+     </ol>
+    **/
     public static class HashMap<TUUID2 extends UUID2<?>, TEntity> {
         private static final long serialVersionUID = 0x2743L;
 
@@ -305,7 +315,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     ///// Private helpers //////
     ////////////////////////////
 
-    private @NotNull String getNormalizedUuid2TypeString(String uuid2TypeStr) {
+    private @NotNull
+    String getNormalizedUuid2TypeString(String uuid2TypeStr) {
         if(uuid2TypeStr == null) {
             return "UUID"; // unspecified-type
         }
@@ -324,7 +335,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return normalizedTypeStr.toString();
     }
-    private String getLast3SegmentsOfTypeStrPath(@NotNull String uuid2TypeStr) {
+    private
+    String getLast3SegmentsOfTypeStrPath(@NotNull String uuid2TypeStr) {
         String[] segments = uuid2TypeStr.split("\\.");
         if(segments.length < 3) {
             return uuid2TypeStr;
@@ -335,7 +347,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
                 segments[segments.length - 1];
     }
 
-    private static String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
+    private static
+    String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
         String[] segments = classPath.split("\\.");
         if(segments.length == 1) {
             return classPath;
