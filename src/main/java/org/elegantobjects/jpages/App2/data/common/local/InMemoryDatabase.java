@@ -18,8 +18,7 @@ class InMemoryDatabase<TEntity extends Entity, TUUID2 extends IUUID2> implements
     private final String password;
 
     // Simulate a local database
-//    private final UUID2.HashMap<TUUID2, TEntity> database = new UUID2.HashMap<>(IUUID2.class);
-    private final UUID2.HashMap<TUUID2, TEntity> database = new UUID2.HashMap<>();
+    private final UUID2.HashMap<UUID2<TUUID2>, TEntity> database = new UUID2.HashMap<>();
 
     public InMemoryDatabase(URL url, String user, String password) {
         this.url = url;
@@ -44,7 +43,7 @@ class InMemoryDatabase<TEntity extends Entity, TUUID2 extends IUUID2> implements
     @SuppressWarnings("unchecked")
     @Override
     public Result<TEntity> updateEntityInfo(@NotNull TEntity entityInfo) {
-        // Simulate the
+        // Simulate the request
         try {
             database.put((UUID2<TUUID2>) entityInfo.id(), entityInfo);
         } catch (Exception e) {
@@ -92,7 +91,7 @@ class InMemoryDatabase<TEntity extends Entity, TUUID2 extends IUUID2> implements
     public Map<UUID2<TUUID2>, TEntity> getAllEntityInfo() {
 
         Map<UUID2<TUUID2>, TEntity> map = new HashMap<>();
-        for (Map.Entry<UUID, TEntity> entry : database.entrySet()) {
+        for (Map.Entry<UUID2<TUUID2>, TEntity> entry : database.entrySet()) {
             map.put(new UUID2<>(entry.getKey()), entry.getValue());
         }
 

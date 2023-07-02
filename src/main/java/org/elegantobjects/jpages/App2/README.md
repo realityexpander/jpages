@@ -5,7 +5,9 @@
 ### Inspiration
 - Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
-  - Note: BOOP is a design pattern that is inspired by Alan Kay's OO style & lectures, and Yegor Bugayenko's book Elegant Objects.
+  - Note: BOOP is a design pattern that is inspired by:
+    - Alan Kay's OO style & lectures, HyperCard, the ideas behind Smalltalk. 
+    - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
 
 ### Developer Experience
 - Architected by layer, and each layer is grouped by feature, which allows convenient and
@@ -45,11 +47,11 @@ Strive to make it look like regular English, and to be able to read it without a
   - ie: `id()` is preferred over `getId()`
 
 ### No Nulls in Domain
-- Nulls only allowed to be passed in constructors
-  - in order to indicate "use a default value for this"
-- Nulls are checked for in constructors only, usually to create a reasonable default value.
-- Nulls are not allowed to be returned from methods
-  - return "Empty" objects instead
+- `null` only allowed to be passed in constructors
+  - in order to indicate "use a reasonable default value for this parameter"
+- `null` are checked for in constructors only, usually to create a reasonable default value.
+- `null` are not allowed to be returned from methods
+  - `return` "Empty" objects instead of `null`
 - Use intention-named objects that indicate the reason for a `null` case.
   - ie: `PrivateLibrary` instead of a `null` source Library
 
@@ -231,9 +233,12 @@ Strive to make it look like regular English, and to be able to read it without a
       - `UserInfoRepo` - Handles persistence of `UserInfo` objects
       - `LibraryInfoRepo` - Handles persistence of `LibraryInfo` objects
     - `EntityInfo`
-      - `BookInfoEntity` - Handles transfer of `BookInfo` objects to database
+      - `BookInfoEntity` - Handles transfer of `BookInfo` objects to database 
+      - currently only one `Entity` in the system, to be expanded later to include `AccountInfoEntity`, `UserInfoEntity`, `LibraryInfoEntity`
     - `DTOInfo`
       - `BookInfoDTO`  - Handles transfer of `BookInfo` objects to API
+      - currently only one `DTO` in the system, to be expanded later to include `AccountInfoDTO`, `UserInfoDTO`, `LibraryInfoDTO`
+      
 - ### Role
   - `User` - Handles `User` actions, like `giveBookToUser()`, `checkOutBook()`, `checkInBook()`, etc.
     - `User` contains an `Account` object, which contains an `AccountInfo` object.  
@@ -243,22 +248,22 @@ Strive to make it look like regular English, and to be able to read it without a
       
 ## Arbitrary Domain Design decisions
 
+### _"BOOP is made for modeling the capriciousness of the Real World..."_ 
 
-
-### Arbitrary Rules
-
-_"Modeling the capricousness of the Real World..."_ 
-
-Some decisions have been made capriciously and with somewhat irrational discretion  in order 
-to see how much domain complexity can be modeled using BOOP. This is not a criticism of BOOP, but rather a test of its
+Some decisions have been made capriciously and with intentionally irrationally haphazard in order 
+to see how much inherent domain complexity can be modeled using BOOP. This is not a criticism of BOOP, but rather a test of its
 flexibility and power.
 
+#### Some Arbitrary Rules:
 - Like the fact that `Users` of the system can have `PrivateLibrary`, and can give `Books` to other `Users`.
 - Or a `User` can create their own book and add it to the their library first, then to a public library.
 - Or a `User` can "find" a book, and add it to their `PrivateLibrary`, and then give it to a public library. 
 - So some books need to respect system Account rules, and others dont.
-- A normal library system would likely not be set up like this, but would also have other arbitrary rules that would
-  need to be modeled.
+- A normal library system would likely _not_ be set up like this, but would also have other arbitrary rules that would
+  need to be modeled with minimal additional code complexity.
+- Things could be set up differently to simplify the Domain
+  - like not allow `Users` to have `PrivateLibrary`, or not allow `Users` to give `Books` to other `Users`.
+  - But that would be less fun, and less of a test of BOOP's flexibility and power.
 
 #### Flat Hierarchies
 - In order to keep the hierarchies flat and adhere to other design considerations, some decisions break
@@ -266,7 +271,7 @@ flexibility and power.
   - the further away from the `Domain` core layer, the more functional/procedural the code becomes. 
 - `Role` objects themselves adhere strictly to BOOP when interacting in the `Domain` layer.
 
-### Books & Libraries 
+### Arbitrary Domain User, Book, Library, Account Rules
 - Possession of a `Book` are primarily by the `User` and partially tracked by the `Library`. 
   - This is because the `User` is the one who checks out the `Book`, and the `User` is the one who returns the `Book`. 
   - The `Library` is only the intermediary between the `User` and the `Book`.

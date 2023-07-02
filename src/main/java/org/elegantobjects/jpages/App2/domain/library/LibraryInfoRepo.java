@@ -15,7 +15,7 @@ import java.util.UUID;
 public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     // simulate a database on server (UUID2<Library> is the key)
 //    private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>(Library.class);
-    private final UUID2.HashMap<Library, LibraryInfo> database = new UUID2.HashMap<>();
+    private final UUID2.HashMap<UUID2<Library>, LibraryInfo> database = new UUID2.HashMap<>();
 
     public LibraryInfoRepo(ILog log) {
         super(log);
@@ -79,7 +79,7 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     public void removeAllOrphanPrivateLibrariesWithNoBooksInInventory() {
         log.d(this, "removeAllPrivateLibrariesWithNoBooksInInventory");
 
-        for (UUID2<Library> entry : database.keys()) {
+        for (UUID2<Library> entry : database.keySet()) {
             String uuid2TypeStr = entry.getUUID2TypeStr();
             LibraryInfo libraryInfo = database.get(entry);
 

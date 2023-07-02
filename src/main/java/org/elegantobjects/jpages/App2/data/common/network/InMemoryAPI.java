@@ -16,7 +16,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
 
     // Simulate a database accessed via a network API
 //    private final UUID2.HashMap<TUUID2, TDTOInfo> database = new UUID2.HashMap<>(IUUID2.class);
-    private final UUID2.HashMap<TUUID2, TDTOInfo> database = new UUID2.HashMap<>();
+    private final UUID2.HashMap<UUID2<TUUID2>, TDTOInfo> database = new UUID2.HashMap<>();
 
     public InMemoryAPI(URL url, HttpClient client) {
         this.url = url;
@@ -102,7 +102,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
         Map<UUID2<TUUID2>, TDTOInfo> map = new HashMap<>();
 
         // Simulate Network
-        for (Map.Entry<UUID, TDTOInfo> entry : database.entrySet()) {
+        for (Map.Entry<UUID2<TUUID2>, TDTOInfo> entry : database.entrySet()) {
             map.put(new UUID2<>(entry.getKey()), entry.getValue());
         }
 

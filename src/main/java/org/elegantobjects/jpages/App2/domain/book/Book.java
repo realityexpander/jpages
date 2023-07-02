@@ -3,6 +3,8 @@ package org.elegantobjects.jpages.App2.domain.book;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.book.local.BookInfoEntity;
+import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.library.Library;
@@ -63,6 +65,37 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     public Book(Context context) {
         this(new BookInfo(UUID2.randomUUID2(Book.class)), null, context);
     }
+
+    /// Support creating Book from DTO & Entity
+    public Book(BookInfoDTO infoDTO, Library sourceLibrary, Context context) {
+        this(new BookInfo(infoDTO), sourceLibrary, context);
+    }
+    public Book(BookInfoEntity infoEntity, Library sourceLibrary, Context context) {
+        this(new BookInfo(infoEntity), sourceLibrary, context);
+    }
+
+    public static Result<Book> fetchBook(
+            UUID2<Book> uuid2,
+            Library sourceLibrary,
+            @NotNull Context context
+    ) {
+        BookInfoRepo repo = context.bookInfoRepo();
+
+        Result<BookInfo> infoResult = repo.fetchBookInfo(uuid2);
+        if (infoResult instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<BookInfo>) infoResult).exception());
+        }
+
+        BookInfo info = ((Result.Success<BookInfo>) infoResult).value();
+        return new Result.Success<>(new Book(info, sourceLibrary, context));
+    }
+    public static Result<Book> fetchBook(
+            UUID2<Book> uuid2,
+            @NotNull Context context
+    ) {
+        return fetchBook(uuid2, null, context);
+    }
+
 
     ////////////////////////////////
     // Published Getters          //

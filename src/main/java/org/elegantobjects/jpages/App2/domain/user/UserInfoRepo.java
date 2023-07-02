@@ -9,7 +9,7 @@ import org.elegantobjects.jpages.App2.domain.common.Repo;
 public class UserInfoRepo extends Repo implements IUserInfoRepo {
     // Simulate a database on a server somewhere
 //    private final UUID2.HashMap<User, UserInfo> database = new UUID2.HashMap<>(User.class);
-    private final UUID2.HashMap<User, UserInfo> database = new UUID2.HashMap<>();
+    private final UUID2.HashMap<UUID2<User>, UserInfo> database = new UUID2.HashMap<>();
 
     public UserInfoRepo(ILog log) {
         super(log);
@@ -43,8 +43,8 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
 
     @Override
     public Result<UserInfo> upsertUserInfo(UserInfo userInfo) {
-        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
-        log.d(this, method + ", userId:" + userInfo.id);
+        String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+        log.d(this, methodName + ", userId:" + userInfo.id);
 
         // Simulate network/database
         database.put(userInfo.id(), userInfo);

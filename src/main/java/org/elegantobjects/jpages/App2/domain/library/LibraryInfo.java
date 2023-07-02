@@ -16,14 +16,14 @@ public class LibraryInfo extends DomainInfo
 {
     public final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     public final String name;
-    private final UUID2.HashMap<User, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap;  // registered users of this library
-    private final UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap;  // known books & number available in this library
+    private final UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap;  // registered users of this library
+    private final UUID2.HashMap<UUID2<Book>, Integer> bookIdToNumBooksAvailableMap;  // known books & number available in this library
 
     public LibraryInfo(
         @NotNull UUID2<Library> id,
         String name,
-        UUID2.HashMap<User, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap,
-        UUID2.HashMap<Book, Integer> bookIdToNumBooksAvailableMap
+        UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap,
+        UUID2.HashMap<UUID2<Book>, Integer> bookIdToNumBooksAvailableMap
     ) {
         super(id);
         this.name = name;
@@ -106,7 +106,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
 
-    public Result<Book> checkInBookFromUser(Book book, User user) {
+    public Result<Book> checkInBookFromUser(@NotNull Book book, User user) {
         if(book.isBookFromPublicLibrary()) {
             Result<UUID2<Book>> returnedBookIdResult = _checkInPublicLibraryBookIdFromUserId(book.id, user.id);
             if (returnedBookIdResult instanceof Result.Failure)
@@ -201,7 +201,7 @@ public class LibraryInfo extends DomainInfo
     public Result<HashMap<UUID2<Book>, Integer>> calculateAvailableBookIdToCountOfAvailableBooksList() {
         HashMap<UUID2<Book>, Integer> availableBookIdToNumBooksAvailableMap = new HashMap<>();
 
-        Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keys();
+        Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keySet();
 
         for (UUID2<Book> bookId : bookSet) {
             if (isBookIdKnown(bookId)) {
@@ -246,10 +246,10 @@ public class LibraryInfo extends DomainInfo
         return isBookIdCheckedOutByUserId(book.id, user.id);
     }
     public boolean isBookIdCheckedOutByUserId(UUID2<Book> bookId, @NotNull UUID2<User> userId) {
-        return registeredUserIdToCheckedOutBookIdMap.get(userId.uuid()).contains(bookId);
+        return registeredUserIdToCheckedOutBookIdMap.get(userId).contains(bookId);
     }
 
-    public boolean isBookCheckedOutByAnyUser(Book book) {
+    public boolean isBookCheckedOutByAnyUser(@NotNull Book book) {
         return isBookIdCheckedOutByAnyUser(book.id);
     }
     public boolean isBookIdCheckedOutByAnyUser(UUID2<Book> bookId) {
@@ -262,14 +262,14 @@ public class LibraryInfo extends DomainInfo
         if (!isBookIdCheckedOutByAnyUser(bookId))
             return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
 
-        for (UUID2<User> userId : registeredUserIdToCheckedOutBookIdMap.keys()) {
+        for (UUID2<User> userId : registeredUserIdToCheckedOutBookIdMap.keySet()) {
             if (isBookIdCheckedOutByUserId(bookId, userId))
                 return new Result.Success<>(userId);
         }
 
         return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
     }
-    public Result<UUID2<User>> findUserIdOfCheckedOutBook(Book book) {
+    public Result<UUID2<User>> findUserIdOfCheckedOutBook(@NotNull Book book) {
         return findUserIdOfCheckedOutBookId(book.id);
     }
 
@@ -278,11 +278,11 @@ public class LibraryInfo extends DomainInfo
         return addBookIdToInventory(bookId, quantity);
     }
 
-    protected Result<UUID2<Book>> removeTransferringBookFromInventory(Book bookToTransfer) {
+    protected Result<UUID2<Book>> removeTransferringBookFromInventory(@NotNull Book bookToTransfer) {
         return removeBookIdFromInventory(bookToTransfer.id, 1);
     }
 
-    protected Result<UUID2<Book>> addTransferringBookToInventory(Book bookToTransfer) {
+    protected Result<UUID2<Book>> addTransferringBookToInventory(@NotNull Book bookToTransfer) {
         return addBookIdToInventory(bookToTransfer.id, 1);
     }
 
@@ -328,13 +328,13 @@ public class LibraryInfo extends DomainInfo
         if (quantity <= 0) return new Result.Failure<>(new IllegalArgumentException("quantity must be > 0, quantity: " + quantity));
 
         try {
-            if (bookIdToNumBooksAvailableMap.containsKey(bookId.uuid())) {
+            if (bookIdToNumBooksAvailableMap.containsKey(bookId)) {
                 bookIdToNumBooksAvailableMap.put(
-                    bookId.uuid(),
-                    bookIdToNumBooksAvailableMap.get(bookId.uuid()) + 1
+                    bookId,
+                    bookIdToNumBooksAvailableMap.get(bookId) + 1
                 );
             } else {
-                bookIdToNumBooksAvailableMap.put(bookId.uuid(), 1);
+                bookIdToNumBooksAvailableMap.put(bookId, 1);
             }
         } catch (Exception e) {
             return new Result.Failure<>(e);
@@ -342,7 +342,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(bookId);
     }
-    private Result<Book> addBookToInventory(Book book, int quantity) {
+    private Result<Book> addBookToInventory(@NotNull Book book, int quantity) {
         Result<UUID2<Book>> addedUUID2Book = addBookIdToInventory(book.id, quantity);
 
         if (addedUUID2Book instanceof Result.Failure) {
@@ -357,8 +357,8 @@ public class LibraryInfo extends DomainInfo
 
         // Simulate network/database call
         try {
-            if (bookIdToNumBooksAvailableMap.containsKey(bookId.uuid())) {
-                bookIdToNumBooksAvailableMap.put(bookId.uuid(), bookIdToNumBooksAvailableMap.get(bookId.uuid()) - 1);
+            if (bookIdToNumBooksAvailableMap.containsKey(bookId)) {
+                bookIdToNumBooksAvailableMap.put(bookId, bookIdToNumBooksAvailableMap.get(bookId) - 1);
             } else {
                 return new Result.Failure<>(new Exception("Book not in inventory, id: " + bookId));
             }
@@ -368,7 +368,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(bookId);
     }
-    private Result<Book> removeBookFromInventory(Book book, int quantity) {
+    private Result<Book> removeBookFromInventory(@NotNull Book book, int quantity) {
         Result<UUID2<Book>> removedUUID2Book = removeBookIdFromInventory(book.id, quantity);
 
         if (removedUUID2Book instanceof Result.Failure) {
@@ -387,11 +387,11 @@ public class LibraryInfo extends DomainInfo
             return new Result.Failure<>(new IllegalArgumentException("book is already checked out by user, bookId: " + bookId + ", userId: " + userId));
 
         try {
-            if (registeredUserIdToCheckedOutBookIdMap.containsKey(userId.uuid())) {
+            if (registeredUserIdToCheckedOutBookIdMap.containsKey(userId)) {
                 registeredUserIdToCheckedOutBookIdMap.get(userId).add(bookId);
             } else {
                 //noinspection ArraysAsListWithZeroOrOneArgument
-                registeredUserIdToCheckedOutBookIdMap.put(userId.uuid(), new ArrayList<>(Arrays.asList(bookId)));
+                registeredUserIdToCheckedOutBookIdMap.put(userId, new ArrayList<>(Arrays.asList(bookId)));
             }
         } catch (Exception e) {
             return new Result.Failure<>(e);
@@ -399,7 +399,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(bookId);
     }
-    private Result<Book> addBookToUser(Book book, User user) {
+    private Result<Book> addBookToUser(@NotNull Book book, @NotNull User user) {
         Result<UUID2<Book>> addedUUID2Book = addBookIdToRegisteredUser(book.id, user.id);
 
         if (addedUUID2Book instanceof Result.Failure) {
@@ -419,7 +419,7 @@ public class LibraryInfo extends DomainInfo
 
         try {
             registeredUserIdToCheckedOutBookIdMap
-                .get(userId.uuid())
+                .get(userId)
                 .remove(bookId); //todo reduce count instead of remove? Can someone check out multiple copies of the same book?
         } catch (Exception e) {
             return new Result.Failure<>(e);
@@ -427,7 +427,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(bookId);
     }
-    private Result<Book> removeBookFromUser(Book book, User user) {
+    private Result<Book> removeBookFromUser(@NotNull Book book, @NotNull User user) {
         Result<UUID2<Book>> removedUUID2Book = removeBookIdFromRegisteredUser(book.id, user.id);
 
         if (removedUUID2Book instanceof Result.Failure) {
@@ -442,14 +442,14 @@ public class LibraryInfo extends DomainInfo
             return new Result.Failure<>(new IllegalArgumentException("userId is already known"));
 
         try {
-            registeredUserIdToCheckedOutBookIdMap.put(userId.uuid(), new ArrayList<>());
+            registeredUserIdToCheckedOutBookIdMap.put(userId, new ArrayList<>());
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
 
         return new Result.Success<>(userId);
     }
-    private Result<UUID2<User>> upsertUserId(UUID2<User> userId) {
+    private @NotNull Result<UUID2<User>> upsertUserId(UUID2<User> userId) {
         if (isUserIdKnown(userId)) return new Result.Success<>(userId);
 
         return insertUserId(userId);
@@ -460,7 +460,7 @@ public class LibraryInfo extends DomainInfo
             return new Result.Failure<>(new IllegalArgumentException("userId is not known, userId: " + userId));
 
         try {
-            registeredUserIdToCheckedOutBookIdMap.remove(userId.uuid());
+            registeredUserIdToCheckedOutBookIdMap.remove(userId);
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
@@ -472,7 +472,7 @@ public class LibraryInfo extends DomainInfo
     // ToInfo implementation //
     ///////////////////////////
 
-    // note: currently no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
+    // note: currently no DB or API for UserInfo (so no .ToInfoEntity() or .ToInfoDTO())
     @Override
     public LibraryInfo toDeepCopyDomainInfo() {
         // Note: *MUST* return a deep copy
@@ -482,7 +482,7 @@ public class LibraryInfo extends DomainInfo
         libraryInfoDeepCopy.bookIdToNumBooksAvailableMap.putAll(this.bookIdToNumBooksAvailableMap);
 
         // Deep copy the userIdToCheckedOutBookMap
-        for (Map.Entry<UUID, ArrayList<UUID2<Book>>> entry : this.registeredUserIdToCheckedOutBookIdMap.entrySet()) {
+        for (Map.Entry<UUID2<User>, ArrayList<UUID2<Book>>> entry : this.registeredUserIdToCheckedOutBookIdMap.entrySet()) {
             libraryInfoDeepCopy.registeredUserIdToCheckedOutBookIdMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
 
@@ -495,6 +495,6 @@ public class LibraryInfo extends DomainInfo
     }
 
     public Set<UUID2<Book>> findAllKnownBookIds() {
-        return this.bookIdToNumBooksAvailableMap.keys();
+        return this.bookIdToNumBooksAvailableMap.keySet();
     }
 }
