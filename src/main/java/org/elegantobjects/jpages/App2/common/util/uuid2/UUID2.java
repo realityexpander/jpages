@@ -1,6 +1,5 @@
  package org.elegantobjects.jpages.App2.common.util.uuid2;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -161,69 +160,89 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         // - The hash of UUID2<T> objects includes the "type" of the UUID2<T> object, which is not consistent between
         //   UUID2<T> objects.
         // - The .hashCode() of UUID's is consistent between UUID objects of the same value.
-        private final java.util.HashMap<TUUID2, UUID> uuid2ToUuidMap = new java.util.HashMap<>();
-        private final java.util.HashMap<Integer, TEntity> hashCodeToEntityMap = new java.util.HashMap<>();
+        private final java.util.HashMap<TUUID2, TEntity> uuid2ToEntityMap = new java.util.HashMap<>(); // keeps the mapping of UUID2<T> to TEntity
+        transient private final java.util.HashMap<TUUID2, UUID> _uuid2ToUuidMap = new java.util.HashMap<>();
+        transient private final java.util.HashMap<UUID, TEntity> _uuidToEntityMap = new java.util.HashMap<>();
 
         public HashMap() {}
 
-        // Creates a database from another database
+        // Creates a copy of another UUID2.HashMap
         public HashMap(UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
             this.putAll(sourceDatabase);
         }
+        public HashMap(java.util.HashMap<TUUID2, TEntity> sourceDatabase) {
 
-        public TEntity get(@NotNull UUID2<?> uuid2) {
-            return hashCodeToEntityMap.get(uuid2.uuid().hashCode());
+            // Copy the sourceDatabase into this HashMap
+            for (Map.Entry<TUUID2, TEntity> entry : sourceDatabase.entrySet()) {
+                TUUID2 uuid2 = entry.getKey();
+                TEntity entity = entry.getValue();
+                this.put(uuid2, entity);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return uuid2ToEntityMap.toString();
+        }
+
+        public TEntity get(@NotNull TUUID2 uuid2) {
+            return _uuidToEntityMap.get(uuid2.uuid());
         }
 
         public TEntity put(@NotNull TUUID2 uuid2, TEntity value) {
-            uuid2ToUuidMap.put(uuid2, uuid2.uuid());
-            return hashCodeToEntityMap.put(uuid2.uuid().hashCode(), value);
+            _uuid2ToUuidMap.put(uuid2, uuid2.uuid());
+            uuid2ToEntityMap.put(uuid2, value);
+            return _uuidToEntityMap.put(uuid2.uuid(), value);
         }
 
-        public ArrayList<TEntity> putAll(@NotNull HashMap<TUUID2, TEntity> sourceDatabase) {
+        public ArrayList<TEntity> putAll(@NotNull UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
             ArrayList<TEntity> entities = new ArrayList<>();
 
-            for (Map.Entry<TUUID2, UUID> entry : sourceDatabase.uuid2ToUuidMap.entrySet()) {
+            for (Map.Entry<TUUID2, UUID> entry : sourceDatabase._uuid2ToUuidMap.entrySet()) {
                 TUUID2 uuid2 = entry.getKey();
                 UUID uuid = entry.getValue();
 
-                TEntity entity = sourceDatabase.hashCodeToEntityMap.get(uuid.hashCode());
+                TEntity entity = sourceDatabase._uuidToEntityMap.get(uuid2.uuid());
 
-                uuid2ToUuidMap.put(uuid2, uuid);
-                hashCodeToEntityMap.put(uuid.hashCode(), entity);
+                this.uuid2ToEntityMap.put(uuid2, entity);
+                this._uuid2ToUuidMap.put(uuid2, uuid);
+                this._uuidToEntityMap.put(uuid2.uuid(), entity);
 
                 entities.add(entity);
             }
+
+            this._uuidToEntityMap.putAll(sourceDatabase._uuidToEntityMap);
 
             return entities;
         }
 
         public TEntity remove(@NotNull TUUID2 uuid2) {
-            uuid2ToUuidMap.remove(uuid2);
-            return hashCodeToEntityMap.remove(uuid2.uuid().hashCode());
+            _uuid2ToUuidMap.remove(uuid2);
+            uuid2ToEntityMap.remove(uuid2);
+            return _uuidToEntityMap.remove(uuid2.uuid());
         }
 
         public boolean containsKey(TUUID2 uuid2) {
-            UUID uuid = uuid2ToUuidMap.get(uuid2);
+            UUID uuid = _uuid2ToUuidMap.get(uuid2);
 
-            return uuid != null && hashCodeToEntityMap.containsKey(uuid.hashCode());
+            return uuid != null && _uuidToEntityMap.containsKey(uuid2.uuid());
         }
 
         public boolean containsValue(TEntity entity) {
-            return hashCodeToEntityMap.containsValue(entity);
+            return _uuidToEntityMap.containsValue(entity);
         }
 
         public Set<TUUID2> keySet() throws RuntimeException {
             Set<TUUID2> uuid2Set = new HashSet<>();
 
             try {
-                for (TUUID2 uuid2 : uuid2ToUuidMap.keySet()) {
+                for (TUUID2 uuid2 : _uuid2ToUuidMap.keySet()) {
                     //noinspection UseBulkOperation
                     uuid2Set.add(uuid2);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException("HashMap.keys(): Failed to convert UUID to UUID2<TDomainUUID>, uuidSet: " + hashCodeToEntityMap.keySet());
+                throw new RuntimeException("HashMap.keySet(): Failed to convert UUID to UUID2<TDomainUUID>, uuid2ToEntityMap: " + uuid2ToEntityMap.keySet());
             }
 
             return uuid2Set;
@@ -233,37 +252,37 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             Set<Map.Entry<TUUID2, TEntity>> uuid2Set = new HashSet<>();
 
             try {
-                for (Map.Entry<TUUID2, UUID> entry : uuid2ToUuidMap.entrySet()) {
+                for (Map.Entry<TUUID2, UUID> entry : _uuid2ToUuidMap.entrySet()) {
                     TUUID2 uuid2 = entry.getKey();
                     UUID uuid = entry.getValue();
 
-                    TEntity entity = hashCodeToEntityMap.get(uuid.hashCode());
+                    TEntity entity = _uuidToEntityMap.get(uuid2.uuid());
 
                     uuid2Set.add(new AbstractMap.SimpleEntry<>(uuid2, entity));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException("HashMap.keys(): Failed to convert UUID to UUID2<TDomainUUID>, uuidSet: " + hashCodeToEntityMap.keySet());
+                throw new RuntimeException("HashMap.entrySet(): Failed to convert UUID to UUID2<TDomainUUID>, uuid2ToEntityMap: " + uuid2ToEntityMap.keySet());
             }
 
             return uuid2Set;
         }
 
-        public Set<TEntity> values() throws RuntimeException {
-            Set<TEntity> entitySet = new HashSet<>();
+        public ArrayList<TEntity> values() throws RuntimeException {
+            ArrayList<TEntity> entityValues = new ArrayList<>();
 
             try {
-                for (Integer hashCode : hashCodeToEntityMap.keySet()) {
-                    TEntity entity = hashCodeToEntityMap.get(hashCode);
+                for (Map.Entry<UUID, TEntity> entry : _uuidToEntityMap.entrySet()) {
+                    TEntity entity = entry.getValue();
 
-                    entitySet.add(entity);
+                    entityValues.add(entity);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException("HashMap.keys(): Failed to convert UUID to UUID2<TDomainUUID>, uuidSet: " + hashCodeToEntityMap.keySet());
+                throw new RuntimeException("HashMap.values(): Failed to convert UUID to UUID2<TDomainUUID>, uuid2ToEntityMap: " + uuid2ToEntityMap.keySet());
             }
 
-            return entitySet;
+            return entityValues;
         }
     }
 

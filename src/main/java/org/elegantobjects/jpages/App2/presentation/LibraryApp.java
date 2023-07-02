@@ -46,7 +46,7 @@ class LibraryApp {
         );
 
         Populate_And_Poke_Book:
-        if (true)
+        if (false)
         {
             System.out.println();
             ctx.log.d(this, "Populate_And_Poke_Book");
@@ -135,7 +135,7 @@ class LibraryApp {
             ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
             Checkout_2_Books_to_User:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"Checking out 2 books to user " + user1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -159,7 +159,7 @@ class LibraryApp {
             }
 
             Get_available_Books_and_Inventory_Counts_in_Library:
-            if (true) {
+            if (false) {
                 System.out.println();
                 ctx.log.d(this,"\nGetting available books and counts in library:");
                 ctx.log.d(this, "----------------------------------");
@@ -562,7 +562,7 @@ class LibraryApp {
 
             Test_UUID2_HashMap:
             if (true) {
-                UUID2.HashMap<UUID2<Book>, UUID2<User>> map = new UUID2.HashMap<>();
+                UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap = new UUID2.HashMap<>();
 
                 UUID2<Book> book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
                 UUID2<Book> book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
@@ -570,41 +570,42 @@ class LibraryApp {
                 UUID2<User> user01 = new UUID2<>(UUID2.createFakeUUID2(1, User.class));
                 UUID2<User> user02 = new UUID2<>(UUID2.createFakeUUID2(2, User.class));
 
-                map.put(book1, user01);
-                map.put(book2, user02);
+                uuid2ToEntityMap.put(book1, user01);
+                uuid2ToEntityMap.put(book2, user02);
 
-                UUID2<User> user = map.get(book1);
+                UUID2<User> user = uuid2ToEntityMap.get(book1);
                 ctx.log.d(this, "user=" + user);
 
                 UUID2<Book> book1a = ((Result.Success<Book>) Book.fetchBook(UUID2.createFakeUUID2(1200, Book.class), ctx)).value().id;
-                UUID2<User> user2 = map.get(book1a);
+                UUID2<User> user2 = uuid2ToEntityMap.get(book1a);
                 ctx.log.d(this, "user=" + user);
                 assert user2 != null;
                 assert user2.equals(user);
 
-                map.remove(book1);
-                user = map.get(book1);
+                uuid2ToEntityMap.remove(book1);
+                user = uuid2ToEntityMap.get(book1);
                 ctx.log.d(this, "user=" + user);
                 assert user == null;
 
-                map.put(book1, user01);
+                // put it back
+                uuid2ToEntityMap.put(book1, user01);
 
                 // check keySet
-                Set<UUID2<Book>> keySet = map.keySet();
+                Set<UUID2<Book>> keySet = uuid2ToEntityMap.keySet();
                 assert keySet.size() == 2;
 
                 // check values
-                Collection<UUID2<User>> values = map.values();
+                Collection<UUID2<User>> values = uuid2ToEntityMap.values();
                 assert values.size() == 2;
 
                 // check entrySet
-                Set<Map.Entry<UUID2<Book>, UUID2<User>>> entrySet = map.entrySet();
+                Set<Map.Entry<UUID2<Book>, UUID2<User>>> entrySet = uuid2ToEntityMap.entrySet();
                 assert entrySet.size() == 2;
 
                 // check containsKey
-                assert map.containsKey(book1);
-                assert map.containsKey(book2);
-                assert !map.containsKey(UUID2.createFakeUUID2(1400, Book.class));
+                assert uuid2ToEntityMap.containsKey(book1);
+                assert uuid2ToEntityMap.containsKey(book2);
+                assert !uuid2ToEntityMap.containsKey(UUID2.createFakeUUID2(1400, Book.class));
             }
 
         }

@@ -76,6 +76,7 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
         }
     }
 
+    // todo - is this job needed?
     public void removeAllOrphanPrivateLibrariesWithNoBooksInInventory() {
         log.d(this, "removeAllPrivateLibrariesWithNoBooksInInventory");
 
