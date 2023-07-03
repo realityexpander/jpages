@@ -31,7 +31,7 @@ public class AccountInfo extends DomainInfo
 
     // Showing object can use internal ways to track its own data that will not be directly exposed to the outside world.
     // ie: we could have used a "Log" role here, but instead we just use a HashMap. // todo should this be a Log role instead?
-    final private HashMap<Long, String> accountAuditLog; // timestamp_ms -> message as json
+    final private HashMap<Long, AccountAuditLogItem> accountAuditLog; // timestamp_ms -> AccountAuditLogItem
 
     // LEAVE for future use
     // final int maxDays;               // max number of days a book can be checked out
@@ -47,6 +47,26 @@ public class AccountInfo extends DomainInfo
         CLOSED;
     }
 
+    static class AccountAuditLogItem {
+        Long timeStampLongMillis;
+        String operation;
+        HashMap<String, String> entries;  // keyString -> valueString
+
+        public AccountAuditLogItem(
+            @NotNull
+            Long timeStampMillis,
+            @NotNull
+            String operation,
+            @NotNull
+            HashMap<String, String> kvHashMap
+        ) {
+            this.timeStampLongMillis = timeStampMillis;
+            this.operation = operation;
+            this.entries = new HashMap<>();
+            this.entries.putAll(kvHashMap);
+        }
+    }
+
     public AccountInfo(
         @NotNull UUID2<Account> id,  // UUID should match User's UUID
         String name,
@@ -54,7 +74,7 @@ public class AccountInfo extends DomainInfo
         int currentFinePennies,
         int maxAcceptedBooks,
         int maxFinePennies,
-        HashMap<Long, String> accountAuditLog
+        HashMap<Long, AccountAuditLogItem> accountAuditLog
     ) {
         super(id);
         this.id = id;
@@ -293,9 +313,9 @@ public class AccountInfo extends DomainInfo
                 .toArray(String[]::new);
     }
 
-    private String convertTimeStampLongMillisToIsoDateTimeString(long timeStampMillis) {
+    private @NotNull String convertTimeStampLongMillisToIsoDateTimeString(long timeStampMillis) {
         return DateTimeFormatter.ISO_DATE_TIME.format(
-                Instant.ofEpochMilli(timeStampMillis)
+            Instant.ofEpochMilli(timeStampMillis)
         );
     }
 
@@ -407,22 +427,34 @@ public class AccountInfo extends DomainInfo
         addAuditLogEntry(System.currentTimeMillis(), operation, key1, value1, key2, value2);
     }
     private void addAuditLogEntry(Long timeStampMillis, String operation) {
-        accountAuditLog.put(timeStampMillis, operation);
-    }
-    private void addAuditLogEntry(Long timeStampMillis, String operation, Object value) {
-        accountAuditLog.put(timeStampMillis, "{ \"" + operation + "\": \"" + value + "\" }");
-//        accountAuditLog.put(timeStampMillis, "{ " + operation + ": " + value + " }");
-    }
-    private void addAuditLogEntry(Long timeStampMillis, String operation, String key1, Object value1, String key2, Object value2) {
-        accountAuditLog.put(timeStampMillis,
-            "{ \"" + operation + "\": " +
-                "{" +
-                    "\"" + key1 + "\": \"" + value1 + "\"," +
-                    "\"" + key2 + "\": \"" + value2 + "\"" +
-                "}" +
-            "}"
+        accountAuditLog.put(
+            timeStampMillis,
+            new AccountAuditLogItem(timeStampMillis, operation, new HashMap<>())
         );
+    }
+    private void addAuditLogEntry(Long timeStampMillis, String operation, @NotNull Object value) {
+        HashMap<String, String> keyValMap = new HashMap<>();
+        keyValMap.put("value", value.toString());
 
+        accountAuditLog.put(
+            timeStampMillis,
+            new AccountAuditLogItem(timeStampMillis, operation, keyValMap)
+        );
+    }
+    private void addAuditLogEntry(
+            Long timeStampMillis,
+            String operation,
+            String key1, @NotNull Object value1,
+            String key2, @NotNull Object value2
+    ) {
+        HashMap<String, String> keyValMap = new HashMap<>();
+        keyValMap.put(key1, value1.toString());
+        keyValMap.put(key2, value2.toString());
+
+        accountAuditLog.put(
+            timeStampMillis,
+            new AccountAuditLogItem(timeStampMillis, operation, keyValMap)
+        );
     }
 
     private Result<AccountInfo> withName(String newName) {
