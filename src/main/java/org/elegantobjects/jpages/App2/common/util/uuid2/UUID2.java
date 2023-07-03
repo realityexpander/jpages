@@ -6,12 +6,16 @@ import java.util.*;
 
 import static java.lang.String.format;
 
-// UUID2 is a type-safe wrapper for UUIDs.
-// - Used to enforce type-specific UUIDs for Objects that expect a specific type of UUID.
-// - Domain objects must be marked with the IUUID2 interface to be used with UUID2.
-// - UUID2 is immutable.
-// - UUID2 is a wrapper for UUID, so it can be used in place of UUID.
-// - IUUID2 is a marker interface for Domain objects that can be used with UUID2.
+/**
+ UUID2 is a type-safe wrapper for UUIDs.<br>
+ <ul>
+ <li> UUID2 is a wrapper for UUID, so it can be used in place of UUID.</li>
+ <li> Used to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
+ <li> IUUID2 is a marker interface for Domain objects that can be used with UUID2.</li>
+ <li> Domain objects must be marked with the IUUID2 interface to be used with UUID2.</li>
+ <li> UUID2 is immutable.</li>
+</ul>
+**/
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;
     private String _uuid2Type; // usually just the last 3 path segments of class name of the Domain object
@@ -247,12 +251,13 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         private
         void removeEntryByUUID(UUID uuid) {
-            // This is to prevent duplicate entries for UUID2's that have the same internal UUID value.
-            //   This is bc the hashCode() of the UUID2 is the entire object, not the internal UUID's hashCode.
-            // So even though the UUID2 internal UUID is the same value, the java Hash implementation doesn't use that,
-            //   and we must work around it by doing a linear search here for each insert.
-            // Maybe there is a way around this, but i've already tried overloading the hashCode function for the
+            // This is to prevent duplicate UUID2 entries that have the same internal UUID value.
+            //   This is due to the hashCode() of the UUID2 is the entire object, not the internal UUID's hashCode.
+            // So even though the UUID2 internal UUID is the same UUID value, the java Hash implementation doesn't use that,
+            //   and we must work around it by doing a linear search here for each removal.
+            // Maybe there is a way around this, but i've already tried overloading the hashCode() method for the
             //   UUID2, but it seems to be ignored(?).
+            // Maybe there is an alternate Map collection I could use?
 
             // iterate thru uuid2ToEntityMap and remove element that matches UUID
             for (Map.Entry<TUUID2, TEntity> entry : uuid2ToEntityMap.entrySet()) {
