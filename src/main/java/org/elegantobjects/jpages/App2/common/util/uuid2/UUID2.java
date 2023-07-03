@@ -175,17 +175,23 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
 
     /**
-     Utility HashMap class for mapping UUID2<T> to Objects.<br>
+     Utility HashMap class for mapping {@code UUID2<TUUID2>} to {@code TEntity} Objects.<br>
      <br>
-     Wrapper for HashMap where the `key` hash is the common UUID value stored in UUID class.
-     <ol>
-      <li>
-        The problem is that java `HashMap` uses `hashCode()` of `UUID2<T>` object itself, which is _not_
-        consistent between `UUID2<T>` objects of the same value.
+     This class is a wrapper for {@code java.util.HashMap} where the {@code key} hash value used is
+     the hash of the {@code UUID} value stored inside the {@code UUID2<TUUID2>}'s {@code UUID} object.
+     <ul>
+      <li><b>Problem:</b> The {@code java.util.HashMap} class uses the {@code hashCode()} of the {@code UUID2<TUUID2>}
+        object itself, which is <b><i>not</i></b> consistent between {@code UUID2<TUUID2>} objects of the same value.
       </li>
-      - This class uses `UUID2<T>` for the keys, but the `hashCode()` used is from the common `UUID` value
-        stored in `UUID2` class.
-     </ol>
+      <li><b>Solution:</b> {@code UUID2.HashMap} uses {@code UUID2<TUUID2>} for the {@code key}s, and:
+        <ol>
+            <li>The {@code hashCode()} used is from the {@code UUID} value held inside the {@code UUID2<TUUID2>} object.</li>
+            <li>The {@code UUID hashCode()} is consistent between {@code UUID2<TUUID2>} objects with the same UUID value.</li>
+        </ol>
+     </li>
+     </ul>
+     * @param  <TUUID2>  the type of the class that implements the IUUID2 interface, ie: {@code Book} or {@code Account}
+     * @param  <TEntity> the type of the object to be stored.
     **/
     public static class HashMap<TUUID2 extends UUID2<?>, TEntity> {
         private static final long serialVersionUID = 0x2743L;
