@@ -188,28 +188,28 @@ class LibraryApp {
             }
 
             List_available_Books_and_Inventory_Counts_in_Library:
-            if (true) {
+            if (true)  {
                 System.out.println();
                 ctx.log.d(this,"\nGetting available books and counts in library:");
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<HashMap<Book, Integer>> availableBookToNumAvailableResult =
+                final Result<HashMap<Book, Long>> availableBookToNumAvailableResult =
                         library1.calculateAvailableBookIdToNumberAvailableList();
                 if (availableBookToNumAvailableResult instanceof Result.Failure) {
-                    ctx.log.d(this,"AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Integer>>) availableBookToNumAvailableResult).exception().getMessage());
-                    throw new Exception("AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Integer>>) availableBookToNumAvailableResult).exception().getMessage());
+                    ctx.log.d(this,"AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Long>>) availableBookToNumAvailableResult).exception().getMessage());
+                    throw new Exception("AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Long>>) availableBookToNumAvailableResult).exception().getMessage());
                 }
 
                 // create objects and populate info for available books
                 assert availableBookToNumAvailableResult instanceof Result.Success;
-                final HashMap<Book, Integer> availableBooks =
-                        ((Result.Success<HashMap<Book, Integer>>) availableBookToNumAvailableResult).value();
+                final HashMap<Book, Long> availableBooks =
+                        ((Result.Success<HashMap<Book, Long>>) availableBookToNumAvailableResult).value();
                 if(availableBooks == null) throw new Exception("availableBooks is null");
 
                 // Print out available books
                 System.out.println();
                 ctx.log.d(this,"Available Books in Library:");
-                for (Map.Entry<Book, Integer> availableBook : availableBooks.entrySet()) {
+                for (Map.Entry<Book, Long> availableBook : availableBooks.entrySet()) {
 
                     final Result<BookInfo> bookInfoResult =
                             availableBook.getKey()
@@ -224,7 +224,7 @@ class LibraryApp {
             }
 
             Check_Out_and_check_In_Book_from_User_to_Library:
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Check in book:" + book1200.id + ", from user: " + user1.id + ", to library:" + library1.id);
                 ctx.log.d(this, "----------------------------------");
@@ -232,14 +232,19 @@ class LibraryApp {
                 int acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
 
                 // First check out a book
-                Result<UUID2<Book>> checkoutResult = user1.checkOutBookFromLibrary(book1200, library1);
-                if(checkoutResult instanceof Result.Success)
-                    ctx.log.d(this, "Checked out book SUCCESS --> book id:" + ((Result.Success<UUID2<Book>>) checkoutResult).value());
-                else
-                    ctx.log.e(this, "Checked out book FAILURE --> book id:" + ((Result.Failure<UUID2<Book>>) checkoutResult).exception().getMessage());
+                if(!user1.hasAcceptedBook(book1200)) {
+                    Result<UUID2<Book>> checkoutResult = user1.checkOutBookFromLibrary(book1200, library1);
+                    if (checkoutResult instanceof Result.Success)
+                        ctx.log.d(this, "Checked out book SUCCESS --> book id:" + ((Result.Success<UUID2<Book>>) checkoutResult).value());
+                    else
+                        ctx.log.e(this, "Checked out book FAILURE --> book id:" + ((Result.Failure<UUID2<Book>>) checkoutResult).exception().getMessage());
 
-                int afterCheckOutBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
-                if(afterCheckOutBookCount != acceptedBookCount+1) throw new Exception("afterCheckOutBookCount != numBooksAccepted+1");
+                    int afterCheckOutBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+                    if(afterCheckOutBookCount != acceptedBookCount+1) throw new Exception("afterCheckOutBookCount != numBooksAccepted+1");
+                }
+
+                acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+
 
                 final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1200, user1);
                 if (checkInBookResult instanceof Result.Failure)
@@ -248,79 +253,51 @@ class LibraryApp {
                     ctx.log.d(this, "Returned Book SUCCESS --> book id:" + ((Result.Success<Book>) checkInBookResult).value().id);
 
                 int afterCheckInBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
-                if(afterCheckInBookCount != afterCheckOutBookCount-1) throw new Exception("afterNumBooksAccepted != afterCheckOutBookCount-1");
+                if(afterCheckInBookCount != acceptedBookCount-1) throw new Exception("afterNumBooksAccepted != acceptedBookCount-1");
 
                 library1.DumpDB(ctx);
             }
 
             // Load Library from Json
-            if (false) {
+            if (true) {
                 System.out.println();
                 ctx.log.d(this,"Load Library from Json: ");
                 ctx.log.d(this, "----------------------------------");
 
                 // Library library2 = new Library(ctx); // uses random UUID, will cause expected error due to unknown UUID
                 Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
+
+                // Show empty info object.
                 ctx.log.d(this, library2.toJson());
                 if(!Objects.equals(library2.toJson(), "{}")) throw new Exception("library2.toJson() != {}");
 
                 String json =
                     "{\n" +
-                    "  \"name\": \"Ronald Reagan Library\",\n" +
-                    "  \"userIdToCheckedOutBookIdMap\": {\n" +
-                    "    \"00000000-0000-0000-0000-000000000001\": [\n" +
-                    "      {\n" +
-                    "        \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                    "        \"uuid2TypeStr\": \"Object.Role.Book\"\n" +
-                    "      }\n" +
-                    "    ]\n" +
-                    "  },\n" +
-                    "  \"bookIdToNumBooksAvailableMap\": {\n" +
-                    "    \"00000000-0000-0000-0000-000000000010\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000011\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000012\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000013\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000014\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000015\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000016\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000017\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000018\": 50,\n" +
-                    "    \"00000000-0000-0000-0000-000000000019\": 50\n" +
-                    "  },\n" +
                     "  \"id\": {\n" +
                     "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                    "    \"uuid2TypeStr\": \"Object.Role.Library\"\n" +
+                    "    \"_uuid2Type\": \"Object.Role.Library\"\n" +
+                    "  },\n" +
+                    "  \"name\": \"Ronald Reagan Library\",\n" +
+                    "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
+                    "    \"uuid2ToEntityMap\": {\n" +
+                    "      \"UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001\": []\n" +
+                    "    }\n" +
+                    "  },\n" +
+                    "  \"bookIdToNumBooksAvailableMap\": {\n" +
+                    "    \"uuid2ToEntityMap\": {\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001400\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001000\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001300\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001200\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001500\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001600\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001700\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001800\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001900\": 25,\n" +
+                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001100\": 25\n" +
+                    "    }\n" +
                     "  }\n" +
                     "}";
-
-                String json2 =
-                        "{\n" +
-                        "  \"id\": {\n" +
-                        "    \"uuid\": \"00000000-0000-0000-0000-000000000001\",\n" +
-                        "    \"_uuid2Type\": \"Object.Role.Library\"\n" +
-                        "  },\n" +
-                        "  \"name\": \"Library 1\",\n" +
-                        "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
-                        "    \"uuid2ToEntityMap\": {\n" +
-                        "      \"\\u003cObject.Role.User\\u003e00000000-0000-0000-0000-000000000001\": []\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"bookIdToNumBooksAvailableMap\": {\n" +
-                        "    \"uuid2ToEntityMap\": {\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001000\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001100\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001200\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001300\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001400\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001500\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001600\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001700\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001800\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001900\": 1,\n" +
-                        "      \"\\u003cObject.Role.Book\\u003e00000000-0000-0000-0000-000000001200\": 1\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}\n";
 
                 // Check JSON loaded properly
                 if(true) {
@@ -331,14 +308,26 @@ class LibraryApp {
                     Result<LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
                         // NOTE: FAILURE IS EXPECTED HERE
+                        ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
 
                         // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
                         ctx.log.d(this, ((Result.Failure<LibraryInfo>) library2Result).exception().getMessage());
 
                         // The JSON was still loaded properly
                         ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
-                        assert library2.toJson().equals(json);
-                        if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
+
+                        // Can't just check json as the ordering of the bookIdToNumBooksAvailableMap is random
+                        // assert library2.toJson().equals(json);
+                        // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
+
+                        // check for same number of items
+                        if( ((Result.Success<HashMap<Book, Long>>) library2.calculateAvailableBookIdToNumberAvailableList()).value().size() != 10)
+                            throw new Exception("Library2 should have 10 books");
+
+                        // check existence of a particular book
+                        if (!library2.isKnownBook(new Book(UUID2.createFakeUUID2(1500, Book.class), null, ctx)))
+                            throw new Exception("Library2 should not have known book with id 1500");
+
                     } else {
                         // Intentionally Wont see this branch bc the library2 was never saved to the central database/api.
                         ctx.log.d(this, "Results of Library2 json load:");

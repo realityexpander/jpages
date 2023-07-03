@@ -6,7 +6,6 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @SuppressWarnings("FieldCanBeLocal")
 public
@@ -33,7 +32,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<T
     public Result<TDTOInfo> getDtoInfo(String id) {
         try {
             @SuppressWarnings("unchecked")
-            UUID2<TUUID2> uuid = (UUID2<TUUID2>) UUID2.fromString(id);
+            UUID2<TUUID2> uuid = (UUID2<TUUID2>) UUID2.fromUuidString(id);
             return getDtoInfo(uuid);
         } catch (Exception e) {
             return new Result.Failure<>(e);

@@ -2,6 +2,7 @@ package org.elegantobjects.jpages.App2.domain;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
@@ -76,7 +77,10 @@ public class Context implements IContext {
             new UserInfoRepo(log),
             new LibraryInfoRepo(log),
             new AccountInfoRepo(log),
-            new GsonBuilder().setPrettyPrinting().create(),
+            new GsonBuilder()
+                .registerTypeAdapter(UUID2.HashMap.class, new UUID2.Uuid2HashMapGsonDeserializer())
+                .setPrettyPrinting()
+                .create(),
             log
         );
     }

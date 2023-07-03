@@ -99,9 +99,8 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
     @Override
     public String uuid2TypeStr() {
-//        return this.getClass().getName();
-        //        return UUID2.getUUID2TypeStr(Library.class);
-        return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
+        // Get the Class Inheritance Path from the Class Path
+        return UUID2.calcUUID2TypeStr(this.getClass());
     }
 
 
@@ -114,28 +113,38 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        if (isUnableToFindOrRegisterUser(user)) return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
+        if (isUnableToFindOrRegisterUser(user))
+            return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
 
         // Note: this calls a wrapper to the User's Account domain object
-        if (!user.isAccountInGoodStanding()) return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
+        if (!user.isAccountInGoodStanding())
+            return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
 
         // Note: this calls a wrapper to the User's Account domain object
-        if (user.hasReachedMaxAmountOfAcceptedPublicLibraryBooks()) return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
+        if (user.hasReachedMaxAmountOfAcceptedPublicLibraryBooks())
+            return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
+
+        if(user.hasAcceptedBook(book))
+            return new Result.Failure<>(new Exception("User has already accepted this Book, userId: " + user.id + ", bookId: " + book.id));
 
         // Get User's AccountInfo object
         AccountInfo userAccountInfo = user.accountInfo();
-        if (userAccountInfo == null) return new Result.Failure<>(new Exception("User AccountInfo is null, userId: " + user.id));
+        if (userAccountInfo == null)
+            return new Result.Failure<>(new Exception("User AccountInfo is null, userId: " + user.id));
 
         // Check User fines are not exceeded
-        if (userAccountInfo.isMaxFineExceeded()) return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id));
+        if (userAccountInfo.isMaxFineExceeded())
+            return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id));
 
         // Check out Book to User
         Result<Book> checkOutBookresult = this.info.checkOutBookToUser(book, user);
-        if (checkOutBookresult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
+        if (checkOutBookresult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
 
         // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
-        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
+        if (updateInfoResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
     }
@@ -332,24 +341,24 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return new Result.Success<>(books);
     }
 
-    public Result<HashMap<Book, Integer>> calculateAvailableBookIdToNumberAvailableList() {
+    public Result<HashMap<Book, Long>> calculateAvailableBookIdToNumberAvailableList() {
         context.log.d(this, "Library (" + this.id + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<HashMap<UUID2<Book>, Integer>> entriesResult = this.info.calculateAvailableBookIdToCountOfAvailableBooksList();
+        Result<HashMap<UUID2<Book>, Long>> entriesResult = this.info.calculateAvailableBookIdToCountOfAvailableBooksList();
         if (entriesResult instanceof Result.Failure) {
-            return new Result.Failure<>(((Result.Failure<HashMap<UUID2<Book>, Integer>>) entriesResult).exception());
+            return new Result.Failure<>(((Result.Failure<HashMap<UUID2<Book>, Long>>) entriesResult).exception());
         }
 
         // Convert list of UUID2<Book> to list of Book
         // Note: the BookInfo is not fetched, so the Book only contains the id. This is by design.
-        HashMap<UUID2<Book>, Integer> bookIdToNumberAvailable =
-                ((Result.Success<HashMap<UUID2<Book>, Integer>>) entriesResult).value();
-        HashMap<Book, Integer> bookToNumberAvailable = new HashMap<>();
-        for (Map.Entry<UUID2<Book>, Integer> entry : bookIdToNumberAvailable.entrySet()) {
+        HashMap<UUID2<Book>, Long> bookIdToNumberAvailable =
+                ((Result.Success<HashMap<UUID2<Book>, Long>>) entriesResult).value();
+        HashMap<Book, Long> bookToNumberAvailable = new HashMap<>();
+        for (Map.Entry<UUID2<Book>, Long> entry : bookIdToNumberAvailable.entrySet()) {
             bookToNumberAvailable.put(
                 new Book(entry.getKey(), this, context),
-                entry.getValue()
+                    entry.getValue()
             );
         }
 

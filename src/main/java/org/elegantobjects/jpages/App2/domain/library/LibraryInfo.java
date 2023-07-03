@@ -17,13 +17,13 @@ public class LibraryInfo extends DomainInfo
     public final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     public final String name;
     private final UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap;  // registered users of this library
-    private final UUID2.HashMap<UUID2<Book>, Integer> bookIdToNumBooksAvailableMap;  // known books & number available in this library
+    private final UUID2.HashMap<UUID2<Book>, Long> bookIdToNumBooksAvailableMap;  // known books & number available in this library
 
     public LibraryInfo(
         @NotNull UUID2<Library> id,
         String name,
         UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap,
-        UUID2.HashMap<UUID2<Book>, Integer> bookIdToNumBooksAvailableMap
+        UUID2.HashMap<UUID2<Book>, Long> bookIdToNumBooksAvailableMap
     ) {
         super(id);
         this.name = name;
@@ -43,7 +43,7 @@ public class LibraryInfo extends DomainInfo
         );
     }
     public LibraryInfo(UUID uuid, String name) {
-        this(new UUID2<Library>(uuid, Library.class), name);
+        this(new UUID2<>(uuid, Library.class), name);
     }
     public LibraryInfo(String id, String name) {
         this(UUID.fromString(id), name);
@@ -198,14 +198,14 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(registeredUserIdToCheckedOutBookIdMap.get(userId));
     }
 
-    public Result<HashMap<UUID2<Book>, Integer>> calculateAvailableBookIdToCountOfAvailableBooksList() {
-        HashMap<UUID2<Book>, Integer> availableBookIdToNumBooksAvailableMap = new HashMap<>();
+    public Result<HashMap<UUID2<Book>, Long>> calculateAvailableBookIdToCountOfAvailableBooksList() {
+        HashMap<UUID2<Book>, Long> availableBookIdToNumBooksAvailableMap = new HashMap<>();
 
         Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keySet();
 
         for (UUID2<Book> bookId : bookSet) {
             if (isBookIdKnown(bookId)) {
-                int numBooksAvail = this.bookIdToNumBooksAvailableMap.get(bookId);
+                Long numBooksAvail = this.bookIdToNumBooksAvailableMap.get(bookId);
                 availableBookIdToNumBooksAvailableMap.put(bookId, numBooksAvail);
             }
         }
@@ -334,7 +334,7 @@ public class LibraryInfo extends DomainInfo
                     bookIdToNumBooksAvailableMap.get(bookId) + 1
                 );
             } else {
-                bookIdToNumBooksAvailableMap.put(bookId, 1);
+                bookIdToNumBooksAvailableMap.put(bookId, 1L);
             }
         } catch (Exception e) {
             return new Result.Failure<>(e);

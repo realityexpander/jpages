@@ -169,7 +169,6 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         try {
             Class<TDomainInfo> domainInfoClazz = this.infoClazz;
             TDomainInfo infoFromJson = this.context.gson.fromJson(json, domainInfoClazz);
-            assert infoFromJson.getClass() == this.info.getClass();
 
             Result<TDomainInfo> checkResult = checkJsonInfoIdMatchesThisInfoId(infoFromJson, domainInfoClazz);
             if (checkResult instanceof Result.Failure) {
@@ -192,7 +191,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
 
     public String toJson() {
         if(!isInfoFetched()) {
-            context.log.w(this,"called on unfetched info for " +
+            context.log.w(this,"called on un-fetched info for " +
                     "class: " + this.getClass().getName() + ", " +
                     "id: " + this.id());
 

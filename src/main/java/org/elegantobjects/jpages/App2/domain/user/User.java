@@ -242,6 +242,13 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return accountInfo.hasReachedMaxAmountOfAcceptedLibraryBooks(numPublicLibraryBooksAccepted);
     }
 
+    public boolean hasAcceptedBook(Book book) {
+        context.log.d(this,"User (" + this.id + "), book: " + book.id);
+        if (fetchInfoFailureReason() != null) return false;
+
+        return this.info.isBookAcceptedByThisUser(book.id);
+    }
+
     public Result<ArrayList<Book>> findAllAcceptedBooks() {
         context.log.d(this,"User (" + this.id + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));

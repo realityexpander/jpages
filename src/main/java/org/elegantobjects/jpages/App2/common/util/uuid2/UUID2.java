@@ -1,7 +1,9 @@
  package org.elegantobjects.jpages.App2.common.util.uuid2;
 
+import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -14,6 +16,9 @@ import static java.lang.String.format;
  <li> IUUID2 is a marker interface for Domain objects that can be used with UUID2.</li>
  <li> Domain objects must be marked with the IUUID2 interface to be used with UUID2.</li>
  <li> UUID2 is immutable.</li>
+ <li> UUID2Type is the class Inheritance path, <b>NOT</b> the Class path. <br>
+      ie: {@code Object.Role.User} instead of {@code org.elegantobjects.jpages.App2.domain.user.User}
+      note: Class path changes if location/package is changed.</li>
 </ul>
 **/
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
@@ -53,6 +58,30 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public
     UUID2(UUID uuid, Class<?> clazz) {
         this((TUUID2) UUID2.fromUUID(uuid), clazz);
+    }
+
+    public static UUID2<?> fromUUID2String(String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
+        // format example:
+        // UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001
+        // ^-- Always prefixed with `UUID2`
+        //      ^-- `:` divides between Prefix and Type
+        //       ^-- UUID2Type
+        //                       ^-- `@` divides the Type block and Value
+
+        String[] segments = uuid2FormattedString.split("@");
+        if(segments.length != 2) {
+            throw new IllegalArgumentException("Invalid UUID2 formatted string, invalid number of segments: " + uuid2FormattedString);
+        }
+
+        String[] typeSegments = segments[0].split(":");
+        if(!typeSegments[0].equals("UUID2")) {
+            throw new IllegalArgumentException("Invalid UUID2 formatted string, no `UUID2` prefix: " + uuid2FormattedString);
+        }
+
+        String uuid2TypeStr = typeSegments[1];  // ie: Object.Role.User
+        String uuidStr = segments[1];           // ie: 00000000-0000-0000-0000-000000000001
+
+        return new UUID2<>(UUID2.fromUuidString(uuidStr), uuid2TypeStr);
     }
 
     ////////////////////////////////
@@ -97,13 +126,14 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     public static @NotNull
-    UUID2<IUUID2> fromString(String uuidStr) {
+    UUID2<IUUID2> fromUuidString(String uuidStr) {
         return new UUID2<>(UUID.fromString(uuidStr));
     }
 
     public @Override
     String toString() {
-        return  "<" + getLast3SegmentsOfTypeStrPath(_uuid2Type) + ">" + uuid;
+//        return  "<" + getLast3SegmentsOfTypeStrPath(_uuid2Type) + ">" + uuid;
+        return  "UUID2:" + getLast4SegmentsOfTypeStrPath(_uuid2Type) + "@" + uuid;
     }
 
     public
@@ -172,7 +202,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         if (nonNullId == null) nonNullId = 0; // default value
 
         final String idPaddedWith11LeadingZeroes = format("%011d", nonNullId);
-        final UUID2<IUUID2> uuid2 = fromString("00000000-0000-0000-0000-" + idPaddedWith11LeadingZeroes);
+        final UUID2<IUUID2> uuid2 = fromUuidString("00000000-0000-0000-0000-" + idPaddedWith11LeadingZeroes);
 
         return new UUID2<>((TDomainUUID2) uuid2, clazzPathStr);
     }
@@ -241,11 +271,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return _uuidToEntityMap.get(uuid2.uuid());
         }
 
+        @SuppressWarnings("unchecked")
         public
-        TEntity put(@NotNull TUUID2 uuid2, TEntity value) {
+        TEntity put(@NotNull UUID2<?> uuid2, TEntity value) {
             removeEntryByUUID(uuid2.uuid());
 
-            uuid2ToEntityMap.put(uuid2, value);
+            uuid2ToEntityMap.put((TUUID2) uuid2, value);
             return _uuidToEntityMap.put(uuid2.uuid(), value);
         }
 
@@ -387,16 +418,25 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return normalizedTypeStr.toString();
     }
-    private
-    String getLast3SegmentsOfTypeStrPath(@NotNull String uuid2TypeStr) {
+    private static
+    String getLast4SegmentsOfTypeStrPath(@NotNull String uuid2TypeStr) {
         String[] segments = uuid2TypeStr.split("\\.");
-        if(segments.length < 3) {
+        if(segments.length <= 1) {
             return uuid2TypeStr;
         }
 
-        return segments[segments.length - 3] + "." +
-                segments[segments.length - 2] + "." +
-                segments[segments.length - 1];
+        // Make a string of up to 4 last segments (stopping at null) of the uuid2TypeStr with a period between them
+        int numSegments = segments.length;
+        StringBuilder pathBuilder = new StringBuilder();
+        int maxSegments = Math.min(numSegments, 4);
+        for(int i = 0; i < maxSegments; i++) {
+            pathBuilder.append(segments[numSegments - maxSegments + i]);
+            if(i < maxSegments - 1) {
+                pathBuilder.append(".");
+            }
+        }
+
+        return pathBuilder.toString();
     }
 
     private static
@@ -407,5 +447,53 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
 
         return segments[segments.length - 1];
+    }
+
+    public static class Uuid2HashMapGsonDeserializer implements JsonDeserializer<UUID2.HashMap<?,?>> {
+
+        @Override
+        public UUID2.HashMap<?,?> deserialize(
+                @NotNull
+                JsonElement jsonElement,
+                Type type,
+                JsonDeserializationContext jsonDeserializationContext
+        ) throws JsonParseException {
+            UUID2.HashMap<?, ?> uuid2HashMapFromJson = new Gson().fromJson(jsonElement.getAsJsonObject(), UUID2.HashMap.class);
+
+            HashMap<? extends UUID2<?>, Object> uuid2ToUuidMap = new HashMap<>();
+            try {
+                JsonObject uuid2ToUuidMapJsonObj = null;
+                if (jsonElement.getAsJsonObject().get("uuid2ToEntityMap") != null) {
+                    uuid2ToUuidMapJsonObj = jsonElement.getAsJsonObject()
+                        .get("uuid2ToEntityMap")
+                        .getAsJsonObject();
+                }
+
+                // rebuild the UUID2 to Entity map
+                for (Map.Entry<?, ?> entry : uuid2HashMapFromJson.uuid2ToEntityMap.entrySet()) {
+                    UUID2<?> uuid2Key = UUID2.fromUUID2String(entry.getKey().toString());
+                    Object entity = entry.getValue();
+
+                    if (entity == null) {
+                        throw new RuntimeException("Uuid2HashMapGsonDeserializer.deserialize(): entity is null");
+                    }
+
+                    // Converting all Numbers to longs
+                    // (for consistent number deserialization bc GSON defaults to Doubles)
+                    if (entity instanceof Number) {
+                        entity = ((Number) entity).longValue();
+
+                    }
+
+                    uuid2ToUuidMap.put(uuid2Key, entity);
+                }
+
+            } catch (IllegalArgumentException | ClassNotFoundException e) {
+                System.err.println(e.getMessage());
+                throw new RuntimeException(e);
+            }
+
+            return uuid2ToUuidMap;
+        }
     }
 }
