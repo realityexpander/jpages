@@ -65,12 +65,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public @Override
     int hashCode() {
-        return uuid.hashCode();
+        return this.uuid().hashCode();
     }
 
     public
     boolean equals(@NotNull UUID2<TUUID2> other) {
-        return (other).uuid.equals(uuid);
+        return (other).uuid().equals(uuid());
     }
 
     ////////////////////////////////
@@ -175,18 +175,22 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
 
     /**
-     Utility HashMap class for mapping {@code UUID2<TUUID2>} to {@code TEntity} Objects.<br>
+     Utility {@code HashMap} class for mapping {@code UUID2<TUUID2>} to {@code TEntity} Objects.<br>
      <br>
      This class is a wrapper for {@code java.util.HashMap} where the {@code key} hash value used is
-     the hash of the {@code UUID} value stored inside the {@code UUID2<TUUID2>}'s {@code UUID} object.
+     the hash of the {@code UUID} value s of  {@code UUID2<TUUID2>}'s embedded {@code UUID} object.
      <ul>
-      <li><b>Problem:</b> The {@code java.util.HashMap} class uses the {@code hashCode()} of the {@code UUID2<TUUID2>}
-        object itself, which is <b><i>not</i></b> consistent between {@code UUID2<TUUID2>} objects of the same value.
-      </li>
-      <li><b>Solution:</b> {@code UUID2.HashMap} uses {@code UUID2<TUUID2>} for the {@code key}s, and:
+      <li>
+        <b>Problem:</b> The {@code java.util.HashMap} class uses the {@code hashCode()} of the {@code UUID2<TUUID2>}
+          object itself, which is <b><i>not</i></b> consistent between {@code UUID2<TUUID2>} objects
+          with the {@code UUID} same value.
+     </li>
+     <li>
+        <b>Solution:</b> {@code UUID2.HashMap} uses the {@code hashCode()} from the embedded {@code UUID} object and:
         <ol>
-            <li>The {@code hashCode()} used is from the {@code UUID} value held inside the {@code UUID2<TUUID2>} object.</li>
-            <li>The {@code UUID hashCode()} is consistent between {@code UUID2<TUUID2>} objects with the same UUID value.</li>
+          <li>The {@code hashCode()} is calculated from the {@code UUID}.</li>
+          <li>The {@code UUID hashCode()} is consistent between {@code UUID2<TUUID2>} objects
+              with the same UUID value.</li>
         </ol>
      </li>
      </ul>
@@ -203,13 +207,16 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         private final java.util.HashMap<TUUID2, TEntity> uuid2ToEntityMap = new java.util.HashMap<>(); // keeps the mapping of UUID2<T> to TEntity
         transient private final java.util.HashMap<UUID, TEntity> _uuidToEntityMap = new java.util.HashMap<>();
 
-        public HashMap() {}
+        public
+        HashMap() {}
 
         // Creates a copy of another UUID2.HashMap
-        public HashMap(UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
+        public
+        HashMap(UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
             this.putAll(sourceDatabase);
         }
-        public HashMap(java.util.HashMap<TUUID2, TEntity> sourceDatabase) {
+        public
+        HashMap(java.util.HashMap<TUUID2, TEntity> sourceDatabase) {
 
             // Copy the sourceDatabase into this HashMap
             for (Map.Entry<TUUID2, TEntity> entry : sourceDatabase.entrySet()) {
@@ -220,20 +227,48 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
 
         @Override
-        public String toString() {
+        public
+        String toString() {
             return uuid2ToEntityMap.toString();
         }
 
-        public TEntity get(@NotNull TUUID2 uuid2) {
+        public
+        TEntity get(@NotNull TUUID2 uuid2) {
             return _uuidToEntityMap.get(uuid2.uuid());
         }
 
-        public TEntity put(@NotNull TUUID2 uuid2, TEntity value) {
+        public
+        TEntity put(@NotNull TUUID2 uuid2, TEntity value) {
+            removeEntryByUUID(uuid2.uuid());
+
             uuid2ToEntityMap.put(uuid2, value);
             return _uuidToEntityMap.put(uuid2.uuid(), value);
         }
 
-        public ArrayList<TEntity> putAll(@NotNull UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
+        private
+        void removeEntryByUUID(UUID uuid) {
+            // This is to prevent duplicate entries for UUID2's that have the same internal UUID value.
+            //   This is bc the hashCode() of the UUID2 is the entire object, not the internal UUID's hashCode.
+            // So even though the UUID2 internal UUID is the same value, the java Hash implementation doesn't use that,
+            //   and we must work around it by doing a linear search here for each insert.
+            // Maybe there is a way around this, but i've already tried overloading the hashCode function for the
+            //   UUID2, but it seems to be ignored(?).
+
+            // iterate thru uuid2ToEntityMap and remove element that matches UUID
+            for (Map.Entry<TUUID2, TEntity> entry : uuid2ToEntityMap.entrySet()) {
+                TUUID2 uuid2 = entry.getKey();
+                TEntity entity = entry.getValue();
+
+                if (uuid2.uuid().equals(uuid)) {
+                    uuid2ToEntityMap.remove(uuid2);
+                    _uuidToEntityMap.remove(uuid);
+                    break;
+                }
+            }
+        }
+
+        public
+        ArrayList<TEntity> putAll(@NotNull UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
             ArrayList<TEntity> entities = new ArrayList<>();
 
             for (Map.Entry<TUUID2, TEntity> entry : sourceDatabase.uuid2ToEntityMap.entrySet()) {
@@ -250,20 +285,24 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return entities;
         }
 
-        public TEntity remove(@NotNull TUUID2 uuid2) {
+        public
+        TEntity remove(@NotNull TUUID2 uuid2) {
             uuid2ToEntityMap.remove(uuid2);
             return _uuidToEntityMap.remove(uuid2.uuid());
         }
 
-        public boolean containsKey(@NotNull TUUID2 uuid2) {
+        public
+        boolean containsKey(@NotNull TUUID2 uuid2) {
             return _uuidToEntityMap.containsKey(uuid2.uuid());
         }
 
-        public boolean containsValue(TEntity entity) {
+        public
+        boolean containsValue(TEntity entity) {
             return _uuidToEntityMap.containsValue(entity);
         }
 
-        public Set<TUUID2> keySet() throws RuntimeException {
+        public
+        Set<TUUID2> keySet() throws RuntimeException {
             Set<TUUID2> uuid2Set = new HashSet<>();
 
             try {
@@ -279,7 +318,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return uuid2Set;
         }
 
-        public Set<Map.Entry<TUUID2, TEntity>> entrySet() throws RuntimeException {
+        public
+        Set<Map.Entry<TUUID2, TEntity>> entrySet() throws RuntimeException {
             Set<Map.Entry<TUUID2, TEntity>> uuid2Set = new HashSet<>();
 
             try {
@@ -299,7 +339,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return uuid2Set;
         }
 
-        public ArrayList<TEntity> values() throws RuntimeException {
+        public
+        ArrayList<TEntity> values() throws RuntimeException {
             ArrayList<TEntity> entityValues = new ArrayList<>();
 
             try {
