@@ -16,8 +16,8 @@ import static java.lang.String.format;
  <li> IUUID2 is a marker interface for Domain objects that can be used with UUID2.</li>
  <li> Domain objects must be marked with the IUUID2 interface to be used with UUID2.</li>
  <li> UUID2 is immutable.</li>
- <li> UUID2Type is the class Inheritance path, <b>NOT</b> the Class path. <br>
-      ie: {@code Object.Role.User} instead of {@code org.elegantobjects.jpages.App2.domain.user.User}
+ <li> UUID2Type is the Class Inheritance path, <b>NOT</b> the Class Path (ie: Package path). <br>
+      ie: {@code Model.Domain.BookInfo} instead of {@code org.elegantobjects.jpages.App2.domain.book.BookInfo}
       note: Class path changes if location/package is changed.</li>
 </ul>
 **/
@@ -60,7 +60,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         this((TUUID2) UUID2.fromUUID(uuid), clazz);
     }
 
-    public static UUID2<?> fromUUID2String(String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
+    public static UUID2<?> fromUUID2String(@NotNull String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
         // format example:
         // UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001
         // ^-- Always prefixed with `UUID2`
@@ -89,7 +89,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     ////////////////////////////////
 
     public
-    UUID uuid() {return uuid;}
+    UUID uuid() { return uuid; }
 
     public @Override
     String uuid2TypeStr() {
@@ -104,6 +104,26 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public
     boolean equals(@NotNull UUID2<TUUID2> other) {
         return (other).uuid().equals(uuid());
+    }
+
+    boolean isMatchingUUID2Types(@NotNull UUID2<?> checkUUID2) {
+        return this.uuid2TypeStr().equals(checkUUID2.uuid2TypeStr());
+    }
+
+    static boolean checkUUID2TypesMatch(String firstUuid2Str, String secondUuid2Str) {
+        if(firstUuid2Str == null) return false;  // note: null checks are acceptable for static methods.
+        if(secondUuid2Str == null) return false;
+
+        try {
+            UUID2<?> firstUUID2 = UUID2.fromUUID2String(firstUuid2Str);
+            UUID2<?> secondUUID2 = UUID2.fromUUID2String(secondUuid2Str);
+
+            return firstUUID2.isMatchingUUID2Types(secondUUID2);
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error: Unable to find class for UUID2: " + firstUuid2Str);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     ////////////////////////////////
@@ -132,8 +152,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public @Override
     String toString() {
-//        return  "<" + getLast3SegmentsOfTypeStrPath(_uuid2Type) + ">" + uuid;
-        return  "UUID2:" + getLast4SegmentsOfTypeStrPath(_uuid2Type) + "@" + uuid;
+        return  "UUID2:" + getClassInheritancePathStr(_uuid2Type) + "@" + uuid;
     }
 
     public
@@ -163,16 +182,29 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public static @NotNull
     String calcUUID2TypeStr(@NotNull Class<?> clazz) {
 
-        // Climbs the class hierarchy for the clazz, ie: `Model.{Domain}.{Entity}Info`
-        String modelClassPathStr = clazz.getSuperclass().getSuperclass().toString();
-        String domainClassPathStr = clazz.getSuperclass().toString();
-        String entityClassPathStr = clazz.getName();
+        // Get all names of superClasses for this clazz.
+        // - Climbs the Class Inheritance hierarchy for the clazz
+        // - ie: `Model.{Domain}.{Entity}Info`
+        // - *NOT* the Class path (org.elegantobjects.jpages.App2.domain.{entity}.{entity}info`
+        List<String> superClassNames = new ArrayList<>();
+        Class<?> curClazz = clazz;
+        while(!curClazz.getSimpleName().equals("Object")) {
+            superClassNames.add(curClazz.toString());
+            curClazz = curClazz.getSuperclass();
+        }
 
-        String model = UUID2.getLastSegmentOfTypeStrPath(modelClassPathStr);
-        String domain = UUID2.getLastSegmentOfTypeStrPath(domainClassPathStr);
-        String entity = UUID2.getLastSegmentOfTypeStrPath(entityClassPathStr);
+        // Build Class Inheritance path from each Class name
+        StringBuilder uuid2TypeStr = new StringBuilder();
+        for(int i = superClassNames.size() - 1; i >= 0; i--) {
+            uuid2TypeStr.append(
+                UUID2.getLastSegmentOfTypeStrPath(superClassNames.get(i))
+            );
+            if(i != 0) {
+                uuid2TypeStr.append(".");
+            }
+        }
 
-        return model + "." + domain + "." + entity;
+        return uuid2TypeStr.toString();
     }
 
     // Note: Should only be used when importing JSON
@@ -206,7 +238,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return new UUID2<>((TDomainUUID2) uuid2, clazzPathStr);
     }
-
 
     /**
      Utility {@code HashMap} class for mapping {@code UUID2<TUUID2>} to {@code TEntity} Objects.<br>
@@ -419,7 +450,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return normalizedTypeStr.toString();
     }
     private static
-    String getLast4SegmentsOfTypeStrPath(@NotNull String uuid2TypeStr) {
+    String getClassInheritancePathStr(@NotNull String uuid2TypeStr) {
         String[] segments = uuid2TypeStr.split("\\.");
         if(segments.length <= 1) {
             return uuid2TypeStr;
@@ -449,7 +480,9 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return segments[segments.length - 1];
     }
 
-    public static class Uuid2HashMapGsonDeserializer implements JsonDeserializer<UUID2.HashMap<?,?>> {
+    public static class Uuid2HashMapJsonDeserializer implements JsonDeserializer<UUID2.HashMap<?,?>> {
+        // Note: Deserializes all JSON Numbers to Longs for all UUID2.HashMap Entity Number values.
+        // - for consistent number deserialization bc GSON defaults to Doubles.
 
         @Override
         public UUID2.HashMap<?,?> deserialize(
@@ -469,17 +502,16 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
                         .getAsJsonObject();
                 }
 
-                // rebuild the UUID2 to Entity map
+                // Rebuild the UUID2<?> to Entity map
                 for (Map.Entry<?, ?> entry : uuid2HashMapFromJson.uuid2ToEntityMap.entrySet()) {
                     UUID2<?> uuid2Key = UUID2.fromUUID2String(entry.getKey().toString());
                     Object entity = entry.getValue();
 
                     if (entity == null) {
-                        throw new RuntimeException("Uuid2HashMapGsonDeserializer.deserialize(): entity is null");
+                        throw new RuntimeException("Uuid2HashMapGsonDeserializer.deserialize(): entity is null, uuid2Key=" + uuid2Key);
                     }
 
-                    // Converting all Numbers to longs
-                    // (for consistent number deserialization bc GSON defaults to Doubles)
+                    // Convert any Numbers to Longs
                     if (entity instanceof Number) {
                         entity = ((Number) entity).longValue();
 

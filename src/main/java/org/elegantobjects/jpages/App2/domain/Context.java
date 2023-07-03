@@ -78,7 +78,7 @@ public class Context implements IContext {
             new LibraryInfoRepo(log),
             new AccountInfoRepo(log),
             new GsonBuilder()
-                .registerTypeAdapter(UUID2.HashMap.class, new UUID2.Uuid2HashMapGsonDeserializer())
+                .registerTypeAdapter(UUID2.HashMap.class, new UUID2.Uuid2HashMapJsonDeserializer())
                 .setPrettyPrinting()
                 .create(),
             log

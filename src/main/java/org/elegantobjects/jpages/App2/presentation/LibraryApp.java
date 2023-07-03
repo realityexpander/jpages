@@ -264,7 +264,7 @@ class LibraryApp {
                 ctx.log.d(this,"Load Library from Json: ");
                 ctx.log.d(this, "----------------------------------");
 
-                // Library library2 = new Library(ctx); // uses random UUID, will cause expected error due to unknown UUID
+                // Create the "unknown" library with just an id.
                 Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
 
                 // Show empty info object.
@@ -275,26 +275,26 @@ class LibraryApp {
                     "{\n" +
                     "  \"id\": {\n" +
                     "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                    "    \"_uuid2Type\": \"Object.Role.Library\"\n" +
+                    "    \"_uuid2Type\": \"Role.Library\"\n" +
                     "  },\n" +
                     "  \"name\": \"Ronald Reagan Library\",\n" +
                     "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
                     "    \"uuid2ToEntityMap\": {\n" +
-                    "      \"UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001\": []\n" +
+                    "      \"UUID2:Role.User@00000000-0000-0000-0000-000000000001\": []\n" +
                     "    }\n" +
                     "  },\n" +
                     "  \"bookIdToNumBooksAvailableMap\": {\n" +
                     "    \"uuid2ToEntityMap\": {\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001400\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001000\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001300\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001200\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001500\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001600\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001700\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001800\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001900\": 25,\n" +
-                    "      \"UUID2:Object.Role.Book@00000000-0000-0000-0000-000000001100\": 25\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001400\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001000\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001300\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001200\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001500\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001600\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001700\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001800\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001900\": 25,\n" +
+                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001100\": 25\n" +
                     "    }\n" +
                     "  }\n" +
                     "}";
@@ -303,7 +303,6 @@ class LibraryApp {
                 if(true) {
                     System.out.println();
                     ctx.log.d(this,"Check JSON loaded properly: ");
-                    ctx.log.d(this, "----------------------------------");
 
                     Result<LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
@@ -316,7 +315,7 @@ class LibraryApp {
                         // The JSON was still loaded properly
                         ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
 
-                        // Can't just check json as the ordering of the bookIdToNumBooksAvailableMap is random
+                        // Can't just check json as the ordering of the bookIdToNumBooksAvailableMap is random - LEAVE FOR REFERENCE
                         // assert library2.toJson().equals(json);
                         // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
 
@@ -354,7 +353,13 @@ class LibraryApp {
                         Library library3 = new Library(libraryInfo3, ctx);
                         ctx.log.d(this, "Results of Library3 json load:" + library3.toJson());
 
-                        // todo make an assert on the data in library3.toJson()
+                        // check for same number of items
+                        if( ((Result.Success<HashMap<Book, Long>>) library3.calculateAvailableBookIdToNumberAvailableList()).value().size() != 10)
+                            throw new Exception("Library2 should have 10 books");
+
+                        // check existence of a particular book
+                        if (!library3.isKnownBook(new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx)))
+                            throw new Exception("Library2 should not have known book with id 1900");
 
 
                     } catch (Exception e) {
