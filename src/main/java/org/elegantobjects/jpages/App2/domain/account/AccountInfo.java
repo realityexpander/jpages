@@ -5,6 +5,7 @@ import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -20,7 +21,7 @@ public class AccountInfo extends DomainInfo
         implements
         Model.ToDomainInfo<AccountInfo>
 {
-    //DONT DELETE    public final UUID2<User> userId;// This AccountInfo UUID matches the UUID of the UUID2<User> for this Account. // todo add User
+    //DONT DELETE    public final UUID2<User> userId;// This AccountInfo UUID matches the UUID of the UUID2<User> for this Account. // todo add User id
     public final String name;
     public final AccountStatus accountStatus;  // status of Account (active, inactive, suspended, etc.)
     public final int currentFinePennies;       // current fine amount in pennies
@@ -37,33 +38,6 @@ public class AccountInfo extends DomainInfo
     // final int maxRenewalDays;        // max number days for each renewal (per book)
     // final int maxFineAmountPennies;  // max dollar amount of all fines allowed before account is suspended
     // final int maxFineDays;           // max number of days to pay fine before account is suspended
-
-    enum AccountStatus {
-        ACTIVE,
-        INACTIVE,
-        SUSPENDED,
-        CLOSED;
-    }
-
-    static class AccountAuditLogItem {
-        Long timeStampLongMillis;
-        String operation;
-        HashMap<String, String> entries;  // keyString -> valueString
-
-        public AccountAuditLogItem(
-            @NotNull
-            Long timeStampMillis,
-            @NotNull
-            String operation,
-            @NotNull
-            HashMap<String, String> kvHashMap
-        ) {
-            this.timeStampLongMillis = timeStampMillis;
-            this.operation = operation;
-            this.entries = new HashMap<>();
-            this.entries.putAll(kvHashMap);
-        }
-    }
 
     public
     AccountInfo(
@@ -115,6 +89,34 @@ public class AccountInfo extends DomainInfo
     public
     AccountInfo(String id, String name) {
         this(UUID.fromString(id), name);
+    }
+
+    enum AccountStatus {
+        ACTIVE,
+        INACTIVE,
+        SUSPENDED,
+        CLOSED;
+    }
+
+    static class AccountAuditLogItem {
+        Long timeStampLongMillis;
+        String operation;
+        HashMap<String, String> entries;  // keyString -> valueString
+
+        public
+        AccountAuditLogItem(
+                @NotNull
+                Long timeStampMillis,
+                @NotNull
+                String operation,
+                @NotNull
+                HashMap<String, String> kvHashMap
+        ) {
+            this.timeStampLongMillis = timeStampMillis;
+            this.operation = operation;
+            this.entries = new HashMap<>();
+            this.entries.putAll(kvHashMap);
+        }
     }
 
     ///////////////////////////////
@@ -446,58 +448,55 @@ public class AccountInfo extends DomainInfo
         return AccountStatus.ACTIVE;
     }
 
-    private void addAuditLogEntry(String operation) {
-        addAuditLogEntry(System.currentTimeMillis(), operation);
-    }
-    private void addAuditLogEntry(String operation, Object value) {
-        addAuditLogEntry(System.currentTimeMillis(), operation, value);
-    }
-    private void addAuditLogEntry(String operation, String key1, Object value1, String key2, Object value2) {
-        addAuditLogEntry(System.currentTimeMillis(), operation, key1, value1, key2, value2);
-    }
-    private void addAuditLogEntry(Long timeStampMillis, String operation) {
-        timeStampToAccountAuditLogItemMap.put(
-            timeStampMillis,
-            new AccountAuditLogItem(timeStampMillis, operation, new HashMap<>())
-        );
-    }
-    private void addAuditLogEntry(Long timeStampMillis, String operation, @NotNull Object value) {
-        HashMap<String, String> keyValMap = new HashMap<>();
-        keyValMap.put("value", value.toString());
-
-        timeStampToAccountAuditLogItemMap.put(
-            timeStampMillis,
-            new AccountAuditLogItem(timeStampMillis, operation, keyValMap)
-        );
-    }
     private void addAuditLogEntry(
-            Long timeStampMillis,
-            String operation,
-            String key1, @NotNull Object value1,
-            String key2, @NotNull Object value2
+        @NotNull Long timeStampMillis,
+        @NotNull String operation,
+        @NotNull String key1, @NotNull Object value1,
+        @NotNull String key2, @NotNull Object value2
     ) {
         HashMap<String, String> keyValMap = new HashMap<>();
         keyValMap.put(key1, value1.toString());
         keyValMap.put(key2, value2.toString());
 
         timeStampToAccountAuditLogItemMap.put(
-            timeStampMillis,
-            new AccountAuditLogItem(timeStampMillis, operation, keyValMap)
+                timeStampMillis,
+                new AccountAuditLogItem(timeStampMillis, operation, keyValMap)
         );
+    }
+    private void addAuditLogEntry(@NotNull Long timeStampMillis, @NotNull String operation, @NotNull Object value) {
+        HashMap<String, String> keyValMap = new HashMap<>();
+        keyValMap.put("value", value.toString());
+
+        timeStampToAccountAuditLogItemMap.put(
+                timeStampMillis,
+                new AccountAuditLogItem(timeStampMillis, operation, keyValMap)
+        );
+    }
+    private void addAuditLogEntry(@NotNull Long timeStampMillis, @NotNull String operation) {
+        timeStampToAccountAuditLogItemMap.put(
+                timeStampMillis,
+                new AccountAuditLogItem(timeStampMillis, operation, new HashMap<>())
+        );
+    }
+    private void addAuditLogEntry(@NotNull String operation, @NotNull String key1, @NotNull  Object value1, @NotNull String key2, @NotNull Object value2) {
+        addAuditLogEntry(System.currentTimeMillis(), operation, key1, value1, key2, value2);
+    }
+    private void addAuditLogEntry(@NotNull String operation, @NotNull Object value) {
+        addAuditLogEntry(System.currentTimeMillis(), operation, value);
+    }
+    private void addAuditLogEntry(@NotNull String operation) {
+        addAuditLogEntry(System.currentTimeMillis(), operation);
     }
 
     @SuppressWarnings("unchecked")
-    private Result<AccountInfo> withName(String newName) {
-        if (newName == null || newName.isEmpty())
+    private Result<AccountInfo> withName(@NotNull String newName) {
+        if (newName.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("newName is null or empty"));
 
         return new Result.Success<>(new AccountInfo((UUID2<Account>) this.id, newName));
     }
     @SuppressWarnings("unchecked")
-    private Result<AccountInfo> withAccountStatus(AccountStatus newAccountStatus) {
-        if (newAccountStatus == null)
-            return new Result.Failure<>(new IllegalArgumentException("newAccountStatus is null"));
-
+    private  Result<AccountInfo> withAccountStatus(@NotNull AccountStatus newAccountStatus) {
         return new Result.Success<>(
             new AccountInfo(
                 (UUID2<Account>) this.id,

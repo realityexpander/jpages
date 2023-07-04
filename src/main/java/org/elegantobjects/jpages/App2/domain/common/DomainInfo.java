@@ -9,10 +9,4 @@ public class DomainInfo extends Model {
     protected DomainInfo(UUID2<?> id) {
         super(id);
     }
-
-    // This is primarily for JSON deserialization purposes
-    @Override
-    public UUID2<?> id() {
-        return super.id();
-    }
 }

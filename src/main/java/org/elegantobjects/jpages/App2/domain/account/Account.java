@@ -5,6 +5,9 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.Role;
+import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.jetbrains.annotations.NotNull;
 
 import static java.lang.String.format;
@@ -48,6 +51,26 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     public Account(String json, Context context) { this(json, AccountInfo.class, context); }
     public Account(Context context) {
         this(UUID2.randomUUID2(), context);
+    }
+
+
+    /////////////////////////
+    // Static constructors //
+    /////////////////////////
+
+    public static Result<Account> fetchAccount(
+        @NotNull UUID2<Account> uuid2,
+        @NotNull Context context
+    ) {
+        AccountInfoRepo repo = context.accountInfoRepo();
+
+        Result<AccountInfo> infoResult = repo.fetchAccountInfo(uuid2);
+        if (infoResult instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<AccountInfo>) infoResult).exception());
+        }
+
+        AccountInfo info = ((Result.Success<AccountInfo>) infoResult).value();
+        return new Result.Success<>(new Account(info, context));
     }
 
     /////////////////////////////////////

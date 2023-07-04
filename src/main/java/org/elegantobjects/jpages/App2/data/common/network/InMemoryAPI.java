@@ -14,7 +14,6 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTOInfo> implements IA
     private final HttpClient client;
 
     // Simulate a database accessed via a network API
-//    private final UUID2.HashMap<TUUID2, TDTOInfo> database = new UUID2.HashMap<>(IUUID2.class);
     private final UUID2.HashMap<UUID2<TUUID2>, TDTOInfo> database = new UUID2.HashMap<>();
 
     public InMemoryAPI(URL url, HttpClient client) {

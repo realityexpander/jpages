@@ -14,7 +14,6 @@ public class LibraryInfo extends DomainInfo
         implements
         Model.ToDomainInfo<LibraryInfo>
 {
-//    public final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     public final String name;
     private final UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap;  // registered users of this library
     private final UUID2.HashMap<UUID2<Book>, Long> bookIdToNumBooksAvailableMap;  // known books & number available in this library
@@ -72,13 +71,15 @@ public class LibraryInfo extends DomainInfo
     // Published Domain Business Logic Methods //
     /////////////////////////////////////////////
 
-    public Result<Book> checkOutBookToUser(Book book, User user) {
+    public Result<Book> checkOutBookToUser(@NotNull Book book, User user) {
         if(book.isBookFromPublicLibrary()) { // No checks for private library books.
             Result<UUID2<Book>> checkedOutUUID2Book = _checkOutPublicLibraryBookIdToUserId(book.id, user.id);
             if (checkedOutUUID2Book instanceof Result.Failure)
                 return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) checkedOutUUID2Book).exception().getMessage()));
 
-            user.acceptBook(book); // todo fix check result
+            Result<ArrayList<Book>> unacceptBookResult = user.acceptBook(book);
+            if (unacceptBookResult instanceof Result.Failure)
+                return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<Book>>) unacceptBookResult).exception().getMessage()));
 
             return new Result.Success<>(book);
         }
@@ -88,7 +89,9 @@ public class LibraryInfo extends DomainInfo
         if (checkOutBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkOutBookResult).exception().getMessage()));
 
-        user.acceptBook(book); // todo fix check result
+        Result<ArrayList<Book>> acceptBookResult = user.acceptBook(book);
+        if (acceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception().getMessage()));
 
         return new Result.Success<>(book);
     }
@@ -106,7 +109,9 @@ public class LibraryInfo extends DomainInfo
         if (checkOutBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkOutBookResult).exception().getMessage()));
 
-        addBookIdToRegisteredUser(bookId, userId);
+        Result<UUID2<Book>> addBookResult = addBookIdToRegisteredUser(bookId, userId);
+        if (addBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) addBookResult).exception().getMessage()));
 
         return new Result.Success<>(bookId);
     }
@@ -117,7 +122,9 @@ public class LibraryInfo extends DomainInfo
             if (returnedBookIdResult instanceof Result.Failure)
                 return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) returnedBookIdResult).exception().getMessage()));
 
-            user.unacceptBook(book); // todo check result
+            Result<ArrayList<UUID2<Book>>> unacceptBookResult = user.unacceptBook(book);
+            if (unacceptBookResult instanceof Result.Failure)
+                return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception().getMessage()));
 
             return new Result.Success<>(book);
         }
@@ -127,7 +134,9 @@ public class LibraryInfo extends DomainInfo
         if (checkInBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkInBookResult).exception().getMessage()));
 
-        user.unacceptBook(book); // todo check result
+        Result<ArrayList<UUID2<Book>>> unacceptBookResult = user.unacceptBook(book);
+        if (unacceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception().getMessage()));
 
         return new Result.Success<>(book);
     }
@@ -143,7 +152,9 @@ public class LibraryInfo extends DomainInfo
         if (checkInBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkInBookResult).exception().getMessage()));
 
-        removeBookIdFromRegisteredUser(bookId, userId);
+        Result<UUID2<Book>> removeBookResult = removeBookIdFromRegisteredUser(bookId, userId);
+        if (removeBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removeBookResult).exception().getMessage()));
 
         return new Result.Success<>(bookId);
     }
@@ -158,12 +169,8 @@ public class LibraryInfo extends DomainInfo
 
         if(book.isBookFromPublicLibrary()) {
             // Check if the fromUser can transfer the Book
-            if (!isUserIdKnown(fromUser.id)) // todo remove checks that are already done internally
+            if (!isUserIdKnown(fromUser.id))
                 return new Result.Failure<>(new IllegalArgumentException("fromUser is not known, fromUserId: " + fromUser.id));
-            if (!isBookIdKnown(book.id))
-                return new Result.Failure<>(new IllegalArgumentException("bookId is not known, bookId: " + book.id));
-            if (!isBookIdCheckedOutByUserId(book.id, fromUser.id))
-                return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by User, bookId: " + book.id + ", fromUserId: " + fromUser.id));
             if (!fromUser.accountInfo().isAccountInGoodStanding())
                 return new Result.Failure<>(new IllegalArgumentException("fromUser Account is not in good standing, fromUserId: " + fromUser.id));
 
@@ -173,7 +180,7 @@ public class LibraryInfo extends DomainInfo
             if (!toUser.accountInfo().isAccountInGoodStanding())
                 return new Result.Failure<>(new IllegalArgumentException("toUser Account is not in good standing, toUser: " + toUser.id));
             if (toUser.hasReachedMaxAmountOfAcceptedPublicLibraryBooks())
-                return new Result.Failure<>(new IllegalArgumentException("toUser has reached max number of accepted Books, toUser: " + toUser.id));
+                return new Result.Failure<>(new IllegalArgumentException("toUser has reached max number of accepted Public Library Books, toUser: " + toUser.id));
         }
 
         Result<Book> returnedBookResult = checkInBookFromUser(book, fromUser);
@@ -183,12 +190,6 @@ public class LibraryInfo extends DomainInfo
         Result<Book> checkedOutBookIdResult = checkOutBookToUser(book, toUser);
         if (checkedOutBookIdResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Book>) checkedOutBookIdResult).exception().getMessage()));
-
-        // remove book from `fromUser` list of checked out books
-        fromUser.unacceptBook(book); // todo check Result
-
-        // add book to `toUser` list of checked out books
-        toUser.acceptBook(book);  // todo check Result
 
         return new Result.Success<>(book);
     }
@@ -216,6 +217,10 @@ public class LibraryInfo extends DomainInfo
         }
 
         return new Result.Success<>(availableBookIdToNumBooksAvailableMap);
+    }
+
+    public Set<UUID2<Book>> findAllKnownBookIds() {
+        return this.bookIdToNumBooksAvailableMap.keySet();
     }
 
     /////////////////////////////////
@@ -499,9 +504,5 @@ public class LibraryInfo extends DomainInfo
     @Override
     public UUID2<?> getDomainInfoId() {
         return this.id;
-    }
-
-    public Set<UUID2<Book>> findAllKnownBookIds() {
-        return this.bookIdToNumBooksAvailableMap.keySet();
     }
 }

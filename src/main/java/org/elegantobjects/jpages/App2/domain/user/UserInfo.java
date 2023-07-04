@@ -81,7 +81,7 @@ public class UserInfo extends DomainInfo
     // User Info Business Logic Methods   //
     ////////////////////////////////////////
 
-    public boolean isBookAcceptedByThisUser(UUID2<Book> bookId) {
+    public boolean isBookIdAcceptedByThisUser(UUID2<Book> bookId) {
         return this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId);
     }
 

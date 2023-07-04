@@ -10,6 +10,8 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -66,6 +68,9 @@ public class User extends Role<UserInfo> implements IUUID2 {
         this(UUID2.randomUUID2(), account, context);
     }
 
+    /////////////////////////
+    // Static constructors //
+    /////////////////////////
     public static Result<User> fetchUser(UUID2<User> id, Context context) {
 
         // get the User's UserInfo
@@ -91,6 +96,9 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return new Result.Success<>(new User(userInfo, account, context));
     }
 
+    /////////////////////////
+    // Simple Getters      //
+    /////////////////////////
 
     @Override
     public String toString() {
@@ -247,7 +255,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id + "), book: " + book.id);
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookAcceptedByThisUser(book.id);
+        return this.info.isBookIdAcceptedByThisUser(book.id);
     }
 
     public Result<ArrayList<Book>> findAllAcceptedBooks() {
@@ -279,7 +287,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Check this User has the Book
-        if (!this.info.isBookAcceptedByThisUser(book.id))
+        if (!this.info.isBookIdAcceptedByThisUser(book.id))
             return new Result.Failure<>(new Exception("User (" + this.id + ") does not have book (" + book.id + ")"));
 
         // Have Library Swap the checkout of Book from this User to the receiving User
@@ -292,10 +300,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
                     );
         if (swapCheckoutResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<Book>) swapCheckoutResult).exception());
-
-        // Now transfer the BookId from the fromUser to the toUser
-        this.unacceptBook(book);
-        receivingUser.acceptBook(book);
 
         // LEAVE FOR REFERENCE
         // Note: no update needed as each Role method used performs its own updates, as needed.

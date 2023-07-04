@@ -9,6 +9,7 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,25 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     //     this(UUID2.randomUUID());
     // }
 
+    /////////////////////////
+    // Static constructors //
+    /////////////////////////
+
+    public static Result<Library> fetchLibrary(
+        @NotNull UUID2<Library> uuid2,
+        @NotNull Context context
+    ) {
+        LibraryInfoRepo repo = context.libraryInfoRepo();
+
+        Result<LibraryInfo> infoResult = repo.fetchLibraryInfo(uuid2);
+        if (infoResult instanceof Result.Failure) {
+            return new Result.Failure<>(((Result.Failure<LibraryInfo>) infoResult).exception());
+        }
+
+        LibraryInfo info = ((Result.Success<LibraryInfo>) infoResult).value();
+        return new Result.Success<>(new Library(info, context));
+    }
+
     /////////////////////////////////////
     // Role/UUID2 Required Overrides  //
     /////////////////////////////////////
@@ -102,7 +122,6 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         // Get the Class Inheritance Path from the Class Path
         return UUID2.calcUUID2TypeStr(this.getClass());
     }
-
 
     ///////////////////////////////////////////
     // Library Role Business Logic Methods   //
@@ -267,6 +286,9 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return false;
 
         return this.info.isBookKnown(book);
+    }
+    public boolean isUnknownBook(@NotNull Book book) {
+        return !isKnownBook(book);
     }
 
     public boolean isKnownUser(@NotNull User user) {

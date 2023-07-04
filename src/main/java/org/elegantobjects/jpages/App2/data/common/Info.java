@@ -13,7 +13,7 @@ import java.util.UUID;
 // It is the "single source of truth" for the Domain object.
 // Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
 public interface Info<TInfo> {
-    // TInfo info;                        // Requires a field named "info" of type TInfo (is there a way to enforce this in java?
+    // TInfo info;                        // Requires a field named `info` of type `TInfo` (is there a way to enforce this in java?)
 
     UUID2<?> id();                        // Returns the UUID2 of the Info object
     TInfo fetchInfo();                    // Fetches info for object from server/DB
@@ -25,10 +25,12 @@ public interface Info<TInfo> {
 
     @SuppressWarnings("unchecked")
     default TInfo deepCopyInfo() {                // Returns a deep copy of the Info object
+        Gson gson = new Gson();
 
-        return (TInfo) new Gson().fromJson(
-                new Gson().toJson(this),
-                this.getClass()
+        // hacky but works.
+        return (TInfo) gson.fromJson(
+            gson.toJson(this),
+            this.getClass()
         );
     }
 
@@ -38,15 +40,15 @@ public interface Info<TInfo> {
         @SuppressWarnings("unchecked")
         default TInfo getInfo() {         // Returns the Info object
             //noinspection unchecked
-            return (TInfo) this; // todo test this cast
+            return (TInfo) this;
         }
 
         @SuppressWarnings("unchecked")
         default TInfo toDeepCopyInfo() {    // **MUST** override, method should return a DEEP copy (& no original references)
             //noinspection unchecked
-            return ((Info<TInfo>) this).deepCopyInfo();  // todo test this cast
+            return ((Info<TInfo>) this).deepCopyInfo();
 
-            // throw new RuntimeException("Info:ToInfo:toDeepCopyInfo(): Must override this method"); // todo remove this?
+            // throw new RuntimeException("Info:ToInfo:toDeepCopyInfo(): Must override this method"); // todo Should force override? or use this default behavior?
         }
     }
 
@@ -79,8 +81,8 @@ public interface Info<TInfo> {
         }
     }
 
-    // This interface is to enforce all DomainInfo objects have a deepCopy() method
-    // - Just add "implements ToInfo.hasDeepCopyInfo<ToInfo<{InfoClass}>>" to the class
+    // This interface used to enforce all {Domain}Info objects have a `deepCopy()` method
+    // - Just add `implements ToInfo.hasDeepCopyInfo<ToInfo<{InfoClass}>>` to the class
     //   definition, and the toDeepCopyInfo() method will be added.
     interface hasToDeepCopyInfo<TInfo extends ToInfo<?>> {
 
@@ -96,8 +98,7 @@ public interface Info<TInfo> {
 
         try {
             // Ensure JSON Info object has an `id` field
-//            Class<?> rootInfoClazz = infoClazz.getSuperclass().getSuperclass();
-            Class<?> rootInfoClazz = getRootClass(infoClazz);
+            Class<?> rootInfoClazz = _getRootClass(infoClazz);
             Object idField = rootInfoClazz.getDeclaredField("id").get(infoFromJson);
             if(idField == null) {
                 return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an id field"));
@@ -119,7 +120,7 @@ public interface Info<TInfo> {
         return new Result.Success<>(infoFromJson);
     }
 
-    default Class<?> getRootClass(Class<?> infoClazz) {
+    default Class<?> _getRootClass(Class<?> infoClazz) {
 
         Class<?> rootClazz = infoClazz;
         while(!rootClazz.getSuperclass().getSimpleName().equals("Object")) {

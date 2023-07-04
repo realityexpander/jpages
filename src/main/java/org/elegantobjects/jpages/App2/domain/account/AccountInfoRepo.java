@@ -9,7 +9,6 @@ import org.elegantobjects.jpages.App2.domain.common.Repo;
 public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
 
     // simulate a local database on server (UUID2<Account> is the key)
-//    private final UUID2.HashMap<Account, AccountInfo> database = new UUID2.HashMap<>(Account.class);
     private final UUID2.HashMap<UUID2<Account>, AccountInfo> database = new UUID2.HashMap<>();
 
     public AccountInfoRepo(ILog log) {

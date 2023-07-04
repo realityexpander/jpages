@@ -24,27 +24,21 @@ public class BookInfoApi {
     public Result<DTOBookInfo> getBookInfo(String id) {
         return api.getDtoInfo(id);
     }
-
     public Result<DTOBookInfo> getBookInfo(UUID2<Book> id) {
         return api.getDtoInfo(id);
     }
-
     public Result<DTOBookInfo> addBookInfo(DTOBookInfo bookInfo) {
         return api.addDtoInfo(bookInfo);
     }
-
     public Result<DTOBookInfo> updateBookInfo(DTOBookInfo bookInfo) {
         return api.updateDtoInfo(bookInfo);
     }
-
     public Result<DTOBookInfo> upsertBookInfo(DTOBookInfo bookInfo) {
         return api.upsertDtoInfo(bookInfo);
     }
-
     public Result<DTOBookInfo> deleteBookInfo(DTOBookInfo bookInfo) {
         return api.deleteDtoInfo(bookInfo);
     }
-
     public Map<UUID2<Book>, DTOBookInfo> getAllBookInfos() {
         return new HashMap<>(api.getAllDtoInfos());
     }

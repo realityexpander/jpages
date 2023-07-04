@@ -12,6 +12,7 @@ import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
 import org.elegantobjects.jpages.App2.domain.library.PrivateLibrary;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 // Book Role Object - Only interacts with its own repo, Context, and other Role Objects
 public class Book extends Role<BookInfo> implements IUUID2 {
@@ -19,7 +20,8 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     private final BookInfoRepo repo;
     private final Library sourceLibrary; // Book's source Library Role Object - owns this Book.
 
-    public Book(
+    public
+    Book(
         @NotNull BookInfo info,
         Library sourceLibrary,
         Context context
@@ -31,7 +33,8 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
         context.log.d(this, "Book (" + this.id + ") created from Info");
     }
-    public Book(
+    public
+    Book(
         String json,
         Class<BookInfo> clazz,
         Library sourceLibrary,
@@ -44,7 +47,8 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
         context.log.d(this, "Book (" + this.id + ") created from JSON using class:" + clazz.getName());
     }
-    public Book(
+    public
+    Book(
         @NotNull UUID2<Book> id,
         Library sourceLibrary,
         Context context
@@ -56,13 +60,16 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
         context.log.d(this, "Book (" + this.id + ") created using id with no Info");
     }
-    public Book(String json, Library sourceLibrary, Context context) {
+    public
+    Book(String json, Library sourceLibrary, Context context) {
         this(json, BookInfo.class, sourceLibrary, context);
     }
-    public Book(String json, Context context) {
+    public
+    Book(String json, Context context) {
         this(json, BookInfo.class, null, context);
     }
-    public Book(Context context) {
+    public
+    Book(Context context) {
         this(new BookInfo(UUID2.randomUUID2(Book.class)), null, context);
     }
 
@@ -74,9 +81,12 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         this(new BookInfo(infoEntity), sourceLibrary, context);
     }
 
+    /////////////////////////
+    // Static constructors //
+    /////////////////////////
     public static Result<Book> fetchBook(
-            UUID2<Book> uuid2,
-            Library sourceLibrary,
+            @NotNull UUID2<Book> uuid2,
+            @Nullable Library sourceLibrary,
             @NotNull Context context
     ) {
         BookInfoRepo repo = context.bookInfoRepo();
@@ -90,7 +100,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return new Result.Success<>(new Book(info, sourceLibrary, context));
     }
     public static Result<Book> fetchBook(
-            UUID2<Book> uuid2,
+            @NotNull UUID2<Book> uuid2,
             @NotNull Context context
     ) {
         return fetchBook(uuid2, null, context);
@@ -141,9 +151,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
     @Override
     public String uuid2TypeStr() {
-//        return this.getClass().getName();
-//        return UUID2.getUUID2TypeStr(Book.class);
-        return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
+        return UUID2.calcUUID2TypeStr(this.getClass());
     }
 
     ////////////////////////////////////////

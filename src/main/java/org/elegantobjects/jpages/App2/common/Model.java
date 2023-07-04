@@ -9,11 +9,12 @@ import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.jetbrains.annotations.NotNull;
 
-// "{Model}Info" Data Holders held inside each App Domain Object.
+// "{Model}Info" Data "Holders" kept inside each App Domain Object.
 // - Similar to an Entity for a database row or a DTO for a REST API endpoint, these are
-//   the objects that are passed around the application.
+//   the objects contain the "data" that is accessed by the Role object.
 // - They are the "source of truth" for the Domain objects in the application.
-// - {Domain}Info hold the Info state that is on the server/api.
+// - {Domain}Info hold the Role state that resides elsewhere, usually on the server/api,
+//   but the Role does not know where or care where the data comes from, it only knows the format.
 // - {DTO}Info hold the API transfer "dumb" objects and Validation layer for the Domain objects.
 // - {Entity}Info hold the Database transfer "dumb" objects. Validation can occur here too, but usually not necessary.
 public class Model {
@@ -23,12 +24,12 @@ public class Model {
         this.id = new UUID2<>(id);
     }
 
-    ///////////////////////////////
-    // Converters between
-    // - Domain.{Domain}Info
-    // - Entity.{Domain}Info
-    // - DTO.{Domain}Info
-    ///////////////////////////////
+    ///////////////////////////
+    // Converters between    //
+    // - Domain.{Domain}Info //
+    // - Entity.{Domain}Info //
+    // - DTO.{Domain}Info    //
+    ///////////////////////////
 
     public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
         UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
@@ -74,8 +75,8 @@ public class Model {
     public UUID2<?> id() { return id; }
 
     // This method is for JSON deserialization purposes & should only be used for such.
-    public void _setIdFromImportedJson(UUID2<IUUID2> _id) {
-        this.id = _id;
-    } // todo remove _
+    public void _setIdFromImportedJson(UUID2<IUUID2> id) {
+        this.id = id;
+    }
 
 }

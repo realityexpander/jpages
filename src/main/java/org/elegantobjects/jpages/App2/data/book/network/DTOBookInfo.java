@@ -16,20 +16,19 @@ public class DTOBookInfo extends DTOInfo
         Info.ToInfo<DTOBookInfo>,
         Info.hasToDeepCopyInfo<DTOBookInfo>
 {
-//    public final UUID2<Book> id; // note this is a UUID2<Book> and not a UUID2<BookInfo>
     public final String title;
     public final String author;
     public final String description;
     public final String extraFieldToShowThisIsADTO;
 
-    public DTOBookInfo(
+    public
+    DTOBookInfo(
         @NotNull UUID2<Book> id,
         String title,
         String author,
         String description,
         String extraFieldToShowThisIsADTO
     ) {
-//        super(id.toDomainUUID2(), DTOBookInfo.class.getName()); // todo remove this
         super(id);
         this.id = id;
         this.title = title;
@@ -42,11 +41,13 @@ public class DTOBookInfo extends DTOInfo
             this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
         }
     }
-    public DTOBookInfo(String json, @NotNull Context context) {
-        this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTO.BookInfo from the JSON
+    public
+    DTOBookInfo(String json, @NotNull Context context) {
+        this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTOInfo.BookInfo from the JSON
     }
 
     // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
+    public
     DTOBookInfo(@NotNull DTOBookInfo bookInfo) {
         this(new UUID2<Book>(bookInfo.id.uuid(), Book.class),
             bookInfo.title,
@@ -54,19 +55,16 @@ public class DTOBookInfo extends DTOInfo
             bookInfo.description,
             bookInfo.extraFieldToShowThisIsADTO);
     }
-    public DTOBookInfo(@NotNull BookInfo bookInfo) {
+    public
+    DTOBookInfo(@NotNull BookInfo bookInfo) {
         this(new UUID2<Book>(bookInfo.id().uuid(), Book.class),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
             "Imported from Domain.BookInfo");
     }
-    // todo - Is it better to have a constructor that takes in a DTO.BookInfo and throws an exception? Or to not have it at all?
-    // BookInfo(Entity.BookInfo bookInfo) {
-    //     // Never accept Entity.BookInfo to keep the API layer separate from the DB layer
-    //     super(bookInfo.id.toDomainUUID2());
-    //     throw new IllegalArgumentException("DTO.BookInfo should never be created from Entity.BookInfo");
-    // }
+    // Never accept Entity.BookInfo to keep the API layer separate from the DB layer
+    // Note: no constructor for BookInfo(Entity.BookInfo bookInfo)
 
     @Override
     public String toString() {
