@@ -105,13 +105,30 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     public @Override
+    String toString() {
+        return  "UUID2:" + getClassInheritancePathStr(_uuid2Type) + "@" + uuid;
+    }
+
+    public @Override
     int hashCode() {
         return this.uuid().hashCode();
     }
 
-    public
-    boolean equals(@NotNull UUID2<TUUID2> other) {
-        return (other).uuid().equals(uuid());
+//    public
+//    boolean equals(@NotNull UUID2<TUUID2> other) {
+//        return (other).uuid().equals(uuid());
+//    }
+
+    public @Override
+    boolean equals(Object other) {
+        if(other==null) return false;
+        if(!(other instanceof UUID2)) return false;
+
+        return ((UUID2<?>)other).uuid().equals(uuid())
+            && Objects.equals(
+                this.uuid2TypeStr(),
+                ((UUID2<?>) other).uuid2TypeStr()
+            );
     }
 
     boolean isMatchingUUID2Type(@NotNull UUID2<?> checkUUID2) {
@@ -156,11 +173,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public static @NotNull
     UUID2<IUUID2> fromUuidString(String uuidStr) {
         return new UUID2<>(UUID.fromString(uuidStr));
-    }
-
-    public @Override
-    String toString() {
-        return  "UUID2:" + getClassInheritancePathStr(_uuid2Type) + "@" + uuid;
     }
 
     public

@@ -228,209 +228,209 @@ public class LibraryApp {
 //                if(availableBooks.size() != 10) throw new Exception("availableBooks.size() != 10");
 //            }
 
-            Check_Out_and_check_In_Book_from_User_to_Library:
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Check in book:" + book1200.id + ", from user: " + user1.id + ", to library:" + library1.id);
-                ctx.log.d(this, "----------------------------------");
+//            Check_Out_and_check_In_Book_from_User_to_Library:
+//            if (true) {
+//                System.out.println();
+//                ctx.log.d(this,"Check in book:" + book1200.id + ", from user: " + user1.id + ", to library:" + library1.id);
+//                ctx.log.d(this, "----------------------------------");
+//
+//                int acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+//
+//                // First check out a book
+//                if(!user1.hasAcceptedBook(book1200)) {
+//                    Result<UUID2<Book>> checkoutResult = user1.checkOutBookFromLibrary(book1200, library1);
+//                    if (checkoutResult instanceof Result.Success)
+//                        ctx.log.d(this, "Checked out book SUCCESS --> book id:" + ((Result.Success<UUID2<Book>>) checkoutResult).value());
+//                    else
+//                        ctx.log.e(this, "Checked out book FAILURE --> book id:" + ((Result.Failure<UUID2<Book>>) checkoutResult).exception().getMessage());
+//
+//                    int afterCheckOutBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+//                    if(afterCheckOutBookCount != acceptedBookCount+1) throw new Exception("afterCheckOutBookCount != numBooksAccepted+1");
+//                }
+//
+//                acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+//
+//
+//                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1200, user1);
+//                if (checkInBookResult instanceof Result.Failure)
+//                    ctx.log.e(this, "Check In book FAILURE --> book id:" + ((Result.Failure<Book>) checkInBookResult).exception().getMessage());
+//                else
+//                    ctx.log.d(this, "Returned Book SUCCESS --> book id:" + ((Result.Success<Book>) checkInBookResult).value().id);
+//
+//                int afterCheckInBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+//                if(afterCheckInBookCount != acceptedBookCount-1) throw new Exception("afterNumBooksAccepted != acceptedBookCount-1");
+//
+//                library1.DumpDB(ctx);
+//            }
 
-                int acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+//            // Load Library from Json
+//            if (true) {
+//                System.out.println();
+//                ctx.log.d(this,"Load Library from Json: ");
+//                ctx.log.d(this, "----------------------------------");
+//
+//                // Create the "unknown" library with just an id.
+//                Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
+//
+//                // Show empty info object.
+//                ctx.log.d(this, library2.toJson());
+//                if(!Objects.equals(library2.toJson(), "{}")) throw new Exception("library2.toJson() != {}");
+//
+//                String json =
+//                    "{\n" +
+//                    "  \"id\": {\n" +
+//                    "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
+//                    "    \"_uuid2Type\": \"Role.Library\"\n" +
+//                    "  },\n" +
+//                    "  \"name\": \"Ronald Reagan Library\",\n" +
+//                    "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
+//                    "    \"uuid2ToEntityMap\": {\n" +
+//                    "      \"UUID2:Role.User@00000000-0000-0000-0000-000000000001\": []\n" +
+//                    "    }\n" +
+//                    "  },\n" +
+//                    "  \"bookIdToNumBooksAvailableMap\": {\n" +
+//                    "    \"uuid2ToEntityMap\": {\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001400\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001000\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001300\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001200\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001500\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001600\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001700\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001800\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001900\": 25,\n" +
+//                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001100\": 25\n" +
+//                    "    }\n" +
+//                    "  }\n" +
+//                    "}";
+//
+//                // Check JSON loaded properly
+//                if(true) {
+//                    System.out.println();
+//                    ctx.log.d(this,"Check JSON loaded properly: ");
+//
+//                    Result<LibraryInfo> library2Result = library2.updateInfoFromJson(json);
+//                    if (library2Result instanceof Result.Failure) {
+//                        // NOTE: FAILURE IS EXPECTED HERE
+//                        ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
+//
+//                        // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
+//                        ctx.log.d(this, ((Result.Failure<LibraryInfo>) library2Result).exception().getMessage());
+//
+//                        // The JSON was still loaded properly
+//                        ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
+//
+//                        // Can't just check json as the ordering of the bookIdToNumBooksAvailableMap is random - LEAVE FOR REFERENCE
+//                        // assert library2.toJson().equals(json);
+//                        // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
+//
+//                        // check for same number of items
+//                        if( ((Result.Success<HashMap<Book, Long>>) library2.calculateAvailableBookIdToNumberAvailableList()).value().size() != 10)
+//                            throw new Exception("Library2 should have 10 books");
+//
+//                        // check existence of a particular book
+//                        if (library2.isUnknownBook(new Book(UUID2.createFakeUUID2(1500, Book.class), null, ctx)))
+//                            throw new Exception("Library2 should have known Book with id 1500");
+//
+//                    } else {
+//                        // Intentionally Wont see this branch bc the library2 was never saved to the central database/api.
+//                        ctx.log.d(this, "Results of Library2 json load:");
+//                        ctx.log.d(this, library2.toJson());
+//                        throw new Exception("Library2 JSON load should have failed");
+//                    }
+//                }
+//
+//                // Create a Library Domain Object from the Info
+//                if(true) {
+//                    System.out.println();
+//                    ctx.log.d(this,"Create Library from LibraryInfo: ");
+//                    ctx.log.d(this, "----------------------------------");
+//
+//                    try {
+//                        LibraryInfo libraryInfo3 =
+//                            Library.createInfoFromJson(
+//                                json,
+//                                LibraryInfo.class,
+//                                ctx
+//                            );
+//
+//                        assert libraryInfo3 != null;
+//                        Library library3 = new Library(libraryInfo3, ctx);
+//                        ctx.log.d(this, "Results of Library3 json load:" + library3.toJson());
+//
+//                        // check for same number of items
+//                        if( ((Result.Success<HashMap<Book, Long>>) library3.calculateAvailableBookIdToNumberAvailableList()).value().size() != 10)
+//                            throw new Exception("Library2 should have 10 books");
+//
+//                        // check existence of a particular book
+//                        if (library3.isUnknownBook(new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx)))
+//                            throw new Exception("Library2 should have known Book with id 1900");
+//
+//
+//                    } catch (Exception e) {
+//                        ctx.log.e(this, "Exception: " + e.getMessage());
+//                        throw e;
+//                    }
+//                }
+//            }
 
-                // First check out a book
-                if(!user1.hasAcceptedBook(book1200)) {
-                    Result<UUID2<Book>> checkoutResult = user1.checkOutBookFromLibrary(book1200, library1);
-                    if (checkoutResult instanceof Result.Success)
-                        ctx.log.d(this, "Checked out book SUCCESS --> book id:" + ((Result.Success<UUID2<Book>>) checkoutResult).value());
-                    else
-                        ctx.log.e(this, "Checked out book FAILURE --> book id:" + ((Result.Failure<UUID2<Book>>) checkoutResult).exception().getMessage());
+//            // Load Book from DTO Json
+//            if (true) {
+//                System.out.println();
+//                ctx.log.d(this,"Load BookInfo from DTO Json: ");
+//                ctx.log.d(this, "----------------------------------");
+//
+//                String json =
+//                    "{\n" +
+//                    "  \"id\": {\n" +
+//                    "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
+//                    "    \"uuid2TypeStr\": \"Model.DTO.BookInfo\"\n" +
+//                    "  },\n" +
+//                    "  \"title\": \"The Great Gatsby\",\n" +
+//                    "  \"author\": \"F. Scott Fitzgerald\",\n" +
+//                    "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
+//                    "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
+//                    "}";
+//
+//                try {
+//                    DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
+//                    Book book3 = new Book(new BookInfo(dtoBookInfo3), null, ctx);
+//
+//                    ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
+//                } catch (Exception e) {
+//                    ctx.log.e(this, "Exception: " + e.getMessage());
+//                    throw e;
+//                }
+//            }
 
-                    int afterCheckOutBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
-                    if(afterCheckOutBookCount != acceptedBookCount+1) throw new Exception("afterCheckOutBookCount != numBooksAccepted+1");
-                }
-
-                acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
-
-
-                final Result<Book> checkInBookResult = library1.checkInBookFromUser(book1200, user1);
-                if (checkInBookResult instanceof Result.Failure)
-                    ctx.log.e(this, "Check In book FAILURE --> book id:" + ((Result.Failure<Book>) checkInBookResult).exception().getMessage());
-                else
-                    ctx.log.d(this, "Returned Book SUCCESS --> book id:" + ((Result.Success<Book>) checkInBookResult).value().id);
-
-                int afterCheckInBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
-                if(afterCheckInBookCount != acceptedBookCount-1) throw new Exception("afterNumBooksAccepted != acceptedBookCount-1");
-
-                library1.DumpDB(ctx);
-            }
-
-            // Load Library from Json
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Load Library from Json: ");
-                ctx.log.d(this, "----------------------------------");
-
-                // Create the "unknown" library with just an id.
-                Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
-
-                // Show empty info object.
-                ctx.log.d(this, library2.toJson());
-                if(!Objects.equals(library2.toJson(), "{}")) throw new Exception("library2.toJson() != {}");
-
-                String json =
-                    "{\n" +
-                    "  \"id\": {\n" +
-                    "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
-                    "    \"_uuid2Type\": \"Role.Library\"\n" +
-                    "  },\n" +
-                    "  \"name\": \"Ronald Reagan Library\",\n" +
-                    "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
-                    "    \"uuid2ToEntityMap\": {\n" +
-                    "      \"UUID2:Role.User@00000000-0000-0000-0000-000000000001\": []\n" +
-                    "    }\n" +
-                    "  },\n" +
-                    "  \"bookIdToNumBooksAvailableMap\": {\n" +
-                    "    \"uuid2ToEntityMap\": {\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001400\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001000\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001300\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001200\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001500\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001600\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001700\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001800\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001900\": 25,\n" +
-                    "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001100\": 25\n" +
-                    "    }\n" +
-                    "  }\n" +
-                    "}";
-
-                // Check JSON loaded properly
-                if(true) {
-                    System.out.println();
-                    ctx.log.d(this,"Check JSON loaded properly: ");
-
-                    Result<LibraryInfo> library2Result = library2.updateInfoFromJson(json);
-                    if (library2Result instanceof Result.Failure) {
-                        // NOTE: FAILURE IS EXPECTED HERE
-                        ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
-
-                        // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
-                        ctx.log.d(this, ((Result.Failure<LibraryInfo>) library2Result).exception().getMessage());
-
-                        // The JSON was still loaded properly
-                        ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
-
-                        // Can't just check json as the ordering of the bookIdToNumBooksAvailableMap is random - LEAVE FOR REFERENCE
-                        // assert library2.toJson().equals(json);
-                        // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
-
-                        // check for same number of items
-                        if( ((Result.Success<HashMap<Book, Long>>) library2.calculateAvailableBookIdToNumberAvailableList()).value().size() != 10)
-                            throw new Exception("Library2 should have 10 books");
-
-                        // check existence of a particular book
-                        if (library2.isUnknownBook(new Book(UUID2.createFakeUUID2(1500, Book.class), null, ctx)))
-                            throw new Exception("Library2 should have known Book with id 1500");
-
-                    } else {
-                        // Intentionally Wont see this branch bc the library2 was never saved to the central database/api.
-                        ctx.log.d(this, "Results of Library2 json load:");
-                        ctx.log.d(this, library2.toJson());
-                        throw new Exception("Library2 JSON load should have failed");
-                    }
-                }
-
-                // Create a Library Domain Object from the Info
-                if(true) {
-                    System.out.println();
-                    ctx.log.d(this,"Create Library from LibraryInfo: ");
-                    ctx.log.d(this, "----------------------------------");
-
-                    try {
-                        LibraryInfo libraryInfo3 =
-                            Library.createInfoFromJson(
-                                json,
-                                LibraryInfo.class,
-                                ctx
-                            );
-
-                        assert libraryInfo3 != null;
-                        Library library3 = new Library(libraryInfo3, ctx);
-                        ctx.log.d(this, "Results of Library3 json load:" + library3.toJson());
-
-                        // check for same number of items
-                        if( ((Result.Success<HashMap<Book, Long>>) library3.calculateAvailableBookIdToNumberAvailableList()).value().size() != 10)
-                            throw new Exception("Library2 should have 10 books");
-
-                        // check existence of a particular book
-                        if (library3.isUnknownBook(new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx)))
-                            throw new Exception("Library2 should have known Book with id 1900");
-
-
-                    } catch (Exception e) {
-                        ctx.log.e(this, "Exception: " + e.getMessage());
-                        throw e;
-                    }
-                }
-            }
-
-            // Load Book from DTO Json
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Load BookInfo from DTO Json: ");
-                ctx.log.d(this, "----------------------------------");
-
-                String json =
-                    "{\n" +
-                    "  \"id\": {\n" +
-                    "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                    "    \"uuid2TypeStr\": \"Model.DTO.BookInfo\"\n" +
-                    "  },\n" +
-                    "  \"title\": \"The Great Gatsby\",\n" +
-                    "  \"author\": \"F. Scott Fitzgerald\",\n" +
-                    "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
-                    "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
-                    "}";
-
-                try {
-                    DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
-                    Book book3 = new Book(new BookInfo(dtoBookInfo3), null, ctx);
-
-                    ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
-                } catch (Exception e) {
-                    ctx.log.e(this, "Exception: " + e.getMessage());
-                    throw e;
-                }
-            }
-
-            // Load Book from DTO Json using DTO Book constructor
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Load Book from DTO Json using DTO Book constructor: ");
-                ctx.log.d(this, "----------------------------------");
-
-                String json =
-                        "{\n" +
-                                "  \"id\": {\n" +
-                                "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                                "    \"uuid2TypeStr\": \"Model.DTO.BookInfo\"\n" +
-                                "  },\n" +
-                                "  \"title\": \"The Great Gatsby\",\n" +
-                                "  \"author\": \"F. Scott Fitzgerald\",\n" +
-                                "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
-                                "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
-                                "}";
-
-                try {
-                    DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
-                    Book book3 = new Book(dtoBookInfo3, null, ctx); // passing in DTO directly to Book constructor
-
-                    ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
-                } catch (Exception e) {
-                    ctx.log.e(this, "Exception: " + e.getMessage());
-                    throw e;
-                }
-            }
+//            // Load Book from DTO Json using DTO Book constructor
+//            if (true) {
+//                System.out.println();
+//                ctx.log.d(this,"Load Book from DTO Json using DTO Book constructor: ");
+//                ctx.log.d(this, "----------------------------------");
+//
+//                String json =
+//                        "{\n" +
+//                        "  \"id\": {\n" +
+//                        "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
+//                        "    \"uuid2TypeStr\": \"Model.DTO.BookInfo\"\n" +
+//                        "  },\n" +
+//                        "  \"title\": \"The Great Gatsby\",\n" +
+//                        "  \"author\": \"F. Scott Fitzgerald\",\n" +
+//                        "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
+//                        "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
+//                        "}";
+//
+//                try {
+//                    DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
+//                    Book book3 = new Book(dtoBookInfo3, null, ctx); // passing in DTO directly to Book constructor
+//
+//                    ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
+//                } catch (Exception e) {
+//                    ctx.log.e(this, "Exception: " + e.getMessage());
+//                    throw e;
+//                }
+//            }
 
             Check_out_Book_via_User:
             if (true) {

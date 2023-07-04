@@ -3,6 +3,7 @@ package org.elegantobjects.jpages.LibraryAppTest;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.testingUtils.TestingUtils;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.account.Account;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
@@ -84,8 +85,8 @@ public class LibraryAppTest {
         // • Create & populate a Library in the Library Repo
         final Result<LibraryInfo> libraryInfo = testUtil.createFakeLibraryInfoInContextLibraryRepo(1);
         if (libraryInfo instanceof Result.Failure) {
-            ctx.log.e(this,"Create Library FAILURE --> " + ((Result.Failure<LibraryInfo>) libraryInfo));
-            assert false;
+            ctx.log.e(this,"Create Library FAILURE --> " + libraryInfo);
+            fail("Create Library FAILURE --> " + libraryInfo);
         }
         assertTrue(libraryInfo instanceof Result.Success);
         UUID2<Library> library1InfoId = ((Result.Success<LibraryInfo>) libraryInfo).value().id();
@@ -98,11 +99,11 @@ public class LibraryAppTest {
         // • Create Accounts for Users //
         /////////////////////////////////
 
-        // Create fake AccountInfo for User 1
-        AccountInfo accountInfo = new AccountInfo(
-            UUID2.createFakeUUID2(1, Account.class),
-            "User Name 1"
-        );
+//        // Create fake AccountInfo for User 1
+//        AccountInfo accountInfo = new AccountInfo(
+//            UUID2.createFakeUUID2(1, Account.class),
+//            "User Name 1"
+//        );
         final Result<AccountInfo> accountInfo1Result = testUtil.createFakeAccountInfoInContextAccountRepo(1);
         final Result<AccountInfo> accountInfo2Result = testUtil.createFakeAccountInfoInContextAccountRepo(2);
         assertNotNull(accountInfo1Result);
@@ -171,7 +172,7 @@ public class LibraryAppTest {
         BookInfo bookInfo3 = book.fetchInfo();
         if (bookInfo3 == null) {
             context.log.d(this, "Book Missing --> book id: " + book.id() + " >> " + " is null");
-            assert false;
+            fail("Book Missing --> book id: " + book.id() + " >> " + " is null");
         }
 
         // Check the title for updated info
@@ -189,11 +190,11 @@ public class LibraryAppTest {
         Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, context);
 
         // • ASSERT
-        assertFalse("Book SHOULD NOT Exist --> " + book2.id, book2.fetchInfoResult() instanceof Result.Success);
+        assertTrue("Book SHOULD NOT Exist, but does! --> " + book2.id, book2.fetchInfoResult() instanceof Result.Failure);
     }
 
     @Test
-    public void Checkout_2_Books_to_User_is_Success() {
+    public void CheckOut_2_Books_to_User_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx);
@@ -210,7 +211,7 @@ public class LibraryAppTest {
     }
 
     @Test
-    public void Find_Books_checked_out_by_User_is_Success() {  // note: relies on Checkout_2_books_to_User
+    public void Find_Books_checkedOut_by_User_is_Success() {  // note: relies on Checkout_2_books_to_User
         // • ARRANGE
         Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx);
@@ -238,7 +239,7 @@ public class LibraryAppTest {
     }
 
     @Test
-    public void Calculate_availableBook_To_NumAvailable_is_Success() {
+    public void Calculate_availableBook_To_numAvailable_Map_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx);
@@ -272,6 +273,193 @@ public class LibraryAppTest {
         }
         ctx.log.d(this,"Total Available Books (unique UUIDs): " + availableBooks.size());
         assertEquals("availableBooks.size() != 10", 10, availableBooks.size());
+    }
+
+    @Test
+    public void CheckOut_and_CheckIn_Book_to_Library_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+        int initialBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
+
+        // • ACT & ASSERT
+
+        // First check out book
+        Result<UUID2<Book>> checkoutResult = roles.user1.checkOutBookFromLibrary(roles.book1200, roles.library1);
+        assertTrue("Checked out book FAILURE --> book id:" + roles.book1200.id, checkoutResult instanceof Result.Success);
+        int afterCheckOutBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
+        assertEquals("afterCheckOutBookCount != initialAcceptedBookCount+1", afterCheckOutBookCount, initialBookCount + 1);
+
+        // Now check in Book
+        final Result<Book> checkInBookResult = roles.library1.checkInBookFromUser(roles.book1200, roles.user1);
+        assertTrue("Checked out book FAILURE --> book id:" + roles.book1200.id, checkInBookResult instanceof Result.Success);
+        int afterCheckInBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
+        assertEquals("afterCheckInBookCount != initialBookCount", afterCheckInBookCount, initialBookCount);
+
+        roles.library1.DumpDB(ctx);
+    }
+
+    private String getRonaldReaganLibraryJson() {
+        return
+            "{\n" +
+            "  \"id\": {\n" +
+            "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
+            "    \"_uuid2Type\": \"Role.Library\"\n" +
+            "  },\n" +
+            "  \"name\": \"Ronald Reagan Library\",\n" +
+            "  \"registeredUserIdToCheckedOutBookIdMap\": {\n" +
+            "    \"uuid2ToEntityMap\": {\n" +
+            "      \"UUID2:Role.User@00000000-0000-0000-0000-000000000001\": []\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"bookIdToNumBooksAvailableMap\": {\n" +
+            "    \"uuid2ToEntityMap\": {\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001400\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001000\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001300\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001200\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001500\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001600\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001700\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001800\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001900\": 25,\n" +
+            "      \"UUID2:Role.Book@00000000-0000-0000-0000-000000001100\": 25\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+    }
+
+    @Test
+    public void Update_LibraryInfo_by_updateInfoFromJson_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        String json = getRonaldReaganLibraryJson();
+
+        // Create the "unknown" library with just an id.
+        Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
+        Book book1500 = new Book(UUID2.createFakeUUID2(1500, Book.class), null, ctx);
+
+        // • ASSERT
+        // Get empty info object.
+        ctx.log.d(this, library2.toJson());
+        assertEquals("afterCheckInBookCount != initialBookCount", "{}", library2.toJson());
+
+        // Check JSON loaded properly
+        Result<LibraryInfo> library2Result = library2.updateInfoFromJson(json);
+        if (library2Result instanceof Result.Failure) {
+            // NOTE: FAILURE IS EXPECTED HERE
+            ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
+
+            // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
+            ctx.log.d(this, ((Result.Failure<LibraryInfo>) library2Result).exception().getMessage());
+
+            // The JSON was still loaded properly
+            ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
+
+            // LEAVE FOR REFERENCE
+            // Note: Can't just do simple "text equality" check on Json as the ordering of the `bookIdToNumBooksAvailableMap` is random
+            // // assert library2.toJson().equals(json);
+            // // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
+
+            // check for same number of items
+            assertEquals("Library2 should have 10 books", 10, ((Result.Success<HashMap<Book, Long>>)
+                    library2.calculateAvailableBookIdToNumberAvailableList()).value().size());
+
+            // check existence of a particular book
+            assertTrue("Library2 should have known Book with id 1500",
+                    library2.isKnownBook(book1500));
+
+        } else {
+            // Intentionally should NOT see this branch bc the library2 was never saved to the central database/api.
+            ctx.log.d(this, "Results of Library2 json load:");
+            ctx.log.d(this, library2.toJson());
+            fail("Library2 JSON load should have failed");
+        }
+    }
+
+    @Test
+    public void Create_Library_Role_from_createInfoFromJson_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        String json = getRonaldReaganLibraryJson();
+        Book expectedBook1900 = new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx);
+
+        // Create a Library Domain Object from the Info
+        try {
+
+            // • ACT
+            LibraryInfo libraryInfo =
+                Library.createInfoFromJson(
+                    json,
+                    LibraryInfo.class,
+                    ctx
+                );
+            assertNotNull(libraryInfo);
+
+            Library library = new Library(libraryInfo, ctx);
+            ctx.log.d(this, "Results of Library3 json load:" + library.toJson());
+
+            // • ASSERT
+            // check for same number of items
+            assertEquals("Library2 should have 10 books",
+                    10, ((Result.Success<HashMap<Book, Long>>)
+                            library.calculateAvailableBookIdToNumberAvailableList()).value().size());
+
+            // check existence of a particular book
+            assertTrue("Library2 should have known Book with id="+ expectedBook1900.id, library.isKnownBook(expectedBook1900));
+        } catch (Exception e) {
+            ctx.log.e(this, "Exception: " + e.getMessage());
+            fail(e.getMessage());
+        }
+
+    }
+
+    private String getGreatGatsbyBookJson() {
+        return
+            "{\n" +
+            "  \"id\": {\n" +
+            "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
+            "    \"uuid2Type\": \"Model.DTOInfo.BookInfo\"\n" +
+            "  },\n" +
+            "  \"title\": \"The Great Gatsby\",\n" +
+            "  \"author\": \"F. Scott Fitzgerald\",\n" +
+            "  \"description\": \"The Great Gatsby is a 1925 novel written by American author F. Scott Fitzgerald that follows a cast of characters living in the fictional towns of West Egg and East Egg on prosperous Long Island in the summer of 1922. The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan. Considered to be Fitzgerald's magnum opus, The Great Gatsby explores themes of decadence, idealism, resistance to change, social upheaval, and excess, creating a portrait of the Jazz Age or the Roaring Twenties that has been described as a cautionary tale regarding the American Dream.\",\n" +
+            "  \"extraFieldToShowThisIsADTO\": \"Extra Unneeded Data from JSON payload load\"\n" +
+            "}";
+    }
+
+    @Test
+    public void Create_Book_Role_from_DTOInfo_Json() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        String json = getGreatGatsbyBookJson();
+        String expectedTitle = "The Great Gatsby";
+        String expectedAuthor = "F. Scott Fitzgerald";
+        UUID2<Book> expectedUUID2 = UUID2.createFakeUUID2(10, Book.class);
+        String expectedUuid2Type = expectedUUID2.uuid2TypeStr();
+
+        // • ACT & ASSERT
+        try {
+            DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
+            assertNotNull(dtoBookInfo3);
+
+            Book book3 = new Book(new BookInfo(dtoBookInfo3), null, ctx);
+            assertNotNull(book3);
+
+            ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
+
+            assertEquals("Book3 should have title:" + expectedTitle,
+                    expectedTitle, book3.info().title);
+            assertEquals("Book3 should have author:" + expectedAuthor,
+                    expectedAuthor, book3.info().author);
+            assertEquals("Book3 should have id: " + expectedUUID2,
+                    expectedUUID2, book3.id);
+            assertEquals("Book3 should have UUID2 Type of:" + expectedUuid2Type,
+                    expectedUuid2Type, book3.id.uuid2TypeStr());
+        } catch (Exception e) {
+            ctx.log.e(this, "Exception: " + e.getMessage());
+            fail(e.getMessage());
+        }
     }
 
 }

@@ -349,7 +349,7 @@ using IDE tools (like hover to find var types).
       <code>num</code>
     </td>
     <td>
-      Prefix for things that refer to counts or amounts.
+      Prefix for counts or amounts, or other integer intentions that are sum-like.
     </td>
   </tr>
   <tr>
@@ -377,6 +377,15 @@ using IDE tools (like hover to find var types).
     <td>
       These are in a gray area.<br>
       • Prefer spelling it out, ie: <code>Amount</code>
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>Ct</code> & <code>Cnt</code>
+    </td>
+    <td>
+      These are are too vague and one is mildly rude in English.<br>
+      • Prefer spelling it out, ie: <code>Count</code>
     </td>
   </tr>
   <tr>
