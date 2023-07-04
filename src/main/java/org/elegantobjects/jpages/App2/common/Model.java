@@ -3,8 +3,8 @@ package org.elegantobjects.jpages.App2.common;
 import com.google.gson.GsonBuilder;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.common.network.DTO;
-import org.elegantobjects.jpages.App2.data.common.local.Entity;
+import org.elegantobjects.jpages.App2.data.common.network.DTOInfo;
+import org.elegantobjects.jpages.App2.data.common.local.EntityInfo;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.jetbrains.annotations.NotNull;
@@ -17,10 +17,10 @@ import org.jetbrains.annotations.NotNull;
 // - {DTO}Info hold the API transfer "dumb" objects and Validation layer for the Domain objects.
 // - {Entity}Info hold the Database transfer "dumb" objects. Validation can occur here too, but usually not necessary.
 public class Model {
-    transient protected UUID2<?> _id; // Can't make final bc need to set it during JSON deserialization. :(
+    public UUID2<?> id; // Can't make final bc need to set it during JSON deserialization. :(
 
     protected Model(UUID2<?> id) {
-        this._id = new UUID2<>(id);
+        this.id = new UUID2<>(id);
     }
 
     ///////////////////////////////
@@ -30,7 +30,7 @@ public class Model {
     // - DTO.{Domain}Info
     ///////////////////////////////
 
-    public interface ToInfoDomain<TDomainInfo extends DomainInfo> {
+    public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
         UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
         @SuppressWarnings("unchecked")
@@ -46,7 +46,7 @@ public class Model {
         // This interface enforces all DomainInfo objects to include a deepCopyDomainInfo() method
         // - Just add "implements ToDomainInfo.deepCopyDomainInfo<ToDomainInfo<Domain>>" to the class
         //   definition, and the deepCopy() method will be added.
-        interface hasToDeepCopyDomainInfo<TToInfo extends ToInfoDomain<? extends DomainInfo>> {
+        interface hasToDeepCopyDomainInfo<TToInfo extends ToDomainInfo<? extends DomainInfo>> {
 
             @SuppressWarnings("unchecked")
             default <TDomainInfo extends DomainInfo>
@@ -57,10 +57,10 @@ public class Model {
             }
         }
     }
-    public interface ToInfoEntity<T extends Entity> {
+    public interface ToEntityInfo<T extends EntityInfo> {
         T toInfoEntity(); // Should return a deep copy (no original references)
     }
-    public interface ToInfoDTO<T extends DTO> {
+    public interface ToDTOInfo<T extends DTOInfo> {
         T toInfoDTO();    // Should return a deep copy (no original references)
     }
 
@@ -71,11 +71,11 @@ public class Model {
         return context.gson.toJson(this);
     }
 
-    public UUID2<?> id() { return _id; }
+    public UUID2<?> id() { return id; }
 
     // This method is for JSON deserialization purposes & should only be used for such.
     public void _setIdFromImportedJson(UUID2<IUUID2> _id) {
-        this._id = _id;
-    }
+        this.id = _id;
+    } // todo remove _
 
 }

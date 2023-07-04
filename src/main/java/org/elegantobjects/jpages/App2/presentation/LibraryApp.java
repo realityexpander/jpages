@@ -3,7 +3,7 @@ package org.elegantobjects.jpages.App2.presentation;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
+import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.domain.account.Account;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
@@ -14,6 +14,7 @@ import org.elegantobjects.jpages.App2.domain.user.UserInfo;
 import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -304,7 +305,7 @@ class LibraryApp {
                     System.out.println();
                     ctx.log.d(this,"Check JSON loaded properly: ");
 
-                    Result<LibraryInfo> library2Result = library2.updateDomainInfoFromJson(json);
+                    Result<LibraryInfo> library2Result = library2.updateInfoFromJson(json);
                     if (library2Result instanceof Result.Failure) {
                         // NOTE: FAILURE IS EXPECTED HERE
                         ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
@@ -325,7 +326,7 @@ class LibraryApp {
 
                         // check existence of a particular book
                         if (!library2.isKnownBook(new Book(UUID2.createFakeUUID2(1500, Book.class), null, ctx)))
-                            throw new Exception("Library2 should not have known book with id 1500");
+                            throw new Exception("Library2 should have known Book with id 1500");
 
                     } else {
                         // Intentionally Wont see this branch bc the library2 was never saved to the central database/api.
@@ -343,7 +344,7 @@ class LibraryApp {
 
                     try {
                         LibraryInfo libraryInfo3 =
-                            Library.createDomainInfoFromJson(
+                            Library.createInfoFromJson(
                                 json,
                                 LibraryInfo.class,
                                 ctx
@@ -359,7 +360,7 @@ class LibraryApp {
 
                         // check existence of a particular book
                         if (!library3.isKnownBook(new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx)))
-                            throw new Exception("Library2 should not have known book with id 1900");
+                            throw new Exception("Library2 should have known Book with id 1900");
 
 
                     } catch (Exception e) {
@@ -388,8 +389,8 @@ class LibraryApp {
                     "}";
 
                 try {
-                    BookInfoDTO bookInfoDTO3 = new BookInfoDTO(json, ctx);
-                    Book book3 = new Book(new BookInfo(bookInfoDTO3), null, ctx);
+                    DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
+                    Book book3 = new Book(new BookInfo(dtoBookInfo3), null, ctx);
 
                     ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
@@ -417,8 +418,8 @@ class LibraryApp {
                                 "}";
 
                 try {
-                    BookInfoDTO bookInfoDTO3 = new BookInfoDTO(json, ctx);
-                    Book book3 = new Book(bookInfoDTO3, null, ctx); // passing in DTO directly to Book constructor
+                    DTOBookInfo dtoBookInfo3 = new DTOBookInfo(json, ctx);
+                    Book book3 = new Book(dtoBookInfo3, null, ctx); // passing in DTO directly to Book constructor
 
                     ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
                 } catch (Exception e) {
@@ -691,12 +692,12 @@ class LibraryApp {
     //////////////////////// TESTING Helper Methods //////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    private void PopulateFakeBookInfoInContextBookRepoDBandAPI(Context context) {
+    private void PopulateFakeBookInfoInContextBookRepoDBandAPI(@NotNull Context context) {
         context.bookInfoRepo().populateDatabaseWithFakeBookInfo();
         context.bookInfoRepo().populateApiWithFakeBookInfo();
     }
 
-    private void DumpBookDBandAPI(Context context) {
+    private void DumpBookDBandAPI(@NotNull Context context) {
         System.out.print("\n");
         context.log.d(this,"DB Dump");
         context.bookInfoRepo().printDB();
@@ -725,7 +726,7 @@ class LibraryApp {
     }
 
 
-    private Result<AccountInfo> createFakeAccountInfoInContextAccountRepo(
+    private @Nullable Result<AccountInfo> createFakeAccountInfoInContextAccountRepo(
             final Integer id,
             Context context
     ) {
@@ -750,7 +751,7 @@ class LibraryApp {
 
         return accountInfoResult;
     }
-    private Result<UserInfo> createFakeUserInfoInContextUserInfoRepo(
+    private @Nullable Result<UserInfo> createFakeUserInfoInContextUserInfoRepo(
             final Integer id,
             Context context
     ) {
@@ -776,7 +777,7 @@ class LibraryApp {
 
     private Result<BookInfo> addFakeBookInfoInContextBookInfoRepo(
             final Integer id,
-            Context context
+            @NotNull Context context
     ) {
         final BookInfo bookInfo = createFakeBookInfo(id);
 

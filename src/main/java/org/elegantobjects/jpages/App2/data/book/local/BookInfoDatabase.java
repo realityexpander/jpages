@@ -10,36 +10,36 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import java.util.Map;
 
 public class BookInfoDatabase {
-    private final IDatabase<Book, BookInfoEntity> database;
+    private final IDatabase<Book, EntityBookInfo> database;
 
-    BookInfoDatabase(IDatabase<Book, BookInfoEntity> database) {
+    BookInfoDatabase(IDatabase<Book, EntityBookInfo> database) {
         this.database = database;
     }
     public BookInfoDatabase() {
         this(new InMemoryDatabase<>(new URL("memory://db.book.com"), "user", "password"));
     }
 
-    public Result<BookInfoEntity> getBookInfo(UUID2<Book> id) {
+    public Result<EntityBookInfo> getBookInfo(UUID2<Book> id) {
         return database.getEntityInfo(id);
     }
 
-    public Result<BookInfoEntity> updateBookInfo(BookInfoEntity bookInfo) {
+    public Result<EntityBookInfo> updateBookInfo(EntityBookInfo bookInfo) {
         return database.updateEntityInfo(bookInfo);
     }
 
-    public Result<BookInfoEntity> addBookInfo(BookInfoEntity bookInfo) {
+    public Result<EntityBookInfo> addBookInfo(EntityBookInfo bookInfo) {
         return database.addEntityInfo(bookInfo);
     }
 
-    public Result<BookInfoEntity> upsertBookInfo(BookInfoEntity bookInfo) {
+    public Result<EntityBookInfo> upsertBookInfo(EntityBookInfo bookInfo) {
         return database.upsertEntityInfo(bookInfo);
     }
 
-    public Result<BookInfoEntity> deleteBookInfo(BookInfoEntity bookInfo) {
+    public Result<EntityBookInfo> deleteBookInfo(EntityBookInfo bookInfo) {
         return database.deleteEntityInfo(bookInfo);
     }
 
-    public Map<UUID2<Book>, BookInfoEntity> getAllBookInfos() {  // todo UUID2 keep
+    public Map<UUID2<Book>, EntityBookInfo> getAllBookInfos() {  // todo UUID2 keep
         return database.getAllEntityInfo();
     }
 }

@@ -15,19 +15,20 @@ import java.util.UUID;
 
 public class UserInfo extends DomainInfo
     implements
-        Model.ToInfoDomain<UserInfo>
+        Model.ToDomainInfo<UserInfo>
 {
-    public final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
+//    public final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
     public final String name;
     public final String email;
     private final HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap; // BookId -> LibraryId
 
+    public
     UserInfo(
-            @NotNull
-            UUID2<User> id,        // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
-            String name,
-            String email,
-            HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap
+        @NotNull
+        UUID2<User> id,        // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
+        String name,
+        String email,
+        HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap
     ) {
         super(id);
         this.id = id;
@@ -35,23 +36,29 @@ public class UserInfo extends DomainInfo
         this.email = email;
         this.acceptedBookIdToSourceLibraryIdMap = acceptedBookIdToSourceLibraryIdMap;
     }
+    public @SuppressWarnings("unchecked")
     UserInfo(@NotNull UserInfo userInfo) {
+
         this(
-            userInfo.id,
+            (UUID2<User>) userInfo.id,
             userInfo.name,
             userInfo.email,
             userInfo.acceptedBookIdToSourceLibraryIdMap
         );
     }
+    public
     UserInfo(UUID uuid, String name, String email, HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap) {
         this(new UUID2<User>(uuid, User.class), name, email, acceptedBookIdToSourceLibraryIdMap);
     }
-    public UserInfo(UUID2<User> uuid2, String name, String email) {
+    public
+    UserInfo(UUID2<User> uuid2, String name, String email) {
         this(uuid2, name, email, new HashMap<>());
     }
+    public
     UserInfo(UUID uuid, String name, String email) {
         this(new UUID2<User>(uuid, User.class), name, email);
     }
+    public
     UserInfo(String uuid, String name, String email) {
         this(UUID.fromString(uuid), name, email);
     }
@@ -60,14 +67,13 @@ public class UserInfo extends DomainInfo
     // Published Simple Getters  //  // note: no setters, all changes are made through business logic methods.
     ///////////////////////////////
 
-    @Override
+    @Override @SuppressWarnings("unchecked")
     public UUID2<User> id() {
-        return id;
+        return (UUID2<User>) id;
     }
 
     @Override
     public String toString() {
-        //return "User: " + this.name + " (" + this.email + "), acceptedBooks: " + this.acceptedBooks;
         return toPrettyJson();
     }
 

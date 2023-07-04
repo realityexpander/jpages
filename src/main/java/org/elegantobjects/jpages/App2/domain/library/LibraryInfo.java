@@ -12,14 +12,15 @@ import java.util.*;
 
 public class LibraryInfo extends DomainInfo
         implements
-        Model.ToInfoDomain<LibraryInfo>
+        Model.ToDomainInfo<LibraryInfo>
 {
-    public final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
+//    public final UUID2<Library> id;  // note this is a UUID2<Library> not a UUID2<LibraryInfo>, it is the id of the Library.
     public final String name;
     private final UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap;  // registered users of this library
     private final UUID2.HashMap<UUID2<Book>, Long> bookIdToNumBooksAvailableMap;  // known books & number available in this library
 
-    public LibraryInfo(
+    public
+    LibraryInfo(
         @NotNull UUID2<Library> id,
         String name,
         UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap,
@@ -31,36 +32,40 @@ public class LibraryInfo extends DomainInfo
         this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
         this.id = id;
     }
-    public LibraryInfo(UUID2<Library> id, String name) {
+    public
+    LibraryInfo(UUID2<Library> id, String name) {
         this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
     }
-    public LibraryInfo(@NotNull LibraryInfo libraryInfo) {
+    public @SuppressWarnings("unchecked")
+    LibraryInfo(@NotNull LibraryInfo libraryInfo) {
         this(
-            libraryInfo.id,
+            (UUID2<Library>) libraryInfo.id,
             libraryInfo.name,
             libraryInfo.registeredUserIdToCheckedOutBookIdMap,
             libraryInfo.bookIdToNumBooksAvailableMap
         );
     }
-    public LibraryInfo(UUID uuid, String name) {
+    public
+    LibraryInfo(UUID uuid, String name) {
         this(new UUID2<>(uuid, Library.class), name);
     }
-    public LibraryInfo(String id, String name) {
+    public
+    LibraryInfo(String id, String name) {
         this(UUID.fromString(id), name);
-    }
-
-    @Override
-    public String toString() {
-        return this.toPrettyJson();
     }
 
     ///////////////////////////////
     // Published Simple Getters  //
     ///////////////////////////////
 
-    @Override
+    @Override @SuppressWarnings("unchecked")
     public UUID2<Library> id() {
-        return id;
+        return (UUID2<Library>) id;
+    }
+
+    @Override
+    public String toString() {
+        return this.toPrettyJson();
     }
 
     /////////////////////////////////////////////
@@ -198,7 +203,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(registeredUserIdToCheckedOutBookIdMap.get(userId));
     }
 
-    public Result<HashMap<UUID2<Book>, Long>> calculateAvailableBookIdToCountOfAvailableBooksList() {
+    public Result<HashMap<UUID2<Book>, Long>> calculateAvailableBookIdToCountOfAvailableBooksMap() {
         HashMap<UUID2<Book>, Long> availableBookIdToNumBooksAvailableMap = new HashMap<>();
 
         Set<UUID2<Book>> bookSet = this.bookIdToNumBooksAvailableMap.keySet();
@@ -476,7 +481,9 @@ public class LibraryInfo extends DomainInfo
     @Override
     public LibraryInfo toDeepCopyDomainInfo() {
         // Note: *MUST* return a deep copy
-        LibraryInfo libraryInfoDeepCopy = new LibraryInfo(this.id, this.name);
+
+        @SuppressWarnings("unchecked")
+        LibraryInfo libraryInfoDeepCopy = new LibraryInfo((UUID2<Library>) this.id, this.name);
 
         // Deep copy the bookIdToNumBooksAvailableMap
         libraryInfoDeepCopy.bookIdToNumBooksAvailableMap.putAll(this.bookIdToNumBooksAvailableMap);

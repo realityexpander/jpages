@@ -12,40 +12,40 @@ import java.util.Map;
 
 // Note: Use Domain-specific language to define the API
 public class BookInfoApi {
-    private final InMemoryAPI<Book, BookInfoDTO> api;
+    private final InMemoryAPI<Book, DTOBookInfo> api;
 
     public BookInfoApi() {
         this(new InMemoryAPI<>(new URL("memory://api.book.com"), new HttpClient()));
     }
-    BookInfoApi(InMemoryAPI<Book, BookInfoDTO> api) {
+    BookInfoApi(InMemoryAPI<Book, DTOBookInfo> api) {
         this.api = api;
     }
 
-    public Result<BookInfoDTO> getBookInfo(String id) {
+    public Result<DTOBookInfo> getBookInfo(String id) {
         return api.getDtoInfo(id);
     }
 
-    public Result<BookInfoDTO> getBookInfo(UUID2<Book> id) {
+    public Result<DTOBookInfo> getBookInfo(UUID2<Book> id) {
         return api.getDtoInfo(id);
     }
 
-    public Result<BookInfoDTO> addBookInfo(BookInfoDTO bookInfo) {
+    public Result<DTOBookInfo> addBookInfo(DTOBookInfo bookInfo) {
         return api.addDtoInfo(bookInfo);
     }
 
-    public Result<BookInfoDTO> updateBookInfo(BookInfoDTO bookInfo) {
+    public Result<DTOBookInfo> updateBookInfo(DTOBookInfo bookInfo) {
         return api.updateDtoInfo(bookInfo);
     }
 
-    public Result<BookInfoDTO> upsertBookInfo(BookInfoDTO bookInfo) {
+    public Result<DTOBookInfo> upsertBookInfo(DTOBookInfo bookInfo) {
         return api.upsertDtoInfo(bookInfo);
     }
 
-    public Result<BookInfoDTO> deleteBookInfo(BookInfoDTO bookInfo) {
+    public Result<DTOBookInfo> deleteBookInfo(DTOBookInfo bookInfo) {
         return api.deleteDtoInfo(bookInfo);
     }
 
-    public Map<UUID2<Book>, BookInfoDTO> getAllBookInfos() {
+    public Map<UUID2<Book>, DTOBookInfo> getAllBookInfos() {
         return new HashMap<>(api.getAllDtoInfos());
     }
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 
 @SuppressWarnings("FieldCanBeLocal")
 public
-class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTO> implements IAPI<TUUID2, TDTOInfo> {
+class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTOInfo> implements IAPI<TUUID2, TDTOInfo> {
     private final URL url;
     private final HttpClient client;
 

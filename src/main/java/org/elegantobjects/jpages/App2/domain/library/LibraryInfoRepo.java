@@ -31,11 +31,12 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Result<LibraryInfo> updateLibraryInfo(@NotNull LibraryInfo libraryInfo) {
         log.d(this, "libraryInfo.id: " + libraryInfo.id);
 
         // Simulate network/database
-        if (database.containsKey(libraryInfo.id)) {
+        if (database.containsKey((UUID2<Library>) libraryInfo.id)) {
             database.put(libraryInfo.id, libraryInfo);
 
             return new Result.Success<>(libraryInfo);

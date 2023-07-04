@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-// User Domain Object - Only interacts with its own Repo, Context, and other Domain Objects
+// User Role Object - Only interacts with its own Repo, the Context, and other Role Objects
 public class User extends Role<UserInfo> implements IUUID2 {
     public final UUID2<User> id;
     private final UserInfoRepo repo;
-    private final Account account; // User's Account Domain Object
+    private final Account account; // User's Account Role Object
 
     public User(
         @NotNull UserInfo info,
@@ -159,10 +159,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
     }
 
-    /////////////////////////////////////////////
-    // User Domain Business Logic Methods      //
-    // - Methods to modify it's DomainUserInfo //
-    /////////////////////////////////////////////
+    /////////////////////////////////////////
+    // User Role Business Logic Methods    //
+    // - Methods to modify it's UserInfo   //
+    // - Interacts with other Role objects //
+    /////////////////////////////////////////
 
     // Note: This delegates to its internal Account Role object.
     // - User has no intimate knowledge of the AccountInfo object, other than
@@ -242,7 +243,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return accountInfo.hasReachedMaxAmountOfAcceptedLibraryBooks(numPublicLibraryBooksAccepted);
     }
 
-    public boolean hasAcceptedBook(Book book) {
+    public boolean hasAcceptedBook(@NotNull Book book) {
         context.log.d(this,"User (" + this.id + "), book: " + book.id);
         if (fetchInfoFailureReason() != null) return false;
 
@@ -269,10 +270,10 @@ public class User extends Role<UserInfo> implements IUUID2 {
         return new Result.Success<>(books);
     }
 
-    // Note: *ONLY* the Domain Objects can take a Book from one User and give it to another User.
-    // - Also notice that we are politely asking each Domain object to accept and unaccept a Book.
-    // - No where is there any databases being accessed directly.
-    // - All interactions are SOLELY directed via the Domain object's public methods.
+    // Note: *ONLY* the Role Objects can take a Book from one User and give it to another User.
+    // - Also notice that we are politely asking each Role object to Accept and UnAccept a Book.
+    // - No where is there any databases being accessed directly, nor knowledge of where the data comes from.
+    // - All Role interactions are SOLELY directed via the Role object's public methods. (no access to references)
     public Result<ArrayList<UUID2<Book>>> giveBookToUser(@NotNull Book book, @NotNull User receivingUser) {
         context.log.d(this,"User (" + this.id + ") - book: " + book.id + ", to receivingUser: " + receivingUser.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
@@ -297,7 +298,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         receivingUser.acceptBook(book);
 
         // LEAVE FOR REFERENCE
-        // Note: no update needed as each Domain method used performs its own updates, as needed.
+        // Note: no update needed as each Role method used performs its own updates, as needed.
         // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
         //   need to be performed.
 
@@ -308,7 +309,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // Convenience method to Check Out a Book from a Library
     // - Is it OK to also have this method in the Library Role Object?
     //   I'm siding with yes, since it just delegates to the Library Role Object.
-    public Result<UUID2<Book>> checkOutBookFromLibrary(Book book, Library library) {
+    public Result<UUID2<Book>> checkOutBookFromLibrary(@NotNull Book book, @NotNull Library library) {
         context.log.d(this,"User (" + this.id + "), book: " + book.id + ", library: " + library.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -319,7 +320,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         // LEAVE FOR REFERENCE
-        // Note: no update needed as each Domain method used performs its own updates, as needed.
+        // Note: no update needed as each Role method used performs its own updates, as needed.
         // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
         //   need to be performed.
 
@@ -329,7 +330,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // Convenience method to Check In a Book to a Library
     // - Is it OK to also have this method in the Library Role Object?
     //   I'm siding with yes, since it just delegates to the Library Role Object.
-    public Result<UUID2<Book>> checkInBookToLibrary(Book book, Library library) {
+    public Result<UUID2<Book>> checkInBookToLibrary(@NotNull Book book, @NotNull Library library) {
         context.log.d(this,"User (" + this.id + "), book: " + book.id + ", library: " + library.id);
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -340,7 +341,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         // LEAVE FOR REFERENCE
-        // Note: no update needed as each Domain method used performs its own updates, as needed.
+        // Note: no update needed as each Role method used performs its own updates, as needed.
         // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
         //   need to be performed.
 

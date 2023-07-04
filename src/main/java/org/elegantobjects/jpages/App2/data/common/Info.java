@@ -95,8 +95,10 @@ public interface Info<TInfo> {
     default Result<TInfo> checkJsonInfoIdMatchesThisInfoId(TInfo infoFromJson, Class<?> infoClazz) {
 
         try {
-            // Ensure JSON Info object has an id field
-            Object idField = infoClazz.getDeclaredField("id").get(infoFromJson);
+            // Ensure JSON Info object has an `id` field
+//            Class<?> rootInfoClazz = infoClazz.getSuperclass().getSuperclass();
+            Class<?> rootInfoClazz = getRootClass(infoClazz);
+            Object idField = rootInfoClazz.getDeclaredField("id").get(infoFromJson);
             if(idField == null) {
                 return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an id field"));
             }
@@ -115,5 +117,15 @@ public interface Info<TInfo> {
         }
 
         return new Result.Success<>(infoFromJson);
+    }
+
+    default Class<?> getRootClass(Class<?> infoClazz) {
+
+        Class<?> rootClazz = infoClazz;
+        while(!rootClazz.getSuperclass().getSimpleName().equals("Object")) {
+            rootClazz = rootClazz.getSuperclass();
+        }
+
+        return rootClazz;
     }
 }

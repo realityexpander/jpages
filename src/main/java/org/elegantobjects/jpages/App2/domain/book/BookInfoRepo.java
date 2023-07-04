@@ -5,9 +5,9 @@ import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
-import org.elegantobjects.jpages.App2.data.book.local.BookInfoEntity;
+import org.elegantobjects.jpages.App2.data.book.local.EntityBookInfo;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
-import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
+import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,29 +36,29 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         log.d(this, "bookId " + id);
 
         // Make the request to API
-        Result<BookInfoDTO> bookInfoApiResult = api.getBookInfo(id);
+        Result<DTOBookInfo> bookInfoApiResult = api.getBookInfo(id);
         if (bookInfoApiResult instanceof Result.Failure) {
 
             // If API fails, try to get from cached DB
-            Result<BookInfoEntity> bookInfoResult = database.getBookInfo(id);
+            Result<EntityBookInfo> bookInfoResult = database.getBookInfo(id);
             if (bookInfoResult instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<BookInfoEntity>) bookInfoResult).exception();
+                Exception exception = ((Result.Failure<EntityBookInfo>) bookInfoResult).exception();
                 return new Result.Failure<BookInfo>(exception);
             }
 
-            BookInfoEntity bookInfo = ((Result.Success<BookInfoEntity>) bookInfoResult).value();
+            EntityBookInfo bookInfo = ((Result.Success<EntityBookInfo>) bookInfoResult).value();
             return new Result.Success<>(bookInfo.toDeepCopyDomainInfo());
         }
 
         // Convert to Domain Model
-        BookInfo bookInfo = ((Result.Success<BookInfoDTO>) bookInfoApiResult)
+        BookInfo bookInfo = ((Result.Success<DTOBookInfo>) bookInfoApiResult)
                 .value()
                 .toDeepCopyDomainInfo();
 
         // Cache to Local DB
-        Result<BookInfoEntity> resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
+        Result<EntityBookInfo> resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
         if (resultDB instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<BookInfoEntity>) resultDB).exception();
+            Exception exception = ((Result.Failure<EntityBookInfo>) resultDB).exception();
             return new Result.Failure<>(exception);
         }
 
@@ -121,7 +121,7 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         log.d(this, "updateType: " + updateKind + ", id: " + bookInfo.id());
 
         // Make the API request
-        Result<BookInfoDTO> resultApi;
+        Result<DTOBookInfo> resultApi;
         switch (updateKind) {
             case UPDATE:
                 resultApi = api.updateBookInfo(bookInfo.toInfoDTO());
@@ -134,12 +134,12 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         }
 
         if (resultApi instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<BookInfoDTO>) resultApi).exception();
+            Exception exception = ((Result.Failure<DTOBookInfo>) resultApi).exception();
             return new Result.Failure<>(exception);
         }
 
         // Save to Local DB
-        Result<BookInfoEntity> resultDB;
+        Result<EntityBookInfo> resultDB;
         switch (updateKind) {
             case UPDATE:
                 resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
@@ -152,7 +152,7 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         }
 
         if (resultDB instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<BookInfoEntity>) resultDB).exception();
+            Exception exception = ((Result.Failure<EntityBookInfo>) resultDB).exception();
             return new Result.Failure<>(exception);
         }
 
@@ -170,8 +170,8 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
             final int id = 1000+i*100;
 
             database.addBookInfo(
-                new BookInfoEntity(
-                    UUID2.createFakeUUID2(id, BookInfoEntity.class),
+                new EntityBookInfo(
+                    UUID2.createFakeUUID2(id, EntityBookInfo.class),
                     "Title " + id,
                     "Author " + id,
                     "Description " + id,
@@ -185,9 +185,9 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         for (int i = 0; i < 10; i++) {
             final int id = 1000+i*100;
 
-            Result<BookInfoDTO> result = api.addBookInfo(
-                new BookInfoDTO(
-                    UUID2.createFakeUUID2(id, BookInfoDTO.class),
+            Result<DTOBookInfo> result = api.addBookInfo(
+                new DTOBookInfo(
+                    UUID2.createFakeUUID2(id, DTOBookInfo.class),
                     "Title " + id,
                     "Author " + id,
                     "Description " + id,
@@ -196,20 +196,20 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
             );
 
             if (result instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<BookInfoDTO>) result).exception();
+                Exception exception = ((Result.Failure<DTOBookInfo>) result).exception();
                 log.d(this, exception.getMessage());
             }
         }
     }
 
     public void printDB() {
-        for (Map.Entry<UUID2<Book>, BookInfoEntity> entry : database.getAllBookInfos().entrySet()) {
+        for (Map.Entry<UUID2<Book>, EntityBookInfo> entry : database.getAllBookInfos().entrySet()) {
             log.d(this, entry.getKey() + " = " + entry.getValue());
         }
     }
 
     public void printAPI() {
-        for (Map.Entry<UUID2<Book>, BookInfoDTO> entry : api.getAllBookInfos().entrySet()) {
+        for (Map.Entry<UUID2<Book>, DTOBookInfo> entry : api.getAllBookInfos().entrySet()) {
             log.d(this, entry.getKey() + " = " + entry.getValue());
         }
     }

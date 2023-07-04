@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-// Library Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
+// Library Role Object - *ONLY* interacts with its own Repo, Context, and other Role Objects
 public class Library extends Role<LibraryInfo> implements IUUID2 {
     public final UUID2<Library> id;
     private final LibraryInfoRepo repo;
@@ -62,7 +62,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     // }
 
     /////////////////////////////////////
-    // IRole/UUID2 Required Overrides  //
+    // Role/UUID2 Required Overrides  //
     /////////////////////////////////////
 
     @Override
@@ -105,8 +105,9 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
 
     ///////////////////////////////////////////
-    // Library Domain Business Logic Methods //
+    // Library Role Business Logic Methods   //
     // - Methods to modify it's LibraryInfo  //
+    // - Communicate with other ROle objects //
     ///////////////////////////////////////////
 
     public Result<Book> checkOutBookToUser(Book book, User user) {
@@ -116,11 +117,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (isUnableToFindOrRegisterUser(user))
             return new Result.Failure<>(new Exception("User is not known, userId: " + user.id));
 
-        // Note: this calls a wrapper to the User's Account domain object
+        // Note: this calls a wrapper to the User's Account Role object
         if (!user.isAccountInGoodStanding())
             return new Result.Failure<>(new Exception("User Account is not active, userId: " + user.id));
 
-        // Note: this calls a wrapper to the User's Account domain object
+        // Note: this calls a wrapper to the User's Account Role object
         if (user.hasReachedMaxAmountOfAcceptedPublicLibraryBooks())
             return new Result.Failure<>(new Exception("User has reached max num Books accepted, userId: " + user.id));
 
@@ -243,7 +244,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
     // Note: This Library Role Object enforces the rule:
     //   - if a User is not known, they are added as a new user.   // todo change to Result<> return type
-    public boolean isUnableToFindOrRegisterUser(User user) {
+    public boolean isUnableToFindOrRegisterUser(@NotNull User user) {
         context.log.d(this, format("Library (%s) for user: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return true;
 
@@ -261,28 +262,28 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return false;
     }
 
-    public boolean isKnownBook(Book book) {
+    public boolean isKnownBook(@NotNull Book book) {
         context.log.d(this, format("Library(%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
         return this.info.isBookKnown(book);
     }
 
-    public boolean isKnownUser(User user) {
+    public boolean isKnownUser(@NotNull User user) {
         context.log.d(this, format("Library (%s) User id: %s", this.id, user.id));
         if (fetchInfoFailureReason() != null) return false;
 
         return this.info.isUserKnown(user);
     }
 
-    public boolean isBookAvailable(Book book) {
+    public boolean isBookAvailable(@NotNull Book book) {
         context.log.d(this, format("Library (%s) Book id: %s\n", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
         return this.info.isBookAvailableToCheckout(book);
     }
 
-    public boolean isBookCheckedOutByAnyUser(Book book) {  // todo return Result<>
+    public boolean isBookCheckedOutByAnyUser(@NotNull Book book) {  // todo return Result<>?
         context.log.d(this, format("Library (%s) Book id: %s", this.id, book.id));
         if (fetchInfoFailureReason() != null) return false;
 
@@ -299,8 +300,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("PrivateLibrary does not support registration of users, libraryId: " + this.id));
 
         // get the User's id from the Book checkout record
-        Result<UUID2<User>> userIdResult =
-                this.info.findUserIdOfCheckedOutBook(book);
+        Result<UUID2<User>> userIdResult = this.info.findUserIdOfCheckedOutBook(book);
         if (userIdResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<User>>) userIdResult).exception());
         UUID2<User> userId = ((Result.Success<UUID2<User>>) userIdResult).value();
@@ -314,7 +314,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
 
     /////////////////////////////////////////
-    // Published Domain Reporting Methods  //
+    // Published Role Reporting Methods  //
     /////////////////////////////////////////
 
     public Result<ArrayList<Book>> findBooksCheckedOutByUser(User user) {
@@ -345,7 +345,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, "Library (" + this.id + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<HashMap<UUID2<Book>, Long>> entriesResult = this.info.calculateAvailableBookIdToCountOfAvailableBooksList();
+        Result<HashMap<UUID2<Book>, Long>> entriesResult = this.info.calculateAvailableBookIdToCountOfAvailableBooksMap();
         if (entriesResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<HashMap<UUID2<Book>, Long>>) entriesResult).exception());
         }

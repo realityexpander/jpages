@@ -8,8 +8,10 @@
   - Note: BOOP is a design pattern that is inspired by:
     - Alan Kay's OO style & lectures, HyperCard, the ideas behind Smalltalk. 
     - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
-  - Code that is easy to change & maintain and ready for separating out and 
-    independently horizontally scaling any domain object into a separate service or microservice.
+    - David West, PhD's book "Object Thinking"
+  - Writing code that is easy to change & comprehend quickly using English prose.
+  - Back to basics approach for Java coding style in the Domain layer for Role objects.
+  - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice) 
 
 ### Developer Experience
 - Architected by layer, and each layer is grouped by feature, which allows convenient and
@@ -22,6 +24,7 @@
 - Strive to make Domain layer code plain idiomatic Java as possible, and read like English prose.
 - Strive to make it read like regular English as possible, and to be able to understand it without 
 using IDE tools (like hover to find var types).
+- Limit language to plain-old Java 8
 
 ### Encapsulation of Data via Intention-named methods
   - Set and Get methods are not used, instead methods are named for their intention.
@@ -41,20 +44,21 @@ using IDE tools (like hover to find var types).
     - Return an intention-revealing object instead
     - Prefer `Result` or `Empty` object instead of `null`
     - `boolean` is acceptable, over `null`.
-- Methods that require network or CPU time should be labeled
+- Methods that require network, disk access or CPU time should be labeled with that intent.
   - ie: `calculateTotalCost()` is preferred over `getTotalCost()`
   - ie: `fetchInfo()` is preferred over `getInfo()`
+  - ie: `findUserIdOfCheckedOutBook` is preferred over `getCheckedOutBookUserId()`
 - When the method is a simple data-accessor that just returns a simple field, no need to use get.
   - Prefer `id()` over `getId()` for readability and simplicity.
   - ie: `info()` is preferred over `getInfo()`
   - ie: `id()` is preferred over `getId()`
 
-### No Nulls in Domain
+### No `null` in Domain
 - `null` only allowed to be passed in constructors
-  - in order to indicate "use a reasonable default value for this parameter"
-- `null` are checked for in constructors only, usually to create a reasonable default value.
-- `null` are not allowed to be returned from methods
-  - `return` "Empty" objects instead of `null`
+  - used to indicate <i>"use a reasonable default value for this parameter"</i>
+- `null` is checked for in constructors only, usually to create a reasonable default value.
+- `null` is not allowed to be returned from methods for Domain.
+  - `return` "Empty" or `Result` objects instead of `null`
 - Use intention-named objects that indicate the reason for a `null` case.
   - ie: `PrivateLibrary` instead of a `null` source Library
 
@@ -63,10 +67,13 @@ using IDE tools (like hover to find var types).
   - If there is an error, it is returned in a `Result` object.
   - This is for convenience: 
     - It allows the `fetchInfo()` and error handling to be a single line.
+  - `null` still used outside of Domain, but prefer to limit its use in general.
 
 ### Intention Revealing Error Messages
-- Error messages should be human-readable, clearly reveal the problem encountered
-- include ids of associated object(s) in message.
+- Error messages should be human-readable, clearly reveal the issue encountered.
+- include `id` of associated object(s) in message or useful data for the issue.
+- This is to prevent guessing and hunting what the cause of the issue may be.
+- The unhappy path is the more complex path, so doing this helps reduce its complexity.
 
 ### No Global State
 - No shared mutable state
@@ -104,18 +111,29 @@ using IDE tools (like hover to find var types).
   - the only exception is for JSON and Info constructors, since they use special types.
 
 ### Anti-inheritance
-- Minimal use of inheritance
-  - [Model -> Domain -> EntityInfo] for the `Info` objects inside each `Domain` `Role` Object.
-  - [IRepo -> Repo -> DomainRepo] for the `Repo` objects
-  - [Role -> DomainRole] for the `Role` objects
+- Minimal & shallow use of inheritance
+  - [Model -> {Domain} -> {Entity}{Domain}Info] for the `Info` objects inside each `Domain` `Role` Object.
+  - [IRepo -> Repo -> {Domain}Repo] for the `Repo` objects
+  - [Role -> {DomainRole}] for the `Role` objects
 - Minimal use of Interfaces
   - only where needed for testing via fakes/mocks 
 - One abstract class to define the `Role` Object class
+- Be very wary of any attempts to `generic-ify` using `abstract class`. 
+  - Prefer extending concrete classes or Duplicating code at least 3 times
+  - Or find yourself having to make the same change in multiple places too often
+  - Prefer comprehension over "lets make this generic, but add special cases"
+- Model.Domain.Entity class should be 3 levels MAX, unless a very unusual case. 
+  - You should be able to keep it as flat as possible
+    - use packages to put the objects in the appropriate places, usually together with the feature.
+    - Keep the Class Inheritance simple, and allow the package arrangement can be complex.
 
 ### Shallow Hierarchies
-- Keep hierarchies as flat as possible, as deep hierarchies are difficult to understand and maintain.
-- If reasonable parameterized behavior can be captured in a Role, it is better than 2 or more classes.
-  - example: [Library -> PrivateLibrary -> OrphanPrivateLibrary] vs [Library -> PrivateLibrary with `isOrphan` flag]
+- Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
+- If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
+  - example: 
+    - [Library -> PrivateLibrary with `isOrphan` flag] 
+    - vs 
+    - [Library -> PrivateLibrary -> OrphanPrivateLibrary]
   - prefer the shallower hierarchy with the `isOrphan` flag. 
   
 ### No `Static` Methods (with extremely limited exceptions)
@@ -243,7 +261,24 @@ using IDE tools (like hover to find var types).
   - ie: `transferBookSourceLibraryToThisLibrary` is preferred over `transferBook`
     - yes, its wordier, but leaves no doubt as to what is going on. 
 - Use of `By` if there is an authorization, or a delegate.
-  - ie: `activateAccountByStaff` is preferred over `activateAccount`
+  - ie: `activateAccountByStaff` is preferred over `staffActivateAccount`
+  - ie: `findAllCheckedOutBooksByUserId` is preferred over `findAllUserIdCheckedOutBooks`
+    - even though both convey the same meaning, one is easier to comprehend in English.
+
+### Naming of "Find" methods
+- Use of `Of` is encouraged
+ - ie: `findUserIdOfCheckedOutBook` instead of `findCheckedOutBookUserId`
+ - even though both convey the same meaning, one is easier to read in English.
+
+### Naming of "Maps" and "Lists"
+- List the `from` type and the `to` type in the name of the map.
+- It is preferred to use `To` between the `from` and `to` types.
+- It is preferred to add `Map` or `List` at the end of the variable names.
+- ie: `acceptedBookIdToSourceLibraryIdMap` is preferred over `acceptedBooks`
+- ie: `timeStampToAccountAuditLogItemMap` is preferred over `auditLog`
+- This makes the JSON data easy to read and understand out of context.
+- `List` can refer to Arrays or an "single column" data.
+- `Map` can refer to any Map or "two column lookup" data.
 
 ### Guard Clauses
 - Guard clauses are used to check for errors and return early if error is found.
@@ -260,20 +295,99 @@ using IDE tools (like hover to find var types).
 - Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, etc.
 
 ### Acceptable Acronyms
-  - `Id` - for Id's
-  - `Info` - for objects that contain the Role object's domain information
-  - `Repo` - for repository objects
-  - `DTO` - for Data Transfer Objects
-  - `num` - for things that refer to counts or amounts
-  - `max` & `min` - for limits
-  - `cur` - for `current` is gray area, prefer spelling out unless too pedantic for a local context.
-    - indicates the current value for the object.
-  - `amt` - is in a gray area, as is `amnt`, prefer spelling out `amount`
-  - `Kind` - Use in enums, instead of the word `Type` which is reserved specifically for the `Class<?>` types
-  - `Str` - Append to a string variable name that represents a specific type
-    - ie: `UUID2TypeStr` is preferred over `UUID2Type` 
-      bc using the name `UUID2Type` would be considered a `Class<UUID2<?>>` in 
-      plain reading of the name in code (without looking it up)
+
+<table>
+  <tr>
+    <th>Acronym</th>
+    <th>Preferred Use</th>
+  </tr>
+  <tr>
+    <td> 
+      <code>Id</code>
+    </td>
+    <td>
+      for <code>Id</code>'s
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>Info</code>
+    </td>
+    <td>
+      For Classes that contain the Info for the <code>Role</code> Class internal information
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>Repo</code>
+    </td>
+    <td>
+      For Repository Classes.
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>DTO</code>
+    </td>
+    <td>
+      Prefix for "Data Transfer Object" classes.
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>num</code>
+    </td>
+    <td>
+      Prefix for things that refer to counts or amounts.
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>max</code> & <code>min</code>
+    </td>
+    <td>
+      Prefix for limits on ranges.
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>cur</code>
+    </td>
+    <td>
+      Prefix for <code>current</code>> is gray area, prefer spelling out unless too pedantic for a local context.<br>
+      • Indicates the current value for the object.
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>Amt</code>
+    </td>
+    <td>
+      is in a gray area, as is <code>amnt</code>.<br>
+      • Prefer spelling out <code>amount</code>
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>Kind</code>
+    </td>
+    <td>
+      Use in enums, instead of the word <code>Type</code> which is reserved specifically for the <code>Class<?></code> types.
+    </td>
+  </tr>
+  <tr>
+    <td> 
+      <code>Str</code>
+    </td>
+    <td>
+      • Append to a string variable name that represents a specific type<br>
+      • ie: <code>UUID2TypeStr</code>> is preferred over <code>UUID2Type</code><br>
+      <br>
+      Reasoning: Because casual reading of the type name <code>UUID2Type</code> could be misunderstood a <code>"clazz"</code> <code>Class&lt;UUID2&lt;?&gt;&gt;</code> in 
+      plain reading of the name in code. Without the <code>Str</code> at the end, you would need to look up the actual type.
+    </td>
+  </tr>
+</table>
 
 ## Architecture
 

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static java.lang.String.format;
 
-// Account Domain Object - *ONLY* interacts with its own Repo, Context, and other Domain Objects
+// Account Role Object - *ONLY* interacts with its own Repo, Context, and other Role Objects
 public class Account extends Role<AccountInfo> implements IUUID2 {
     public final UUID2<Account> id;
     private final AccountInfoRepo repo;
@@ -88,15 +88,17 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
     @Override
     public String uuid2TypeStr() {
-        return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
+        return UUID2.calcUUID2TypeStr(this.getClass());
     }
 
     ///////////////////////////////////////////
-    // Account Domain Business Logic Methods //
+    // Account Role Business Logic Methods //
     // - Methods to modify it's LibraryInfo  //
     ///////////////////////////////////////////
 
-    public void DumpDB(Context context) {
+    // todo - to be implemented
+
+    public void DumpDB(@NotNull Context context) {
         System.out.println();
         context.log.d(this,"Dumping Account DB:");
         context.log.d(this, this.toJson());

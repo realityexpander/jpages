@@ -2,26 +2,26 @@ package org.elegantobjects.jpages.App2.data.book.local;
 
 import org.elegantobjects.jpages.App2.common.Model;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.common.local.Entity;
+import org.elegantobjects.jpages.App2.data.common.local.EntityInfo;
 import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
 
-public class BookInfoEntity extends Entity
+public class EntityBookInfo extends EntityInfo
     implements
-        Model.ToInfoDomain<BookInfo>,
-        Model.ToInfoDomain.hasToDeepCopyDomainInfo<BookInfo>,
-        Info.ToInfo<BookInfoEntity>,
-        Info.hasToDeepCopyInfo<BookInfoEntity>
+        Model.ToDomainInfo<BookInfo>,
+        Model.ToDomainInfo.hasToDeepCopyDomainInfo<BookInfo>,
+        Info.ToInfo<EntityBookInfo>,
+        Info.hasToDeepCopyInfo<EntityBookInfo>
 {
-    public final UUID2<Book> id;  // note this is a UUID2<Book> and not a UUID2<BookInfo>
+//    public final UUID2<Book> id;  // note this is a UUID2<Book> and not a UUID2<BookInfo>
     public final String title;
     public final String author;
     public final String description;
     public final String extraFieldToShowThisIsAnEntity;
 
-    public BookInfoEntity(
+    public EntityBookInfo(
         @NotNull UUID2<Book> id,
         String title,
         String author,
@@ -42,10 +42,11 @@ public class BookInfoEntity extends Entity
     }
 
     // Note: Intentionally DON'T accept `DTO.BookInfo` (to keep DB layer separate from API layer)
-    public BookInfoEntity(@NotNull BookInfoEntity bookInfo) {
-        this(bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description, bookInfo.extraFieldToShowThisIsAnEntity);
+    @SuppressWarnings("unchecked")
+    public EntityBookInfo(@NotNull EntityBookInfo bookInfo) {
+        this((UUID2<Book>) bookInfo.id, bookInfo.title, bookInfo.author, bookInfo.description, bookInfo.extraFieldToShowThisIsAnEntity);
     }
-    public BookInfoEntity(@NotNull BookInfo bookInfo) {
+    public EntityBookInfo(@NotNull BookInfo bookInfo) {
         this(bookInfo.id(), bookInfo.title, bookInfo.author, bookInfo.description, "Imported from Domain.DomainBookInfo");
     }
     // todo Is it better to have a constructor that takes in a DTO.BookInfo and throws an exception? Or to not have it at all?
@@ -73,7 +74,7 @@ public class BookInfoEntity extends Entity
 
     @Override
     public BookInfo toDeepCopyDomainInfo() {
-        // implement deep copy, if needed.
+        // implement deep copy, if structure is not flat.
         return new BookInfo(this);
     }
 
@@ -87,13 +88,14 @@ public class BookInfoEntity extends Entity
     /////////////////////////////
 
     @Override
-    public BookInfoEntity toDeepCopyInfo() {
-        // note: implement deep copy, if needed.
-        return new BookInfoEntity(this);
+    public EntityBookInfo toDeepCopyInfo() {
+        // note: implement deep copy, if structure is not flat.
+        return new EntityBookInfo(this);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public UUID2<Book> getInfoId() {
-        return this.id;
+        return (UUID2<Book>) this.id;
     }
 }

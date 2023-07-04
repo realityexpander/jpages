@@ -3,8 +3,8 @@ package org.elegantobjects.jpages.App2.domain.book;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.data.book.local.BookInfoEntity;
-import org.elegantobjects.jpages.App2.data.book.network.BookInfoDTO;
+import org.elegantobjects.jpages.App2.data.book.local.EntityBookInfo;
+import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.library.Library;
@@ -13,11 +13,11 @@ import org.elegantobjects.jpages.App2.domain.library.PrivateLibrary;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 
-// Book Domain Object - Only interacts with its own repo, Context, and other Domain Objects
+// Book Role Object - Only interacts with its own repo, Context, and other Role Objects
 public class Book extends Role<BookInfo> implements IUUID2 {
     public final UUID2<Book> id;
     private final BookInfoRepo repo;
-    private final Library sourceLibrary; // Book's source Library Domain Object - owns this Book.
+    private final Library sourceLibrary; // Book's source Library Role Object - owns this Book.
 
     public Book(
         @NotNull BookInfo info,
@@ -67,10 +67,10 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     }
 
     /// Support creating Book from DTO & Entity
-    public Book(BookInfoDTO infoDTO, Library sourceLibrary, Context context) {
+    public Book(DTOBookInfo infoDTO, Library sourceLibrary, Context context) {
         this(new BookInfo(infoDTO), sourceLibrary, context);
     }
-    public Book(BookInfoEntity infoEntity, Library sourceLibrary, Context context) {
+    public Book(EntityBookInfo infoEntity, Library sourceLibrary, Context context) {
         this(new BookInfo(infoEntity), sourceLibrary, context);
     }
 
@@ -147,7 +147,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     }
 
     ////////////////////////////////////////
-    // Book Domain Business Logic Methods //
+    // Book Role Business Logic Methods //
     // - Methods to modify it's BookInfo  //
     ////////////////////////////////////////
 
@@ -192,13 +192,13 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
 
-    // Domain Role-specific business logic in a Role Object.
+    // Role Role-specific business logic in a Role Object.
     public Result<Book> updateSourceLibrary(Library sourceLibrary) {
-        // NOTE: This method is primarily used by the Library Domain Object when moving a Book from one Library
+        // NOTE: This method is primarily used by the Library Role Object when moving a Book from one Library
         //   to another Library.
-        // It is NOT saved with the Book's BookInfo, as it only applies to the Book Domain Role Object.
-        // - shows example of Domain Role-specific business logic in a Role Object.
-        // - ie: sourceLibrary only exists in the Domain. BookInfo does not have a sourceLibrary field.
+        // It is NOT saved with the Book's BookInfo, as it only applies to the Book Role Object.
+        // - shows example of Role-specific business logic in a Role Object.
+        // - ie: sourceLibrary only exists in this Book Role as BookInfo does NOT have a sourceLibrary field.
 
         Book updatedBook = new Book(this.info(), sourceLibrary, this.context);  // todo test
         return new Result.Success<>(updatedBook);

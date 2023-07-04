@@ -11,20 +11,22 @@ import static java.lang.String.format;
 /**
  UUID2 is a type-safe wrapper for UUIDs.<br>
  <ul>
- <li> UUID2 is a wrapper for UUID, so it can be used in place of UUID.</li>
- <li> Used to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
+ <li> UUID2 is a wrapper for a UUID, so it can be used in place of a UUID.</li>
+ <li> Benefits:<br>
+      - Useful to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.<br>
+      - Allows for easier debugging and exposing UUID types in Json payloads.<br></li>
  <li> IUUID2 is a marker interface for Domain objects that can be used with UUID2.</li>
  <li> Domain objects must be marked with the IUUID2 interface to be used with UUID2.</li>
  <li> UUID2 is immutable.</li>
  <li> UUID2Type is the Class Inheritance path, <b>NOT</b> the Class Path (ie: Package path). <br>
-      ie: {@code Model.Domain.BookInfo} instead of {@code org.elegantobjects.jpages.App2.domain.book.BookInfo}
-      note: Class path changes if location/package is changed.</li>
+      ie: {@code Model.Domain.BookInfo} instead of {@code org.elegantobjects.jpages.App2.domain.book.BookInfo}<br>
+      <i>note: Java Class Path changes if location/package of object's Class changes.</i></li>
 </ul>
 **/
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;
-    private String _uuid2Type; // usually just the last 3 path segments of class name of the Domain object
-                               // NOT final due to JSON deserialization needs to set it. :(
+    private String _uuid2Type; // Class Inheritance Path of the object the UUID refers to. '.' separated.
+                               // NOT final due to need for it to be set for creating objects via JSON deserialization. :( // todo - is there a way around this? Maybe reflection?
 
     public
     UUID2(TUUID2 uuid2, String uuid2TypeStr) {
@@ -106,11 +108,11 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return (other).uuid().equals(uuid());
     }
 
-    boolean isMatchingUUID2Types(@NotNull UUID2<?> checkUUID2) {
+    boolean isMatchingUUID2Type(@NotNull UUID2<?> checkUUID2) {
         return this.uuid2TypeStr().equals(checkUUID2.uuid2TypeStr());
     }
 
-    static boolean checkUUID2TypesMatch(String firstUuid2Str, String secondUuid2Str) {
+    static boolean isMatchingUUID2Type(String firstUuid2Str, String secondUuid2Str) {
         if(firstUuid2Str == null) return false;  // note: null checks are acceptable for static methods.
         if(secondUuid2Str == null) return false;
 
@@ -118,7 +120,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             UUID2<?> firstUUID2 = UUID2.fromUUID2String(firstUuid2Str);
             UUID2<?> secondUUID2 = UUID2.fromUUID2String(secondUuid2Str);
 
-            return firstUUID2.isMatchingUUID2Types(secondUUID2);
+            return firstUUID2.isMatchingUUID2Type(secondUUID2);
         } catch (ClassNotFoundException e) {
             System.err.println("Error: Unable to find class for UUID2: " + firstUuid2Str);
             e.printStackTrace();
@@ -179,42 +181,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return new UUID2<>(UUID.randomUUID(), clazz);
     }
 
-    public static @NotNull
-    String calcUUID2TypeStr(@NotNull Class<?> clazz) {
-
-        // Get all names of superClasses for this clazz.
-        // - Climbs the Class Inheritance hierarchy for the clazz
-        // - ie: `Model.{Domain}.{Entity}Info`
-        // - *NOT* the Class path (org.elegantobjects.jpages.App2.domain.{entity}.{entity}info`
-        List<String> superClassNames = new ArrayList<>();
-        Class<?> curClazz = clazz;
-        while(!curClazz.getSimpleName().equals("Object")) {
-            superClassNames.add(curClazz.toString());
-            curClazz = curClazz.getSuperclass();
-        }
-
-        // Build Class Inheritance path from each Class name
-        StringBuilder uuid2TypeStr = new StringBuilder();
-        for(int i = superClassNames.size() - 1; i >= 0; i--) {
-            uuid2TypeStr.append(
-                UUID2.getLastSegmentOfTypeStrPath(superClassNames.get(i))
-            );
-            if(i != 0) {
-                uuid2TypeStr.append(".");
-            }
-        }
-
-        return uuid2TypeStr.toString();
-    }
-
-    // Note: Should only be used when importing JSON
-    @SuppressWarnings("UnusedReturnValue")
-    public
-    boolean _setUUID2TypeStr(String uuid2TypeStr) {
-        this._uuid2Type = getNormalizedUuid2TypeString(uuid2TypeStr);
-        return true; // always return `true` instead of a `void` return type
-    }
-
     //////////////////////////////////////////////////
     // Methods for creating fake UUID's for testing //
     //////////////////////////////////////////////////
@@ -238,6 +204,50 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return new UUID2<>((TDomainUUID2) uuid2, clazzPathStr);
     }
+
+    /////////////////
+    // UUID2 Type  //
+    /////////////////
+
+    public static @NotNull
+    String calcUUID2TypeStr(@NotNull Class<?> clazz) {
+
+        // Get all names of superClasses for this clazz.
+        // - Climbs the Class Inheritance hierarchy for the clazz
+        // - ie: `Model.{Domain}.{Entity}Info`
+        // - *NOT* the Class path (org.elegantobjects.jpages.App2.domain.{entity}.{entity}info`
+        List<String> superClassNames = new ArrayList<>();
+        Class<?> curClazz = clazz;
+        while(!curClazz.getSimpleName().equals("Object")) {
+            superClassNames.add(curClazz.toString());
+            curClazz = curClazz.getSuperclass();
+        }
+
+        // Build Class Inheritance path from each Class name
+        StringBuilder uuid2TypeStr = new StringBuilder();
+        for(int i = superClassNames.size() - 1; i >= 0; i--) {
+            uuid2TypeStr.append(
+                    UUID2.getLastSegmentOfTypeStrPath(superClassNames.get(i))
+            );
+            if(i != 0) {
+                uuid2TypeStr.append(".");
+            }
+        }
+
+        return uuid2TypeStr.toString();
+    }
+
+    // Note: Should only be used when importing JSON
+    @SuppressWarnings("UnusedReturnValue")
+    public
+    boolean _setUUID2TypeStr(String uuid2TypeStr) {
+        this._uuid2Type = getNormalizedUuid2TypeString(uuid2TypeStr);
+        return true; // always return `true` instead of a `void` return type
+    }
+
+    ////////////////////
+    // UUID2 HashMap  //
+    ////////////////////
 
     /**
      Utility {@code HashMap} class for mapping {@code UUID2<TUUID2>} to {@code TEntity} Objects.<br>

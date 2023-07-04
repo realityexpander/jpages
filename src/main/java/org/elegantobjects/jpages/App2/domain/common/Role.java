@@ -32,7 +32,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // Singletons
     protected final Context context;
 
-    // Class of the Info<TDomain> info object (for Gson serialization)
+    // Class of the Info<TDomain> info object (for Gson serialization) (also JAVA REFLECTION IS UGLY!!)
     @SuppressWarnings("unchecked")
     private final Class<TDomainInfo> infoClazz =
             getClass().getGenericSuperclass() instanceof ParameterizedType
@@ -47,8 +47,6 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                             )
                         ).getGenericSuperclass()
                   ).getActualTypeArguments()[0];
-
-//    private final Class<?> infoClazz = this.getClass();
 
     private Role(
             @NotNull UUID id,
@@ -68,7 +66,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         this.info = info;
         this.context = context;
     }
-    protected <TDomainInfo_ extends Model.ToInfoDomain<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
+    protected <TDomainInfo_ extends Model.ToDomainInfo<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
     Role(
         @NotNull String domainInfoJson,
         Class<TDomainInfo_> classType,
@@ -76,7 +74,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     ) {
         this(
             Objects.requireNonNull(
-                Role.createDomainInfoFromJson(domainInfoJson, classType, context)
+                Role.createInfoFromJson(domainInfoJson, classType, context)
             ).getDomainInfo(),
             context
         );
@@ -127,26 +125,27 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     @SuppressWarnings("unchecked") // for _setIdFromImportedJson() call
     public static <
             TDomain extends DomainInfo,  // restrict to Domain subclasses, ie: Domain.BookInfo
-            TDomainInfo extends Model.ToInfoDomain<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
+            TDomainInfo extends Model.ToDomainInfo<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
             TToInfo extends ToInfo<?>
-            > TDomainInfo createDomainInfoFromJson(
+            > TDomainInfo createInfoFromJson(
             String json,
             Class<TDomainInfo> domainInfoClazz, // type of `Domain.TDomainInfo` object to create
             Context context
     ) {
         try {
             TDomainInfo obj = context.gson.fromJson(json, (Type) domainInfoClazz);
-            context.log.d("IDomainObject:createDomainInfoFromJson()", "obj = " + obj);
+            context.log.d("Role:createDomainInfoFromJson()", "obj = " + obj);
 
             // Set the UUID2 typeStr to match the type of the TDomainInfo object
             String domainInfoClazzName = UUID2.calcUUID2TypeStr(domainInfoClazz);
+
             domainInfoClazz.cast(obj)
                     .getDomainInfoId()
                     ._setUUID2TypeStr(domainInfoClazzName);
 
-            // Set Domain "Model" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
+            // Set id to match id of imported Info
             ((TDomain) obj)._setIdFromImportedJson(
-                    new UUID2<>(((TDomain) obj).id(), domainInfoClazzName)
+                new UUID2<>(((TDomain) obj).id(), domainInfoClazzName)
             );
 
             return obj;
@@ -160,9 +159,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public Result<TDomainInfo> updateDomainInfoFromJson(String json) {
-        context.log.d(this,"Updating Domain Info from JSON for " +
+    public Result<TDomainInfo> updateInfoFromJson(String json) {
+        context.log.d(this,"Updating Info from JSON for " +
                 "class: " + this.getClass().getName() + ", " +
                 "id: " + this.id());
 
@@ -175,7 +173,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                 return checkResult;
             }
 
-            // Set Domain "Model" id to match id of imported Info, ie: Model._id = Domain.TDomainInfo.id // todo maybe a better way to do this?
+            // Set Domain "Model" id to match id of imported Info // todo maybe use just one id?
             infoFromJson._setIdFromImportedJson(
                 new UUID2<>(infoFromJson.id(), UUID2.calcUUID2TypeStr(domainInfoClazz))
             );
