@@ -192,41 +192,41 @@ public class LibraryApp {
 //                if(acceptedBookCount != 2) throw new Exception("acceptedBookCount != 2");
 //            }
 
-            List_available_Books_and_Inventory_Counts_in_Library:
-            if (true)  {
-                System.out.println();
-                ctx.log.d(this,"\nGetting available books and counts in library:");
-                ctx.log.d(this, "----------------------------------");
-
-                final Result<HashMap<Book, Long>> availableBookToNumAvailableResult =
-                        library1.calculateAvailableBookIdToNumberAvailableList();
-                if (availableBookToNumAvailableResult instanceof Result.Failure) {
-                    ctx.log.d(this,"AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Long>>) availableBookToNumAvailableResult).exception().getMessage());
-                    throw new Exception("AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Long>>) availableBookToNumAvailableResult).exception().getMessage());
-                }
-
-                // create objects and populate info for available books
-                assert availableBookToNumAvailableResult instanceof Result.Success;
-                final HashMap<Book, Long> availableBooks =
-                        ((Result.Success<HashMap<Book, Long>>) availableBookToNumAvailableResult).value();
-                if(availableBooks == null) throw new Exception("availableBooks is null");
-
-                // Print out available books
-                System.out.println();
-                ctx.log.d(this,"Available Books in Library:");
-                for (Map.Entry<Book, Long> availableBook : availableBooks.entrySet()) {
-
-                    final Result<BookInfo> bookInfoResult =
-                            availableBook.getKey()
-                                    .fetchInfoResult();
-                    if (bookInfoResult instanceof Result.Failure)
-                        ctx.log.e(this, "Book Error: " + ((Result.Failure<BookInfo>) bookInfoResult).exception().getMessage());
-                    else
-                        ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value() + " >> num available: " + availableBook.getValue());
-                }
-                ctx.log.d(this,"Total Available Books (unique UUIDs): " + availableBooks.size());
-                if(availableBooks.size() != 10) throw new Exception("availableBooks.size() != 10");
-            }
+//            List_available_Books_and_Inventory_Counts_in_Library:
+//            if (true)  {
+//                System.out.println();
+//                ctx.log.d(this,"\nGetting available books and counts in library:");
+//                ctx.log.d(this, "----------------------------------");
+//
+//                final Result<HashMap<Book, Long>> availableBookToNumAvailableResult =
+//                        library1.calculateAvailableBookIdToNumberAvailableList();
+//                if (availableBookToNumAvailableResult instanceof Result.Failure) {
+//                    ctx.log.d(this,"AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Long>>) availableBookToNumAvailableResult).exception().getMessage());
+//                    throw new Exception("AvailableBookIdCounts FAILURE! --> " + ((Result.Failure<HashMap<Book, Long>>) availableBookToNumAvailableResult).exception().getMessage());
+//                }
+//
+//                // create objects and populate info for available books
+//                assert availableBookToNumAvailableResult instanceof Result.Success;
+//                final HashMap<Book, Long> availableBooks =
+//                        ((Result.Success<HashMap<Book, Long>>) availableBookToNumAvailableResult).value();
+//                if(availableBooks == null) throw new Exception("availableBooks is null");
+//
+//                // Print out available books
+//                System.out.println();
+//                ctx.log.d(this,"Available Books in Library:");
+//                for (Map.Entry<Book, Long> availableBook : availableBooks.entrySet()) {
+//
+//                    final Result<BookInfo> bookInfoResult =
+//                            availableBook.getKey()
+//                                    .fetchInfoResult();
+//                    if (bookInfoResult instanceof Result.Failure)
+//                        ctx.log.e(this, "Book Error: " + ((Result.Failure<BookInfo>) bookInfoResult).exception().getMessage());
+//                    else
+//                        ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value() + " >> num available: " + availableBook.getValue());
+//                }
+//                ctx.log.d(this,"Total Available Books (unique UUIDs): " + availableBooks.size());
+//                if(availableBooks.size() != 10) throw new Exception("availableBooks.size() != 10");
+//            }
 
             Check_Out_and_check_In_Book_from_User_to_Library:
             if (true) {

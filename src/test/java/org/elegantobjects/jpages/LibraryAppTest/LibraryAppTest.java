@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -208,13 +210,13 @@ public class LibraryAppTest {
     }
 
     @Test
-    public void List_Books_checked_out_by_User(){  // note: relies on Checkout_2_books_to_User
+    public void Find_Books_checked_out_by_User_is_Success() {  // note: relies on Checkout_2_books_to_User
         // • ARRANGE
         Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx);
 
         // Checkout 2 books
-        final Result<Book> bookResult = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
+        final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
         final Result<Book> bookResult2 = roles.library1.checkOutBookToUser(roles.book1200, roles.user1);
 
         // • ACT
@@ -222,8 +224,7 @@ public class LibraryAppTest {
         assertTrue("findBooksCheckedOutByUser FAILURE for userId" + roles.user1.id, checkedOutBooksResult instanceof Result.Success);
         ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
 
-        // Print checked out books
-        System.out.println();
+        // • ASSERT
         ctx.log.d(this,"Checked Out Books for User [" + roles.user1.fetchInfo().name + ", " + roles.user1.id + "]:");
         for (Book book : checkedOutBooks) {
             final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
@@ -234,6 +235,43 @@ public class LibraryAppTest {
 
         int acceptedBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
         assertEquals("acceptedBookCount != 2", 2, acceptedBookCount);
+    }
+
+    @Test
+    public void Calculate_availableBook_To_NumAvailable_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+
+        // Checkout 2 books
+        final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
+        final Result<Book> bookResult2 = roles.library1.checkOutBookToUser(roles.book1200, roles.user1);
+
+        final Result<HashMap<Book, Long>> availableBookToNumAvailableResult =
+                roles.library1.calculateAvailableBookIdToNumberAvailableList();
+        assertTrue("findBooksCheckedOutByUser FAILURE for libraryId" + roles.library1.id,
+            availableBookToNumAvailableResult instanceof Result.Success
+        );
+
+        // create objects and populate info for available books
+        final HashMap<Book, Long> availableBooks =
+                ((Result.Success<HashMap<Book, Long>>) availableBookToNumAvailableResult).value();
+        assertNotNull(availableBooks);
+
+        // Print out available books
+        System.out.println();
+        ctx.log.d(this,"Available Books in Library:");
+        for (Map.Entry<Book, Long> availableBook : availableBooks.entrySet()) {
+
+            final Result<BookInfo> bookInfoResult =
+                    availableBook.getKey()
+                            .fetchInfoResult();
+
+            assertTrue("Book Error: bookId" + availableBook.getKey().id,  bookInfoResult instanceof Result.Success);
+            ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value().toString());
+        }
+        ctx.log.d(this,"Total Available Books (unique UUIDs): " + availableBooks.size());
+        assertEquals("availableBooks.size() != 10", 10, availableBooks.size());
     }
 
 }
