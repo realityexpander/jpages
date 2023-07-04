@@ -5,17 +5,18 @@
 ### Inspiration
 - Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
-  - Note: BOOP is a design pattern that is inspired by:
-    - Alan Kay's OO style & lectures, HyperCard, the ideas behind Smalltalk. 
-    - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
-    - David West, PhD's book "Object Thinking"
   - Writing code that is easy to change & comprehend quickly using English prose.
   - Back to basics approach for Java coding style in the Domain layer for Role objects.
-  - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice) 
+  - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice)
+
+- BOOP is a design pattern that is inspired by:
+  - Alan Kay's OO style & lectures, HyperCard, the ideas behind Smalltalk.
+  - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
+  - David West, PhD's book "Object Thinking"
 
 ### Developer Experience
-- Architected by layer, and each layer is grouped by feature, which allows convenient and
-  easy to comprehend navigation of the code.
+- Architected by layer, and each layer is grouped by feature
+- Allows convenient and easy to comprehend navigation of the code.
 - Built to test from start!
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
@@ -31,7 +32,8 @@ using IDE tools (like hover to find var types).
   - Problem: The English word `set` and `get` are _extremely_ generic 
     - Hundreds of definitions, each with many subtle different meanings, based on context.
     - `set` and `get` do not reveal the underlying intention of the method. 
-    - It's a very convenient generic short-hand for the code-writer, but not for the code-reader.
+    - It's a very convenient short-hand for the code-writer and always confusing for the code-reader.<br> 
+      Requires investigation into what is actually going on, specifically network, CPU or disk access.
 - No setters
   - All changes must be made via intention-named methods.
   - Only immutable copies of objects are returned, for read-only purposes.
@@ -112,9 +114,14 @@ using IDE tools (like hover to find var types).
 
 ### Anti-inheritance
 - Minimal & shallow use of inheritance
-  - [Model -> {Domain} -> {Entity}{Domain}Info] for the `Info` objects inside each `Domain` `Role` Object.
-  - [IRepo -> Repo -> {Domain}Repo] for the `Repo` objects
-  - [Role -> {DomainRole}] for the `Role` objects
+  - <code>Model -> {Domain} -> {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
+    - ie: <code>Model.DTOInfo.DTOBookInfo</code>
+    - ie: <code>Model.DomainInfo.BookInfo</code> 
+      - note:`BookInfo` is <i>not</i> a `DomainBookInfo` bc the Domain is the core and more plain java-like.
+  - <code>IRepo -> Repo -> {Domain}Repo</code> for the `Repo` objects
+    - ie: <code>Repo.BookInfoRepo</code> 
+  - <code>Role -> {DomainRole}</code> for the `Role` objects
+    - ie: <code>Role.Book</code>
 - Minimal use of Interfaces
   - only where needed for testing via fakes/mocks 
 - One abstract class to define the `Role` Object class
