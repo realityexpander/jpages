@@ -16,6 +16,8 @@ import org.elegantobjects.jpages.LibraryAppTest.testFakes.TestLog;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 public class LibraryAppTest {
@@ -203,6 +205,35 @@ public class LibraryAppTest {
         assertTrue("Checked out book FAILURE, bookId: " + roles.book1200.id, bookResult2 instanceof Result.Success);
 
         roles.library1.DumpDB(ctx);  // LEAVE for debugging
+    }
+
+    @Test
+    public void List_Books_checked_out_by_User(){  // note: relies on Checkout_2_books_to_User
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+
+        // Checkout 2 books
+        final Result<Book> bookResult = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
+        final Result<Book> bookResult2 = roles.library1.checkOutBookToUser(roles.book1200, roles.user1);
+
+        // • ACT
+        final Result<ArrayList<Book>> checkedOutBooksResult = roles.library1.findBooksCheckedOutByUser(roles.user1);
+        assertTrue("findBooksCheckedOutByUser FAILURE for userId" + roles.user1.id, checkedOutBooksResult instanceof Result.Success);
+        ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
+
+        // Print checked out books
+        System.out.println();
+        ctx.log.d(this,"Checked Out Books for User [" + roles.user1.fetchInfo().name + ", " + roles.user1.id + "]:");
+        for (Book book : checkedOutBooks) {
+            final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
+
+            assertTrue("Book Error: bookId" + book.id,  bookInfoResult instanceof Result.Success);
+            ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value().toString());
+        }
+
+        int acceptedBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
+        assertEquals("acceptedBookCount != 2", 2, acceptedBookCount);
     }
 
 }

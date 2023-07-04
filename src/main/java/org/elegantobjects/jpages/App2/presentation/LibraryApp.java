@@ -162,35 +162,35 @@ public class LibraryApp {
 //                library1.DumpDB(ctx);  // LEAVE for debugging
 //            }
 
-            List_Books_checked_out_by_User:  // note: relies on Checkout_2_books_to_User
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Getting books checked out by user " + user1.id);
-                ctx.log.d(this, "----------------------------------");
-
-                final Result<ArrayList<Book>> checkedOutBooksResult = library1.findBooksCheckedOutByUser(user1);
-                if (checkedOutBooksResult instanceof Result.Failure) {
-                    ctx.log.d(this, "OH NO! --> " + ((Result.Failure<ArrayList<Book>>) checkedOutBooksResult).exception().getMessage());
-                    throw new Exception("OH NO! --> " + ((Result.Failure<ArrayList<Book>>) checkedOutBooksResult).exception().getMessage());
-                }
-
-                assert checkedOutBooksResult instanceof Result.Success;
-                ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
-
-                // Print checked out books
-                System.out.println();
-                ctx.log.d(this,"Checked Out Books for User [" + user1.fetchInfo().name + ", " + user1.id + "]:");
-                for (Book book : checkedOutBooks) {
-                    final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
-                    if (bookInfoResult instanceof Result.Failure)
-                        ctx.log.e(this, "Book Error: " + ((Result.Failure<BookInfo>) bookInfoResult).exception().getMessage());
-                    else
-                        ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value().toString());
-                }
-
-                int acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
-                if(acceptedBookCount != 2) throw new Exception("acceptedBookCount != 2");
-            }
+//            List_Books_checked_out_by_User:  // note: relies on Checkout_2_books_to_User
+//            if (true) {
+//                System.out.println();
+//                ctx.log.d(this,"Getting books checked out by user " + user1.id);
+//                ctx.log.d(this, "----------------------------------");
+//
+//                final Result<ArrayList<Book>> checkedOutBooksResult = library1.findBooksCheckedOutByUser(user1);
+//                if (checkedOutBooksResult instanceof Result.Failure) {
+//                    ctx.log.d(this, "OH NO! --> " + ((Result.Failure<ArrayList<Book>>) checkedOutBooksResult).exception().getMessage());
+//                    throw new Exception("OH NO! --> " + ((Result.Failure<ArrayList<Book>>) checkedOutBooksResult).exception().getMessage());
+//                }
+//
+//                assert checkedOutBooksResult instanceof Result.Success;
+//                ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
+//
+//                // Print checked out books
+//                System.out.println();
+//                ctx.log.d(this,"Checked Out Books for User [" + user1.fetchInfo().name + ", " + user1.id + "]:");
+//                for (Book book : checkedOutBooks) {
+//                    final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
+//                    if (bookInfoResult instanceof Result.Failure)
+//                        ctx.log.e(this, "Book Error: " + ((Result.Failure<BookInfo>) bookInfoResult).exception().getMessage());
+//                    else
+//                        ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value().toString());
+//                }
+//
+//                int acceptedBookCount = ((Result.Success<ArrayList<Book>>) user1.findAllAcceptedBooks()).value().size();
+//                if(acceptedBookCount != 2) throw new Exception("acceptedBookCount != 2");
+//            }
 
             List_available_Books_and_Inventory_Counts_in_Library:
             if (true)  {
