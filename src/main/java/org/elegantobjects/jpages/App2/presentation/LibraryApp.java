@@ -138,29 +138,29 @@ public class LibraryApp {
             System.out.println();
             ctx.log.d(this,"User --> " + user1.id + ", " + user1.fetchInfo().toPrettyJson());
 
-            Checkout_2_Books_to_User:
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Checking out 2 books to user " + user1.id);
-                ctx.log.d(this, "----------------------------------");
-
-                final Result<Book> bookResult = library1.checkOutBookToUser(book1100, user1);
-                if (bookResult instanceof Result.Failure) {
-                    ctx.log.e(this, "Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult).exception().getMessage());
-                    throw new Exception("Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult).exception().getMessage());
-                } else
-                    ctx.log.d(this, "Checked out book SUCCESS --> " + ((Result.Success<Book>) bookResult).value().id);
-
-                System.out.println();
-                final Result<Book> bookResult2 = library1.checkOutBookToUser(book1200, user1);
-                if (bookResult2 instanceof Result.Failure) {
-                    ctx.log.e(this, "Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult2).exception().getMessage());
-                    throw new Exception("Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult2).exception().getMessage());
-                } else
-                    ctx.log.d(this, "Checked out book SUCCESS --> " + ((Result.Success<Book>) bookResult2).value().id);
-
-                library1.DumpDB(ctx);  // LEAVE for debugging
-            }
+//            Checkout_2_Books_to_User:
+//            if (true) {
+//                System.out.println();
+//                ctx.log.d(this,"Checking out 2 books to user " + user1.id);
+//                ctx.log.d(this, "----------------------------------");
+//
+//                final Result<Book> bookResult = library1.checkOutBookToUser(book1100, user1);
+//                if (bookResult instanceof Result.Failure) {
+//                    ctx.log.e(this, "Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult).exception().getMessage());
+//                    throw new Exception("Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult).exception().getMessage());
+//                } else
+//                    ctx.log.d(this, "Checked out book SUCCESS --> " + ((Result.Success<Book>) bookResult).value().id);
+//
+//                System.out.println();
+//                final Result<Book> bookResult2 = library1.checkOutBookToUser(book1200, user1);
+//                if (bookResult2 instanceof Result.Failure) {
+//                    ctx.log.e(this, "Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult2).exception().getMessage());
+//                    throw new Exception("Checked out book FAILURE--> " + ((Result.Failure<Book>) bookResult2).exception().getMessage());
+//                } else
+//                    ctx.log.d(this, "Checked out book SUCCESS --> " + ((Result.Success<Book>) bookResult2).value().id);
+//
+//                library1.DumpDB(ctx);  // LEAVE for debugging
+//            }
 
             List_Books_checked_out_by_User:  // note: relies on Checkout_2_books_to_User
             if (true) {
