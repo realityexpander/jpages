@@ -11,16 +11,22 @@ import static java.lang.String.format;
 /**
  UUID2 is a type-safe wrapper for UUIDs.<br>
  <ul>
- <li> UUID2 is a wrapper for a UUID, so it can be used in place of a UUID.</li>
+ <li> {@code UUID2} is a wrapper for a UUID, so it can be used in place of a UUID.</li>
  <li> Benefits:<br>
-      - Useful to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.<br>
-      - Allows for easier debugging and exposing UUID types in Json payloads.<br></li>
- <li> IUUID2 is a marker interface for Domain objects that can be used with UUID2.</li>
- <li> Domain objects must be marked with the IUUID2 interface to be used with UUID2.</li>
- <li> UUID2 is immutable.</li>
- <li> UUID2Type is the Class Inheritance path, <b>NOT</b> the Class Path (ie: Package path). <br>
-      ie: {@code Model.Domain.BookInfo} instead of {@code org.elegantobjects.jpages.App2.domain.book.BookInfo}<br>
-      <i>note: Java Class Path changes if location/package of object's Class changes.</i></li>
+    <ul>
+        <li>Useful to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
+        <li>Allows for easier debugging and exposing UUID types in Json payloads.</li>
+        <li>Includes type-safe {@code HashMap} for {@code UUID2}s.</li>
+        <li>{@code UUID2} is immutable.</li>
+    </ul>
+ <li> {@code IUUID2} is a marker interface for Domain objects that can be used with UUID2.</li>
+ <li> Domain objects must be marked with the {@code IUUID2} marker interface to be used with {@code UUID2}.</li>
+ <li> {@code UUID2Type} is the Class <b>Inheritance</b> path, <b>NOT</b> the Class Path (ie: Package path). <br>
+      {@code Model.Domain.BookInfo} <-- "Class Inheritance path"<br>
+      <i>instead of:</i> <br>
+      {@code org.elegantobjects.jpages.App2.domain.book.BookInfo} <-- "Class Path"<br>
+ </li>
+ <li><i>Design note: The java "Class Path" changes if the package of a Class changes, so UUID2 uses the Class Inheritance Path instead.</i></li>
 </ul>
 **/
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
