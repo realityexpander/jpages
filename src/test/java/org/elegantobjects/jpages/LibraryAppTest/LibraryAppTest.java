@@ -348,6 +348,7 @@ public class LibraryAppTest {
         Result<LibraryInfo> library2Result = library2.updateInfoFromJson(json);
         if (library2Result instanceof Result.Failure) {
             // NOTE: FAILURE IS EXPECTED HERE
+            System.out.println("^^^^^^^^^^^^ 2 Warnings are expected and normal.");
             ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
 
             // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected

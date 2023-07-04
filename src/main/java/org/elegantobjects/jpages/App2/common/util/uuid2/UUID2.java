@@ -106,7 +106,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public @Override
     String toString() {
-        return  "UUID2:" + getClassInheritancePathStr(_uuid2Type) + "@" + uuid;
+        return  "UUID2:" + _uuid2Type + "@" + uuid;
     }
 
     public @Override
@@ -114,10 +114,10 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return this.uuid().hashCode();
     }
 
-//    public
-//    boolean equals(@NotNull UUID2<TUUID2> other) {
-//        return (other).uuid().equals(uuid());
-//    }
+    public
+    boolean onlyUUIDEquals(@NotNull UUID2<TUUID2> other) {
+        return (other).uuid().equals(uuid());
+    }
 
     public @Override
     boolean equals(Object other) {
@@ -229,11 +229,11 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public static @NotNull
     String calcUUID2TypeStr(@NotNull Class<?> clazz) {
+        // Build the UUID2 Type string -> ie: `Model.DomainInfo.BookInfo`
+        // - Gets all Class names of all superClasses for this clazz.
+        // - Climbs the Class Inheritance hierarchy for the clazz.
+        // - *NOT* the Class path (org.elegantobjects.jpages.App2.domain.book.BookInfo`
 
-        // Get all names of superClasses for this clazz.
-        // - Climbs the Class Inheritance hierarchy for the clazz
-        // - ie: `Model.{Domain}.{Entity}Info`
-        // - *NOT* the Class path (org.elegantobjects.jpages.App2.domain.{entity}.{entity}info`
         List<String> superClassNames = new ArrayList<>();
         Class<?> curClazz = clazz;
         while(!curClazz.getSimpleName().equals("Object")) {
@@ -477,26 +477,27 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return normalizedTypeStr.toString();
     }
-    private static
-    String getClassInheritancePathStr(@NotNull String uuid2TypeStr) {
-        String[] segments = uuid2TypeStr.split("\\.");
-        if(segments.length <= 1) {
-            return uuid2TypeStr;
-        }
 
-        // Make a string of up to 4 last segments (stopping at null) of the uuid2TypeStr with a period between them
-        int numSegments = segments.length;
-        StringBuilder pathBuilder = new StringBuilder();
-        int maxSegments = Math.min(numSegments, 4);
-        for(int i = 0; i < maxSegments; i++) {
-            pathBuilder.append(segments[numSegments - maxSegments + i]);
-            if(i < maxSegments - 1) {
-                pathBuilder.append(".");
-            }
-        }
-
-        return pathBuilder.toString();
-    }
+//    private static
+//    String getClassInheritancePathStr(@NotNull String uuid2TypeStr) {
+//        String[] segments = uuid2TypeStr.split("\\.");
+//        if(segments.length <= 1) {
+//            return uuid2TypeStr;
+//        }
+//
+//        // Make a string of last segments (stopping at null) of the uuid2TypeStr with a period between them
+//        int numSegments = segments.length;
+//        StringBuilder pathBuilder = new StringBuilder();
+//        int maxSegments = Math.min(numSegments, 4);
+//        for(int i = 0; i < maxSegments; i++) {
+//            pathBuilder.append(segments[numSegments - maxSegments + i]);
+//            if(i < maxSegments - 1) {
+//                pathBuilder.append(".");
+//            }
+//        }
+//
+//        return pathBuilder.toString();
+//    }
 
     private static
     String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
