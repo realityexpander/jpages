@@ -2,17 +2,19 @@ package org.elegantobjects.jpages.App2.domain;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.book.network.BookInfoApi;
 import org.elegantobjects.jpages.App2.data.book.local.BookInfoDatabase;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
-import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfoRepo;
 import org.elegantobjects.jpages.App2.domain.common.IContext;
 import org.elegantobjects.jpages.App2.domain.book.BookInfoRepo;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.elegantobjects.jpages.App2.domain.user.UserInfoRepo;
+import org.jetbrains.annotations.NotNull;
 
+import static org.elegantobjects.jpages.App2.domain.Context.ContextType.*;
 import static org.elegantobjects.jpages.App2.domain.Context.ContextType.PRODUCTION;
 
 public class Context implements IContext {
@@ -33,6 +35,7 @@ public class Context implements IContext {
         TEST
     }
 
+    public
     Context(
             BookInfoRepo bookInfoRepo,
             UserInfoRepo userInfoRepo,
@@ -49,16 +52,23 @@ public class Context implements IContext {
         this.gson = gson;
     }
 
-    public static Context setupProductionInstance() {
-        return setupInstance(PRODUCTION, null);
+    public static Context setupProductionInstance(ILog log) {
+        if (log == null)
+            return setupInstance(PRODUCTION, new Log(), null);
+        else
+            return setupInstance(PRODUCTION, log, null);
     }
-    public static Context setupInstance(Context.ContextType contextType, Context context) {
+    public static Context setupInstance(
+        @NotNull ContextType contextType,
+        @NotNull ILog log,
+        Context context
+    ) {
         switch (contextType) {
             case PRODUCTION:
-                System.out.println("Context.setupInstance(): passed in Context is null, creating PRODUCTION Context");
-                return Context.generateDefaultProductionContext();
+                return Context.generateDefaultProductionContext(log);
+                // LEAVE FOR REFERENCE: System.out.println("Context.setupInstance(): passed in Context is null, creating PRODUCTION Context");
             case TEST:
-                System.out.println("Context.setupInstance(): using passed in Context");
+                System.out.println("Context.setupInstance(): contextType=TEST, using passed in Context");
                 return context;
         }
 
@@ -66,13 +76,13 @@ public class Context implements IContext {
     }
 
     // Generate sensible default singletons for the production application
-    private static Context generateDefaultProductionContext() {
-        ILog log = new Log();
+    private static Context generateDefaultProductionContext(ILog log) {
+
         return new Context(
             new BookInfoRepo(
                 new BookInfoApi(),
                 new BookInfoDatabase(),
-                log
+                    log
             ),
             new UserInfoRepo(log),
             new LibraryInfoRepo(log),
@@ -81,7 +91,7 @@ public class Context implements IContext {
                 .registerTypeAdapter(UUID2.HashMap.class, new UUID2.Uuid2HashMapJsonDeserializer())
                 .setPrettyPrinting()
                 .create(),
-            log
+                log
         );
     }
 

@@ -203,6 +203,10 @@ using IDE tools (like hover to find var types).
   - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
 
 ### Avoid C++/Java Design Pattern Hacks
+- Java has inherited bad ideas from C++ bc they had become "industry standard" and "best practices", but are just 
+  afterthought workaround to fundamental language design issues. We know this bc recent language versions have remediated
+  some of these issues, and other languages like Kotlin show how to addresss these issues. Combines with BOOP, many
+  of the patterns just dont make sense and add unnecessary complexity.
 - No factory patterns
   - Just use constructors. 
 - No builder patterns
@@ -299,7 +303,7 @@ using IDE tools (like hover to find var types).
   - `Role` objects are essentially smart pointers to their `Info` objects & other `Role` objects.
 
 ### Minimal Annotations
-- Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, etc.
+- Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, @Suppress, etc.
 
 ### Acceptable Acronyms
 
@@ -425,7 +429,10 @@ using IDE tools (like hover to find var types).
     - `Account` - Handles `Account` actions, like paying fines, checking status, etc.
   - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
   - `Book` - Handles `Book` actions like changing `title`, `author`, `description`, `sourceLibrary`, etc.
-      
+
+### Java Complaints
+- Type system... for a language that is dealing with types, it sure does forget types a lot... design flaw!
+
 ## Arbitrary Domain Design decisions
 
 ### _"BOOP is made for modeling the capriciousness of the Real World..."_ 

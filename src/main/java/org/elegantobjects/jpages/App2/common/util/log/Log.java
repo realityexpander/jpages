@@ -12,6 +12,19 @@ public class Log implements ILog {
         System.err.println(tag + ":(ERROR) " + msg);
     }
 
+    // example: log.d(this, "message") will print "ClassName➤MethodName(): message"
+    public void d(Object obj, String msg) {
+        if(obj == null) {
+            d("null", msg);
+            return;
+        }
+
+        d(obj.getClass().getSimpleName() + "➤" +
+                        Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
+                msg
+        );
+    }
+
     public void e(Object obj, String msg, Exception e) {
         if(obj == null) {
             d("null", msg);
@@ -29,19 +42,6 @@ public class Log implements ILog {
             msg + " - " + e.getMessage() + " - " + stacktrace
         );
         e.printStackTrace(); // LEAVE for debugging
-    }
-
-    // example: log.d(this, "message") will print "ClassName➤MethodName(): message"
-    public void d(Object obj, String msg) {
-        if(obj == null) {
-            d("null", msg);
-            return;
-        }
-
-        d(obj.getClass().getSimpleName() + "➤" +
-            Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
-            msg
-        );
     }
 
     // example: log.w(this, "message") will print "ClassName➤MethodName():(WARNING) message"

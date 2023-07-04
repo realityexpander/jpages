@@ -1,7 +1,8 @@
 package org.elegantobjects.jpages.App2.presentation;
 
 
-import org.elegantobjects.jpages.App2.common.testingUtils.TestingUtils;
+import org.elegantobjects.jpages.App2.common.util.log.Log;
+import org.elegantobjects.jpages.App2.common.util.testingUtils.TestingUtils;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.data.book.network.DTOBookInfo;
@@ -15,7 +16,6 @@ import org.elegantobjects.jpages.App2.domain.user.UserInfo;
 import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -24,12 +24,12 @@ import java.util.*;
 // - Intentionally using multiple returns. Makes error handling easier.
 
 
-class LibraryApp {
+public class LibraryApp {
 
     public static void main(final String... args) throws Exception {
 
         // Setup App Context Object singletons
-        Context productionContext = Context.setupProductionInstance();
+        Context productionContext = Context.setupProductionInstance(new Log());
         // Context productionContext = Context.setupInstance(TEST, testContext); // LEAVE for testing
 
         new LibraryApp(productionContext);
@@ -49,46 +49,46 @@ class LibraryApp {
             "User Name 1"
         );
 
-        Populate_And_Poke_Book:
-        if (false)
-        {
-            System.out.println();
-            ctx.log.d(this, "Populate_And_Poke_Book");
-            ctx.log.d(this, "----------------------------------");
-
-            // Create a book object (it only has an id)
-            Book book = new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx);
-            ctx.log.d(this, book.fetchInfoResult().toString());
-
-            // Update info for a book
-            final Result<BookInfo> bookInfoResult =
-                book.updateInfo(
-                    new BookInfo(
-                        book.id,
-                        "The Updated Title",
-                        "The Updated Author",
-                        "The Updated Description"
-                    ));
-            ctx.log.d(this, book.fetchInfoResult().toString());
-
-            // Get the bookInfo (null if not loaded)
-            BookInfo bookInfo3 = book.fetchInfo();
-            if (bookInfo3 == null) {
-                ctx.log.d(this, "Book Missing --> book id: " + book.id() + " >> " + " is null");
-                assert false;
-            } else
-                ctx.log.d(this, "Book Info --> " + bookInfo3.toString());
-
-            // Try to get a book id that doesn't exist
-            Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
-            if (book2.fetchInfoResult() instanceof Result.Failure) {
-                ctx.log.d(this, "Get Book Should fail : FAILURE --> book id: " + book2.id + " >> " + ((Result.Failure<BookInfo>) book2.fetchInfoResult()));
-                assert true; // should fail
-            } else
-                ctx.log.d(this, "Book Exists --> " + ((Result.Success<BookInfo>) book2.fetchInfoResult()).value());
-
-            testUtil.DumpBookDBandAPI();
-        }
+//        Populate_And_Poke_Book:
+//        if (false)
+//        {
+//            System.out.println();
+//            ctx.log.d(this, "Populate_And_Poke_Book");
+//            ctx.log.d(this, "----------------------------------");
+//
+//            // Create a book object (it only has an id)
+//            Book book = new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx);
+//            ctx.log.d(this, book.fetchInfoResult().toString());
+//
+//            // Update info for a book
+//            final Result<BookInfo> bookInfoResult =
+//                book.updateInfo(
+//                    new BookInfo(
+//                        book.id,
+//                        "The Updated Title",
+//                        "The Updated Author",
+//                        "The Updated Description"
+//                    ));
+//            ctx.log.d(this, book.fetchInfoResult().toString());
+//
+//            // Get the bookInfo (null if not loaded)
+//            BookInfo bookInfo3 = book.fetchInfo();
+//            if (bookInfo3 == null) {
+//                ctx.log.d(this, "Book Missing --> book id: " + book.id() + " >> " + " is null");
+//                assert false;
+//            } else
+//                ctx.log.d(this, "Book Info --> " + bookInfo3.toString());
+//
+//            // Try to get a book id that doesn't exist
+//            Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
+//            if (book2.fetchInfoResult() instanceof Result.Failure) {
+//                ctx.log.d(this, "Get Book Should fail : FAILURE --> book id: " + book2.id + " >> " + ((Result.Failure<BookInfo>) book2.fetchInfoResult()));
+//                assert true; // should fail
+//            } else
+//                ctx.log.d(this, "Book Exists --> " + ((Result.Success<BookInfo>) book2.fetchInfoResult()).value());
+//
+//            testUtil.DumpBookDBandAPI();
+//        }
 
         Populate_the_library_and_user_DBs:
         {

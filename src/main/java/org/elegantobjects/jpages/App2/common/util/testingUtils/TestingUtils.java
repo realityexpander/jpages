@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.App2.common.testingUtils;
+package org.elegantobjects.jpages.App2.common.util.testingUtils;
 
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
