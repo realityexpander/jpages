@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class LibraryTest {
+public class LibraryAppTest {
 
     Context context;
 
@@ -26,7 +26,7 @@ public class LibraryTest {
         TestLog testLog = new TestLog();
         Context prodContext = Context.setupProductionInstance(testLog);
 
-        // modify the Prod context into a Test context.
+        // Change the Prod context into a Test context.
         Context testContext = new Context(
             prodContext.bookInfoRepo(),
             prodContext.userInfoRepo(),
@@ -35,8 +35,8 @@ public class LibraryTest {
             prodContext.gson,
             testLog
         );
-        TestingUtils testUtil = new TestingUtils(testContext);
 
+        TestingUtils testUtil = new TestingUtils(testContext);
         testUtil.PopulateFakeBookInfoInContextBookRepoDBandAPI();
 
         // Create fake AccountInfo
