@@ -354,17 +354,18 @@ using IDE tools (like hover to find var types).
       <code>cur</code>
     </td>
     <td>
-      Prefix for <code>current</code>> is gray area, prefer spelling out unless too pedantic for a local context.<br>
+      Prefix for <code>current</code> is gray area.<br>
+      • Prefer spelling out unless too pedantic for a local context.<br>
       • Indicates the current value for the object.
     </td>
   </tr>
   <tr>
     <td> 
-      <code>Amt</code>
+      <code>Amt</code> & <code>Amnt</code>
     </td>
     <td>
-      is in a gray area, as is <code>amnt</code>.<br>
-      • Prefer spelling out <code>amount</code>
+      These are in a gray area.<br>
+      • Prefer spelling it out, ie: <code>Amount</code>
     </td>
   </tr>
   <tr>
@@ -372,7 +373,7 @@ using IDE tools (like hover to find var types).
       <code>Kind</code>
     </td>
     <td>
-      Use in enums, instead of the word <code>Type</code> which is reserved specifically for the <code>Class<?></code> types.
+      Use in <code>enums</code> instead of the word <code>Type</code> which is reserved specifically for the clazz <code>Class&lt;?&gt;</code> types.
     </td>
   </tr>
   <tr>
