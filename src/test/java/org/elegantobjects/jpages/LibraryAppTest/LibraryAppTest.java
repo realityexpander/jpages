@@ -17,9 +17,7 @@ import org.elegantobjects.jpages.LibraryAppTest.testFakes.TestLog;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -30,17 +28,17 @@ public class LibraryAppTest {
 //    }
 
     private @NotNull Context setupTestContext() {
-        TestLog testLog = new TestLog(false); // false = print all logs to console
+        TestLog testLog = new TestLog(true); // false = print all logs to console
         Context prodContext = Context.setupProductionInstance(testLog);
 
-        // Change the Prod context into a Test context.
+        // Modify the Production context into a Test context.
         Context testContext = new Context(
             prodContext.bookInfoRepo(),
             prodContext.userInfoRepo(),
             prodContext.libraryInfoRepo(),
             prodContext.accountInfoRepo(),
             prodContext.gson,
-            testLog
+            testLog   // <--- just using the test logger
         );
 
         return testContext;
@@ -71,7 +69,10 @@ public class LibraryAppTest {
             this.book1200 = book1200;
         }
     }
-    private @NotNull TestRoles setupDefaultScenarioAndRoles(@NotNull Context ctx, TestingUtils testUtils) {
+    private @NotNull TestRoles setupDefaultScenarioAndRoles(
+            @NotNull Context ctx,
+            @NotNull TestingUtils testUtils
+    ) {
 
         ////////////////////////////////////////
         // Setup DB & API simulated resources //
@@ -138,7 +139,6 @@ public class LibraryAppTest {
         assertNotNull(testRoles);
 
         // print User1
-        System.out.println();
         ctx.log.d(this,"User --> " + testRoles.user1.id + ", " + testRoles.user1.fetchInfo().toPrettyJson());
 
         return testRoles;
@@ -301,7 +301,7 @@ public class LibraryAppTest {
         roles.library1.DumpDB(ctx);
     }
 
-    private String getRonaldReaganLibraryJson() {
+    private String getRonaldReaganLibraryInfoJson() {
         return
             "{\n" +
             "  \"id\": {\n" +
@@ -335,7 +335,7 @@ public class LibraryAppTest {
     public void Update_LibraryInfo_by_updateInfoFromJson_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        String json = getRonaldReaganLibraryJson();
+        String json = getRonaldReaganLibraryInfoJson();
 
         // Create the "unknown" library with just an id.
         Library library2 = new Library(UUID2.createFakeUUID2(99, Library.class), ctx);
@@ -350,7 +350,7 @@ public class LibraryAppTest {
         Result<LibraryInfo> library2Result = library2.updateInfoFromJson(json);
         if (library2Result instanceof Result.Failure) {
             // NOTE: FAILURE IS EXPECTED HERE
-            System.out.println("^^^^^^^^^^^^ 2 Warnings are expected and normal.");
+            System.out.println("^^^^^^^^^^^^ 2 Warnings `Library➤toJson()` are expected and normal.");
             ctx.log.d(this, "^^^^^^^^ warning is expected and normal.");
 
             // Since the library2 was not saved in the central database, we will get a "library not found error" which is expected
@@ -384,7 +384,7 @@ public class LibraryAppTest {
     public void Create_Library_Role_from_createInfoFromJson_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        String json = getRonaldReaganLibraryJson();
+        String json = getRonaldReaganLibraryInfoJson();
         Book expectedBook1900 = new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx);
 
         // Create a Library Domain Object from the Info
@@ -417,7 +417,7 @@ public class LibraryAppTest {
 
     }
 
-    private String getGreatGatsbyBookJson() {
+    private String getGreatGatsbyDTOBookInfoJson() {
         return
             "{\n" +
             "  \"id\": {\n" +
@@ -435,7 +435,7 @@ public class LibraryAppTest {
     public void Create_Book_Role_from_DTOInfo_Json() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        String json = getGreatGatsbyBookJson();
+        String json = getGreatGatsbyDTOBookInfoJson();
         String expectedTitle = "The Great Gatsby";
         String expectedAuthor = "F. Scott Fitzgerald";
         UUID2<Book> expectedUUID2 = UUID2.createFakeUUID2(10, Book.class);
@@ -498,7 +498,7 @@ public class LibraryAppTest {
     }
 
     @Test
-    public void Give_Book_To_User_is_Success() {
+    public void User_Accepts_Book_and_Gives_Book_to_another_User_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
         TestingUtils testUtil = new TestingUtils(ctx);
@@ -534,4 +534,165 @@ public class LibraryAppTest {
         assertTrue("User2 should have given Book12 to User01", giveBookToUserResult instanceof Result.Success);
     }
 
+    @Test
+    public void Give_Checked_Out_Book_From_User_To_User_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestingUtils testUtil = new TestingUtils(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+
+        final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        assert user01InfoResult != null;
+        final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1 , ctx);
+
+        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        assert user2InfoResult != null;
+        final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
+
+        final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+        assert book12InfoResult != null;
+        final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
+        final Book book12 = new Book(book12id, roles.library1, ctx);
+
+        // • ACT & ASSERT
+
+        // Add book12 to library1
+        final Result<Book> book12UpsertResult = roles.library1.addTestBookToLibrary(book12, 1);
+        assertTrue("Book12 should have been added to Library1", book12UpsertResult instanceof Result.Success);
+
+        // Register user1 to library1
+        final Result<UUID2<User>> user01UpsertResult = roles.library1.info().registerUser(user01.id);
+        assertTrue("User01 should have been registered to Library1", user01UpsertResult instanceof Result.Success);
+
+        // Make user2 checkout book12 from library1
+        final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, roles.library1);
+        assertTrue("Book12 should have been checked out by user2", checkedOutBookResult instanceof Result.Success);
+
+        ctx.log.d(this,"User (2):" + user2.id + " Transfer Checked-Out Book:" + book12id + " to User(1):" + user01.id);
+
+        // Give book12 from user2 to user01
+        // Note: The Library that the book is checked out from ALSO transfers the checkout to the new user.
+        // - Will only allow the transfer to complete if the receiving user has an account in good standing (ie: no fines, etc.)
+        final Result<ArrayList<UUID2<Book>>> transferBookToUserResult = user2.giveBookToUser(book12, user01);
+        assertTrue("User2 should have given Book12 to User01", transferBookToUserResult instanceof Result.Success);
+        ctx.log.d(this, "Transfer Book SUCCESS --> Book:" + ((Result.Success<ArrayList<UUID2<Book>>>) transferBookToUserResult).value());
+    }
+
+    @Test
+    public void Give_Book_From_User_To_User_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestingUtils testUtil = new TestingUtils(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+
+        final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        assert user01InfoResult != null;
+        final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1, ctx);
+
+        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        assert user2InfoResult != null;
+        final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
+
+        Result<ArrayList<Book>> acceptBookResult = user2.acceptBook(roles.book1100);
+        assertTrue("User2 should have accepted Book1100", acceptBookResult instanceof Result.Success);
+
+        Result<ArrayList<UUID2<Book>>> giveBookResult = user2.giveBookToUser(roles.book1100, user01);
+        assertTrue("User2 should have given Book1100 to User01", giveBookResult instanceof Result.Success);
+
+        ctx.log.d(this, "Give Book SUCCESS --> Book:" + ((Result.Success<ArrayList<UUID2<Book>>>) giveBookResult).value());
+    }
+
+    @Test
+    public void Transfer_CheckedOut_Book_sourceLibrary_to_another_Library_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestingUtils testUtil = new TestingUtils(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+
+        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        assert user2InfoResult != null;
+        final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
+
+        // Book12 represents a found book that is not in the library
+        final Result<BookInfo> book13InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(13);
+        assert book13InfoResult != null;
+        final UUID2<Book> book13id = ((Result.Success<BookInfo>) book13InfoResult).value().id();
+        final Book book13 = new Book(book13id, null, ctx); // note: sourceLibrary is null, so this book comes from an ORPHAN Library
+
+        ctx.log.d(this, "OLD Source Library: name=" + book13.sourceLibrary().info().name);
+
+        // Simulate a User "finding" a Book and checking it out from its ORPHAN Private Library (ie: itself)
+        final Result<UUID2<Book>> checkoutResult = user2.checkOutBookFromLibrary(book13, book13.sourceLibrary());
+        assertTrue("Book13 should have been checked out by user2", checkoutResult instanceof Result.Success);
+
+        // Represents a User assigning the "found" Book to a Library, while the Book is still checked out to the User.
+        Result<Book> transferResult1 = book13.transferToLibrary(roles.library1);
+        assertTrue("Book13 should have been transferred to Library1", transferResult1 instanceof Result.Success);
+        ctx.log.d(this, "Transfer Book SUCCESS --> Book:" + ((Result.Success<Book>) transferResult1).value());
+
+        Book transferredBook13 = ((Result.Success<Book>) transferResult1).value();
+        ctx.log.d(this, "NEW Source Library: name=" + transferredBook13.sourceLibrary().info().name);
+
+        assertEquals("Book13 should have been transferred to Library1",
+                transferredBook13.sourceLibrary().info().name, roles.library1.info().name);
+    }
+
+    @Test
+    public void Test_UUID2_HashMap() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
+
+        UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap = new UUID2.HashMap<>();
+        UUID2<Book> book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
+        UUID2<Book> book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
+        UUID2<User> user01 = new UUID2<>(UUID2.createFakeUUID2(1, User.class));
+        UUID2<User> user02 = new UUID2<>(UUID2.createFakeUUID2(2, User.class));
+
+        uuid2ToEntityMap.put(book1, user01);
+        uuid2ToEntityMap.put(book2, user02);
+
+        // ACT & ASSERT
+
+        // check simple retrieval
+        UUID2<User> user = uuid2ToEntityMap.get(book1);
+        ctx.log.d(this, "user=" + user);
+        assertNotNull(user);
+
+        // check fetched Book retrieval by new BookId
+        UUID2<Book> book1a = ((Result.Success<Book>)
+                Book.fetchBook(UUID2.createFakeUUID2(1200, Book.class), ctx)
+            ).value().id;
+        UUID2<User> user2 = uuid2ToEntityMap.get(book1a);
+        ctx.log.d(this, "user=" + user);
+        assertNotNull(user2);
+        assertEquals(user2, user);
+
+        uuid2ToEntityMap.remove(book1);
+        user = uuid2ToEntityMap.get(book1);
+        ctx.log.d(this, "user=" + user);
+        assertNull(user);
+
+        // put it back
+        uuid2ToEntityMap.put(book1, user01);
+
+        // check keySet
+        Set<UUID2<Book>> keySet = uuid2ToEntityMap.keySet();
+        assertEquals(2, keySet.size());
+
+        // check values
+        Collection<UUID2<User>> values = uuid2ToEntityMap.values();
+        assertEquals(2, values.size());
+
+        // check entrySet
+        Set<Map.Entry<UUID2<Book>, UUID2<User>>> entrySet = uuid2ToEntityMap.entrySet();
+        assertEquals(2, entrySet.size());
+
+        // check containsKey
+        assertTrue("containsKey(book1) failed", uuid2ToEntityMap.containsKey(book1));
+        assertTrue("containsKey(book2) failed", uuid2ToEntityMap.containsKey(book2));
+        assertFalse("containsKey(Book 1400) should fail",
+                uuid2ToEntityMap.containsKey(UUID2.createFakeUUID2(1400, Book.class))
+        );
+    }
 }
