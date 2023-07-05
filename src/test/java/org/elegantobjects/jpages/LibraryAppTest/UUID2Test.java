@@ -71,12 +71,16 @@ public class UUID2Test {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
         UUID2<User> user1200Id = UUID2.createFakeUUID2(1200, User.class);
+        UUID2<User> user9999Id = UUID2.createFakeUUID2(9999, User.class);
+
 
         // • ACT
         boolean isEqual = book1200Id.isOnlyUUIDEqual(user1200Id);
+        boolean isNotEqual = book1200Id.isOnlyUUIDEqual(user9999Id);
 
         // • ASSERT
         assertTrue(isEqual);
+        assertFalse(isNotEqual);
     }
 
     @Test
@@ -182,6 +186,24 @@ public class UUID2Test {
         assertFalse("containsKey(Book 1400) should fail",
                 uuid2ToEntityMap.containsKey(UUID2.createFakeUUID2(1400, Book.class))
         );
+    }
+
+    @Test
+    public void Invalid_UUID2_String_throws_IllegalArgumentException() {
+        // • ARRANGE
+        String invalidUUID2Str = "UUID2:Role.Book_00000000-0000-0000-0000-000000001200"; // missing `@`
+
+        // • ACT
+        try {
+            @SuppressWarnings("unchecked")
+            UUID2<Book> book1200aId = (UUID2<Book>) UUID2.fromUUID2String(invalidUUID2Str);
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // • ASSERT
+            assertTrue( true);
+        } catch (ClassNotFoundException e) {
+            fail("Unexpected ClassNotFoundException");
+        }
     }
 
 }
