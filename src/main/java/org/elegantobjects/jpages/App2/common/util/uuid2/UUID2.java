@@ -68,7 +68,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         this((TUUID2) UUID2.fromUUID(uuid), clazz);
     }
 
-    public static UUID2<?> fromUUID2String(@NotNull String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
+    public static
+    UUID2<?> fromUUID2String(@NotNull String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
         // format example:
         // UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001
         // ^-- Always prefixed with `UUID2`
@@ -477,27 +478,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         return normalizedTypeStr.toString();
     }
-
-//    private static
-//    String getClassInheritancePathStr(@NotNull String uuid2TypeStr) {
-//        String[] segments = uuid2TypeStr.split("\\.");
-//        if(segments.length <= 1) {
-//            return uuid2TypeStr;
-//        }
-//
-//        // Make a string of last segments (stopping at null) of the uuid2TypeStr with a period between them
-//        int numSegments = segments.length;
-//        StringBuilder pathBuilder = new StringBuilder();
-//        int maxSegments = Math.min(numSegments, 4);
-//        for(int i = 0; i < maxSegments; i++) {
-//            pathBuilder.append(segments[numSegments - maxSegments + i]);
-//            if(i < maxSegments - 1) {
-//                pathBuilder.append(".");
-//            }
-//        }
-//
-//        return pathBuilder.toString();
-//    }
 
     private static
     String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
