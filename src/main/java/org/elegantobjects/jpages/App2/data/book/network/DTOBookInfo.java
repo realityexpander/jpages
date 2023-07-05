@@ -30,7 +30,7 @@ public class DTOBookInfo extends DTOInfo
         String extraFieldToShowThisIsADTO
     ) {
         super(id);
-        this.id = id;
+//        this.id = id;
         this.title = title;
         this.author = author;
         this.description = description;
@@ -49,7 +49,7 @@ public class DTOBookInfo extends DTOInfo
     // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
     public
     DTOBookInfo(@NotNull DTOBookInfo bookInfo) {
-        this(new UUID2<Book>(bookInfo.id.uuid(), Book.class),
+        this(new UUID2<Book>(bookInfo.id().uuid(), Book.class),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
@@ -68,7 +68,7 @@ public class DTOBookInfo extends DTOInfo
 
     @Override
     public String toString() {
-        return "Book (" + this.id + ") : " + this.title + " by " + this.author + ", " + this.description + ", " + this.extraFieldToShowThisIsADTO;
+        return "Book (" + this.id() + ") : " + this.title + " by " + this.author + ", " + this.description + ", " + this.extraFieldToShowThisIsADTO;
     }
 
     ///////////////////////////////////////////
@@ -85,11 +85,11 @@ public class DTOBookInfo extends DTOInfo
         return new BookInfo(this);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public UUID2<Book> domainInfoId() {
-        return (UUID2<Book>) this.id;
-    }
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public UUID2<Book> domainInfoId() {
+//        return (UUID2<Book>) this.id();
+//    }
 
     /////////////////////////////
     // ToInfo implementation   //
@@ -101,9 +101,9 @@ public class DTOBookInfo extends DTOInfo
         return new DTOBookInfo(this);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public UUID2<Book> getInfoId() {
-        return (UUID2<Book>) this.id;
-    }
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public UUID2<Book> getInfoId() {
+//        return (UUID2<Book>) this.id();
+//    }
 }

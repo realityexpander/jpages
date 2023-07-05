@@ -36,7 +36,7 @@ public class BookInfoDatabase {
     public Result<EntityBookInfo> deleteBookInfo(EntityBookInfo bookInfo) {
         return database.deleteEntityInfo(bookInfo);
     }
-    public Map<UUID2<Book>, EntityBookInfo> getAllBookInfos() {  // todo UUID2 keep
+    public Map<UUID2<Book>, EntityBookInfo> getAllBookInfos() {
         return database.getAllEntityInfo();
     }
 }

@@ -48,7 +48,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         @NotNull Context context
     ) {
         super(info, context);
-        this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
+        this.id()._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
     public PrivateLibrary(
@@ -56,7 +56,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         @NotNull Context context
     ) {
         super(id, context);
-        this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
+        this.id()._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
     public PrivateLibrary(
@@ -68,7 +68,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).
 
         super(new UUID2<Library>(bookId), context); // make the LibraryId match the BookId
-        this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
+        this.id()._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
 
         // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).
         // ORPHAN Private Library can:
@@ -82,7 +82,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         // Note: this creates an ORPHAN private library with a random id.
         this(UUID2.randomUUID2(Book.class), true, context);
 
-        context.log.w(this, "PrivateLibrary (" + this.id + ") created with ORPHAN Library with Random Id.");
+        context.log.w(this, "PrivateLibrary (" + this.id() + ") created with ORPHAN Library with Random Id.");
     }
 
     //////////////////////////////////////////////////
@@ -91,7 +91,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
     @Override
     public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
-        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
+        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id(), book.id(), user.id()));
 
         if (!isForOnlyOneBook) {
             return super.info()
@@ -101,14 +101,14 @@ public class PrivateLibrary extends Library implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Orphan Libraries can only check in 1 Book from Users.
-        if (this.info.findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id));
+        if (this.info.findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id()));
 
         // Only allow check in if the Book Id matches the initial Book Id that created this Orphan Library.
         Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
         @SuppressWarnings("unchecked")
         UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0]; // there should only be 1 bookId
-        if (!firstBookId.equals(book.id)) {
-            return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id));
+        if (!firstBookId.equals(book.id())) {
+            return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id()));
         }
 
         return super.info()
@@ -117,7 +117,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
     @Override
     public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
-        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
+        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id(), book.id(), user.id()));
 
         if (!isForOnlyOneBook) {
             return super.info()
@@ -129,14 +129,14 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
         // Orphan Libraries can only check out 1 Book to Users.
         if (this.info.findAllKnownBookIds().size() != 1)
-            return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users, bookId: " + book.id));
+            return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users, bookId: " + book.id()));
 
         // Only allow check out if the Book Id matches the initial Book Id that created this Orphan Library.
         Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
         @SuppressWarnings("unchecked")
         UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0];  // there should only be 1 bookId
-        if (!firstBookId.equals(book.id))
-            return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id));
+        if (!firstBookId.equals(book.id()))
+            return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id()));
 
         return super.info()
                 .checkOutBookToUser(book, user); // note: we bypass all normal Library User Account checking

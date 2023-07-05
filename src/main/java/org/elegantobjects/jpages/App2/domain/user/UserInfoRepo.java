@@ -30,7 +30,7 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
     @Override
     public Result<UserInfo> updateUserInfo(@NotNull UserInfo userInfo) {
         String method = Thread.currentThread().getStackTrace()[2].getMethodName();
-        log.d(this, method + ", userId:" + userInfo.id);
+        log.d(this, method + ", userId:" + userInfo.id());
 
         // Simulate network/database
         if (database.containsKey(userInfo.id())) {
@@ -44,7 +44,7 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
     @Override
     public Result<UserInfo> upsertUserInfo(@NotNull UserInfo userInfo) {
         String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
-        log.d(this, methodName + ", userId:" + userInfo.id);
+        log.d(this, methodName + ", userId:" + userInfo.id());
 
         // Simulate network/database
         database.put(userInfo.id(), userInfo);

@@ -27,6 +27,8 @@ public class LibraryAppTest {
     Context ctx;
     TestingUtils testUtils;
 
+    static final boolean shouldDisplayAllDebugLogs = false;
+
     @Before
     public void setUp() {
         ctx = setupDefaultTestContext();
@@ -34,7 +36,7 @@ public class LibraryAppTest {
     }
 
     public static @NotNull Context setupDefaultTestContext() {
-        TestLog testLog = new TestLog(true); // false = print all logs to console, including info/debug
+        TestLog testLog = new TestLog(!shouldDisplayAllDebugLogs); // false = print all logs to console, including info/debug
         Context prodContext = Context.setupProductionInstance(testLog);
 
         // Modify the Production context into a Test context.
@@ -135,7 +137,7 @@ public class LibraryAppTest {
         assertNotNull(testRoles);
 
         // print User1
-        ctx.log.d(this,"User --> " + testRoles.user1.id + ", " + testRoles.user1.fetchInfo().toPrettyJson());
+        ctx.log.d(this,"User --> " + testRoles.user1.id() + ", " + testRoles.user1.fetchInfo().toPrettyJson(ctx));
 
         return testRoles;
     }
@@ -155,7 +157,7 @@ public class LibraryAppTest {
         final Result<BookInfo> bookInfoResult =
             book.updateInfo(
                 new BookInfo(
-                    book.id,
+                    book.id(),
                     expectedUpdatedTitle,
                     expectedUpdatedAuthor,
                     expectedUpdatedDescription
@@ -186,7 +188,7 @@ public class LibraryAppTest {
         Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
 
         // • ASSERT
-        assertTrue("Book SHOULD NOT Exist, but does! --> " + book2.id, book2.fetchInfoResult() instanceof Result.Failure);
+        assertTrue("Book SHOULD NOT Exist, but does! --> " + book2.id(), book2.fetchInfoResult() instanceof Result.Failure);
     }
 
     @Test
@@ -199,8 +201,8 @@ public class LibraryAppTest {
         final Result<Book> bookResult2 = roles.library1.checkOutBookToUser(roles.book1200, roles.user1);
 
         // • ASSERT
-        assertTrue("Checked out book FAILURE, bookId: " + roles.book1100.id, bookResult instanceof Result.Success);
-        assertTrue("Checked out book FAILURE, bookId: " + roles.book1200.id, bookResult2 instanceof Result.Success);
+        assertTrue("Checked out book FAILURE, bookId: " + roles.book1100.id(), bookResult instanceof Result.Success);
+        assertTrue("Checked out book FAILURE, bookId: " + roles.book1200.id(), bookResult2 instanceof Result.Success);
 
         roles.library1.DumpDB(ctx);  // LEAVE for debugging
     }
@@ -213,22 +215,22 @@ public class LibraryAppTest {
         // Checkout 2 books to User
         final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
         final Result<Book> bookResult2 = roles.library1.checkOutBookToUser(roles.book1200, roles.user1);
-        assertTrue("Checked out book FAILURE, bookId: " + roles.book1100.id, bookResult1 instanceof Result.Success);
-        assertTrue("Checked out book FAILURE, bookId: " + roles.book1200.id, bookResult2 instanceof Result.Success);
+        assertTrue("Checked out book FAILURE, bookId: " + roles.book1100.id(), bookResult1 instanceof Result.Success);
+        assertTrue("Checked out book FAILURE, bookId: " + roles.book1200.id(), bookResult2 instanceof Result.Success);
 
         // • ACT & ASSERT
 
         // Find books checked out by user
         final Result<ArrayList<Book>> checkedOutBooksResult = roles.library1.findBooksCheckedOutByUser(roles.user1);
-        assertTrue("findBooksCheckedOutByUser FAILURE for userId" + roles.user1.id, checkedOutBooksResult instanceof Result.Success);
+        assertTrue("findBooksCheckedOutByUser FAILURE for userId" + roles.user1.id(), checkedOutBooksResult instanceof Result.Success);
         ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
 
         // List Books
-        ctx.log.d(this,"Checked Out Books for User [" + roles.user1.fetchInfo().name + ", " + roles.user1.id + "]:");
+        ctx.log.d(this,"Checked Out Books for User [" + roles.user1.fetchInfo().name + ", " + roles.user1.id() + "]:");
         for (Book book : checkedOutBooks) {
             final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
 
-            assertTrue("Book Error: bookId" + book.id,  bookInfoResult instanceof Result.Success);
+            assertTrue("Book Error: bookId" + book.id(),  bookInfoResult instanceof Result.Success);
             ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value().toString());
         }
 
@@ -247,7 +249,7 @@ public class LibraryAppTest {
 
         final Result<HashMap<Book, Long>> availableBookToNumAvailableResult =
                 roles.library1.calculateAvailableBookIdToNumberAvailableList();
-        assertTrue("findBooksCheckedOutByUser FAILURE for libraryId" + roles.library1.id,
+        assertTrue("findBooksCheckedOutByUser FAILURE for libraryId" + roles.library1.id(),
             availableBookToNumAvailableResult instanceof Result.Success
         );
 
@@ -265,7 +267,7 @@ public class LibraryAppTest {
                     availableBook.getKey()
                             .fetchInfoResult();
 
-            assertTrue("Book Error: bookId" + availableBook.getKey().id,  bookInfoResult instanceof Result.Success);
+            assertTrue("Book Error: bookId" + availableBook.getKey().id(),  bookInfoResult instanceof Result.Success);
             ctx.log.d(this, ((Result.Success<BookInfo>) bookInfoResult).value().toString());
         }
         ctx.log.d(this,"Total Available Books (unique UUIDs): " + availableBooks.size());
@@ -282,13 +284,13 @@ public class LibraryAppTest {
 
         // First check out book
         Result<UUID2<Book>> checkoutResult = roles.user1.checkOutBookFromLibrary(roles.book1200, roles.library1);
-        assertTrue("Checked out book FAILURE --> book id:" + roles.book1200.id, checkoutResult instanceof Result.Success);
+        assertTrue("Checked out book FAILURE --> book id:" + roles.book1200.id(), checkoutResult instanceof Result.Success);
         int afterCheckOutBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
         assertEquals("afterCheckOutBookCount != initialAcceptedBookCount+1", afterCheckOutBookCount, initialBookCount + 1);
 
         // Now check in Book
         final Result<Book> checkInBookResult = roles.library1.checkInBookFromUser(roles.book1200, roles.user1);
-        assertTrue("Checked out book FAILURE --> book id:" + roles.book1200.id, checkInBookResult instanceof Result.Success);
+        assertTrue("Checked out book FAILURE --> book id:" + roles.book1200.id(), checkInBookResult instanceof Result.Success);
         int afterCheckInBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
         assertEquals("afterCheckInBookCount != initialBookCount", afterCheckInBookCount, initialBookCount);
 
@@ -298,7 +300,7 @@ public class LibraryAppTest {
     private String getRonaldReaganLibraryInfoJson() {
         return
             "{\n" +
-            "  \"id\": {\n" +
+            "  \"_id\": {\n" +
             "    \"uuid\": \"00000000-0000-0000-0000-000000000099\",\n" +
             "    \"_uuid2Type\": \"Role.Library\"\n" +
             "  },\n" +
@@ -401,7 +403,7 @@ public class LibraryAppTest {
                             library.calculateAvailableBookIdToNumberAvailableList()).value().size());
 
             // check existence of a particular book
-            assertTrue("Library2 should have known Book with id="+ expectedBook1900.id, library.isKnownBook(expectedBook1900));
+            assertTrue("Library2 should have known Book with id="+ expectedBook1900.id(), library.isKnownBook(expectedBook1900));
         } catch (Exception e) {
             ctx.log.e(this, "Exception: " + e.getMessage());
             fail(e.getMessage());
@@ -412,7 +414,7 @@ public class LibraryAppTest {
     private String getGreatGatsbyDTOBookInfoJson() {
         return
             "{\n" +
-            "  \"id\": {\n" +
+            "  \"_id\": {\n" +
             "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
             "    \"uuid2Type\": \"Model.DTOInfo.BookInfo\"\n" +
             "  },\n" +
@@ -447,9 +449,9 @@ public class LibraryAppTest {
             assertEquals("Book3 should have author:" + expectedAuthor,
                 expectedAuthor, book3.info().author);
             assertEquals("Book3 should have id: " + expectedUUID2,
-                expectedUUID2, book3.id);
+                expectedUUID2, book3.id());
             assertEquals("Book3 should have UUID2 Type of:" + expectedUuid2Type,
-                expectedUuid2Type, book3.id.uuid2TypeStr());
+                expectedUuid2Type, book3.id().uuid2TypeStr());
         } catch (Exception e) {
             ctx.log.e(this, "Exception: " + e.getMessage());
             fail(e.getMessage());
@@ -481,7 +483,7 @@ public class LibraryAppTest {
         assertTrue("Book12 should have been added to Library1", book12UpsertResult instanceof Result.Success);
 
         // Check out Book from Library
-        ctx.log.d(this,"Check out book " + book12id + " to user " + roles.user1.id);
+        ctx.log.d(this,"Check out book " + book12id + " to user " + roles.user1.id());
         final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, roles.library1);
         assertTrue("Book12 should have been checked out by user2", checkedOutBookResult instanceof Result.Success);
     }
@@ -515,7 +517,7 @@ public class LibraryAppTest {
         Result<ArrayList<Book>> acceptBookResult = user2.acceptBook(book12); // no library involved.
         assertTrue("User2 should have accepted Book12", acceptBookResult instanceof Result.Success);
 
-        ctx.log.d(this,"User (2):" + user2.id + " Give Book:" + book12id + " to User(1):" + user01.id);
+        ctx.log.d(this,"User (2):" + user2.id() + " Give Book:" + book12id + " to User(1):" + user01.id());
 
         final Result<ArrayList<UUID2<Book>>> giveBookToUserResult = user2.giveBookToUser(book12, user01);
         assertTrue("User2 should have given Book12 to User01", giveBookToUserResult instanceof Result.Success);
@@ -546,14 +548,14 @@ public class LibraryAppTest {
         assertTrue("Book12 should have been added to Library1", book12UpsertResult instanceof Result.Success);
 
         // Register user1 to library1
-        final Result<UUID2<User>> user01UpsertResult = roles.library1.info().registerUser(user01.id);
+        final Result<UUID2<User>> user01UpsertResult = roles.library1.info().registerUser(user01.id());
         assertTrue("User01 should have been registered to Library1", user01UpsertResult instanceof Result.Success);
 
         // Make user2 checkout book12 from library1
         final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, roles.library1);
         assertTrue("Book12 should have been checked out by user2", checkedOutBookResult instanceof Result.Success);
 
-        ctx.log.d(this,"User (2):" + user2.id + " Transfer Checked-Out Book:" + book12id + " to User(1):" + user01.id);
+        ctx.log.d(this,"User (2):" + user2.id() + " Transfer Checked-Out Book:" + book12id + " to User(1):" + user01.id());
 
         // Give book12 from user2 to user01
         // Note: The Library that the book is checked out from ALSO transfers the checkout to the new user.

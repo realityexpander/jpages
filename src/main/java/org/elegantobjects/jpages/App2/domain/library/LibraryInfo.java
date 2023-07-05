@@ -21,35 +21,33 @@ public class LibraryInfo extends DomainInfo
     public
     LibraryInfo(
         @NotNull UUID2<Library> id,
-        String name,
-        UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap,
-        UUID2.HashMap<UUID2<Book>, Long> bookIdToNumBooksAvailableMap
+        @NotNull String name,
+        @NotNull UUID2.HashMap<UUID2<User>, ArrayList<UUID2<Book>>> registeredUserIdToCheckedOutBookIdMap,
+        @NotNull UUID2.HashMap<UUID2<Book>, Long> bookIdToNumBooksAvailableMap
     ) {
         super(id);
         this.name = name;
         this.registeredUserIdToCheckedOutBookIdMap = registeredUserIdToCheckedOutBookIdMap;
         this.bookIdToNumBooksAvailableMap = bookIdToNumBooksAvailableMap;
-        this.id = id;
     }
     public
-    LibraryInfo(UUID2<Library> id, String name) {
+    LibraryInfo(@NotNull UUID2<Library> id, @NotNull String name) {
         this(id, name, new UUID2.HashMap<>(), new UUID2.HashMap<>());
     }
-    public @SuppressWarnings("unchecked")
     LibraryInfo(@NotNull LibraryInfo libraryInfo) {
         this(
-            (UUID2<Library>) libraryInfo.id,
+            libraryInfo.id(),
             libraryInfo.name,
             libraryInfo.registeredUserIdToCheckedOutBookIdMap,
             libraryInfo.bookIdToNumBooksAvailableMap
         );
     }
     public
-    LibraryInfo(UUID uuid, String name) {
+    LibraryInfo(@NotNull UUID uuid, @NotNull String name) {
         this(new UUID2<>(uuid, Library.class), name);
     }
     public
-    LibraryInfo(String id, String name) {
+    LibraryInfo(@NotNull String id, @NotNull String name) {
         this(UUID.fromString(id), name);
     }
 
@@ -57,9 +55,10 @@ public class LibraryInfo extends DomainInfo
     // Published Simple Getters  //
     ///////////////////////////////
 
+    // Convenience method to get the Type-safe id from the Class
     @Override @SuppressWarnings("unchecked")
     public UUID2<Library> id() {
-        return (UUID2<Library>) id;
+        return (UUID2<Library>) super.id();
     }
 
     @Override
@@ -73,7 +72,7 @@ public class LibraryInfo extends DomainInfo
 
     public Result<Book> checkOutBookToUser(@NotNull Book book, User user) {
         if(book.isBookFromPublicLibrary()) { // No checks for private library books.
-            Result<UUID2<Book>> checkedOutUUID2Book = _checkOutPublicLibraryBookIdToUserId(book.id, user.id);
+            Result<UUID2<Book>> checkedOutUUID2Book = _checkOutPublicLibraryBookIdToUserId(book.id(), user.id());
             if (checkedOutUUID2Book instanceof Result.Failure)
                 return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) checkedOutUUID2Book).exception().getMessage()));
 
@@ -85,7 +84,7 @@ public class LibraryInfo extends DomainInfo
         }
 
         // Private library book check-outs skip Account checks.
-        Result<Void> checkOutBookResult = _checkOutBookIdToUserId(book.id, user.id);
+        Result<Void> checkOutBookResult = _checkOutBookIdToUserId(book.id(), user.id());
         if (checkOutBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkOutBookResult).exception().getMessage()));
 
@@ -118,7 +117,7 @@ public class LibraryInfo extends DomainInfo
 
     public Result<Book> checkInBookFromUser(@NotNull Book book, User user) {
         if(book.isBookFromPublicLibrary()) {
-            Result<UUID2<Book>> returnedBookIdResult = _checkInPublicLibraryBookIdFromUserId(book.id, user.id);
+            Result<UUID2<Book>> returnedBookIdResult = _checkInPublicLibraryBookIdFromUserId(book.id(), user.id());
             if (returnedBookIdResult instanceof Result.Failure)
                 return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) returnedBookIdResult).exception().getMessage()));
 
@@ -130,7 +129,7 @@ public class LibraryInfo extends DomainInfo
         }
 
         // Private Library Book check-ins skip Account checks.
-        Result<Void> checkInBookResult = _checkInBookIdFromUserId(book.id, user.id);
+        Result<Void> checkInBookResult = _checkInBookIdFromUserId(book.id(), user.id());
         if (checkInBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkInBookResult).exception().getMessage()));
 
@@ -169,18 +168,18 @@ public class LibraryInfo extends DomainInfo
 
         if(book.isBookFromPublicLibrary()) {
             // Check if the fromUser can transfer the Book
-            if (!isUserIdKnown(fromUser.id))
-                return new Result.Failure<>(new IllegalArgumentException("fromUser is not known, fromUserId: " + fromUser.id));
+            if (!isUserIdKnown(fromUser.id()))
+                return new Result.Failure<>(new IllegalArgumentException("fromUser is not known, fromUserId: " + fromUser.id()));
             if (!fromUser.accountInfo().isAccountInGoodStanding())
-                return new Result.Failure<>(new IllegalArgumentException("fromUser Account is not in good standing, fromUserId: " + fromUser.id));
+                return new Result.Failure<>(new IllegalArgumentException("fromUser Account is not in good standing, fromUserId: " + fromUser.id()));
 
             // Check if receiving User can check out Book
-            if (!isUserIdKnown(toUser.id))
-                return new Result.Failure<>(new IllegalArgumentException("toUser is not known, toUser: " + toUser.id));
+            if (!isUserIdKnown(toUser.id()))
+                return new Result.Failure<>(new IllegalArgumentException("toUser is not known, toUser: " + toUser.id()));
             if (!toUser.accountInfo().isAccountInGoodStanding())
-                return new Result.Failure<>(new IllegalArgumentException("toUser Account is not in good standing, toUser: " + toUser.id));
+                return new Result.Failure<>(new IllegalArgumentException("toUser Account is not in good standing, toUser: " + toUser.id()));
             if (toUser.hasReachedMaxAmountOfAcceptedPublicLibraryBooks())
-                return new Result.Failure<>(new IllegalArgumentException("toUser has reached max number of accepted Public Library Books, toUser: " + toUser.id));
+                return new Result.Failure<>(new IllegalArgumentException("toUser has reached max number of accepted Public Library Books, toUser: " + toUser.id()));
         }
 
         Result<Book> returnedBookResult = checkInBookFromUser(book, fromUser);
@@ -232,35 +231,35 @@ public class LibraryInfo extends DomainInfo
     }
 
     public boolean isBookKnown(@NotNull Book book) {
-        return isBookIdKnown(book.id);
+        return isBookIdKnown(book.id());
     }
     public boolean isBookIdKnown(UUID2<Book> bookId) {
         return bookIdToNumBooksAvailableMap.containsKey(bookId);
     }
 
     public boolean isUserKnown(@NotNull User user) {
-        return isUserIdKnown(user.id);
+        return isUserIdKnown(user.id());
     }
     public boolean isUserIdKnown(UUID2<User> userId) {
         return registeredUserIdToCheckedOutBookIdMap.containsKey(userId);
     }
 
     public boolean isBookAvailableToCheckout(@NotNull Book book) {
-        return isBookIdAvailableToCheckout(book.id);
+        return isBookIdAvailableToCheckout(book.id());
     }
     public boolean isBookIdAvailableToCheckout(UUID2<Book> bookId) {
         return bookIdToNumBooksAvailableMap.get(bookId) > 0;
     }
 
     public boolean isBookCheckedOutByUser(@NotNull Book book, @NotNull User user) {
-        return isBookIdCheckedOutByUserId(book.id, user.id);
+        return isBookIdCheckedOutByUserId(book.id(), user.id());
     }
     public boolean isBookIdCheckedOutByUserId(UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         return registeredUserIdToCheckedOutBookIdMap.get(userId).contains(bookId);
     }
 
     public boolean isBookCheckedOutByAnyUser(@NotNull Book book) {
-        return isBookIdCheckedOutByAnyUser(book.id);
+        return isBookIdCheckedOutByAnyUser(book.id());
     }
     public boolean isBookIdCheckedOutByAnyUser(UUID2<Book> bookId) {
         return registeredUserIdToCheckedOutBookIdMap.values()
@@ -280,7 +279,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
     }
     public Result<UUID2<User>> findUserIdOfCheckedOutBook(@NotNull Book book) {
-        return findUserIdOfCheckedOutBookId(book.id);
+        return findUserIdOfCheckedOutBookId(book.id());
     }
 
     // Convenience method - Called from PrivateLibrary class ONLY
@@ -289,11 +288,11 @@ public class LibraryInfo extends DomainInfo
     }
 
     protected Result<UUID2<Book>> removeTransferringBookFromInventory(@NotNull Book bookToTransfer) {
-        return removeBookIdFromInventory(bookToTransfer.id, 1);
+        return removeBookIdFromInventory(bookToTransfer.id(), 1);
     }
 
     protected Result<UUID2<Book>> addTransferringBookToInventory(@NotNull Book bookToTransfer) {
-        return addBookIdToInventory(bookToTransfer.id, 1);
+        return addBookIdToInventory(bookToTransfer.id(), 1);
     }
 
     /////////////////////////////////////////
@@ -353,7 +352,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
     private Result<Book> addBookToInventory(@NotNull Book book, int quantity) {
-        Result<UUID2<Book>> addedUUID2Book = addBookIdToInventory(book.id, quantity);
+        Result<UUID2<Book>> addedUUID2Book = addBookIdToInventory(book.id(), quantity);
 
         if (addedUUID2Book instanceof Result.Failure) {
             return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) addedUUID2Book).exception().getMessage()));
@@ -379,7 +378,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
     private Result<Book> removeBookFromInventory(@NotNull Book book, int quantity) {
-        Result<UUID2<Book>> removedUUID2Book = removeBookIdFromInventory(book.id, quantity);
+        Result<UUID2<Book>> removedUUID2Book = removeBookIdFromInventory(book.id(), quantity);
 
         if (removedUUID2Book instanceof Result.Failure) {
             return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removedUUID2Book).exception().getMessage()));
@@ -410,7 +409,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
     private Result<Book> addBookToUser(@NotNull Book book, @NotNull User user) {
-        Result<UUID2<Book>> addedUUID2Book = addBookIdToRegisteredUser(book.id, user.id);
+        Result<UUID2<Book>> addedUUID2Book = addBookIdToRegisteredUser(book.id(), user.id());
 
         if (addedUUID2Book instanceof Result.Failure) {
             return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) addedUUID2Book).exception().getMessage()));
@@ -438,7 +437,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
     private Result<Book> removeBookFromUser(@NotNull Book book, @NotNull User user) {
-        Result<UUID2<Book>> removedUUID2Book = removeBookIdFromRegisteredUser(book.id, user.id);
+        Result<UUID2<Book>> removedUUID2Book = removeBookIdFromRegisteredUser(book.id(), user.id());
 
         if (removedUUID2Book instanceof Result.Failure) {
             return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removedUUID2Book).exception().getMessage()));
@@ -487,8 +486,7 @@ public class LibraryInfo extends DomainInfo
     public LibraryInfo toDeepCopyDomainInfo() {
         // Note: *MUST* return a deep copy
 
-        @SuppressWarnings("unchecked")
-        LibraryInfo libraryInfoDeepCopy = new LibraryInfo((UUID2<Library>) this.id, this.name);
+        LibraryInfo libraryInfoDeepCopy = new LibraryInfo(this.id(), this.name);
 
         // Deep copy the bookIdToNumBooksAvailableMap
         libraryInfoDeepCopy.bookIdToNumBooksAvailableMap.putAll(this.bookIdToNumBooksAvailableMap);
@@ -501,8 +499,4 @@ public class LibraryInfo extends DomainInfo
         return libraryInfoDeepCopy;
     }
 
-    @Override
-    public UUID2<?> domainInfoId() {
-        return this.id;
-    }
 }

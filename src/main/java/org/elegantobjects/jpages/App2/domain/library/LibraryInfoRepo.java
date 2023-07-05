@@ -31,13 +31,12 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Result<LibraryInfo> updateLibraryInfo(@NotNull LibraryInfo libraryInfo) {
-        log.d(this, "libraryInfo.id: " + libraryInfo.id);
+        log.d(this, "libraryInfo.id: " + libraryInfo.id());
 
         // Simulate network/database
-        if (database.containsKey((UUID2<Library>) libraryInfo.id)) {
-            database.put(libraryInfo.id, libraryInfo);
+        if (database.containsKey(libraryInfo.id())) {
+            database.put(libraryInfo.id(), libraryInfo);
 
             return new Result.Success<>(libraryInfo);
         }
@@ -47,10 +46,10 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
 
     @Override
     public Result<LibraryInfo> upsertLibraryInfo(@NotNull LibraryInfo libraryInfo) {
-        log.d(this, "libraryInfo.id: " + libraryInfo.id);
+        log.d(this, "libraryInfo.id: " + libraryInfo.id());
 
         // Simulate network/database
-        database.put(libraryInfo.id, libraryInfo);
+        database.put(libraryInfo.id(), libraryInfo);
 
         return new Result.Success<>(libraryInfo);
     }
@@ -74,7 +73,6 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
         }
     }
 
-    // todo - is this job needed?
     public void removeAllOrphanPrivateLibrariesWithNoBooksInInventory() {
         log.d(this, "removeAllPrivateLibrariesWithNoBooksInInventory");
 

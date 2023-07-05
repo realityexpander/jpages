@@ -14,76 +14,74 @@ import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// Book Role Object - Only interacts with its own repo, Context, and other Role Objects
+// Book Role Object - Only interacts with its own repository, Context, and other Role Objects
+// Note: Use of @Nullable for `sourceLibrary` indicates "use default value" - see pickSourceLibrary() below.
 public class Book extends Role<BookInfo> implements IUUID2 {
-    public final UUID2<Book> id;
     private final BookInfoRepo repo;
     private final Library sourceLibrary; // Book's source Library Role Object - owns this Book.
 
     public
     Book(
         @NotNull BookInfo info,
-        Library sourceLibrary,
-        Context context
+        @Nullable  Library sourceLibrary,
+        @NotNull Context context
     ) {
         super(info, context);
         this.repo = this.context.bookInfoRepo();
-        this.id = info.id();
-        this.sourceLibrary = pickSourceLibrary(sourceLibrary, id, context);
+        this.sourceLibrary = pickSourceLibrary(sourceLibrary, this.id(), context);
 
-        context.log.d(this, "Book (" + this.id + ") created from Info");
+        context.log.d(this, "Book (" + this.id() + ") created from Info");
     }
     public
     Book(
-        String json,
-        Class<BookInfo> clazz,
-        Library sourceLibrary,
-        Context context
+        @NotNull String json,
+        @NotNull Class<BookInfo> clazz,
+        @Nullable Library sourceLibrary,
+        @NotNull Context context
     ) {
         super(json, clazz, context);
         this.repo = this.context.bookInfoRepo();
-        this.id = this.info.id();
-        this.sourceLibrary = pickSourceLibrary(sourceLibrary, id, context);
+        this.sourceLibrary = pickSourceLibrary(sourceLibrary, this.id(), context);
 
-        context.log.d(this, "Book (" + this.id + ") created from JSON using class:" + clazz.getName());
+        context.log.d(this, "Book (" + this.id() + ") created from JSON using class:" + clazz.getName());
     }
     public
     Book(
         @NotNull UUID2<Book> id,
-        Library sourceLibrary,
-        Context context
+        @Nullable Library sourceLibrary,
+        @NotNull Context context
     ) {
         super(id, context);
         this.repo = this.context.bookInfoRepo();
-        this.id = id;
         this.sourceLibrary = pickSourceLibrary(sourceLibrary, id, context);
 
-        context.log.d(this, "Book (" + this.id + ") created using id with no Info");
+        context.log.d(this, "Book (" + this.id() + ") created using id with no Info");
     }
     public
-    Book(String json, Library sourceLibrary, Context context) {
+    Book(@NotNull String json, @Nullable Library sourceLibrary, @NotNull Context context) {
         this(json, BookInfo.class, sourceLibrary, context);
     }
     public
-    Book(String json, Context context) {
+    Book(@NotNull String json, @NotNull Context context) {
         this(json, BookInfo.class, null, context);
     }
     public
-    Book(Context context) {
+    Book(@NotNull Context context) {
         this(new BookInfo(UUID2.randomUUID2(Book.class)), null, context);
     }
 
     /// Support creating Book from DTO & Entity
-    public Book(DTOBookInfo infoDTO, Library sourceLibrary, Context context) {
+    public Book(@NotNull DTOBookInfo infoDTO, @Nullable Library sourceLibrary, @NotNull Context context) {
         this(new BookInfo(infoDTO), sourceLibrary, context);
     }
-    public Book(EntityBookInfo infoEntity, Library sourceLibrary, Context context) {
+    public Book(@NotNull EntityBookInfo infoEntity, @NotNull Library sourceLibrary, @NotNull Context context) {
         this(new BookInfo(infoEntity), sourceLibrary, context);
     }
 
     /////////////////////////
     // Static constructors //
     /////////////////////////
+
     public static Result<Book> fetchBook(
         @NotNull UUID2<Book> uuid2,
         @Nullable Library sourceLibrary,
@@ -106,12 +104,18 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return fetchBook(uuid2, null, context);
     }
 
-    ////////////////////////////////
-    // Published Getters          //
-    ////////////////////////////////
+    ////////////////////////
+    // Published Getters  //
+    ////////////////////////
 
     public Library sourceLibrary() {
         return sourceLibrary;
+    }
+
+    // Convenience method to get the Type-safe id from the Class
+    @Override @SuppressWarnings("unchecked")
+    public UUID2<Book> id() {
+        return (UUID2<Book>) super.id();
     }
 
     /////////////////////////////////////
@@ -122,7 +126,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     public Result<BookInfo> fetchInfoResult() {
         // context.log.d(this,"Book (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
-        infoResult = this.repo.fetchBookInfo(this.id);
+        infoResult = this.repo.fetchBookInfo(this.id());
         if (infoResult instanceof Result.Failure) {
             return infoResult;
         }
@@ -207,7 +211,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         // - shows example of Role-specific business logic in a Role Object.
         // - ie: sourceLibrary only exists in this Book Role as BookInfo does NOT have a sourceLibrary field.
 
-        Book updatedBook = new Book(this.info(), sourceLibrary, this.context);  // todo test
+        Book updatedBook = new Book(this.info(), sourceLibrary, this.context);
         return new Result.Success<>(updatedBook);
     }
 
@@ -227,7 +231,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
             context.libraryInfoRepo()
                 .upsertLibraryInfo(
                     new LibraryInfo(
-                        privateLibrary.id,
+                        privateLibrary.id(),
                         "ORPHAN Private Library only for one Book, BookId: " + bookId.uuid()
                     )
                 );

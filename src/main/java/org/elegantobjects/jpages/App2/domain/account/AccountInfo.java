@@ -30,7 +30,7 @@ public class AccountInfo extends DomainInfo
     public final int maxFinePennies;           // max fine amount allowed before account is suspended
 
     // Showing object can use internal ways to track its own data that will not be directly exposed to the outside world.
-    // ie: we could have used a "Log" role here, but instead we just use a HashMap. // todo should this be a Log role instead?
+    // ie: we could have used a "Log" role here, but instead we just use a HashMap. // todo should this be a subclassed Log Role instead?
     final private HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap; // timestamp_ms -> AccountAuditLogItem
 
     // LEAVE for future use
@@ -51,7 +51,7 @@ public class AccountInfo extends DomainInfo
         @NotNull HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap
     ) {
         super(id);
-        this.id = id;
+//        this.id = id;
         this.userId = new UUID2<>(id); // set the Accounts' User UUID to match the Account's UUID
         this.name = name;
         this.accountStatus = accountStatus;
@@ -75,7 +75,8 @@ public class AccountInfo extends DomainInfo
     public @SuppressWarnings("unchecked")
     AccountInfo(@NotNull AccountInfo accountInfo) {
         this(
-            (UUID2<Account>) accountInfo.id,
+//            (UUID2<Account>) accountInfo.id(),
+            accountInfo.id(),
             accountInfo.name,
             accountInfo.accountStatus,
             accountInfo.currentFinePennies,
@@ -124,7 +125,7 @@ public class AccountInfo extends DomainInfo
 
     @Override @SuppressWarnings("unchecked")
     public UUID2<Account> id() {
-        return (UUID2<Account>) id;
+        return (UUID2<Account>) super.id();
     }
     public String name() {
         return this.name;
@@ -150,7 +151,8 @@ public class AccountInfo extends DomainInfo
 
         return new Result.Success<>(
             new AccountInfo(
-                (UUID2<Account>) this.id,
+//                (UUID2<Account>) this.id(),
+                this.id(),
                 this.name,
                 AccountStatus.ACTIVE,
                 this.currentFinePennies,
@@ -170,7 +172,8 @@ public class AccountInfo extends DomainInfo
 
         return new Result.Success<>(
             new AccountInfo(
-                (UUID2<Account>) this.id,
+//                (UUID2<Account>) this.id(),
+                this.id(),
                 this.name,
                 AccountStatus.INACTIVE,
                 this.currentFinePennies,
@@ -189,7 +192,8 @@ public class AccountInfo extends DomainInfo
         addAuditLogEntry("suspendAccountByStaff", "reason", reason, "staffMemberName", staffMemberName);
 
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 AccountStatus.SUSPENDED,
                 this.currentFinePennies,
@@ -208,7 +212,8 @@ public class AccountInfo extends DomainInfo
         addAuditLogEntry("closeAccountByStaff", "reason", reason, "staffMemberName", staffMemberName);
 
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 AccountStatus.CLOSED,
                 this.currentFinePennies,
@@ -233,7 +238,8 @@ public class AccountInfo extends DomainInfo
 
         //noinspection unchecked
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 updatedAccountStatus,
                 this.currentFinePennies + fineAmountPennies,
@@ -255,7 +261,8 @@ public class AccountInfo extends DomainInfo
 
         //noinspection unchecked
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 updatedAccountStatus,
                 this.currentFinePennies - fineAmountPennies,
@@ -278,7 +285,8 @@ public class AccountInfo extends DomainInfo
 
         //noinspection unchecked
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 updatedAccountStatus,
                 newCurrentFineAmount,
@@ -297,7 +305,8 @@ public class AccountInfo extends DomainInfo
 
         //noinspection unchecked
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 this.accountStatus,
                 this.currentFinePennies,
@@ -314,7 +323,8 @@ public class AccountInfo extends DomainInfo
 
         //noinspection unchecked
         return new Result.Success<>(
-            new AccountInfo((UUID2<Account>) this.id,
+//            new AccountInfo((UUID2<Account>) this.id(),
+            new AccountInfo(this.id(),
                 this.name,
                 this.accountStatus,
                 this.currentFinePennies,
@@ -492,13 +502,15 @@ public class AccountInfo extends DomainInfo
         if (newName.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("newName is null or empty"));
 
-        return new Result.Success<>(new AccountInfo((UUID2<Account>) this.id, newName));
+//        return new Result.Success<>(new AccountInfo((UUID2<Account>) this.id(), newName));
+        return new Result.Success<>(new AccountInfo(this.id(), newName));
     }
     @SuppressWarnings("unchecked")
     private  Result<AccountInfo> withAccountStatus(@NotNull AccountStatus newAccountStatus) {
         return new Result.Success<>(
             new AccountInfo(
-                (UUID2<Account>) this.id,
+//                (UUID2<Account>) this.id(),
+                this.id(),
                 this.name,
                 newAccountStatus,
                 this.currentFinePennies,
@@ -510,11 +522,12 @@ public class AccountInfo extends DomainInfo
     @SuppressWarnings("unchecked")
     private Result<AccountInfo> withCurrentFineAmountPennies(int newCurrentFineAmountPennies) {
         if (newCurrentFineAmountPennies < 0)
-            return new Result.Failure<>(new IllegalArgumentException("newCurrentFineAmountPennies is negative")); // todo - allow fine credits?
+            return new Result.Failure<>(new IllegalArgumentException("newCurrentFineAmountPennies is negative")); // todo - allow credits for Fines?
 
         return new Result.Success<>(
             new AccountInfo(
-                (UUID2<Account>) this.id,
+//                (UUID2<Account>) this.id(),
+                this.id(),
                 this.name,
                 this.accountStatus,
                 newCurrentFineAmountPennies,
@@ -530,7 +543,8 @@ public class AccountInfo extends DomainInfo
 
         return new Result.Success<>(
             new AccountInfo(
-                (UUID2<Account>) this.id,
+//                (UUID2<Account>) this.id(),
+                this.id(),
                 this.name,
                 this.accountStatus,
                 this.currentFinePennies,
@@ -550,7 +564,8 @@ public class AccountInfo extends DomainInfo
         // Note: *MUST* return a deep copy
 
         return new AccountInfo(
-                (UUID2<Account>) this.id,
+//                (UUID2<Account>) this.id(),
+                this.id(),
                 this.name,
                 this.accountStatus,
                 this.currentFinePennies,
@@ -560,8 +575,8 @@ public class AccountInfo extends DomainInfo
         );
     }
 
-    @Override
-    public UUID2<?> domainInfoId() {
-        return this.id;
-    }
+//    @Override
+//    public UUID2<?> domainInfoId() {
+//        return this.id;
+//    }
 }

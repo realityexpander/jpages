@@ -35,7 +35,8 @@ public interface Info<TInfo> {
     }
 
     interface ToInfo<TInfo> {
-        UUID2<?> getInfoId();             // Returns the UUID2 of the Info object
+//        UUID2<?> getInfoId();             // Returns the UUID2 of the Info object
+        UUID2<?> id();             // Returns the UUID2 of the Info object
 
         @SuppressWarnings("unchecked")
         default TInfo getInfo() {         // Returns the Info object
@@ -67,7 +68,8 @@ public interface Info<TInfo> {
             // Set the UUID2 typeStr to match the Info Class name
             String infoClazzName = UUID2.calcUUID2TypeStr(infoClazz);
             infoClazz.cast(obj)
-                    .getInfoId()
+//                    .getInfoId()
+                    .id()
                     ._setUUID2TypeStr(infoClazzName);
 
             return obj;
@@ -97,19 +99,19 @@ public interface Info<TInfo> {
     default Result<TInfo> checkJsonInfoIdMatchesThisInfoId(TInfo infoFromJson, Class<?> infoClazz) {
 
         try {
-            // Ensure JSON Info object has an `id` field
+            // Ensure JSON Info object has an `_id` field
             Class<?> rootInfoClazz = _getRootClass(infoClazz);
-            Object idField = rootInfoClazz.getDeclaredField("id").get(infoFromJson);
+            Object idField = rootInfoClazz.getDeclaredField("_id").get(infoFromJson);
             if(idField == null) {
-                return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an id field"));
+                return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an _id field"));
             }
 
             UUID idFromJson = ((UUID2<?>)idField).uuid();
 
             if (!idFromJson.equals(this.id().uuid())) {
-                return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info id does not match json id, " +
-                        "info id: " + this.id() + ", " +
-                        "json id: " + idFromJson));
+                return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info _id does not match json _id, " +
+                        "info _id: " + this.id() + ", " +
+                        "json _id: " + idFromJson));
             }
         } catch (NoSuchFieldException e) {
             return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an id field"));

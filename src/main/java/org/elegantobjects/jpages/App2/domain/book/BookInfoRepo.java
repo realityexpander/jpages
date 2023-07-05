@@ -91,6 +91,7 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         return bookResult;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Result<BookInfo> upsertBookInfo(BookInfo bookInfo) {
         log.d(this, "bookId: " + bookInfo.id());

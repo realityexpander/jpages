@@ -23,7 +23,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         Info<TDomainInfo>,
         IUUID2
 {
-    private final UUID2<?> id;
+    private final UUID2<?> id;  // the UUID of the Domain object matches the UUID of the Info object
+                                // It is final and private in the Domain layer.
 
     protected TDomainInfo info;  // Information object for Info<Domain.{Domain}Info>
     protected Result<TDomainInfo> infoResult = null;
@@ -139,7 +140,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             // Set UUID2Type to match type of TDomainInfo object
             String domainInfoClazzName = UUID2.calcUUID2TypeStr(domainInfoClazz);
             domainInfoClazz.cast(obj)
-                    .domainInfoId()
+//                    .domainInfoId()
+                    .id()
                     ._setUUID2TypeStr(domainInfoClazzName);
 
             // Set `id` to match `id` of the Info

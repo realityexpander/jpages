@@ -29,7 +29,7 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
 
     @Override
     public Result<AccountInfo> updateAccountInfo(@NotNull AccountInfo accountInfo) {
-        log.d(this, "accountInfo.id: " + accountInfo.id);
+        log.d(this, "accountInfo.id: " + accountInfo.id());
 
         // Simulate network/database
         if (database.containsKey(accountInfo.id())) {
@@ -43,7 +43,7 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
 
     @Override
     public Result<AccountInfo> upsertAccountInfo(@NotNull AccountInfo accountInfo) {
-        log.d(this, "accountInfo.id: " + accountInfo.id);
+        log.d(this, "accountInfo.id(): " + accountInfo.id());
 
         // Simulate network/database
         database.put(accountInfo.id(), accountInfo);

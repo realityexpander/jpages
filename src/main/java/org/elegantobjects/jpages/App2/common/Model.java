@@ -25,29 +25,31 @@ import org.jetbrains.annotations.NotNull;
  - Validation occurs in the Domain layer, when an DTO/Entity is converted to a DomainInfo object.<br>
  **/
 public class Model {
-    private UUID2<?> id; // Can't make final due to need to set it during JSON deserialization. :(
+    public UUID2<?> _id; // Can't make final due to need to set it during JSON deserialization. :(
+                         // Also can't make it private due to Gson's need to access it during deserialization. :(
+                         // todo Is there a better way to do this? (maybe another JSON library?)
 
     protected
     Model(UUID2<?> id) {
-        this.id = new UUID2<>(id);
+        this._id = new UUID2<>(id);
     }
 
     ////////////////////////
     // Simple getters     //
     ////////////////////////
 
-    public UUID2<?> id() { return id; }
+    public UUID2<?> id() { return _id; }
 
     // EXCEPTIONAL CASE:
     // - This method is for JSON deserialization purposes & should only be used for such.
     // - It is not intended to be used for any other purpose.
     // - todo Is there a better way to do this?
     public void _setIdFromImportedJson(UUID2<IUUID2> id) {
-        this.id = id;
+        this._id = id;
     }
 
     public String toPrettyJson() {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this); // todo switch over to context version
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
     public String toPrettyJson(@NotNull Context context) {
         return context.gson.toJson(this);
@@ -61,7 +63,8 @@ public class Model {
     ///////////////////////////
 
     public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
-        UUID2<?> domainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
+//        UUID2<?> domainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
+        UUID2<?> id();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
 
         default @SuppressWarnings("unchecked")

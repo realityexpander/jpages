@@ -29,16 +29,15 @@ public class UserInfo extends DomainInfo
         @NotNull HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap
     ) {
         super(id);
-        this.id = id;
         this.name = name;
         this.email = email;
         this.acceptedBookIdToSourceLibraryIdMap = acceptedBookIdToSourceLibraryIdMap;
     }
-    public @SuppressWarnings("unchecked")
+    public
     UserInfo(@NotNull UserInfo userInfo) {
 
         this(
-            (UUID2<User>) userInfo.id,
+            userInfo.id(),
             userInfo.name,
             userInfo.email,
             userInfo.acceptedBookIdToSourceLibraryIdMap
@@ -65,14 +64,15 @@ public class UserInfo extends DomainInfo
     // Published Simple Getters  //  // note: no setters, all changes are made through business logic methods.
     ///////////////////////////////
 
+    // Convenience method to get the Type-safe id from the Class
     @Override @SuppressWarnings("unchecked")
     public UUID2<User> id() {
-        return (UUID2<User>) id;
+        return (UUID2<User>) super.id();
     }
 
     @Override
     public String toString() {
-        return toPrettyJson();
+        return this.toPrettyJson();
     }
 
     ////////////////////////////////////////
@@ -187,11 +187,6 @@ public class UserInfo extends DomainInfo
         }
 
         return domainInfoCopy;
-    }
-
-    @Override
-    public UUID2<?> domainInfoId() {
-        return this.id;
     }
 
 }
