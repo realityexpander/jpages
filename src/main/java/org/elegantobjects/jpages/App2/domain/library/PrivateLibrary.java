@@ -90,7 +90,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //////////////////////////////////////////////////
 
     @Override
-    public Result<Book> checkInBookFromUser(Book book, User user) {
+    public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
         context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
 
         if (!isForOnlyOneBook) {
@@ -116,7 +116,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
     }
 
     @Override
-    public Result<Book> checkOutBookToUser(Book book, User user) {
+    public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
         context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
 
         if (!isForOnlyOneBook) {

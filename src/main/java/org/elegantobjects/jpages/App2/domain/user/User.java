@@ -144,7 +144,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
 
     @Override
-    public Result<UserInfo> updateInfo(UserInfo updatedUserInfo) {
+    public Result<UserInfo> updateInfo(@NotNull UserInfo updatedUserInfo) {
         context.log.d(this,"User (" + this.id + "),  userInfo: " + updatedUserInfo);
 
         // Update self optimistically

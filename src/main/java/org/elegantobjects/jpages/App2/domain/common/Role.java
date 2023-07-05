@@ -214,7 +214,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // - Call super.updateInfo(info) to update the info<TDomainInfo> object
     //   (caller decides when appropriate, ie: optimistic updates, or after server confirms update)
     @Override
-    public Result<TDomainInfo> updateInfo(@Nullable TDomainInfo info) { // **MUST** Override in subclasses
+    public Result<TDomainInfo> updateInfo(@NotNull TDomainInfo info) { // **MUST** Override in subclasses
         this.info = info;
         return new Result.Success<>(this.info);
     }
@@ -288,6 +288,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                 "class: " + this.getClass().getName() + ", " +
                 "id: " + this.id.toString());
 
+        // Exception to the no-null rule. This is only when forcing a re-fetch of the info.
+        // todo should we leave the data stale?
         this.info = null;
         return this.fetchInfoResult();
     }

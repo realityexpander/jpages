@@ -24,7 +24,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
     public Library(
         @NotNull LibraryInfo info,
-        Context context
+        @NotNull Context context
     ) {
         super(info, context);
         this.repo = this.context.libraryInfoRepo();
@@ -34,8 +34,8 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
     public Library(
         String json,
-        Class<LibraryInfo> clazz,
-        Context context
+        @NotNull Class<LibraryInfo> clazz,
+        @NotNull Context context
     ) {
         super(json, clazz, context);
         this.repo = this.context.libraryInfoRepo();
@@ -45,7 +45,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
     public Library(
         @NotNull UUID2<Library> id,
-        Context context
+        @NotNull Context context
     ) {
         super(id, context);
         this.repo = this.context.libraryInfoRepo();
@@ -53,8 +53,8 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         context.log.d(this,"Library (" + this.id + ") created using id with no Info");
     }
-    public Library(String json, Context context) { this(json, LibraryInfo.class, context); }
-    public Library(Context context) {
+    public Library(@NotNull String json, @NotNull Context context) { this(json, LibraryInfo.class, context); }
+    public Library(@NotNull Context context) {
         this(UUID2.randomUUID2(Library.class), context);
     }
     // LEAVE for reference, for static Context instance implementation
@@ -100,7 +100,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
 
     @Override
-    public Result<LibraryInfo> updateInfo(LibraryInfo updatedInfo) {
+    public Result<LibraryInfo> updateInfo(@NotNull LibraryInfo updatedInfo) {
         // context.log.d(this,"Library (" + this.id.toString() + ") - updateInfo, newInfo: " + newInfo.toString());  // LEAVE for debugging
 
         // Update self optimistically
@@ -129,7 +129,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     // - Communicate with other ROle objects //
     ///////////////////////////////////////////
 
-    public Result<Book> checkOutBookToUser(Book book, User user) {
+    public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
         context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -169,7 +169,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return new Result.Success<>(book);
     }
 
-    public Result<Book> checkInBookFromUser(Book book, User user) {
+    public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
         context.log.d(this, format("Library (%s) - checkInBookFromUser, bookId %s from userID %s\n", this.id, book.id, user.id));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -392,11 +392,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     /////////////////////////////////////////
 
     // Intention revealing method name
-    public Result<Book> addTestBookToLibrary(@NotNull Book book, Integer count) {
+    public Result<Book> addTestBookToLibrary(@NotNull Book book, @NotNull Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
         return addBookToLibrary(book, count);
     }
-    public Result<Book> addBookToLibrary(@NotNull Book book, Integer count) {
+    public Result<Book> addBookToLibrary(@NotNull Book book, @NotNull Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 

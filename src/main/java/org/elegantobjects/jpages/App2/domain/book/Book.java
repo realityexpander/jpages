@@ -133,7 +133,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     }
 
     @Override
-    public Result<BookInfo> updateInfo(BookInfo updatedInfo) {
+    public Result<BookInfo> updateInfo(@NotNull BookInfo updatedInfo) {
         // Update self optimistically
         super.updateInfo(updatedInfo);
 

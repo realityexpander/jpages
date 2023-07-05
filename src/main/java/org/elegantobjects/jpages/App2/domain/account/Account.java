@@ -92,7 +92,7 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     }
 
     @Override
-    public Result<AccountInfo> updateInfo(AccountInfo updatedInfo) {
+    public Result<AccountInfo> updateInfo(@NotNull AccountInfo updatedInfo) {
         // context.log.d(this,"Account (" + this.id.toString() + ") - updateInfo, newInfo: " + newInfo.toString());  // LEAVE for debugging
 
         // Update self optimistically
