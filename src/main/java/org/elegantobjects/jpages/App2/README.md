@@ -6,7 +6,7 @@
 - Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
-  - Back to basics approach for Java coding style in the Domain layer for Role objects.
+  - Back to original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
   - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice)
 
 - BOOP is a design pattern that is inspired by:
@@ -21,6 +21,19 @@
   - To remedy this, documentation about the data hierarchy should exist near the code (maybe a README). 
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
+<br>
+
+#### Looking to Avoid
+- Prefer to avoid entirely the COP (Class Oriented Programming) paradigms, such as:<br>
+  - Note: These all seem to be primarily focused around continuing to use old procedural methods leftover from C and C++.
+  - Using Classes as dumb data containers, with no methods.
+  - Using Classes as name space for methods, with no data.
+  - Using static methods to modify objects data directly.
+  - Using static methods and static variables to avoid having to create objects.
+  - Exposing internal data structures and mutable objects.
+  - Allowing `null` to be returned from methods.
+  - `Null` checks everywhere.
+  - Allowing multiple shared access to static global variables/state.
 
 ## Code Style
 
