@@ -54,7 +54,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void Create_new_UUID2_from_UUID2_String_results_Equal_values() throws ClassNotFoundException {
+    public void Create_new_UUID2_from_UUID2_String_are_Equal() throws ClassNotFoundException {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
         String book1200UUID2Str = book1200Id.toString();
@@ -68,7 +68,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void Create_new_UUID2_from_another_UUID2_results_Equal_values() throws ClassNotFoundException {
+    public void Create_new_UUID2_from_another_UUID2_are_Equal() throws ClassNotFoundException {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
 
