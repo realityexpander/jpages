@@ -19,7 +19,7 @@ import java.util.UUID;
 // Domain Role - Common Domain Role Abstract class //
 /////////////////////////////////////////////////////
 public abstract class Role<TDomainInfo extends DomainInfo>
-        implements
+    implements
         Info<TDomainInfo>,
         IUUID2
 {

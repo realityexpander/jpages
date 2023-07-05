@@ -108,14 +108,14 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     // Published Getters  //
     ////////////////////////
 
-    public Library sourceLibrary() {
-        return sourceLibrary;
-    }
-
     // Convenience method to get the Type-safe id from the Class
     @Override @SuppressWarnings("unchecked")
     public UUID2<Book> id() {
         return (UUID2<Book>) super.id();
+    }
+
+    public Library sourceLibrary() {
+        return sourceLibrary;
     }
 
     /////////////////////////////////////

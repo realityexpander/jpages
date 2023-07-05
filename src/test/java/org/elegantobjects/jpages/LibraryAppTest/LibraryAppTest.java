@@ -61,12 +61,12 @@ public class LibraryAppTest {
 
         public
         TestRoles(
-                Account account1,
-                Account account2,
-                User user1,
-                Library library1,
-                Book book1100,
-                Book book1200
+            Account account1,
+            Account account2,
+            User user1,
+            Library library1,
+            Book book1100,
+            Book book1200
         ) {
             this.account1 = account1;
             this.account2 = account2;
