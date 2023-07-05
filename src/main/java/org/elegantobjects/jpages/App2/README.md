@@ -59,7 +59,7 @@ using IDE tools (like hover to find var types).
   - Returning/Exposing `Role` objects or `id's` is OK.
     - `Role` objects are immutable, and contain references to their mutable `Info` data.
     - `id` is immutable, and is used to fetch Info objects from their respective Repositories.
-  - Never return `null`
+  - Should never return `null`
     - Return an intention-revealing object instead
     - Prefer `Result` or `Empty` object instead of `null`
     - `boolean` is acceptable, over `null`.
@@ -83,7 +83,7 @@ using IDE tools (like hover to find var types).
 - Use intention-named objects that indicate the reason for a `null` case.
   - ie: `PrivateLibrary` instead of a `null` source Library
 
-- Important Exception
+- <b>Important Exception:</b>
   - `null` is returned from `fetchInfo()` when no error has occurred. 
   - If there is an error, it is returned in a `Result` object.
   - This is for convenience: 
@@ -109,11 +109,15 @@ using IDE tools (like hover to find var types).
 - Singleton objects reside in the Context object, and are passed in constructors.
 
 ### All Objects Immutable
-- All objects are immutable, except for the `UUID2` `id` and `UUIDType` values for all objects.
-  - These are mutable because of how JSON imports work. 
-    - The `id` must first be extracted from the JSON data before the new Object is created. 
-    - The `UUIDType` is mutable because its not known at object creation time, and must be set after the JSON is parsed.
-    - This is a known limitation, and I am unaware of a workaround that doesn't involve a lot of complexity.
+- All objects are immutable, except for the referred `Info` objects.
+  - Important exception:
+    - The `UUID2` `id` and `UUIDType` values for all objects are kept mutable due to limitations of java:
+    - These are mutable because of how JSON imports work. 
+      - The `id` must first be extracted from the JSON data before the new Object is created. 
+      - The `UUIDType` is mutable because its not known at object creation time, and must be set after the JSON is parsed.
+      - This is a known limitation, and I am unaware of a workaround that doesn't involve a lot of complexity.
+      - We keep the id private, and only expose it via `id()` method.
+      - The setter function is public but noted with a `_` prefix to indicate its special case.
 - `Role` objects are immutable and communicate or contain other Role objects.
 - `Role` objects contain references to their mutable data (Info) which is updated or fetched automatically when the
   role object is updated. 
