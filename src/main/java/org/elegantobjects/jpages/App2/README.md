@@ -20,8 +20,6 @@
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
-[Jump to Application Notes](#architecture)
-
 ## Code Style
 
 - Strive to make Domain layer code plain idiomatic Java as possible, and read like English prose.
@@ -37,6 +35,7 @@ using IDE tools (like hover to find var types).
 
 ### Contents
 
+- [Library Application Details](#architecture)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No Dependency Injection Framework](#no-dependency-injection-framework)
 - [No `null` in Domain](#no-null-in-domain)
@@ -466,6 +465,7 @@ using IDE tools (like hover to find var types).
   </tr>
 </table>
 
+# Library Application Details
 
 #architecture
 
