@@ -27,17 +27,17 @@ public class UUID2Test {
     }
 
     @Test
-    public void UUID2_serialized_string_is_Correct() {
+    public void UUID2_deserialized_string_is_Correct() {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
-        String book1200UUID2Str = book1200Id.toString();
+        String expectedUUID2Str = "UUID2:Role.Book@00000000-0000-0000-0000-000000001200";
 
         // • ACT
-        String expectedUUID2Str = "UUID2:Role.Book@00000000-0000-0000-0000-000000001200";
+        String book1200Uuid2Str = book1200Id.toString();
 
         // • ASSERT
         assertEquals("UUID2 String not serialized correctly",
-                book1200UUID2Str, expectedUUID2Str);
+                book1200Uuid2Str, expectedUUID2Str);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class UUID2Test {
         assertEquals(book9999Id, book9999Ida);
     }
 
-    private void setUpUUID2HashMapTest() {
+    private void setUpUuid2HashMapTest() {
         ctx = LibraryAppTest.setupDefaultTestContext();
 
         uuid2ToEntityMap = new UUID2.HashMap<>();
@@ -109,7 +109,7 @@ public class UUID2Test {
     @Test
     public void Get_UUID2HashMap_item_is_Success() {
         // • ARRANGE
-        setUpUUID2HashMapTest();
+        setUpUuid2HashMapTest();
 
         // • ACT
         UUID2<User> user = uuid2ToEntityMap.get(book1);
@@ -123,7 +123,7 @@ public class UUID2Test {
     @Test
     public void Get_UUID2HashMap_item_using_new_UUID2_is_Success() {
         // • ARRANGE
-        setUpUUID2HashMapTest();
+        setUpUuid2HashMapTest();
         UUID2<User> user = uuid2ToEntityMap.get(book1);
         UUID2<Book> book1a = UUID2.createFakeUUID2(1200, Book.class);
 
@@ -139,7 +139,7 @@ public class UUID2Test {
     @Test
     public void Remove_UUID2HashMap_item_using_new_UUID2_is_Success() {
         // • ARRANGE
-        setUpUUID2HashMapTest();
+        setUpUuid2HashMapTest();
         UUID2<User> user = uuid2ToEntityMap.get(book1);
 
         // • ACT
@@ -158,7 +158,7 @@ public class UUID2Test {
     @Test
     public void Put_UUID2HashMap_item_twice_does_not_make_duplicate_entry_is_Success() {
         // • ARRANGE
-        setUpUUID2HashMapTest();
+        setUpUuid2HashMapTest();
         UUID2<User> user = uuid2ToEntityMap.get(book1);
         uuid2ToEntityMap.remove(book1);
 
