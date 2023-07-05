@@ -34,7 +34,6 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //     ie: what is the concept of a "null" Library? Maybe it is a Library which is not part of any system Library?
     //     How about a "Library" which is not part of any system Library is called a "PrivateLibrary"?
 
-
     // ORPHAN Private Library:
     //   - ORPHAN definition: An orphan is a child that has no parent.
     //     - For a Book, it would have no "source" Public Library.
@@ -43,7 +42,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //   - It can only ever hold 1 Book at a time.
     //   - System Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
     //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
-    private final Boolean isForOnlyOneBook;
+    private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
 
     public PrivateLibrary(
         @NotNull LibraryInfo info,
@@ -72,8 +71,9 @@ public class PrivateLibrary extends Library implements IUUID2 {
         this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
 
         // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).
-        // ORPHAN Private Library can contain only 1 Book,
-        //   and it's BookId must match the initial BookId that created this Orphan Library.
+        // ORPHAN Private Library can:
+        //  - Contain only 1 Book,
+        //  - And the 1 BookId must always match initial BookId that created this Orphan Library.
         this.isForOnlyOneBook = true;
     }
     public PrivateLibrary(

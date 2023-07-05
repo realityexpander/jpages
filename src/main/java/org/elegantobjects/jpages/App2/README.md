@@ -223,9 +223,9 @@ using IDE tools (like hover to find var types).
 - No builder patterns
   - Create a new object modified copy from the old object, and return the new object. 
   - No need for a builder. 
-  - Use `.with{someField}(...)` method to update `someField` field.
+  - Use `.with{someField}(updatedValue)` method to update `someField` member field.
 - No fluent interfaces
-  - Use `.with{someField}(...)` to update `someField` field.
+  - Use `.with{someField}(updatedValue)` to update each `someField` member field.
 
 ### Prefer Use of Early Return
 - Multiple early `returns` for ease of error handling 
