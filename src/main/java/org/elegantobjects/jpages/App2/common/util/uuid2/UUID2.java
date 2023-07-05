@@ -116,7 +116,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     public
-    boolean onlyUUIDEquals(@NotNull UUID2<?> other) {
+    boolean isOnlyUUIDEqual(@NotNull UUID2<?> other) {
         return (other).uuid().equals(uuid());
     }
 

@@ -4,7 +4,6 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.user.User;
-import org.elegantobjects.jpages.LibraryAppTest.LibraryAppTest;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,7 +73,7 @@ public class UUID2Test {
         UUID2<User> user1200Id = UUID2.createFakeUUID2(1200, User.class);
 
         // • ACT
-        boolean isEqual = book1200Id.onlyUUIDEquals(user1200Id);
+        boolean isEqual = book1200Id.isOnlyUUIDEqual(user1200Id);
 
         // • ASSERT
         assertTrue(isEqual);
