@@ -34,8 +34,9 @@ public class Model {
     public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
         UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
-        @SuppressWarnings("unchecked")
-        default TDomainInfo getDomainInfo()
+
+        default @SuppressWarnings("unchecked")
+        TDomainInfo getDomainInfo()
         {  // Return reference to TDomainInfo, used when importing JSON
             return (TDomainInfo) this; // todo test this cast
         }
@@ -49,7 +50,8 @@ public class Model {
         //   definition, and the deepCopy() method will be added.
         interface hasToDeepCopyDomainInfo<TToInfo extends ToDomainInfo<? extends DomainInfo>> {
 
-            default <TDomainInfo extends DomainInfo> @SuppressWarnings("unchecked")
+
+            default @SuppressWarnings("unchecked") <TDomainInfo extends DomainInfo>
             TDomainInfo deepCopyDomainInfo() // Requires method override, should return a deep copy (no original references)
             {
                 // This is a hack to get around the fact that Java doesn't allow you to call a generic method from a generic class
