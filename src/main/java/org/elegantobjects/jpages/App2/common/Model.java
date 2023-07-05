@@ -46,8 +46,8 @@ public class Model {
     // - This method is for JSON deserialization purposes & should only be used for such.
     // - It is not intended to be used for any other purpose.
     // - todo Is there a better way to do this?
-    public void _setIdFromImportedJson(UUID2<IUUID2> id) {
-        this._id = id;
+    public void _setIdFromImportedJson(UUID2<IUUID2> _id) {
+        this._id = _id;
     }
 
     public String toPrettyJson() {
@@ -65,9 +65,11 @@ public class Model {
     ///////////////////////////
 
     public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
-//        UUID2<?> domainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
-        UUID2<?> id();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
+        // *MUST* override
+        // - Overridden method should return `id` with correct type of UUID2 for the domain
+        //   ie: `UUID2<User>` for the `User`, `UUID2<UserInfo>` for the UserInfo, etc.
+        UUID2<?> id();
 
         default @SuppressWarnings("unchecked")
         TDomainInfo getDomainInfo()
