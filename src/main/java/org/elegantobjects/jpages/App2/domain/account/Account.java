@@ -19,7 +19,7 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
     public Account(
         @NotNull AccountInfo info,
-        Context context
+        @NotNull Context context
     ) {
         super(info, context);
         this.repo = this.context.accountInfoRepo();
@@ -29,8 +29,8 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     }
     public Account(
         String json,
-        Class<AccountInfo> clazz,
-        Context context
+        @NotNull Class<AccountInfo> clazz,
+        @NotNull Context context
     ) {
         super(json, clazz, context);
         this.repo = this.context.accountInfoRepo();
@@ -40,7 +40,7 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     }
     public Account(
         @NotNull UUID2<Account> id,
-        Context context
+        @NotNull Context context
     ) {
         super(id, context);
         this.repo = this.context.accountInfoRepo();
@@ -48,8 +48,8 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
         context.log.d(this,"Account(" + this.id + ") created using id with no Info");
     }
-    public Account(String json, Context context) { this(json, AccountInfo.class, context); }
-    public Account(Context context) {
+    public Account(@NotNull String json, @NotNull Context context) { this(json, AccountInfo.class, context); }
+    public Account(@NotNull Context context) {
         this(UUID2.randomUUID2(), context);
     }
 

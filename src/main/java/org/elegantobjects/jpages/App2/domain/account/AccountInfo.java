@@ -43,12 +43,12 @@ public class AccountInfo extends DomainInfo
     public
     AccountInfo(
         @NotNull UUID2<Account> id,  // UUID should match User's UUID
-        String name,
-        AccountStatus accountStatus,
+        @NotNull String name,
+        @NotNull AccountStatus accountStatus,
         int currentFinePennies,
         int maxAcceptedBooks,
         int maxFinePennies,
-        HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap
+        @NotNull HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap
     ) {
         super(id);
         this.id = id;
@@ -61,7 +61,7 @@ public class AccountInfo extends DomainInfo
         this.timeStampToAccountAuditLogItemMap = timeStampToAccountAuditLogItemMap;
     }
     public
-    AccountInfo(UUID2<Account> id, String name) { // sensible defaults
+    AccountInfo(@NotNull UUID2<Account> id, @NotNull String name) { // sensible defaults
         this(
             id,
             name,
@@ -85,11 +85,11 @@ public class AccountInfo extends DomainInfo
         );
     }
     public
-    AccountInfo(UUID uuid, String name) {
+    AccountInfo(@NotNull UUID uuid, @NotNull String name) {
         this(new UUID2<Account>(uuid, Account.class), name);
     }
     public
-    AccountInfo(String id, String name) {
+    AccountInfo(@NotNull String id, @NotNull String name) {
         this(UUID.fromString(id), name);
     }
 
@@ -107,12 +107,9 @@ public class AccountInfo extends DomainInfo
 
         public
         AccountAuditLogItem(
-                @NotNull
-                Long timeStampMillis,
-                @NotNull
-                String operation,
-                @NotNull
-                HashMap<String, String> kvHashMap
+            @NotNull Long timeStampMillis,
+            @NotNull String operation,
+            @NotNull HashMap<String, String> kvHashMap
         ) {
             this.timeStampLongMillis = timeStampMillis;
             this.operation = operation;

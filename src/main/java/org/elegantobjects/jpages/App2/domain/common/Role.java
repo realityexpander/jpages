@@ -23,9 +23,6 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         Info<TDomainInfo>,
         IUUID2
 {
-    // Unique ID for this Role
-    // - Matches id of its Info<TDomainInfo> object (to avoid confusion)
-    // - Marked transient so gson will ignore it, as every concrete DomainObject will have a type-specific UUID2.
     private final UUID2<?> id;
 
     protected TDomainInfo info;  // Information object for Info<Domain.{Domain}Info>
@@ -37,24 +34,24 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // Class of the Info<TDomain> info object (for Gson serialization) (also JAVA REFLECTION IS UGLY!!)
     @SuppressWarnings("unchecked")
     private final Class<TDomainInfo> infoClazz =
-            getClass().getGenericSuperclass() instanceof ParameterizedType
-                ? (Class<TDomainInfo>) ((ParameterizedType) getClass() // Get clazz from this class...
-                    .getGenericSuperclass())
-                    .getActualTypeArguments()[0]
-                : (Class<TDomainInfo>) (
-                        (ParameterizedType) (
-                            (Class<?>) (
-                                this.getClass()
-                                    .getGenericSuperclass()            // ...or from the superClass generic type.
-                            )
-                        ).getGenericSuperclass()
-                  ).getActualTypeArguments()[0];
+        getClass().getGenericSuperclass() instanceof ParameterizedType
+            ? (Class<TDomainInfo>) ((ParameterizedType) getClass() // Get clazz from this class...
+                .getGenericSuperclass())
+                .getActualTypeArguments()[0]
+            : (Class<TDomainInfo>) (
+                    (ParameterizedType) (
+                        (Class<?>) (
+                            this.getClass()
+                                .getGenericSuperclass()            // ...or from the superClass generic type.
+                        )
+                    ).getGenericSuperclass()
+              ).getActualTypeArguments()[0];
 
     private
     Role(
-            @NotNull UUID id,
-            @Nullable TDomainInfo info,
-            @NotNull Context context
+        @NotNull UUID id,
+        @Nullable TDomainInfo info,
+        @NotNull Context context
     ) {
         this.id = UUID2.fromUUID(id); // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
         this.info = info;
@@ -62,9 +59,9 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     }
     private
     Role(
-            @NotNull UUID2<?> id,
-            @Nullable TDomainInfo info,
-            @NotNull Context context
+        @NotNull UUID2<?> id,
+        @Nullable TDomainInfo info,
+        @NotNull Context context
     ) {
         this.id = id; // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
         this.info = info;
@@ -128,7 +125,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             TDomain extends DomainInfo,  // restrict to Domain subclasses, ie: Domain.BookInfo
             TDomainInfo extends Model.ToDomainInfo<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
             TToInfo extends ToInfo<?>
-            > TDomainInfo createInfoFromJson(
+        > TDomainInfo createInfoFromJson(
             String json,
             @NotNull Class<TDomainInfo> domainInfoClazz, // type of `Domain.TDomainInfo` object to create
             @NotNull Context context
@@ -217,7 +214,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // - Call super.updateInfo(info) to update the info<TDomainInfo> object
     //   (caller decides when appropriate, ie: optimistic updates, or after server confirms update)
     @Override
-    public Result<TDomainInfo> updateInfo(TDomainInfo info) { // **MUST** Override in subclasses
+    public Result<TDomainInfo> updateInfo(@Nullable TDomainInfo info) { // **MUST** Override in subclasses
         this.info = info;
         return new Result.Success<>(this.info);
     }

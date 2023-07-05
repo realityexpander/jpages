@@ -13,6 +13,7 @@ import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +27,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
     public User(
         @NotNull UserInfo info,
-        Account account,
-        Context context
+        @NotNull Account account,
+        @NotNull Context context
     ) {
         super(info.id(), context);
         this.account = account;
@@ -38,8 +39,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
     public User(
         @NotNull UUID2<User> id,
-        Account account,
-        Context context
+        @NotNull Account account,
+        @NotNull Context context
     ) {
         super(id.toDomainUUID2(), context);
         this.account = account;
@@ -49,10 +50,10 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id.toString() + ") created from id with no Info");
     }
     public User(
-            String json,
-            Class<UserInfo> clazz,  // class type of json object
-            Account account,
-            Context context
+        @NotNull String json,
+        @NotNull Class<UserInfo> clazz,  // class type of json object
+        @NotNull Account account,
+        @NotNull Context context
     ) {
         super(json, clazz, context);
         this.account = account;
@@ -61,17 +62,17 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
         context.log.d(this,"User (" + this.id.toString() + ") created Json with class: " + clazz.getName());
     }
-    public User(String json, Account account, Context context) {
+    public User(@NotNull String json, @NotNull Account account, @NotNull Context context) {
         this(json, UserInfo.class, account, context);
     }
-    public User(Account account, Context context) {
+    public User(@NotNull Account account, @NotNull Context context) {
         this(UUID2.randomUUID2(), account, context);
     }
 
     /////////////////////////
     // Static constructors //
     /////////////////////////
-    public static Result<User> fetchUser(UUID2<User> id, Context context) {
+    public static Result<User> fetchUser(UUID2<User> id, @NotNull Context context) {
 
         // get the User's UserInfo
         Result<UserInfo> userInfoResult =

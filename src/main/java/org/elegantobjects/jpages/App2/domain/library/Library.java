@@ -313,7 +313,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     }
 
     // Note: This method creates a new User Object from the User id found in the Book checkout record.
-    public Result<User> getUserOfCheckedOutBook(Book book) {
+    public Result<User> getUserOfCheckedOutBook(@NotNull Book book) {
         context.log.d(this, format("Library (%s) Book id: %s", this.id, book));
         if (fetchInfoFailureReason() != null)
             return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
@@ -339,7 +339,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     // Published Role Reporting Methods  //
     /////////////////////////////////////////
 
-    public Result<ArrayList<Book>> findBooksCheckedOutByUser(User user) {
+    public Result<ArrayList<Book>> findBooksCheckedOutByUser(@NotNull User user) {
         context.log.d(this, format("Library (%s) User id: %s\n", this.id, user));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -392,11 +392,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     /////////////////////////////////////////
 
     // Intention revealing method name
-    public Result<Book> addTestBookToLibrary(Book book, Integer count) {
+    public Result<Book> addTestBookToLibrary(@NotNull Book book, Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
         return addBookToLibrary(book, count);
     }
-    public Result<Book> addBookToLibrary(Book book, Integer count) {
+    public Result<Book> addBookToLibrary(@NotNull Book book, Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id, book, count));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
@@ -410,7 +410,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return new Result.Success<>(book);
     }
 
-    public void DumpDB(Context context) {
+    public void DumpDB(@NotNull Context context) {
         context.log.d(this,"Dumping Library DB:");
         context.log.d(this,this.toJson());
         System.out.println();
