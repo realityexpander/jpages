@@ -14,8 +14,7 @@ import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.elegantobjects.jpages.App2.domain.user.UserInfoRepo;
 import org.jetbrains.annotations.NotNull;
 
-import static org.elegantobjects.jpages.App2.domain.Context.ContextType.*;
-import static org.elegantobjects.jpages.App2.domain.Context.ContextType.PRODUCTION;
+import static org.elegantobjects.jpages.App2.domain.Context.ContextKind.PRODUCTION;
 
 public class Context implements IContext {
     // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
@@ -29,11 +28,6 @@ public class Context implements IContext {
     // Utility Singletons
     public final Gson gson;
     public final ILog log;
-
-    public enum ContextType {
-        PRODUCTION,
-        TEST
-    }
 
     public
     Context(
@@ -52,6 +46,11 @@ public class Context implements IContext {
         this.gson = gson;
     }
 
+    public enum ContextKind {
+        PRODUCTION,
+        TEST
+    }
+
     public static Context setupProductionInstance(ILog log) {
         if (log == null)
             return setupInstance(PRODUCTION, new Log(), null);
@@ -59,11 +58,11 @@ public class Context implements IContext {
             return setupInstance(PRODUCTION, log, null);
     }
     public static Context setupInstance(
-        @NotNull ContextType contextType,
+        @NotNull Context.ContextKind contextKind,
         @NotNull ILog log,
         Context context
     ) {
-        switch (contextType) {
+        switch (contextKind) {
             case PRODUCTION:
                 return Context.generateDefaultProductionContext(log);
                 // LEAVE FOR REFERENCE: System.out.println("Context.setupInstance(): passed in Context is null, creating PRODUCTION Context");

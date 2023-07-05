@@ -38,7 +38,7 @@ public class Model {
         default @SuppressWarnings("unchecked")
         TDomainInfo getDomainInfo()
         {  // Return reference to TDomainInfo, used when importing JSON
-            return (TDomainInfo) this; // todo test this cast
+            return (TDomainInfo) this;
         }
 
         default TDomainInfo toDeepCopyDomainInfo() {    // **MUST** override, method should return a DEEP copy (& no original references)
