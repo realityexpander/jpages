@@ -19,13 +19,12 @@ import static java.lang.String.format;
 // A PrivateLibrary usually has only a single Book in it.
 public class PrivateLibrary extends Library implements IUUID2 {
 
-    // This is a marker to indicate a Library is not part of any system Library.
-    // ie: It is a Personal Library, a library for a single found book,
-    // or a Library for a newly created book, etc.
+    // This a Library is not part of any system Library.
+    // ie: It is a "Personal" Library, a library for a single found book, or a Library for a newly created book, etc.
     //
     // This not a system Library, so it doesn't access the Account Role Object for any account checks.
-    // Any user can access this Library.
-    // Users can have unlimited Private Libraries & Books in them.
+    // - Any user can access this Library.
+    // - Users can have unlimited Private Libraries & unlimited number of Books in them.
     //
     // This is a system design alternative to:
     //   - Using `null` to represent a Book which is not part of any Library.
@@ -46,28 +45,29 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
     public PrivateLibrary(
         @NotNull LibraryInfo info,
-        Context context
+        @NotNull Context context
     ) {
         super(info, context);
         this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
     public PrivateLibrary(
-        UUID2<Library> id,
-        Context context
+        @NotNull UUID2<Library> id,
+        @NotNull Context context
     ) {
         super(id, context);
         this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
-    @SuppressWarnings("unchecked")
     public PrivateLibrary(
-        UUID2<Book> bookId,
-        Boolean isForOnlyOneBook, // always true
-        Context context
+        @NotNull UUID2<Book> bookId,
+        boolean isForOnlyOneBook, // always true
+        @NotNull Context context
     ) {
         // Note: This creates an ORPHAN private library.
-        super((UUID2<Library>) UUID2.fromUUID2(bookId, Library.class), context); // convert from BookId to LibraryId
+        // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).
+
+        super(new UUID2<Library>(bookId), context); // make the LibraryId match the BookId
         this.id._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
 
         // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).
@@ -77,7 +77,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
         this.isForOnlyOneBook = true;
     }
     public PrivateLibrary(
-        Context context
+        @NotNull Context context
     ) {
         // Note: this creates an ORPHAN private library with a random id.
         this(UUID2.randomUUID2(Book.class), true, context);

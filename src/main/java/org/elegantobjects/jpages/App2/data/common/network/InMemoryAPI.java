@@ -31,7 +31,7 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTOInfo> implements IA
     public Result<TDTOInfo> getDtoInfo(String id) {
         try {
             @SuppressWarnings("unchecked")
-            UUID2<TUUID2> uuid = (UUID2<TUUID2>) UUID2.fromUuidString(id);
+            UUID2<TUUID2> uuid = (UUID2<TUUID2>) UUID2.fromUUIDString(id);
             return getDtoInfo(uuid);
         } catch (Exception e) {
             return new Result.Failure<>(e);

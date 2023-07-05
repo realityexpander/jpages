@@ -90,7 +90,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         String uuid2TypeStr = typeSegments[1];  // ie: Model.DomainInfo.BookInfo
         String uuidStr = segments[1];           // ie: 00000000-0000-0000-0000-000000000001
 
-        return new UUID2<>(UUID2.fromUuidString(uuidStr), uuid2TypeStr);
+        return new UUID2<>(UUID2.fromUUIDString(uuidStr), uuid2TypeStr);
     }
 
     ////////////////////////////////
@@ -172,7 +172,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     public static @NotNull
-    UUID2<IUUID2> fromUuidString(String uuidStr) {
+    UUID2<IUUID2> fromUUIDString(String uuidStr) {
         return new UUID2<>(UUID.fromString(uuidStr));
     }
 
@@ -219,7 +219,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         if (nonNullId == null) nonNullId = 0; // default value
 
         final String idPaddedWith11LeadingZeroes = format("%011d", nonNullId);
-        final UUID2<IUUID2> uuid2 = fromUuidString("00000000-0000-0000-0000-" + idPaddedWith11LeadingZeroes);
+        final UUID2<IUUID2> uuid2 = fromUUIDString("00000000-0000-0000-0000-" + idPaddedWith11LeadingZeroes);
 
         return new UUID2<>((TDomainUUID2) uuid2, clazzPathStr);
     }

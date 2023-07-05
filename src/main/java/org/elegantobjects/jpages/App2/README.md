@@ -17,7 +17,7 @@
 ### Developer Experience
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
-- Built to test from start!
+- Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
 ## Code Style
@@ -26,6 +26,12 @@
 - Strive to make it read like regular English as possible, and to be able to understand it without 
 using IDE tools (like hover to find var types).
 - Limit language to plain-old Java 8
+- Prefer verbosity of descriptions to brevity of code. Should be easy to read and understand.
+- Prevent "whats that for/do?" questions by using explicit intention-revealing names for everything.
+- Risk pedantic naming over brevity of code.
+  - You may think you know what a variable/method is for, but the next person may not.
+  - Yes, this risks job security, but it also makes it easier to change code as you keep 
+    extending the code base. We risk improving the developer experience for our own sake.
 
 ### Encapsulation of Data via Intention-named methods
   - Set and Get methods are not used, instead methods are named for their intention.
@@ -39,9 +45,11 @@ using IDE tools (like hover to find var types).
   - Only immutable copies of objects are returned, for read-only purposes.
 - No Direct Reference Getters 
   - No references to internal mutable objects (all fields are `final`)
-  - Only return copies of information
+  - Only return copies of information.
   - Never reveal internal structures - always return _curated_ copies for a specific intended purpose.
-  - Returning/Exposing `Role` objects or `id's` is OK
+  - Returning/Exposing `Role` objects or `id's` is OK.
+    - `Role` objects are immutable, and contain references to their mutable `Info` data.
+    - `id` is immutable, and is used to fetch Info objects from their respective Repositories.
   - Never return `null`
     - Return an intention-revealing object instead
     - Prefer `Result` or `Empty` object instead of `null`
@@ -98,6 +106,8 @@ using IDE tools (like hover to find var types).
   - This data is not exposed directly, only through `Role` or `DomainInfo` methods.
 - *Yes, things are copied.* 
   - This is easier than dealing with the complexity of mutable objects.
+  - It is easier than working with threads.
+  - Optimizations can be made later if needed, the architecture is designed to easily allow for this.
 
 ### Constructor Convenience
 - No Dependency Injection framework (_ugh..._)
@@ -153,8 +163,8 @@ using IDE tools (like hover to find var types).
 ### Dumb Container Objects for Data Transfer Only to/from Domain
 - Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
   to domain `Role` objects.
-- Note: DTO's and Entities are still useful to maintain separation of concerns and to communicate with
-  world outside domain, and allows independent changing and updating of the domain objects.
+- Note: DTOs and Entities are still useful to maintain separation of concerns and to communicate with
+  world outside domain, and allows independent changing and versioning of the domain/DTO/Entity objects.
 
 ### Extremely Limit use of `Else` blocks
   - Code for conditions check first and return early if condition is not met.
@@ -176,26 +186,32 @@ using IDE tools (like hover to find var types).
 - Boolean variables and methods are named explicitly
   - `is{something}`
   - `has{something}`
+  - `should{something}` - use sparingly for parameters, consider using `enum` instead.
   - Attempt to avoid using `!` operator
-    - Avoid using `isNot{something}` or `hasNot{something}`
+    - OK to use `isNot{something}` over the `!` operator if it makes the code more readable.
+    - Avoid blindly creating `isNot{something}` or `hasNot{something}` just to oppose each positive 
+      case, only create a "negative case" method when it is needed, not just automatically.
   - Attempt to convey intent
     - ie: `isPrivate` is preferred over `isNotPublic`
     - ie: `hasFines` is preferred over `isBalanceOverZero`
 
 ### Encourage Variable Naming with Explicit Types
+  - Slight nod to Hungarian Notation, it is still useful for readability in limited cases.
   - The emphasis on reading without IDE assistance is important, and explicit type naming helps with this.
   - `{Domain}Id` vs `{Domain}` Types
       - Parameter names are explicit about if they are `{Domain}id` or `{Domain}` objects
-    - Id 
-      - Appending `Id` to the end of the parameter name is acceptable and encouraged
-      - ie: `userId` is preferred over `user`
+    - `Id` 
+      - Appending `Id` to the end of a UUID2<> type variable name is acceptable and encouraged
+      - ie: `userId` is preferred over `user` or  plain `id`
     - Domain
       - If the object is a `Domain` object, then the name should be `{Domain}` and not `{Domain}Id`
-      - ie: `user` is preferred over `userId`
+      - ie: `user` is preferred over `userId` in this case.
   - `Info` vs `Role` Types
     - Parameter names are explicit about whether they are `Info` or `Role` objects
     - Appending `Info` to the end of the parameter name is acceptable and encouraged
-    - Using the plain `{Domain}` name is preferred if the object is a `Role` object
+      - ie: `userInfo` is preferred over `user` or plain `info`
+    - Using the plain `{Domain}` name is preferred if the object is a domain `Role` object
+      - ie: `user` is preferred over `userInfo` in this case.
 
 ### Use Result Object for Errors & Exceptions
 - Use of `Result` object to return success or failure
@@ -508,11 +524,11 @@ flexibility and power.
   - These `Books` have a `PrivateLibrary` for their `sourceLibrary`.
 - `Users` can `checkout` `Books` from `PrivateLibraries` just like any other `Library`.
 - `Orphan` `PrivateLibraries` are automatically created when a `Book` is created without any associated existing `Library`. 
-  - The `id` for an `Orphan` `PrivateLibrary` is generated at the time of the creation of the `Book`.
+  - The `id` for an `Orphan` `PrivateLibrary` is set at the time of the creation of the `Book` to be the same `id` as the `Book`.
   - `Orphan` `PrivateLibraries` can only have one `Book` checked in, and it has to be the same `BookId` that it was created with.
-  - #### Why?
-    - We allow this as a part of the design, because we want to allow the creation of `Books` without having to 
-      create a `Library` first. 
-    - This is an arbitrary decision to see if I could stretch how the system works, and is not a 
-      real world use case. 
-    - In a normal Library system, all `Books` would be associated with a `Library` at the time of creation.
+- #### Why?
+  - We allow this as a part of the design, because we want to allow the creation of `Books` without having to 
+    create a `Library` first. 
+  - This is an arbitrary decision to see if I could stretch how the system works, and is not a 
+    real world use case. 
+  - In a normal Library system, all `Books` would be associated with a `Library` at the time of creation.
