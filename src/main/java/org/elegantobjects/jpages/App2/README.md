@@ -20,6 +20,8 @@
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
+[Jump to Application Notes](#architecture)
+
 ## Code Style
 
 - Strive to make Domain layer code plain idiomatic Java as possible, and read like English prose.
@@ -33,7 +35,14 @@ using IDE tools (like hover to find var types).
   - Yes, this risks job security, but it also makes it easier to change code as you keep 
     extending the code base. We risk improving the developer experience for our own sake.
 
+### Contents
+
+- [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
+- [No Dependency Injection Framework](#no-dependency-injection-framework)
+- [No `null` in Domain](#no-null-in-domain)
+
 ### Encapsulation of Data via Intention-named methods
+#encapsulation-of-data-via-intention-named-methods
   - Set and Get methods are not used, instead methods are named for their intention.
   - Problem: The English word `set` and `get` are _extremely_ generic 
     - Hundreds of definitions, each with many subtle different meanings, based on context.
@@ -64,6 +73,8 @@ using IDE tools (like hover to find var types).
   - ie: `id()` is preferred over `getId()`
 
 ### No `null` in Domain
+#no-null-in-domain
+
 - `null` only allowed to be passed in constructors
   - used to indicate <i>"use a reasonable default value for this parameter"</i>
 - `null` is checked for in constructors only, usually to create a reasonable default value.
@@ -91,6 +102,9 @@ using IDE tools (like hover to find var types).
 - No global accessing state of App (except via passed-in Context object)
 
 ### No Dependency Injection Framework
+
+#no-dependency-injection-framework
+
 - All dependencies passed in constructors
 - Singleton objects reside in the Context object, and are passed in constructors.
 
@@ -442,18 +456,22 @@ using IDE tools (like hover to find var types).
       <br>
       <i>Reasoning:</i> Because casual reading of the type name <code>UUID2Type</code> 
       could be easily misunderstood for a <code>"clazz"</code> of 
-      <code>Class&ltUUID2&lt?&gt&gt</code> in plain reading of the name in code. Without the 
+      <code>Class&lt;UUID2&lt?&gt&gt</code> in plain reading of the name in code. Without the 
       <code>Str</code> at the end, you would need to take an extra step to look up the actual type.
     </td>
   </tr>
 </table>
+
+
+#architecture
 
 ## Architecture
 
 - ### Data
   - `Model`
     - `DomainInfo`
-      - `AccountInfo` - Handles library account details for the `User`, like fines, status, max books, etc. (NO BOOKS TRACKED HERE)
+      - `AccountInfo` - Handles library account details for the `User`, like fines, status, max books, etc. 
+        - Note: NO BOOKS TRACKED HERE, only account details and limits for a `User` for all Libraries in the system.
       - `Bookinfo`    - Handles book details, like title, author, source library, etc.
       - `UserInfo`    - Handles user details, like name, email, books held, can give books to other users, etc.
       - `LibraryInfo` - Handles library details, lists of books on hand, users registered to it, checking books in and out,

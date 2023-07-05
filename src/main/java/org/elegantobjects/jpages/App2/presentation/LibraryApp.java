@@ -20,24 +20,24 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 
-// Notes:
-// - Intentionally using multiple returns. Makes error handling easier.
+final class LibraryApp {
 
-
-public class LibraryApp {
+    Context ctx;
 
     public static void main(final String... args) throws Exception {
 
         // Setup App Context Object singletons
         Context productionContext = Context.setupProductionInstance(new Log());
-        // Context productionContext = Context.setupInstance(TEST, testContext); // LEAVE for testing
 
+        // Note: Check the tests!
         new LibraryApp(productionContext);
     }
 
-    LibraryApp(@NotNull Context ctx) throws Exception {
+    // Library App - Domain Layer Root Object
+    // Note: Most of this has been moved to the tests. This is just a reference for how to use the Domain Layer.
+    public LibraryApp(@NotNull Context ctx) throws Exception {
         //context = Context.setupINSTANCE(context);  // For implementing a static Context. LEAVE for reference
-
+        this.ctx = ctx;
         TestingUtils testUtil = new TestingUtils(ctx);
 
         ctx.log.d(this,"Populating Book DB and API");
@@ -50,7 +50,7 @@ public class LibraryApp {
         );
 
         Populate_And_Poke_Book:
-        if (false)
+        if (true)
         {
             System.out.println();
             ctx.log.d(this, "Populate_And_Poke_Book");
