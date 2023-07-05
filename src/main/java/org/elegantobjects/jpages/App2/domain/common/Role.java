@@ -291,6 +291,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         // Exception to the no-null rule. This is only when forcing a re-fetch of the info.
         // todo should we leave the data stale?
         this.info = null;
+
         return this.fetchInfoResult();
     }
 }
