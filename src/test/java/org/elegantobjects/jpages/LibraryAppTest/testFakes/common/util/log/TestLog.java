@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.LibraryAppTest.testFakes;
+package org.elegantobjects.jpages.LibraryAppTest.testFakes.common.util.log;
 
 import org.elegantobjects.jpages.App2.common.util.log.Log;
 import org.jetbrains.annotations.NotNull;
@@ -56,15 +56,9 @@ public class TestLog extends Log {
         super.e(calcLogPrefix(tag), msg, e);
     }
 
-    private @NotNull String calcLogPrefix(Object obj) {
-        return calcSimpleName(obj) + "➤" + calcMethodName() + "()";
+    @Override
+    public @NotNull String calcMethodName() {
+        return Thread.currentThread().getStackTrace()[4].getMethodName(); // note: 4, not 3. Tests run differently than production.
     }
 
-    private @NotNull String calcMethodName() {
-        return Thread.currentThread().getStackTrace()[4].getMethodName();
-    }
-
-    private @NotNull String calcSimpleName(@NotNull Object obj) {
-        return obj.getClass().getSimpleName();
-    }
 }

@@ -87,7 +87,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             throw new IllegalArgumentException("Invalid UUID2 formatted string, no `UUID2` prefix: " + uuid2FormattedString);
         }
 
-        String uuid2TypeStr = typeSegments[1];  // ie: Object.Role.User
+        String uuid2TypeStr = typeSegments[1];  // ie: Model.DomainInfo.BookInfo
         String uuidStr = segments[1];           // ie: 00000000-0000-0000-0000-000000000001
 
         return new UUID2<>(UUID2.fromUuidString(uuidStr), uuid2TypeStr);

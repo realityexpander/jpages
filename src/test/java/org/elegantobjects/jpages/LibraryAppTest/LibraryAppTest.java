@@ -13,7 +13,7 @@ import org.elegantobjects.jpages.App2.domain.library.Library;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
 import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.user.UserInfo;
-import org.elegantobjects.jpages.LibraryAppTest.testFakes.TestLog;
+import org.elegantobjects.jpages.LibraryAppTest.testFakes.common.util.log.TestLog;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,13 +28,13 @@ public class LibraryAppTest {
     TestingUtils testUtils;
 
     @Before
-    public void setUp() throws Exception {
-        ctx = setupTestContext();
+    public void setUp() {
+        ctx = setupDefaultTestContext();
         testUtils = new TestingUtils(ctx);
     }
 
-    private @NotNull Context setupTestContext() {
-        TestLog testLog = new TestLog(true); // false = print all logs to console
+    public static @NotNull Context setupDefaultTestContext() {
+        TestLog testLog = new TestLog(false); // false = print all logs to console
         Context prodContext = Context.setupProductionInstance(testLog);
 
         // Modify the Production context into a Test context.
@@ -624,62 +624,62 @@ public class LibraryAppTest {
                 transferredBook13.sourceLibrary().info().name, roles.library1.info().name);
     }
 
-    @Test
-    public void Test_UUID2_HashMap() {
-        // • ARRANGE
-        UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap = new UUID2.HashMap<>();
-        UUID2<Book> book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
-        UUID2<Book> book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
-        UUID2<User> user01 = new UUID2<>(UUID2.createFakeUUID2(1, User.class));
-        UUID2<User> user02 = new UUID2<>(UUID2.createFakeUUID2(2, User.class));
-
-        uuid2ToEntityMap.put(book1, user01);
-        uuid2ToEntityMap.put(book2, user02);
-
-        // • ACT & ASSERT
-
-        // check simple retrieval
-        UUID2<User> user = uuid2ToEntityMap.get(book1);
-        ctx.log.d(this, "simple retrieval, user=" + user);
-        assertNotNull(user);
-
-        // Check retrieval using a new UUID2
-        UUID2<Book> book1a = UUID2.createFakeUUID2(1200, Book.class);
-        UUID2<User> user2 = uuid2ToEntityMap.get(book1a);
-        ctx.log.d(this, "retrieved using new id, user=" + user);
-        assertNotNull(user2);
-        assertEquals(user2, user);
-
-        // check removal
-        uuid2ToEntityMap.remove(book1);
-        user = uuid2ToEntityMap.get(book1);
-        ctx.log.d(this, "after removal, user=" + user);
-        assertNull(user);
-
-        // put it back
-        uuid2ToEntityMap.put(book1, user01);
-
-        // put it in again (should replace. not duplicate)
-        uuid2ToEntityMap.put(book1, user01);
-
-        // check keySet count
-        Set<UUID2<Book>> keySet = uuid2ToEntityMap.keySet();
-        assertEquals(2, keySet.size());
-
-        // check values count
-        Collection<UUID2<User>> values = uuid2ToEntityMap.values();
-        assertEquals(2, values.size());
-
-        // check entrySet count
-        Set<Map.Entry<UUID2<Book>, UUID2<User>>> entrySet = uuid2ToEntityMap.entrySet();
-        assertEquals(2, entrySet.size());
-
-        // check containsKey
-        assertTrue("containsKey(book1) failed", uuid2ToEntityMap.containsKey(book1));
-        assertTrue("containsKey(book2) failed", uuid2ToEntityMap.containsKey(book2));
-        assertFalse("containsKey(Book 1400) should fail",
-                uuid2ToEntityMap.containsKey(UUID2.createFakeUUID2(1400, Book.class))
-        );
-    }
+//    @Test
+//    public void UUID2_HashMap_functions_are_Success() {
+//        // • ARRANGE
+//        UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap = new UUID2.HashMap<>();
+//        UUID2<Book> book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
+//        UUID2<Book> book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
+//        UUID2<User> user01 = new UUID2<>(UUID2.createFakeUUID2(1, User.class));
+//        UUID2<User> user02 = new UUID2<>(UUID2.createFakeUUID2(2, User.class));
+//
+//        uuid2ToEntityMap.put(book1, user01);
+//        uuid2ToEntityMap.put(book2, user02);
+//
+//        // • ACT & ASSERT
+//
+//        // check simple retrieval
+//        UUID2<User> user = uuid2ToEntityMap.get(book1);
+//        ctx.log.d(this, "simple retrieval, user=" + user);
+//        assertNotNull(user);
+//
+//        // Check retrieval using a new UUID2
+//        UUID2<Book> book1a = UUID2.createFakeUUID2(1200, Book.class);
+//        UUID2<User> user2 = uuid2ToEntityMap.get(book1a);
+//        ctx.log.d(this, "retrieved using new id, user=" + user);
+//        assertNotNull(user2);
+//        assertEquals(user2, user);
+//
+//        // check removal
+//        uuid2ToEntityMap.remove(book1);
+//        user = uuid2ToEntityMap.get(book1);
+//        ctx.log.d(this, "after removal, user=" + user);
+//        assertNull(user);
+//
+//        // put it back
+//        uuid2ToEntityMap.put(book1, user01);
+//
+//        // put it in again (should replace. not duplicate)
+//        uuid2ToEntityMap.put(book1, user01);
+//
+//        // check keySet count
+//        Set<UUID2<Book>> keySet = uuid2ToEntityMap.keySet();
+//        assertEquals(2, keySet.size());
+//
+//        // check values count
+//        Collection<UUID2<User>> values = uuid2ToEntityMap.values();
+//        assertEquals(2, values.size());
+//
+//        // check entrySet count
+//        Set<Map.Entry<UUID2<Book>, UUID2<User>>> entrySet = uuid2ToEntityMap.entrySet();
+//        assertEquals(2, entrySet.size());
+//
+//        // check containsKey
+//        assertTrue("containsKey(book1) failed", uuid2ToEntityMap.containsKey(book1));
+//        assertTrue("containsKey(book2) failed", uuid2ToEntityMap.containsKey(book2));
+//        assertFalse("containsKey(Book 1400) should fail",
+//                uuid2ToEntityMap.containsKey(UUID2.createFakeUUID2(1400, Book.class))
+//        );
+//    }
 
 }

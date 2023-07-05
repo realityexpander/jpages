@@ -1,41 +1,41 @@
 package org.elegantobjects.jpages.App2.common.util.log;
 
+import org.jetbrains.annotations.NotNull;
+
 // Logs to the system console
 public class Log implements ILog {
-    private void d(String tag, String msg) {
+    // These could be swapped out for files or network calls.
+    private void debug(String tag, String msg) {
         System.out.println(tag + ": " + msg);
     }
-    private void w(String tag, String msg) {
+    private void warning(String tag, String msg) {
         System.err.println(tag + ":(WARNING) " + msg);
     }
-    private void e(String tag, String msg) {
+    private void error(String tag, String msg) {
         System.err.println(tag + ":(ERROR) " + msg);
     }
 
     // example: log.d(this, "message") will print "ClassName➤MethodName(): message"
     public void d(Object tag, String msg) {
         if(tag == null) {
-            d("null", msg);
+            debug("null", msg);
             return;
         }
         if(tag instanceof String) {
-            d((String) tag, msg);
+            debug((String) tag, msg);
             return;
         }
 
-        d(tag.getClass().getSimpleName() + "➤" +
-                        Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
-                msg
-        );
+        debug(calcLogPrefix(tag), msg);
     }
 
     public void e(Object tag, String msg, Exception e) {
         if(tag == null) {
-            e("null", msg);
+            error("null", msg);
             return;
         }
         if(tag instanceof String) {
-            e((String) tag, msg);
+            error((String) tag, msg);
             return;
         }
 
@@ -45,44 +45,47 @@ public class Log implements ILog {
             stacktrace.append(ste.toString()).append(", ");
         }
 
-        e(tag.getClass().getSimpleName() + "➤" +
-            Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
-            msg + " - " + e.getMessage() + " - " + stacktrace
-        );
+        error(calcLogPrefix(tag), msg + ", " + stacktrace);
         e.printStackTrace(); // LEAVE for debugging
     }
 
     // example: log.w(this, "message") will print "ClassName➤MethodName():(WARNING) message"
     public void w(Object tag, String msg) {
         if(tag == null) {
-            w("null", msg);
+            warning("null", msg);
             return;
         }
         if(tag instanceof String) {
-            w((String) tag, msg);
+            warning((String) tag, msg);
             return;
         }
 
-        w(tag.getClass().getSimpleName() + "➤" +
-            Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
-            msg
-        );
+        warning(calcLogPrefix(tag), msg);
     }
 
     // example: log.e(this, "message") will print "ClassName➤MethodName():(ERROR) message"
     public void e(Object tag, String msg) {
         if(tag == null) {
-            e("null", msg);
+            error("null", msg);
             return;
         }
         if(tag instanceof String) {
-            e((String) tag, msg);
+            error((String) tag, msg);
             return;
         }
 
-        e(tag.getClass().getSimpleName() + "➤" +
-            Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
-            msg
-        );
+        error(calcLogPrefix(tag), msg);
+    }
+
+    public @NotNull String calcLogPrefix(Object obj) {
+        return calcSimpleName(obj) + "➤" + calcMethodName() + "()";
+    }
+
+    public @NotNull String calcMethodName() {
+        return Thread.currentThread().getStackTrace()[3].getMethodName();
+    }
+
+    public @NotNull String calcSimpleName(@NotNull Object obj) {
+        return obj.getClass().getSimpleName();
     }
 }

@@ -49,8 +49,7 @@ public class Model {
         //   definition, and the deepCopy() method will be added.
         interface hasToDeepCopyDomainInfo<TToInfo extends ToDomainInfo<? extends DomainInfo>> {
 
-            @SuppressWarnings("unchecked")
-            default <TDomainInfo extends DomainInfo>
+            default <TDomainInfo extends DomainInfo> @SuppressWarnings("unchecked")
             TDomainInfo deepCopyDomainInfo() // Requires method override, should return a deep copy (no original references)
             {
                 // This is a hack to get around the fact that Java doesn't allow you to call a generic method from a generic class
