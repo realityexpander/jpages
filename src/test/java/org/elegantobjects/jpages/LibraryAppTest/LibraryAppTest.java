@@ -15,6 +15,7 @@ import org.elegantobjects.jpages.App2.domain.user.User;
 import org.elegantobjects.jpages.App2.domain.user.UserInfo;
 import org.elegantobjects.jpages.LibraryAppTest.testFakes.TestLog;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
@@ -23,9 +24,14 @@ import static org.junit.Assert.*;
 
 public class LibraryAppTest {
 
-//    @Before
-//    public void setUp() throws Exception {
-//    }
+    Context ctx;
+    TestingUtils testUtils;
+
+    @Before
+    public void setUp() throws Exception {
+        ctx = setupTestContext();
+        testUtils = new TestingUtils(ctx);
+    }
 
     private @NotNull Context setupTestContext() {
         TestLog testLog = new TestLog(true); // false = print all logs to console
@@ -33,12 +39,12 @@ public class LibraryAppTest {
 
         // Modify the Production context into a Test context.
         Context testContext = new Context(
-            prodContext.bookInfoRepo(),
-            prodContext.userInfoRepo(),
-            prodContext.libraryInfoRepo(),
-            prodContext.accountInfoRepo(),
-            prodContext.gson,
-            testLog   // <--- just using the test logger
+                prodContext.bookInfoRepo(),
+                prodContext.userInfoRepo(),
+                prodContext.libraryInfoRepo(),
+                prodContext.accountInfoRepo(),
+                prodContext.gson,
+                testLog   // <--- just using the test logger
         );
 
         return testContext;
@@ -129,12 +135,12 @@ public class LibraryAppTest {
 
         // Create the App objects
         TestRoles testRoles = new TestRoles(
-            account1,
-            new Account(accountInfo2, ctx),
-            new User(user1Info, account1, ctx),
-            library1,
-            new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx), // create ORPHANED book
-            new Book(UUID2.createFakeUUID2(1200, Book.class), library1, ctx)
+                account1,
+                new Account(accountInfo2, ctx),
+                new User(user1Info, account1, ctx),
+                library1,
+                new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx), // create ORPHANED book
+                new Book(UUID2.createFakeUUID2(1200, Book.class), library1, ctx)
         );
         assertNotNull(testRoles);
 
@@ -147,11 +153,10 @@ public class LibraryAppTest {
     @Test
     public void Update_BookInfo_is_Success() {
         // • ARRANGE
-        Context context = setupTestContext();
 
         // Create a book object (it only has an id)
-        Book book = new Book(UUID2.createFakeUUID2(1100, Book.class), null, context);
-        context.log.d(this, book.fetchInfoResult().toString());
+        Book book = new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx);
+        ctx.log.d(this, book.fetchInfoResult().toString());
 
         // • ACT
         // Update info for a book
@@ -163,13 +168,13 @@ public class LibraryAppTest {
                     "The Updated Author",
                     "The Updated Description"
                 ));
-        context.log.d(this, book.fetchInfoResult().toString());
+        ctx.log.d(this, book.fetchInfoResult().toString());
 
         // •ASSERT
         // Get the bookInfo (null if not loaded)
         BookInfo bookInfo3 = book.fetchInfo();
         if (bookInfo3 == null) {
-            context.log.d(this, "Book Missing --> book id: " + book.id() + " >> " + " is null");
+            ctx.log.d(this, "Book Missing --> book id: " + book.id() + " >> " + " is null");
             fail("Book Missing --> book id: " + book.id() + " >> " + " is null");
         }
 
@@ -181,11 +186,10 @@ public class LibraryAppTest {
     @Test
     public void Fetch_NonExisting_Book_is_Failure() {
         // • ARRANGE
-        Context context = setupTestContext();
 
         // • ACT
         // Try to get a book id that doesn't exist - SHOULD FAIL
-        Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, context);
+        Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
 
         // • ASSERT
         assertTrue("Book SHOULD NOT Exist, but does! --> " + book2.id, book2.fetchInfoResult() instanceof Result.Failure);
@@ -194,7 +198,6 @@ public class LibraryAppTest {
     @Test
     public void CheckOut_2_Books_to_User_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
 
         // • ACT
@@ -211,7 +214,6 @@ public class LibraryAppTest {
     @Test
     public void Find_Books_checkedOut_by_User_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
 
         // Checkout 2 books to User
@@ -243,7 +245,6 @@ public class LibraryAppTest {
     @Test
     public void Calculate_availableBook_To_numAvailable_Map_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
 
         // Checkout 2 books
@@ -280,7 +281,6 @@ public class LibraryAppTest {
     @Test
     public void CheckOut_and_CheckIn_Book_to_Library_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
         int initialBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
 
@@ -334,7 +334,6 @@ public class LibraryAppTest {
     @Test
     public void Update_LibraryInfo_by_updateInfoFromJson_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         String json = getRonaldReaganLibraryInfoJson();
 
         // Create the "unknown" library with just an id.
@@ -383,7 +382,6 @@ public class LibraryAppTest {
     @Test
     public void Create_Library_Role_from_createInfoFromJson_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         String json = getRonaldReaganLibraryInfoJson();
         Book expectedBook1900 = new Book(UUID2.createFakeUUID2(1900, Book.class), null, ctx);
 
@@ -434,7 +432,6 @@ public class LibraryAppTest {
     @Test
     public void Create_Book_Role_from_DTOInfo_Json() {
         // • ARRANGE
-        Context ctx = setupTestContext();
         String json = getGreatGatsbyDTOBookInfoJson();
         String expectedTitle = "The Great Gatsby";
         String expectedAuthor = "F. Scott Fitzgerald";
@@ -468,16 +465,14 @@ public class LibraryAppTest {
     @Test
     public void Create_new_Book_then_CheckOut_Book_to_User_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
-        TestingUtils testUtil = new TestingUtils(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
 
-        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assertNotNull(user2InfoResult);
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2 , ctx);
         assertNotNull(user2);
 
-        final Result<BookInfo> book12Result = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+        final Result<BookInfo> book12Result = testUtils.addFakeBookInfoInContextBookInfoRepo(12);
         assertTrue("Book12 should have been added to Library1", book12Result instanceof Result.Success);
 
         // • ACT & ASSERT
@@ -500,23 +495,21 @@ public class LibraryAppTest {
     @Test
     public void User_Accepts_Book_and_Gives_Book_to_another_User_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
-        TestingUtils testUtil = new TestingUtils(ctx);
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
 
-        final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assertNotNull(user01InfoResult);
         assertTrue("User01 should have been added to UserInfoRepo", user01InfoResult instanceof Result.Success);
         final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1 , ctx);
         assertNotNull(user01);
 
-        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assertNotNull(user2InfoResult);
         assertTrue("User2 should have been added to UserInfoRepo", user2InfoResult instanceof Result.Success);
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
         assertNotNull(user2);
 
-        final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+        final Result<BookInfo> book12InfoResult = testUtils.addFakeBookInfoInContextBookInfoRepo(12);
         assertTrue("Book12 should have been added to Library1", book12InfoResult instanceof Result.Success);
 
         final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
@@ -537,19 +530,17 @@ public class LibraryAppTest {
     @Test
     public void Give_Checked_Out_Book_From_User_To_User_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
-        TestingUtils testUtil = new TestingUtils(ctx);
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
 
-        final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assert user01InfoResult != null;
         final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1 , ctx);
 
-        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assert user2InfoResult != null;
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
 
-        final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+        final Result<BookInfo> book12InfoResult = testUtils.addFakeBookInfoInContextBookInfoRepo(12);
         assert book12InfoResult != null;
         final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
         final Book book12 = new Book(book12id, roles.library1, ctx);
@@ -581,15 +572,13 @@ public class LibraryAppTest {
     @Test
     public void Give_Book_From_User_To_User_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
-        TestingUtils testUtil = new TestingUtils(ctx);
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
 
-        final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assert user01InfoResult != null;
         final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1, ctx);
 
-        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assert user2InfoResult != null;
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
 
@@ -605,16 +594,14 @@ public class LibraryAppTest {
     @Test
     public void Transfer_CheckedOut_Book_sourceLibrary_to_another_Library_is_Success() {
         // • ARRANGE
-        Context ctx = setupTestContext();
-        TestingUtils testUtil = new TestingUtils(ctx);
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
 
-        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assert user2InfoResult != null;
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
 
         // Book12 represents a found book that is not in the library
-        final Result<BookInfo> book13InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(13);
+        final Result<BookInfo> book13InfoResult = testUtils.addFakeBookInfoInContextBookInfoRepo(13);
         assert book13InfoResult != null;
         final UUID2<Book> book13id = ((Result.Success<BookInfo>) book13InfoResult).value().id();
         final Book book13 = new Book(book13id, null, ctx); // note: sourceLibrary is null, so this book comes from an ORPHAN Library
@@ -640,9 +627,6 @@ public class LibraryAppTest {
     @Test
     public void Test_UUID2_HashMap() {
         // • ARRANGE
-        Context ctx = setupTestContext();
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
-
         UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap = new UUID2.HashMap<>();
         UUID2<Book> book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
         UUID2<Book> book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
@@ -695,4 +679,5 @@ public class LibraryAppTest {
                 uuid2ToEntityMap.containsKey(UUID2.createFakeUUID2(1400, Book.class))
         );
     }
+
 }

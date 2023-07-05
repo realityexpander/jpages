@@ -201,12 +201,23 @@ using IDE tools (like hover to find var types).
 - Use of `Result` object to return success or failure
   - Encapsulate the error message in an `Exception` object.
   - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
+- Avoid returning null or raw values
+  - Use `Result` object to return success or failure
+  - Encapsulate the error message in an `Exception` object.
+  - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
 
 ### Avoid C++/Java Design Pattern Hacks
-- Java has inherited bad ideas from C++ bc they had become "industry standard" and "best practices", but are just 
-  afterthought workaround to fundamental language design issues. We know this bc recent language versions have remediated
-  some of these issues, and other languages like Kotlin show how to addresss these issues. Combines with BOOP, many
-  of the patterns just dont make sense and add unnecessary complexity.
+- Java has inherited many bad ideas from C++. 
+- Many of the bad ideas were so bad that a common set of workarounds were passed around the community 
+  (or discovered independently) and had become "industry standard" which slowly turned into "best practices" 
+  and catalogued in many books, and eventually became as "gospel truth" and assumed "just the way its done".
+- Turns out many of the patterns were after-thought workarounds to fundamental language design flaws, directly
+  inherited from C++ and C that never were resolved properly much less questioned.
+- We know this now because recent language versions have remediated <i>some</i> of these issues, and other languages 
+  like Kotlin show how to address these issues in a more sane and comprehensible manner. 
+- Combined with BOOP, many of the patterns just don't make sense and add unnecessary complexity.
+<br>
+<br>
 - No factory patterns
   - Just use constructors. 
 - No builder patterns
@@ -214,11 +225,9 @@ using IDE tools (like hover to find var types).
   - No need for a builder. 
   - Use `.with{someField}(...)` method to update `someField` field.
 - No fluent interfaces
-  - Use `.with{someField}(...)` to update `someField` field. 
-- This architecture will update the info for the domain object automatically when the Role object Info field is updated.
-  - No need for a separate `update()` method, in most cases.
+  - Use `.with{someField}(...)` to update `someField` field.
 
-### Use Early Return
+### Prefer Use of Early Return
 - Multiple early `returns` for ease of error handling 
   - Unhappy path errors `return` immediately
 - One success `return` at the end is preferred.
@@ -233,7 +242,9 @@ using IDE tools (like hover to find var types).
 - No direct access to any other Role's data, all data is encapsulated and only accessed through methods.
 - All Role Info is returned as copies, never direct references.
   - This makes it possible to have a Role change independently of other Role objects. By defining communication
-    protocols via methods.   
+    protocols via methods.
+- This architecture will update the info for the domain object automatically when the Role object Info field is updated.
+- No need for a separate `update()` method, in most cases.
 
 ### Reverse-scope-naming Style
 - Starts with the most specific adjective to more general adjectives, and ends with the name of the actual concrete type.
@@ -255,7 +266,7 @@ using IDE tools (like hover to find var types).
   - ie: `OrphanPrivateLibrary` is preferred over `Orphan`
   - ie: `updatedAccountStatus` is preferred over `updated` or `status`
 
-### Naming of "Inverse" methods
+### Preferred Naming of "Inverse" methods
 - Prefer using same verb and a short modifier, than to use two different verbs for inverse/opposite methods.
 - ie: Prefer `CheckIn` and `CheckOut` to `Borrow` and `Return`
 - ie: Prefer `Register` and `UnRegister` to `register` and `delete` (or `remove`)
@@ -266,7 +277,7 @@ using IDE tools (like hover to find var types).
   - `Close` and `Open` are preferred over `Open` and `UnOpen` (unless the domain specifies it)
   - `Push` and `Pop` are preferred over `Push` and `UnPush` (unless the domain specifies it)
 
-### Naming of "Transfer" methods
+### Explicit Naming of "Transfer" methods
 - Use of `From` and `To` encouraged, to show explicit intent.
   - ie: `checkOutBookToUser` is preferred over `checkOut` or `checkOutBook`
   - ie: `transferBookSourceLibraryToThisLibrary` is preferred over `transferBook`
@@ -276,12 +287,12 @@ using IDE tools (like hover to find var types).
   - ie: `findAllCheckedOutBooksByUserId` is preferred over `findAllUserIdCheckedOutBooks`
     - even though both convey the same meaning, one is easier to comprehend in English.
 
-### Naming of "Find" methods
+### Explicit Naming of "Find" methods
 - Use of `Of` is encouraged
  - ie: `findUserIdOfCheckedOutBook` instead of `findCheckedOutBookUserId`
  - even though both convey the same meaning, one is easier to read in English.
 
-### Naming of "Maps" and "Lists"
+### Explicit Naming of "Maps" and "Lists"
 - List the `from` type and the `to` type in the name of the map.
 - It is preferred to use `To` between the `from` and `to` types.
 - It is preferred to add `Map` or `List` at the end of the variable names.
@@ -314,6 +325,14 @@ using IDE tools (like hover to find var types).
   </tr>
   <tr>
     <td> 
+      <code>ctx</code>
+    </td>
+    <td>
+      Acceptable to use in place of <code>context</code>.
+    </td>
+  </tr>
+  <tr>
+    <td> 
       <code>Id</code>
     </td>
     <td>
@@ -325,7 +344,7 @@ using IDE tools (like hover to find var types).
       <code>Info</code>
     </td>
     <td>
-      For Classes that contain the Info for the <code>Role</code> Class internal information
+      For Classes that contain the Info for the <code>Role</code> Class internal information.
     </td>
   </tr>
   <tr>
@@ -376,7 +395,7 @@ using IDE tools (like hover to find var types).
     </td>
     <td>
       These are in a gray area.<br>
-      • Prefer spelling it out, ie: <code>Amount</code>
+      • Prefer spelling it out, ie: <code>Amount</code>.
     </td>
   </tr>
   <tr>
@@ -384,8 +403,8 @@ using IDE tools (like hover to find var types).
       <code>Ct</code> & <code>Cnt</code>
     </td>
     <td>
-      These are are too vague and one is mildly rude in English.<br>
-      • Prefer spelling it out, ie: <code>Count</code>
+      These are too vague and one is mildly rude in English.<br>
+      • Prefer spelling it out, ie: <code>Count</code>.
     </td>
   </tr>
   <tr>
@@ -393,7 +412,8 @@ using IDE tools (like hover to find var types).
       <code>Kind</code>
     </td>
     <td>
-      Use in <code>enums</code> instead of the word <code>Type</code> which is reserved specifically for the clazz <code>Class&lt;?&gt;</code> types.
+      Use in <code>enums</code> instead of the word <code>Type</code> which is 
+      reserved specifically for the clazz <code>Class&lt;?&gt;</code> types.
     </td>
   </tr>
   <tr>
@@ -401,11 +421,13 @@ using IDE tools (like hover to find var types).
       <code>Str</code>
     </td>
     <td>
-      • Append to a string variable name that represents a specific type<br>
-      • ie: <code>UUID2TypeStr</code>> is preferred over <code>UUID2Type</code><br>
+      • Append to a string variable name that represents a specific type.<br>
+      • ie: <code>UUID2TypeStr</code>> is preferred over <code>UUID2Type</code>.<br>
       <br>
-      Reasoning: Because casual reading of the type name <code>UUID2Type</code> could be misunderstood a <code>"clazz"</code> <code>Class&lt;UUID2&lt;?&gt;&gt;</code> in 
-      plain reading of the name in code. Without the <code>Str</code> at the end, you would need to look up the actual type.
+      <i>Reasoning:</i> Because casual reading of the type name <code>UUID2Type</code> 
+      could be easily misunderstood for a <code>"clazz"</code> of 
+      <code>Class&ltUUID2&lt?&gt&gt</code> in plain reading of the name in code. Without the 
+      <code>Str</code> at the end, you would need to take an extra step to look up the actual type.
     </td>
   </tr>
 </table>
