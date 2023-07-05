@@ -44,7 +44,7 @@ public class UserInfo extends DomainInfo
         );
     }
     public
-    UserInfo(@NotNull UUID uuid, String name, String email, HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap) {
+    UserInfo(@NotNull UUID uuid,@NotNull String name,@NotNull String email, @NotNull HashMap<UUID2<Book>, @NotNull UUID2<Library>> acceptedBookIdToSourceLibraryIdMap) {
         this(new UUID2<User>(uuid, User.class), name, email, acceptedBookIdToSourceLibraryIdMap);
     }
     public
@@ -188,5 +188,4 @@ public class UserInfo extends DomainInfo
 
         return domainInfoCopy;
     }
-
 }
