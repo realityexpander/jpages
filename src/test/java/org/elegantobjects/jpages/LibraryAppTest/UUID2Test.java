@@ -26,6 +26,19 @@ public class UUID2Test {
 
     }
 
+    private void setUpUuid2HashMapTest() {
+        ctx = LibraryAppTest.setupDefaultTestContext();
+
+        uuid2ToEntityMap = new UUID2.HashMap<>();
+        book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
+        book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
+        user01 = new UUID2<>(UUID2.createFakeUUID2(1, User.class));
+        user02 = new UUID2<>(UUID2.createFakeUUID2(2, User.class));
+
+        uuid2ToEntityMap.put(book1, user01);
+        uuid2ToEntityMap.put(book2, user02);
+    }
+
     @Test
     public void UUID2_deserialized_string_is_Correct() {
         // • ARRANGE
@@ -93,19 +106,6 @@ public class UUID2Test {
         assertEquals(book9999Id, book9999Ida);
     }
 
-    private void setUpUuid2HashMapTest() {
-        ctx = LibraryAppTest.setupDefaultTestContext();
-
-        uuid2ToEntityMap = new UUID2.HashMap<>();
-        book1 = new UUID2<>(UUID2.createFakeUUID2(1200, Book.class));
-        book2 = new UUID2<>(UUID2.createFakeUUID2(1300, Book.class));
-        user01 = new UUID2<>(UUID2.createFakeUUID2(1, User.class));
-        user02 = new UUID2<>(UUID2.createFakeUUID2(2, User.class));
-
-        uuid2ToEntityMap.put(book1, user01);
-        uuid2ToEntityMap.put(book2, user02);
-    }
-
     @Test
     public void Get_UUID2HashMap_item_is_Success() {
         // • ARRANGE
@@ -156,7 +156,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void Put_UUID2HashMap_item_twice_does_not_make_duplicate_entry_is_Success() {
+    public void Put_UUID2HashMap_item_twice_only_upserts_single_item() {
         // • ARRANGE
         setUpUuid2HashMapTest();
         UUID2<User> user = uuid2ToEntityMap.get(book1);

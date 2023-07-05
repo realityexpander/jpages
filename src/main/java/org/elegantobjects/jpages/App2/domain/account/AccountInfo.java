@@ -5,6 +5,7 @@ import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
+import org.elegantobjects.jpages.App2.domain.user.User;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ public class AccountInfo extends DomainInfo
         implements
         Model.ToDomainInfo<AccountInfo>
 {
-    //DONT DELETE    public final UUID2<User> userId;// This AccountInfo UUID matches the UUID of the UUID2<User> for this Account. // todo add User id
+    public final UUID2<User> userId;           // This Account UUID matches the UUID of the UUID2<User> for this Account.
     public final String name;
     public final AccountStatus accountStatus;  // status of Account (active, inactive, suspended, etc.)
     public final int currentFinePennies;       // current fine amount in pennies
@@ -51,6 +52,7 @@ public class AccountInfo extends DomainInfo
     ) {
         super(id);
         this.id = id;
+        this.userId = new UUID2<>(id); // set the Accounts' User UUID to match the Account's UUID
         this.name = name;
         this.accountStatus = accountStatus;
         this.currentFinePennies = currentFinePennies;

@@ -74,7 +74,7 @@ public class LibraryAppTest {
             this.book1200 = book1200;
         }
     }
-    private @NotNull TestRoles setupDefaultScenarioAndRoles(
+    private @NotNull TestRoles setupDefaultRolesAndScenario(
             @NotNull Context ctx,
             @NotNull TestingUtils testUtils
     ) {
@@ -143,10 +143,12 @@ public class LibraryAppTest {
     @Test
     public void Update_BookInfo_is_Success() {
         // • ARRANGE
-
         // Create a book object (it only has an id)
         Book book = new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx);
         ctx.log.d(this, book.fetchInfoResult().toString());
+        String expectedUpdatedTitle = "The Updated Title";
+        String expectedUpdatedAuthor = "The Updated Author";
+        String expectedUpdatedDescription = "The Updated Description";
 
         // • ACT
         // Update info for a book
@@ -154,9 +156,9 @@ public class LibraryAppTest {
             book.updateInfo(
                 new BookInfo(
                     book.id,
-                    "The Updated Title",
-                    "The Updated Author",
-                    "The Updated Description"
+                    expectedUpdatedTitle,
+                    expectedUpdatedAuthor,
+                    expectedUpdatedDescription
                 ));
         ctx.log.d(this, book.fetchInfoResult().toString());
 
@@ -170,7 +172,9 @@ public class LibraryAppTest {
 
         // Check the title for updated info
         assert(bookInfoResult instanceof Result.Success);
-        assertEquals("The Updated Title", ((Result.Success<BookInfo>) bookInfoResult).value().title);
+        assertEquals(expectedUpdatedTitle, ((Result.Success<BookInfo>) bookInfoResult).value().title);
+        assertEquals(expectedUpdatedAuthor, ((Result.Success<BookInfo>) bookInfoResult).value().author);
+        assertEquals(expectedUpdatedDescription, ((Result.Success<BookInfo>) bookInfoResult).value().description);
     }
 
     @Test
@@ -188,7 +192,7 @@ public class LibraryAppTest {
     @Test
     public void CheckOut_2_Books_to_User_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
         // • ACT
         final Result<Book> bookResult = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
@@ -204,7 +208,7 @@ public class LibraryAppTest {
     @Test
     public void Find_Books_checkedOut_by_User_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, new TestingUtils(ctx));
 
         // Checkout 2 books to User
         final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
@@ -235,7 +239,7 @@ public class LibraryAppTest {
     @Test
     public void Calculate_availableBook_To_numAvailable_Map_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, new TestingUtils(ctx));
 
         // Checkout 2 books
         final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
@@ -271,7 +275,7 @@ public class LibraryAppTest {
     @Test
     public void CheckOut_and_CheckIn_Book_to_Library_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, new TestingUtils(ctx));
         int initialBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
 
         // • ACT & ASSERT
@@ -349,7 +353,8 @@ public class LibraryAppTest {
             ctx.log.d(this, "Results of Library2 json load:" + library2.toJson());
 
             // LEAVE FOR REFERENCE
-            // Note: Can't just do simple "text equality" check on Json as the ordering of the `bookIdToNumBooksAvailableMap` is random
+            // Note: Can't just do simple "text equality" check on Json because the ordering of
+            //   the `bookIdToNumBooksAvailableMap` is random.
             // // assert library2.toJson().equals(json);
             // // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
 
@@ -358,11 +363,10 @@ public class LibraryAppTest {
                     library2.calculateAvailableBookIdToNumberAvailableList()).value().size());
 
             // check existence of a particular book
-            assertTrue("Library2 should have known Book with id 1500",
-                    library2.isKnownBook(book1500));
+            assertTrue("Library2 should have known Book with id 1500", library2.isKnownBook(book1500));
 
         } else {
-            // Intentionally should NOT see this branch bc the library2 was never saved to the central database/api.
+            // Intentionally should NEVER see this branch bc the library2 was never saved to the central database/api.
             ctx.log.d(this, "Results of Library2 json load:");
             ctx.log.d(this, library2.toJson());
             fail("Library2 JSON load should have failed");
@@ -455,7 +459,7 @@ public class LibraryAppTest {
     @Test
     public void Create_new_Book_then_CheckOut_Book_to_User_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
         final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assertNotNull(user2InfoResult);
@@ -485,7 +489,7 @@ public class LibraryAppTest {
     @Test
     public void User_Accepts_Book_and_Gives_Book_to_another_User_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
         final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assertNotNull(user01InfoResult);
@@ -520,7 +524,7 @@ public class LibraryAppTest {
     @Test
     public void Give_Checked_Out_Book_From_User_To_User_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
         final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assert user01InfoResult != null;
@@ -562,7 +566,7 @@ public class LibraryAppTest {
     @Test
     public void Give_Book_From_User_To_User_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
         final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assert user01InfoResult != null;
@@ -584,7 +588,7 @@ public class LibraryAppTest {
     @Test
     public void Transfer_CheckedOut_Book_sourceLibrary_to_another_Library_is_Success() {
         // • ARRANGE
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtils);
+        TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
         final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
         assert user2InfoResult != null;
