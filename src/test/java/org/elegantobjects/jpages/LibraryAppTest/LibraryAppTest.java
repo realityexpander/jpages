@@ -40,12 +40,12 @@ public class LibraryAppTest {
         // Modify the Production context into a Test context.
 
         return new Context(
-                prodContext.bookInfoRepo(),
-                prodContext.userInfoRepo(),
-                prodContext.libraryInfoRepo(),
-                prodContext.accountInfoRepo(),
-                prodContext.gson,
-                testLog   // <--- just using the test logger
+            prodContext.bookInfoRepo(),
+            prodContext.userInfoRepo(),
+            prodContext.libraryInfoRepo(),
+            prodContext.accountInfoRepo(),
+            prodContext.gson,
+            testLog   // <--- just using the test logger
         );
     }
 
@@ -88,11 +88,7 @@ public class LibraryAppTest {
 
         // • Create & populate a Library in the Library Repo
         final Result<LibraryInfo> libraryInfo = testUtils.createFakeLibraryInfoInContextLibraryRepo(1);
-        if (libraryInfo instanceof Result.Failure) {
-            ctx.log.e(this,"Create Library FAILURE --> " + libraryInfo);
-            fail("Create Library FAILURE --> " + libraryInfo);
-        }
-        assertTrue(libraryInfo instanceof Result.Success);
+        assertTrue("Create Library FAILURE --> " + libraryInfo, libraryInfo instanceof Result.Success);
         UUID2<Library> library1InfoId = ((Result.Success<LibraryInfo>) libraryInfo).value().id();
         ctx.log.d(this,"Library Created --> id: " + ((Result.Success<LibraryInfo>) libraryInfo).value().id() + ", name: "+ ((Result.Success<LibraryInfo>) libraryInfo).value().name);
 
@@ -103,11 +99,6 @@ public class LibraryAppTest {
         // • Create Accounts for Users //
         /////////////////////////////////
 
-//        // Create fake AccountInfo for User 1
-//        AccountInfo accountInfo = new AccountInfo(
-//            UUID2.createFakeUUID2(1, Account.class),
-//            "User Name 1"
-//        );
         final Result<AccountInfo> accountInfo1Result = testUtils.createFakeAccountInfoInContextAccountRepo(1);
         final Result<AccountInfo> accountInfo2Result = testUtils.createFakeAccountInfoInContextAccountRepo(2);
         assertNotNull(accountInfo1Result);
@@ -132,14 +123,14 @@ public class LibraryAppTest {
         Library library1 = new Library(library1InfoId, ctx);
         assertNotNull(library1);
 
-        // Create the App objects
+        // Create the Test Roles
         TestRoles testRoles = new TestRoles(
-                account1,
-                new Account(accountInfo2, ctx),
-                new User(user1Info, account1, ctx),
-                library1,
-                new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx), // create ORPHANED book
-                new Book(UUID2.createFakeUUID2(1200, Book.class), library1, ctx)
+            account1,
+            new Account(accountInfo2, ctx),
+            new User(user1Info, account1, ctx),
+            library1,
+            new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx), // create ORPHANED book
+            new Book(UUID2.createFakeUUID2(1200, Book.class), library1, ctx)
         );
         assertNotNull(testRoles);
 
