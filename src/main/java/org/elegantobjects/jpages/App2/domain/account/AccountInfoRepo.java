@@ -4,6 +4,7 @@ import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
+import org.jetbrains.annotations.NotNull;
 
 // Holds Account info for all the users in the system (simple CRUD operations)
 public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
@@ -11,7 +12,7 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
     // simulate a local database on server (UUID2<Account> is the key)
     private final UUID2.HashMap<UUID2<Account>, AccountInfo> database = new UUID2.HashMap<>();
 
-    public AccountInfoRepo(ILog log) {
+    public AccountInfoRepo(@NotNull ILog log) {
         super(log);
     }
 
@@ -27,7 +28,7 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
     }
 
     @Override
-    public Result<AccountInfo> updateAccountInfo(AccountInfo accountInfo) {
+    public Result<AccountInfo> updateAccountInfo(@NotNull AccountInfo accountInfo) {
         log.d(this, "accountInfo.id: " + accountInfo.id);
 
         // Simulate network/database
@@ -41,7 +42,7 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
     }
 
     @Override
-    public Result<AccountInfo> upsertAccountInfo(AccountInfo accountInfo) {
+    public Result<AccountInfo> upsertAccountInfo(@NotNull AccountInfo accountInfo) {
         log.d(this, "accountInfo.id: " + accountInfo.id);
 
         // Simulate network/database
@@ -54,7 +55,7 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
     /// Published Helper methods    ///
     ///////////////////////////////////
 
-    public void populateWithFakeAuditMessages(UUID2<Account> accountId, int numberOfMessagesToCreate) {
+    public void populateWithFakeAuditMessages(@NotNull UUID2<Account> accountId, int numberOfMessagesToCreate) {
         log.d(this, "accountId: " + accountId + ", numberOfAccountsToCreate: " + numberOfMessagesToCreate);
         AccountInfo account = database.get(accountId);
 
