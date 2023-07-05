@@ -636,39 +636,41 @@ public class LibraryAppTest {
         uuid2ToEntityMap.put(book1, user01);
         uuid2ToEntityMap.put(book2, user02);
 
-        // ACT & ASSERT
+        // • ACT & ASSERT
 
         // check simple retrieval
         UUID2<User> user = uuid2ToEntityMap.get(book1);
-        ctx.log.d(this, "user=" + user);
+        ctx.log.d(this, "simple retrieval, user=" + user);
         assertNotNull(user);
 
-        // check fetched Book retrieval by new BookId
-        UUID2<Book> book1a = ((Result.Success<Book>)
-                Book.fetchBook(UUID2.createFakeUUID2(1200, Book.class), ctx)
-            ).value().id;
+        // Check retrieval using a new UUID2
+        UUID2<Book> book1a = UUID2.createFakeUUID2(1200, Book.class);
         UUID2<User> user2 = uuid2ToEntityMap.get(book1a);
-        ctx.log.d(this, "user=" + user);
+        ctx.log.d(this, "retrieved using new id, user=" + user);
         assertNotNull(user2);
         assertEquals(user2, user);
 
+        // check removal
         uuid2ToEntityMap.remove(book1);
         user = uuid2ToEntityMap.get(book1);
-        ctx.log.d(this, "user=" + user);
+        ctx.log.d(this, "after removal, user=" + user);
         assertNull(user);
 
         // put it back
         uuid2ToEntityMap.put(book1, user01);
 
-        // check keySet
+        // put it in again (should replace. not duplicate)
+        uuid2ToEntityMap.put(book1, user01);
+
+        // check keySet count
         Set<UUID2<Book>> keySet = uuid2ToEntityMap.keySet();
         assertEquals(2, keySet.size());
 
-        // check values
+        // check values count
         Collection<UUID2<User>> values = uuid2ToEntityMap.values();
         assertEquals(2, values.size());
 
-        // check entrySet
+        // check entrySet count
         Set<Map.Entry<UUID2<Book>, UUID2<User>>> entrySet = uuid2ToEntityMap.entrySet();
         assertEquals(2, entrySet.size());
 

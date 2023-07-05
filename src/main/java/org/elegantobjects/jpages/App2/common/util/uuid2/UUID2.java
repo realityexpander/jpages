@@ -122,7 +122,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public @Override
     boolean equals(Object other) {
-        if(other==null) return false;
+        if(other == null) return false;
         if(!(other instanceof UUID2)) return false;
 
         return ((UUID2<?>)other).uuid().equals(uuid())
@@ -136,7 +136,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return this.uuid2TypeStr().equals(checkUUID2.uuid2TypeStr());
     }
 
-    static boolean isMatchingUUID2Type(String firstUuid2Str, String secondUuid2Str) {
+    static boolean isMatchingUUID2TypeStr(String firstUuid2Str, String secondUuid2Str) {
         if(firstUuid2Str == null) return false;  // note: null checks are acceptable for static methods.
         if(secondUuid2Str == null) return false;
 
@@ -334,33 +334,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         @SuppressWarnings("unchecked")
         public
         TEntity put(@NotNull UUID2<?> uuid2, TEntity value) {
-            removeEntryByUUID(uuid2.uuid());
-
             uuid2ToEntityMap.put((TUUID2) uuid2, value);
             return _uuidToEntityMap.put(uuid2.uuid(), value);
-        }
-
-        private
-        void removeEntryByUUID(UUID uuid) {
-            // This is to prevent duplicate UUID2 entries that have the same internal UUID value.
-            //   This is due to the hashCode() of the UUID2 is the entire object, not the internal UUID's hashCode.
-            // So even though the UUID2 internal UUID is the same UUID value, the java Hash implementation doesn't use that,
-            //   and we must work around it by doing a linear search here for each removal.
-            // Maybe there is a way around this, but i've already tried overloading the hashCode() method for the
-            //   UUID2, but it seems to be ignored(?).
-            // Maybe there is an alternate Map collection I could use?
-
-            // iterate thru uuid2ToEntityMap and remove element that matches UUID
-            for (Map.Entry<TUUID2, TEntity> entry : uuid2ToEntityMap.entrySet()) {
-                TUUID2 uuid2 = entry.getKey();
-                TEntity entity = entry.getValue();
-
-                if (uuid2.uuid().equals(uuid)) {
-                    uuid2ToEntityMap.remove(uuid2);
-                    _uuidToEntityMap.remove(uuid);
-                    break;
-                }
-            }
         }
 
         public
@@ -376,7 +351,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
                 entities.add(entity);
             }
-
 
             return entities;
         }
