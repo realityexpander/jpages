@@ -139,7 +139,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             // Set UUID2Type to match type of TDomainInfo object
             String domainInfoClazzName = UUID2.calcUUID2TypeStr(domainInfoClazz);
             domainInfoClazz.cast(obj)
-                    .getDomainInfoId()
+                    .domainInfoId()
                     ._setUUID2TypeStr(domainInfoClazzName);
 
             // Set `id` to match `id` of the Info

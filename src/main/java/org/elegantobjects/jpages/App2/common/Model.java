@@ -9,19 +9,48 @@ import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.jetbrains.annotations.NotNull;
 
-// "{Model}Info" Data "Holders" kept inside each App Domain Object.
-// - Similar to an Entity for a database row or a DTO for a REST API endpoint, these are
-//   the objects contain the "data" that is accessed by the Role object.
-// - They are the "source of truth" for the Domain objects in the application.
-// - {Domain}Info hold the Role state that resides elsewhere, usually on the server/api,
-//   but the Role does not know where or care where the data comes from, it only knows the format.
-// - {DTO}Info hold the API transfer "dumb" objects and Validation layer for the Domain objects.
-// - {Entity}Info hold the Database transfer "dumb" objects. Validation can occur here too, but usually not necessary.
+/**
+ {@code {Model}Info} Data "Holders" kept inside each Role Domain Object.<br>
+ <br>
+ <b>Domain Info Classes</b><br>
+ - Similar to an Entity for a database row or a DTO for a REST API endpoint, these objects are the
+   the objects contain the "data" or {@code Info} that is accessed by the {@code Role} object.<br>
+ - They are the "source of truth" for the Domain object's "data" in the application.<br>
+ - {@code {Domain}}Info hold the {@code Role Info} that resides elsewhere, usually on a local-server/db/api,
+   but the {@code Role} does not know where or care where the data comes from, it only knows the format.<br>
+ <br>
+ <b>DTO/Entity Info Classes</b><br>
+ - {@code {DTO}Info} hold the API transfer "dumb" objects that transport info to/from their service/api/db.<br>
+ - {@code {Entity}Info} hold the Database transfer "dumb" objects that transport info to/from their service/api/db.<br>
+ - Validation occurs in the Domain layer, when an DTO/Entity is converted to a DomainInfo object.<br>
+ **/
 public class Model {
-    public UUID2<?> id; // Can't make final bc need to set it during JSON deserialization. :(
+    private UUID2<?> id; // Can't make final due to need to set it during JSON deserialization. :(
 
-    protected Model(UUID2<?> id) {
+    protected
+    Model(UUID2<?> id) {
         this.id = new UUID2<>(id);
+    }
+
+    ////////////////////////
+    // Simple getters     //
+    ////////////////////////
+
+    public UUID2<?> id() { return id; }
+
+    // EXCEPTIONAL CASE:
+    // - This method is for JSON deserialization purposes & should only be used for such.
+    // - It is not intended to be used for any other purpose.
+    // - todo Is there a better way to do this?
+    public void _setIdFromImportedJson(UUID2<IUUID2> id) {
+        this.id = id;
+    }
+
+    public String toPrettyJson() {
+        return new GsonBuilder().setPrettyPrinting().create().toJson(this); // todo switch over to context version
+    }
+    public String toPrettyJson(@NotNull Context context) {
+        return context.gson.toJson(this);
     }
 
     ///////////////////////////
@@ -32,7 +61,7 @@ public class Model {
     ///////////////////////////
 
     public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
-        UUID2<?> getDomainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
+        UUID2<?> domainInfoId();  // *MUST* override, method should return id of DomainInfo object (used for deserialization)
 
 
         default @SuppressWarnings("unchecked")
@@ -64,20 +93,6 @@ public class Model {
     }
     public interface ToDTOInfo<T extends DTOInfo> {
         T toInfoDTO();    // Should return a deep copy (no original references)
-    }
-
-    public String toPrettyJson() {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(this); // todo switch over to context version
-    }
-    public String toPrettyJson(@NotNull Context context) {
-        return context.gson.toJson(this);
-    }
-
-    public UUID2<?> id() { return id; }
-
-    // This method is for JSON deserialization purposes & should only be used for such.
-    public void _setIdFromImportedJson(UUID2<IUUID2> id) {
-        this.id = id;
     }
 
 }

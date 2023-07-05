@@ -75,7 +75,7 @@ public class EntityBookInfo extends EntityInfo
     }
 
     @Override
-    public UUID2<?> getDomainInfoId() {
+    public UUID2<?> domainInfoId() {
         return this.id;
     }
 

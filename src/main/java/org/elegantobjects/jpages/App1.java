@@ -75,9 +75,9 @@ public final class App1 extends IOException {
 
         public String toString() {
             return params.entrySet().stream()
-                    .map(entry ->
-                            entry.getKey() + "=" + entry.getValue())
-                    .reduce("", (a, b) -> a + "\n" + b);
+                .map(entry ->
+                    entry.getKey() + "=" + entry.getValue())
+                .reduce("", (a, b) -> a + "\n" + b);
         }
 
         private Map<String, String> parseRequest(String[] lines) {

@@ -17,18 +17,16 @@ public class UserInfo extends DomainInfo
     implements
         Model.ToDomainInfo<UserInfo>
 {
-//    public final UUID2<User> id;  // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
     public final String name;
     public final String email;
     private final HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap; // BookId -> LibraryId
 
     public
     UserInfo(
-        @NotNull
-        UUID2<User> id,        // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
-        String name,
-        String email,
-        HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap
+        @NotNull UUID2<User> id,        // note this is a UUID2<User> not a UUID2<UserInfo>, it is the id of the User.
+        @NotNull String name,
+        @NotNull String email,
+        @NotNull HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap
     ) {
         super(id);
         this.id = id;
@@ -47,19 +45,19 @@ public class UserInfo extends DomainInfo
         );
     }
     public
-    UserInfo(UUID uuid, String name, String email, HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap) {
+    UserInfo(@NotNull UUID uuid, String name, String email, HashMap<UUID2<Book>, UUID2<Library>> acceptedBookIdToSourceLibraryIdMap) {
         this(new UUID2<User>(uuid, User.class), name, email, acceptedBookIdToSourceLibraryIdMap);
     }
     public
-    UserInfo(UUID2<User> uuid2, String name, String email) {
+    UserInfo(@NotNull UUID2<User> uuid2, @NotNull String name, @NotNull String email) {
         this(uuid2, name, email, new HashMap<>());
     }
     public
-    UserInfo(UUID uuid, String name, String email) {
+    UserInfo(@NotNull UUID uuid, @NotNull String name, @NotNull String email) {
         this(new UUID2<User>(uuid, User.class), name, email);
     }
     public
-    UserInfo(String uuid, String name, String email) {
+    UserInfo(@NotNull String uuid, @NotNull String name, @NotNull String email) {
         this(UUID.fromString(uuid), name, email);
     }
 
@@ -192,7 +190,7 @@ public class UserInfo extends DomainInfo
     }
 
     @Override
-    public UUID2<?> getDomainInfoId() {
+    public UUID2<?> domainInfoId() {
         return this.id;
     }
 

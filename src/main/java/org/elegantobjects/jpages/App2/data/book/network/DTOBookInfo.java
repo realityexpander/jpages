@@ -87,7 +87,7 @@ public class DTOBookInfo extends DTOInfo
 
     @SuppressWarnings("unchecked")
     @Override
-    public UUID2<Book> getDomainInfoId() {
+    public UUID2<Book> domainInfoId() {
         return (UUID2<Book>) this.id;
     }
 

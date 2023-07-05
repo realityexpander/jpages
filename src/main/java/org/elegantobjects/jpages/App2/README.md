@@ -17,6 +17,8 @@
 ### Developer Experience
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
+  - One down side, the hierarchy is separated into different folders, so its not obvious what the hierarchy is.
+  - To remedy this, documentation about the data hierarchy should exist near the code (maybe a README). 
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
@@ -32,6 +34,8 @@ using IDE tools (like hover to find var types).
   - You may think you know what a variable/method is for, but the next person may not.
   - Yes, this risks job security, but it also makes it easier to change code as you keep 
     extending the code base. We risk improving the developer experience for our own sake.
+- Even this short guide repeats ideas, to make it easier to understand what is important and what is not.
+- Some ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
 ### Contents
 
@@ -141,13 +145,13 @@ using IDE tools (like hover to find var types).
 
 ### Anti-inheritance
 - Minimal & shallow use of inheritance
-  - <code>Model -> {Domain} -> {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
+  - <code>Model ➤➤ {Domain} ➤➤ {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
     - ie: <code>Model.DTOInfo.DTOBookInfo</code>
     - ie: <code>Model.DomainInfo.BookInfo</code> 
       - note:`BookInfo` is <i>not</i> a `DomainBookInfo` bc the Domain is the core and more plain java-like.
-  - <code>IRepo -> Repo -> {Domain}Repo</code> for the `Repo` objects
+  - <code>IRepo ➤➤ Repo ➤➤ {Domain}Repo</code> for the `Repo` objects
     - ie: <code>Repo.BookInfoRepo</code> 
-  - <code>Role -> {DomainRole}</code> for the `Role` objects
+  - <code>Role ➤➤ {DomainRole}</code> for the `Role` objects
     - ie: <code>Role.Book</code>
 - Minimal use of Interfaces
   - only where needed for testing via fakes/mocks 
@@ -165,17 +169,16 @@ using IDE tools (like hover to find var types).
 - Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
 - If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
   - example: 
-    - [Library -> PrivateLibrary with `isOrphan` flag] 
+    - [Library ➤➤ PrivateLibrary with `isOrphan` flag] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ⬅︎ shallow is preferred
     - vs 
-    - [Library -> PrivateLibrary -> OrphanPrivateLibrary]
+    - [Library ➤➤ PrivateLibrary ➤➤ OrphanPrivateLibrary]
   - prefer the shallower hierarchy with the `isOrphan` flag. 
   
 ### No `Static` Methods (with extremely limited exceptions)
 - Use of `Static` methods is severely limited to only those that are:
-  - pure functions
-  - have no side effects
-  - used to create objects from JSON, XML, etc.
-  - no modification or creation of global state
+  - Pure functions ie: have no side effects that change data outside the function.
+  - Used to create objects from JSON, XML, another object, the network, etc.
+  - No modification or creation of global state
 
 ### Dumb Container Objects for Data Transfer Only to/from Domain
 - Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
@@ -495,7 +498,7 @@ using IDE tools (like hover to find var types).
 - ### Role
   - `User` - Handles `User` actions, like `giveBookToUser()`, `checkOutBook()`, `checkInBook()`, etc.
     - `User` contains an `Account` object, which contains an `AccountInfo` object.  
-    - `Account` - Handles `Account` actions, like paying fines, checking status, etc.
+    - `Account` - Handles `Account` actions, like paying fines, checking account status, checking limits etc.
   - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
   - `Book` - Handles `Book` actions like changing `title`, `author`, `description`, `sourceLibrary`, etc.
 
@@ -553,4 +556,4 @@ flexibility and power.
     create a `Library` first. 
   - This is an arbitrary decision to see if I could stretch how the system works, and is not a 
     real world use case. 
-  - In a normal Library system, all `Books` would be associated with a `Library` at the time of creation.
+  - In a well-conceived "normal" Library system, all `Books` would be associated with a particular system `Library` at the time of creation.

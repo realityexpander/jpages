@@ -561,7 +561,7 @@ public class AccountInfo extends DomainInfo
     }
 
     @Override
-    public UUID2<?> getDomainInfoId() {
+    public UUID2<?> domainInfoId() {
         return this.id;
     }
 }
