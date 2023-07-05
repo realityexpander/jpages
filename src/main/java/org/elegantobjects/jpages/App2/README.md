@@ -366,7 +366,7 @@ using IDE tools (like hover to find var types).
 ### Minimal Annotations
 - Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, @Suppress, etc.
 
-### Acceptable Acronyms
+### Acceptable Acronyms, Prefixes, and Suffixes
 
 <table>
   <tr>
