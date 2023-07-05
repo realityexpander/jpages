@@ -30,8 +30,8 @@ public class UUID2Test {
     @Test
     public void UUID2_serialized_string_is_Correct() {
         // • ARRANGE
-        UUID2<Book> book1200 = UUID2.createFakeUUID2(1200, Book.class);
-        String book1200UUID2Str = book1200.toString();
+        UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
+        String book1200UUID2Str = book1200Id.toString();
 
         // • ACT
         String expectedUUID2Str = "UUID2:Role.Book@00000000-0000-0000-0000-000000001200";
@@ -44,25 +44,50 @@ public class UUID2Test {
     @Test
     public void Create_new_UUID2_from_UUID2_String_results_Equal_values() throws ClassNotFoundException {
         // • ARRANGE
-        UUID2<Book> book1200 = UUID2.createFakeUUID2(1200, Book.class);
-        String book1200UUID2Str = book1200.toString();
+        UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
+        String book1200UUID2Str = book1200Id.toString();
 
         // • ACT
         @SuppressWarnings("unchecked")
-        UUID2<Book> book1200a = (UUID2<Book>) UUID2.fromUUID2String(book1200UUID2Str);
+        UUID2<Book> book1200aId = (UUID2<Book>) UUID2.fromUUID2String(book1200UUID2Str);
 
         // • ASSERT
-        assertEquals(book1200, book1200a);
+        assertEquals(book1200Id, book1200aId);
+    }
+
+    @Test
+    public void Create_new_UUID2_from_another_UUID2_results_Equal_values() throws ClassNotFoundException {
+        // • ARRANGE
+        UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
+
+        // • ACT
+        UUID2<Book> book1200aId = new UUID2<>(book1200Id);
+
+        // • ASSERT
+        assertEquals(book1200Id, book1200aId);
+    }
+
+    @Test
+    public void UUID2_values_with_equal_UUIDs_using_onlyUUIDEquals_are_Equal() throws ClassNotFoundException {
+        // • ARRANGE
+        UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
+        UUID2<User> user1200Id = UUID2.createFakeUUID2(1200, User.class);
+
+        // • ACT
+        boolean isEqual = book1200Id.onlyUUIDEquals(user1200Id);
+
+        // • ASSERT
+        assertTrue(isEqual);
     }
 
     @Test
     public void Equal_UUID2_values_are_Equal() throws ClassNotFoundException {
         // • ARRANGE
-        UUID2<Book> book9999 = UUID2.createFakeUUID2(9999, Book.class);
-        UUID2<Book> book9999a = UUID2.createFakeUUID2(9999, Book.class);
+        UUID2<Book> book9999Id = UUID2.createFakeUUID2(9999, Book.class);
+        UUID2<Book> book9999Ida = UUID2.createFakeUUID2(9999, Book.class);
 
         // • ACT
-        assertEquals(book9999, book9999a);
+        assertEquals(book9999Id, book9999Ida);
     }
 
     private void setUpUUID2HashMapTest() {

@@ -85,9 +85,9 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     // Static constructors //
     /////////////////////////
     public static Result<Book> fetchBook(
-            @NotNull UUID2<Book> uuid2,
-            @Nullable Library sourceLibrary,
-            @NotNull Context context
+        @NotNull UUID2<Book> uuid2,
+        @Nullable Library sourceLibrary,
+        @NotNull Context context
     ) {
         BookInfoRepo repo = context.bookInfoRepo();
 
@@ -100,12 +100,11 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return new Result.Success<>(new Book(info, sourceLibrary, context));
     }
     public static Result<Book> fetchBook(
-            @NotNull UUID2<Book> uuid2,
-            @NotNull Context context
+        @NotNull UUID2<Book> uuid2,
+        @NotNull Context context
     ) {
         return fetchBook(uuid2, null, context);
     }
-
 
     ////////////////////////////////
     // Published Getters          //
