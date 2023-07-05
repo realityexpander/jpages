@@ -80,7 +80,7 @@ final class LibraryApp {
                 ctx.log.d(this, "Book Info --> " + bookInfo3.toString());
 
             // Try to get a book id that doesn't exist
-            Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
+            Book book2 = new Book(UUID2.createFakeUUID2(1200, Book.class), null, ctx);
             if (book2.fetchInfoResult() instanceof Result.Failure) {
                 ctx.log.d(this, "Get Book Should fail : FAILURE --> book id: " + book2.id() + " >> " + ((Result.Failure<BookInfo>) book2.fetchInfoResult()));
                 assert true; // should fail
