@@ -77,8 +77,8 @@ public class LibraryAppTest {
         }
     }
     private @NotNull TestRoles setupDefaultRolesAndScenario(
-            @NotNull Context ctx,
-            @NotNull TestingUtils testUtils
+        @NotNull Context ctx,
+        @NotNull TestingUtils testUtils
     ) {
 
         ////////////////////////////////////////

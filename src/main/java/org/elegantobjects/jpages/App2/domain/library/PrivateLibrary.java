@@ -19,7 +19,7 @@ import static java.lang.String.format;
 // A PrivateLibrary usually has only a single Book in it.
 public class PrivateLibrary extends Library implements IUUID2 {
 
-    // This a Library is not part of any system Library.
+    // This a Private Library is not part of any system Library.
     // ie: It is a "Personal" Library, a library for a single found book, or a Library for a newly created book, etc.
     //
     // This not a system Library, so it doesn't access the Account Role Object for any account checks.
