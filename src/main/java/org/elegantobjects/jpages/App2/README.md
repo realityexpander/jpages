@@ -81,10 +81,11 @@ using IDE tools (like hover to find var types).
 - `null` only allowed to be passed in constructors
   - used to indicate <i>"use a reasonable default value for this parameter"</i>
 - `null` is checked for in constructors only, usually to create a reasonable default value.
-- `null` is not allowed to be returned from methods for Domain.
-  - `return` "Empty" or `Result` objects instead of `null`
+- `null` is not allowed to be returned from methods in the Domain.
+  - Prefer to `return` "Empty" or `Result` objects instead of `null`.
 - Use intention-named objects that indicate the reason for a `null` case.
-  - ie: `PrivateLibrary` instead of a `null` source Library
+  - ie: `PrivateLibrary` instead of a `null` for an "unknown" system Library object.
+  - This can often become awkward to describe in English, so the use of `null` must always be questioned.
 
 - <b>Important Exception:</b>
   - `null` is returned from `fetchInfo()` when no error has occurred. 
