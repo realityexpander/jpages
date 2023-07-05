@@ -10,9 +10,11 @@ import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.jetbrains.annotations.NotNull;
 
 /**
- {@code {Model}Info} Data "Holders" kept inside each Role Domain Object.<br>
+ <b>Model - Top of data "Info" hierarchy</b><br>
+ Handles data "Info" conversion of DomainInfo to/from DTO/EntityInfo.<br>
  <br>
  <b>Domain Info Classes</b><br>
+ - {@code {Model}Info} Data "Holders" kept inside each Role Domain Object.<br>
  - Similar to an Entity for a database row or a DTO for a REST API endpoint, these objects are the
    the objects contain the "data" or {@code Info} that is accessed by the {@code Role} object.<br>
  - They are the "source of truth" for the Domain object's "data" in the application.<br>
