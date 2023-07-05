@@ -13,21 +13,29 @@ public class Log implements ILog {
     }
 
     // example: log.d(this, "message") will print "ClassName➤MethodName(): message"
-    public void d(Object obj, String msg) {
-        if(obj == null) {
+    public void d(Object tag, String msg) {
+        if(tag == null) {
             d("null", msg);
             return;
         }
+        if(tag instanceof String) {
+            d((String) tag, msg);
+            return;
+        }
 
-        d(obj.getClass().getSimpleName() + "➤" +
+        d(tag.getClass().getSimpleName() + "➤" +
                         Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
                 msg
         );
     }
 
-    public void e(Object obj, String msg, Exception e) {
-        if(obj == null) {
-            d("null", msg);
+    public void e(Object tag, String msg, Exception e) {
+        if(tag == null) {
+            e("null", msg);
+            return;
+        }
+        if(tag instanceof String) {
+            e((String) tag, msg);
             return;
         }
 
@@ -37,7 +45,7 @@ public class Log implements ILog {
             stacktrace.append(ste.toString()).append(", ");
         }
 
-        e(obj.getClass().getSimpleName() + "➤" +
+        e(tag.getClass().getSimpleName() + "➤" +
             Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
             msg + " - " + e.getMessage() + " - " + stacktrace
         );
@@ -45,26 +53,34 @@ public class Log implements ILog {
     }
 
     // example: log.w(this, "message") will print "ClassName➤MethodName():(WARNING) message"
-    public void w(Object obj, String msg) {
-        if(obj == null) {
+    public void w(Object tag, String msg) {
+        if(tag == null) {
             w("null", msg);
             return;
         }
+        if(tag instanceof String) {
+            w((String) tag, msg);
+            return;
+        }
 
-        w(obj.getClass().getSimpleName() + "➤" +
+        w(tag.getClass().getSimpleName() + "➤" +
             Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
             msg
         );
     }
 
     // example: log.e(this, "message") will print "ClassName➤MethodName():(ERROR) message"
-    public void e(Object obj, String msg) {
-        if(obj == null) {
+    public void e(Object tag, String msg) {
+        if(tag == null) {
             e("null", msg);
             return;
         }
+        if(tag instanceof String) {
+            e((String) tag, msg);
+            return;
+        }
 
-        e(obj.getClass().getSimpleName() + "➤" +
+        e(tag.getClass().getSimpleName() + "➤" +
             Thread.currentThread().getStackTrace()[2].getMethodName() + "()",
             msg
         );

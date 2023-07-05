@@ -30,7 +30,7 @@ public class LibraryAppTest {
 //    }
 
     private @NotNull Context setupTestContext() {
-        TestLog testLog = new TestLog(false); // true = print all logs to console
+        TestLog testLog = new TestLog(false); // false = print all logs to console
         Context prodContext = Context.setupProductionInstance(testLog);
 
         // Change the Prod context into a Test context.
@@ -71,19 +71,17 @@ public class LibraryAppTest {
             this.book1200 = book1200;
         }
     }
-    private @NotNull TestRoles setupDefaultScenarioAndRoles(@NotNull Context ctx) {
-
-        TestingUtils testUtil = new TestingUtils(ctx);
+    private @NotNull TestRoles setupDefaultScenarioAndRoles(@NotNull Context ctx, TestingUtils testUtils) {
 
         ////////////////////////////////////////
         // Setup DB & API simulated resources //
         ////////////////////////////////////////
 
         // • Put some fake BookInfo into the DB & API for BookInfo's
-        testUtil.PopulateFakeBookInfoInContextBookRepoDBandAPI();
+        testUtils.PopulateFakeBookInfoInContextBookRepoDBandAPI();
 
         // • Create & populate a Library in the Library Repo
-        final Result<LibraryInfo> libraryInfo = testUtil.createFakeLibraryInfoInContextLibraryRepo(1);
+        final Result<LibraryInfo> libraryInfo = testUtils.createFakeLibraryInfoInContextLibraryRepo(1);
         if (libraryInfo instanceof Result.Failure) {
             ctx.log.e(this,"Create Library FAILURE --> " + libraryInfo);
             fail("Create Library FAILURE --> " + libraryInfo);
@@ -104,8 +102,8 @@ public class LibraryAppTest {
 //            UUID2.createFakeUUID2(1, Account.class),
 //            "User Name 1"
 //        );
-        final Result<AccountInfo> accountInfo1Result = testUtil.createFakeAccountInfoInContextAccountRepo(1);
-        final Result<AccountInfo> accountInfo2Result = testUtil.createFakeAccountInfoInContextAccountRepo(2);
+        final Result<AccountInfo> accountInfo1Result = testUtils.createFakeAccountInfoInContextAccountRepo(1);
+        final Result<AccountInfo> accountInfo2Result = testUtils.createFakeAccountInfoInContextAccountRepo(2);
         assertNotNull(accountInfo1Result);
         assertNotNull(accountInfo2Result);
         assertTrue(accountInfo1Result instanceof Result.Success);
@@ -114,7 +112,7 @@ public class LibraryAppTest {
         final AccountInfo accountInfo2 = ((Result.Success<AccountInfo>) accountInfo2Result).value();
 
         // Create & populate User1 in the User Repo for the Context
-        final Result<UserInfo> user1InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user1InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
         assertNotNull(user1InfoResult);
         assertTrue(user1InfoResult instanceof Result.Success);
         final UserInfo user1Info = ((Result.Success<UserInfo>) user1InfoResult).value();
@@ -197,7 +195,7 @@ public class LibraryAppTest {
     public void CheckOut_2_Books_to_User_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
 
         // • ACT
         final Result<Book> bookResult = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
@@ -211,21 +209,25 @@ public class LibraryAppTest {
     }
 
     @Test
-    public void Find_Books_checkedOut_by_User_is_Success() {  // note: relies on Checkout_2_books_to_User
+    public void Find_Books_checkedOut_by_User_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
 
-        // Checkout 2 books
+        // Checkout 2 books to User
         final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
         final Result<Book> bookResult2 = roles.library1.checkOutBookToUser(roles.book1200, roles.user1);
+        assertTrue("Checked out book FAILURE, bookId: " + roles.book1100.id, bookResult1 instanceof Result.Success);
+        assertTrue("Checked out book FAILURE, bookId: " + roles.book1200.id, bookResult2 instanceof Result.Success);
 
-        // • ACT
+        // • ACT & ASSERT
+
+        // Find books checked out by user
         final Result<ArrayList<Book>> checkedOutBooksResult = roles.library1.findBooksCheckedOutByUser(roles.user1);
         assertTrue("findBooksCheckedOutByUser FAILURE for userId" + roles.user1.id, checkedOutBooksResult instanceof Result.Success);
         ArrayList<Book> checkedOutBooks = ((Result.Success<ArrayList<Book>>) checkedOutBooksResult).value();
 
-        // • ASSERT
+        // List Books
         ctx.log.d(this,"Checked Out Books for User [" + roles.user1.fetchInfo().name + ", " + roles.user1.id + "]:");
         for (Book book : checkedOutBooks) {
             final Result<BookInfo> bookInfoResult = book.fetchInfoResult();
@@ -242,7 +244,7 @@ public class LibraryAppTest {
     public void Calculate_availableBook_To_numAvailable_Map_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
 
         // Checkout 2 books
         final Result<Book> bookResult1 = roles.library1.checkOutBookToUser(roles.book1100, roles.user1);
@@ -279,7 +281,7 @@ public class LibraryAppTest {
     public void CheckOut_and_CheckIn_Book_to_Library_is_Success() {
         // • ARRANGE
         Context ctx = setupTestContext();
-        TestRoles roles = setupDefaultScenarioAndRoles(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
         int initialBookCount = ((Result.Success<ArrayList<Book>>) roles.user1.findAllAcceptedBooks()).value().size();
 
         // • ACT & ASSERT
@@ -450,17 +452,86 @@ public class LibraryAppTest {
             ctx.log.d(this,"Results of load BookInfo from DTO Json: " + book3.toJson());
 
             assertEquals("Book3 should have title:" + expectedTitle,
-                    expectedTitle, book3.info().title);
+                expectedTitle, book3.info().title);
             assertEquals("Book3 should have author:" + expectedAuthor,
-                    expectedAuthor, book3.info().author);
+                expectedAuthor, book3.info().author);
             assertEquals("Book3 should have id: " + expectedUUID2,
-                    expectedUUID2, book3.id);
+                expectedUUID2, book3.id);
             assertEquals("Book3 should have UUID2 Type of:" + expectedUuid2Type,
-                    expectedUuid2Type, book3.id.uuid2TypeStr());
+                expectedUuid2Type, book3.id.uuid2TypeStr());
         } catch (Exception e) {
             ctx.log.e(this, "Exception: " + e.getMessage());
             fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void Create_new_Book_then_CheckOut_Book_to_User_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, new TestingUtils(ctx));
+        TestingUtils testUtil = new TestingUtils(ctx);
+
+        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        assertNotNull(user2InfoResult);
+        final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2 , ctx);
+        assertNotNull(user2);
+
+        final Result<BookInfo> book12Result = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+        assertTrue("Book12 should have been added to Library1", book12Result instanceof Result.Success);
+
+        // • ACT & ASSERT
+
+        // Create new Book by id
+        final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12Result).value().id();
+        final Book book12 = new Book(book12id, null, ctx);
+        assertNotNull(book12);
+
+        // Add Book to Library
+        final Result<Book> book12UpsertResult = roles.library1.addTestBookToLibrary(book12, 1);
+        assertTrue("Book12 should have been added to Library1", book12UpsertResult instanceof Result.Success);
+
+        // Check out Book from Library
+        ctx.log.d(this,"Check out book " + book12id + " to user " + roles.user1.id);
+        final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, roles.library1);
+        assertTrue("Book12 should have been checked out by user2", checkedOutBookResult instanceof Result.Success);
+    }
+
+    @Test
+    public void Give_Book_To_User_is_Success() {
+        // • ARRANGE
+        Context ctx = setupTestContext();
+        TestingUtils testUtil = new TestingUtils(ctx);
+        TestRoles roles = setupDefaultScenarioAndRoles(ctx, testUtil);
+
+        final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+        assertNotNull(user01InfoResult);
+        assertTrue("User01 should have been added to UserInfoRepo", user01InfoResult instanceof Result.Success);
+        final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1 , ctx);
+        assertNotNull(user01);
+
+        final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+        assertNotNull(user2InfoResult);
+        assertTrue("User2 should have been added to UserInfoRepo", user2InfoResult instanceof Result.Success);
+        final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
+        assertNotNull(user2);
+
+        final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+        assertTrue("Book12 should have been added to Library1", book12InfoResult instanceof Result.Success);
+
+        final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
+        final Book book12 = new Book(book12id, null, ctx);
+        assertNotNull(book12);
+
+        // • ACT & ASSERT
+
+        Result<ArrayList<Book>> acceptBookResult = user2.acceptBook(book12); // no library involved.
+        assertTrue("User2 should have accepted Book12", acceptBookResult instanceof Result.Success);
+
+        ctx.log.d(this,"User (2):" + user2.id + " Give Book:" + book12id + " to User(1):" + user01.id);
+
+        final Result<ArrayList<UUID2<Book>>> giveBookToUserResult = user2.giveBookToUser(book12, user01);
+        assertTrue("User2 should have given Book12 to User01", giveBookToUserResult instanceof Result.Success);
     }
 
 }
