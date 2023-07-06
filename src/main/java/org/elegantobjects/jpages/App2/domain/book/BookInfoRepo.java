@@ -18,21 +18,24 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     private final BookInfoApi api;
     private final BookInfoDatabase database;
 
-    public BookInfoRepo(@NotNull BookInfoApi api,
-                        @NotNull BookInfoDatabase database,
-                        ILog log
+    public
+    BookInfoRepo(
+        @NotNull BookInfoApi api,
+        @NotNull BookInfoDatabase database,
+        ILog log
     ) {
         super(log);
         this.api = api;
         this.database = database;
     }
 
-    public BookInfoRepo() {
+    public
+    BookInfoRepo() {
         this(new BookInfoApi(), new BookInfoDatabase(), new Log());
     }
 
     @Override
-    public Result<BookInfo> fetchBookInfo(UUID2<Book> id) {
+    public Result<BookInfo> fetchBookInfo(@NotNull UUID2<Book> id) {
         log.d(this, "bookId " + id);
 
         // Make the request to API
@@ -66,7 +69,7 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     }
 
     @Override
-    public Result<BookInfo> updateBookInfo(BookInfo bookInfo) {
+    public Result<BookInfo> updateBookInfo(@NotNull BookInfo bookInfo) {
         log.d(this, "bookInfo: " + bookInfo);
 
         Result<BookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.UPDATE);
@@ -79,7 +82,7 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     }
 
     @Override
-    public Result<BookInfo> addBookInfo(BookInfo bookInfo) {
+    public Result<BookInfo> addBookInfo(@NotNull BookInfo bookInfo) {
         log.d(this, "bookInfo: " + bookInfo);
 
         Result<BookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.ADD);
@@ -91,9 +94,8 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         return bookResult;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Result<BookInfo> upsertBookInfo(BookInfo bookInfo) {
+    public Result<BookInfo> upsertBookInfo(@NotNull BookInfo bookInfo) {
         log.d(this, "bookId: " + bookInfo.id());
 
         if (database.getBookInfo(bookInfo.id()) != null) {
@@ -116,8 +118,8 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     }
 
     private Result<BookInfo> saveBookToApiAndDB(
-            @NotNull BookInfo bookInfo,
-            @NotNull UpdateKind updateKind
+        @NotNull BookInfo bookInfo,
+        @NotNull UpdateKind updateKind
     ) {
         log.d(this, "updateType: " + updateKind + ", id: " + bookInfo.id());
 

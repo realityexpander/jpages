@@ -30,7 +30,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     protected Result<TDomainInfo> infoResult = null;
 
     // Singletons
-    protected final Context context;
+    protected final Context context;  // All roles have access the the Context singleton
 
     // Class of the Info<TDomain> info object (for Gson serialization)
     // - also JAVA REFLECTION IS UGLY!!

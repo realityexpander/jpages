@@ -13,12 +13,12 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
     private final UUID2.HashMap<UUID2<User>, UserInfo> database = new UUID2.HashMap<>();
 
     public
-    UserInfoRepo(@NotNull  ILog log) {
+    UserInfoRepo(@NotNull ILog log) {
         super(log);
     }
 
     @Override
-    public Result<UserInfo> fetchUserInfo(UUID2<User> id) {
+    public Result<UserInfo> fetchUserInfo(@NotNull UUID2<User> id) {
         log.d(this, "userId: " + id);
 
         // Simulate network/database
@@ -31,8 +31,8 @@ public class UserInfoRepo extends Repo implements IUserInfoRepo {
 
     @Override
     public Result<UserInfo> updateUserInfo(@NotNull UserInfo userInfo) {
-        String method = Thread.currentThread().getStackTrace()[2].getMethodName();
-        log.d(this, method + ", userId:" + userInfo.id());
+        String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+        log.d(this, methodName + ", userId:" + userInfo.id());
 
         // Simulate network/database
         if (database.containsKey(userInfo.id())) {

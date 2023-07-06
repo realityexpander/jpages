@@ -71,7 +71,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
     // Static constructors //
     /////////////////////////
 
-    public static Result<User> fetchUser(UUID2<User> id, @NotNull Context context) {
+    public static Result<User> fetchUser(@NotNull UUID2<User> id, @NotNull Context context) {
 
         // get the User's UserInfo
         Result<UserInfo> userInfoResult =

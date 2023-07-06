@@ -79,11 +79,11 @@ public class UserInfo extends DomainInfo
     // User Info Business Logic Methods   //
     ////////////////////////////////////////
 
-    public boolean isBookIdAcceptedByThisUser(UUID2<Book> bookId) {
+    public boolean isBookIdAcceptedByThisUser(@NotNull UUID2<Book> bookId) {
         return this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId);
     }
 
-    public Result<ArrayList<UUID2<Book>>> acceptBook(UUID2<Book> bookId, UUID2<Library> LibraryId) {
+    public Result<ArrayList<UUID2<Book>>> acceptBook(@NotNull UUID2<Book> bookId, @NotNull UUID2<Library> LibraryId) {
         if (this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId)) {
             return new Result.Failure<>(new Exception("Book already accepted by user, book id:" + bookId));
         }
@@ -97,7 +97,7 @@ public class UserInfo extends DomainInfo
         return new Result.Success<>(findAllAcceptedBookIds());
     }
 
-    public Result<ArrayList<UUID2<Book>>> unacceptBook(UUID2<Book> bookId) {
+    public Result<ArrayList<UUID2<Book>>> unacceptBook(@NotNull UUID2<Book> bookId) {
         if (!this.acceptedBookIdToSourceLibraryIdMap.containsKey(bookId)) {
             return new Result.Failure<>(new Exception("Book not in accepted Books List for user, book id:" + bookId));
         }

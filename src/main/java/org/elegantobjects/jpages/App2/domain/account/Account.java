@@ -12,7 +12,8 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     public final UUID2<Account> id;
     private final AccountInfoRepo repo;
 
-    public Account(
+    public
+    Account(
         @NotNull AccountInfo info,
         @NotNull Context context
     ) {
@@ -22,7 +23,8 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
         context.log.d(this,"Account (" + this.id + ") created from Info");
     }
-    public Account(
+    public
+    Account(
         String json,
         @NotNull Class<AccountInfo> clazz,
         @NotNull Context context
@@ -33,7 +35,8 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
         context.log.d(this,"Account (" + this.id + ") created from Json with class: " + clazz.getName());
     }
-    public Account(
+    public
+    Account(
         @NotNull UUID2<Account> id,
         @NotNull Context context
     ) {
@@ -43,8 +46,10 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
         context.log.d(this,"Account(" + this.id + ") created using id with no Info");
     }
-    public Account(@NotNull String json, @NotNull Context context) { this(json, AccountInfo.class, context); }
-    public Account(@NotNull Context context) {
+    public
+    Account(@NotNull String json, @NotNull Context context) { this(json, AccountInfo.class, context); }
+    public
+    Account(@NotNull Context context) {
         this(UUID2.randomUUID2(), context);
     }
 

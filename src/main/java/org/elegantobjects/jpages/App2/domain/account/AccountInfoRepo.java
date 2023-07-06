@@ -12,7 +12,8 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
     // simulate a local database on server (UUID2<Account> is the key)
     private final UUID2.HashMap<UUID2<Account>, AccountInfo> database = new UUID2.HashMap<>();
 
-    public AccountInfoRepo(@NotNull ILog log) {
+    public
+    AccountInfoRepo(@NotNull ILog log) {
         super(log);
     }
 

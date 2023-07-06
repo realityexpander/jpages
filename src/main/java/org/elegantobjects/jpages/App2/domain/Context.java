@@ -85,7 +85,6 @@ public class Context implements IContext {
     // Generate sensible default singletons for the PRODUCTION application
     private static
     Context generateDefaultProductionContext(@NotNull ILog log) {
-
         return new Context(
             new BookInfoRepo(
                 new BookInfoApi(),

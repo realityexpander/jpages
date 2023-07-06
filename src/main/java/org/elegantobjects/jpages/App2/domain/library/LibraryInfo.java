@@ -70,7 +70,7 @@ public class LibraryInfo extends DomainInfo
     // Published Domain Business Logic Methods //
     /////////////////////////////////////////////
 
-    public Result<Book> checkOutBookToUser(@NotNull Book book, User user) {
+    public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
         if(book.isBookFromPublicLibrary()) { // No checks for private library books.
             Result<UUID2<Book>> checkedOutUUID2Book = _checkOutPublicLibraryBookIdToUserId(book.id(), user.id());
             if (checkedOutUUID2Book instanceof Result.Failure)
@@ -94,7 +94,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(book);
     }
-    public Result<UUID2<Book>> _checkOutPublicLibraryBookIdToUserId(UUID2<Book> bookId, UUID2<User> userId) {
+    public Result<UUID2<Book>> _checkOutPublicLibraryBookIdToUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         if (!isBookIdKnown(bookId))
             return new Result.Failure<>(new IllegalArgumentException("BookId is not known. bookId: " + bookId));
         if (!isUserIdKnown(userId))
@@ -115,7 +115,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
 
-    public Result<Book> checkInBookFromUser(@NotNull Book book, User user) {
+    public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
         if(book.isBookFromPublicLibrary()) {
             Result<UUID2<Book>> returnedBookIdResult = _checkInPublicLibraryBookIdFromUserId(book.id(), user.id());
             if (returnedBookIdResult instanceof Result.Failure)
@@ -139,7 +139,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(book);
     }
-    public Result<UUID2<Book>> _checkInPublicLibraryBookIdFromUserId(UUID2<Book> bookId, UUID2<User> userId) {
+    public Result<UUID2<Book>> _checkInPublicLibraryBookIdFromUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         if (!isBookIdKnown(bookId))
             return new Result.Failure<>(new IllegalArgumentException("BookId is not known, bookId: " + bookId));  // todo - do we allow unknown books to be checked in, and just add them to the list?
         if (!isUserIdKnown(userId))
@@ -197,7 +197,7 @@ public class LibraryInfo extends DomainInfo
     // Published Domain Reporting Methods  //
     /////////////////////////////////////////
 
-    public Result<ArrayList<UUID2<Book>>> findBooksCheckedOutByUserId(UUID2<User> userId) {
+    public Result<ArrayList<UUID2<Book>>> findBooksCheckedOutByUserId(@NotNull UUID2<User> userId) {
         if (!isUserIdKnown(userId)) return new Result.Failure<>(new IllegalArgumentException("userId is not known, id: " + userId));
 
         return new Result.Success<>(registeredUserIdToCheckedOutBookIdMap.get(userId));
@@ -226,14 +226,14 @@ public class LibraryInfo extends DomainInfo
     // Published Helper Methods    //
     /////////////////////////////////
 
-    public Result<UUID2<User>> registerUser(UUID2<User> userId) {
+    public Result<UUID2<User>> registerUser(@NotNull UUID2<User> userId) {
         return upsertUserId(userId);
     }
 
     public boolean isBookKnown(@NotNull Book book) {
         return isBookIdKnown(book.id());
     }
-    public boolean isBookIdKnown(UUID2<Book> bookId) {
+    public boolean isBookIdKnown(@NotNull UUID2<Book> bookId) {
         return bookIdToNumBooksAvailableMap.containsKey(bookId);
     }
 
@@ -247,14 +247,14 @@ public class LibraryInfo extends DomainInfo
     public boolean isBookAvailableToCheckout(@NotNull Book book) {
         return isBookIdAvailableToCheckout(book.id());
     }
-    public boolean isBookIdAvailableToCheckout(UUID2<Book> bookId) {
+    public boolean isBookIdAvailableToCheckout(@NotNull UUID2<Book> bookId) {
         return bookIdToNumBooksAvailableMap.get(bookId) > 0;
     }
 
     public boolean isBookCheckedOutByUser(@NotNull Book book, @NotNull User user) {
         return isBookIdCheckedOutByUserId(book.id(), user.id());
     }
-    public boolean isBookIdCheckedOutByUserId(UUID2<Book> bookId, @NotNull UUID2<User> userId) {
+    public boolean isBookIdCheckedOutByUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         return registeredUserIdToCheckedOutBookIdMap.get(userId).contains(bookId);
     }
 
@@ -267,7 +267,7 @@ public class LibraryInfo extends DomainInfo
                 .anyMatch(bookIds -> bookIds.contains(bookId));
     }
 
-    public Result<UUID2<User>> findUserIdOfCheckedOutBookId(UUID2<Book> bookId) {
+    public Result<UUID2<User>> findUserIdOfCheckedOutBookId(@NotNull UUID2<Book> bookId) {
         if (!isBookIdCheckedOutByAnyUser(bookId))
             return new Result.Failure<>(new IllegalArgumentException("Book is not checked out by any User, bookId: " + bookId));
 
@@ -283,7 +283,7 @@ public class LibraryInfo extends DomainInfo
     }
 
     // Convenience method - Called from PrivateLibrary class ONLY
-    public Result<UUID2<Book>> addPrivateBookIdToInventory(UUID2<Book> bookId, int quantity) {
+    public Result<UUID2<Book>> addPrivateBookIdToInventory(@NotNull UUID2<Book> bookId, int quantity) {
         return addBookIdToInventory(bookId, quantity);
     }
 
@@ -300,11 +300,11 @@ public class LibraryInfo extends DomainInfo
     /////////////////////////////////////////
 
     // Intention revealing method
-    public Result<UUID2<Book>> addTestBook(UUID2<Book> bookId, int quantity) {
+    public Result<UUID2<Book>> addTestBook(@NotNull UUID2<Book> bookId, int quantity) {
         return addBookIdToInventory(bookId, quantity);
     }
 
-    protected Result<UUID2<User>> upsertTestUser(UUID2<User> userId) {
+    protected Result<UUID2<User>> upsertTestUser(@NotNull UUID2<User> userId) {
         return upsertUserId(userId);
     }
 
@@ -312,7 +312,7 @@ public class LibraryInfo extends DomainInfo
     // Private Helper Functions //
     //////////////////////////////
 
-    private Result<Void> _checkInBookIdFromUserId(UUID2<Book> bookId, UUID2<User> userId) {
+    private Result<Void> _checkInBookIdFromUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         try {
             addBookIdToInventory(bookId, 1);
             return new Result.Success<>(null);
@@ -321,7 +321,7 @@ public class LibraryInfo extends DomainInfo
         }
     }
 
-    private Result<Void> _checkOutBookIdToUserId(UUID2<Book> bookId, UUID2<User> userId) {
+    private Result<Void> _checkOutBookIdToUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         if(!isBookIdAvailableToCheckout(bookId))
             return new Result.Failure<>(new IllegalArgumentException("Book is not in inventory, bookId: " + bookId));
 
@@ -333,7 +333,7 @@ public class LibraryInfo extends DomainInfo
         }
     }
 
-    private Result<UUID2<Book>> addBookIdToInventory(UUID2<Book> bookId, int quantity) {
+    private Result<UUID2<Book>> addBookIdToInventory(@NotNull UUID2<Book> bookId, int quantity) {
         if (quantity <= 0) return new Result.Failure<>(new IllegalArgumentException("quantity must be > 0, quantity: " + quantity));
 
         try {
@@ -361,7 +361,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(book);
     }
 
-    private Result<UUID2<Book>> removeBookIdFromInventory(UUID2<Book> bookId, int quantity) {
+    private Result<UUID2<Book>> removeBookIdFromInventory(@NotNull UUID2<Book> bookId, int quantity) {
         if (quantity <= 0) return new Result.Failure<>(new IllegalArgumentException("quantity must be > 0"));
 
         // Simulate network/database call
@@ -387,7 +387,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(book);
     }
 
-    private Result<UUID2<Book>> addBookIdToRegisteredUser(UUID2<Book> bookId, UUID2<User> userId) {
+    private Result<UUID2<Book>> addBookIdToRegisteredUser(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         if (!isBookIdKnown(bookId))
             return new Result.Failure<>(new IllegalArgumentException("bookId is not known, id: " + bookId));
         if (!isUserIdKnown(userId))
@@ -446,7 +446,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(book);
     }
 
-    private Result<UUID2<User>> insertUserId(UUID2<User> userId) {
+    private Result<UUID2<User>> insertUserId(@NotNull UUID2<User> userId) {
         if (isUserIdKnown(userId))
             return new Result.Failure<>(new IllegalArgumentException("userId is already known"));
 
@@ -464,7 +464,7 @@ public class LibraryInfo extends DomainInfo
         return insertUserId(userId);
     }
 
-    private Result<UUID2<User>> removeUserId(UUID2<User> userId) {
+    private Result<UUID2<User>> removeUserId(@NotNull UUID2<User> userId) {
         if (!isUserIdKnown(userId))
             return new Result.Failure<>(new IllegalArgumentException("userId is not known, userId: " + userId));
 

@@ -696,7 +696,7 @@ final class LibraryApp {
         ctx.log.d(this,
     "\n\n" +
             "*****************************\n" +
-            "Tests Completed Successfully\n" +
+            "Trials Completed Successfully\n" +
             "*****************************\n"
         );
     }

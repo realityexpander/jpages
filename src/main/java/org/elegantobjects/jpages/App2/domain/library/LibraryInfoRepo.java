@@ -60,7 +60,7 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     /// Published Helper methods    ///
     ///////////////////////////////////
 
-    public void populateWithFakeBooks(UUID2<Library> libraryId, int numberOfBooksToCreate) {
+    public void populateWithFakeBooks(@NotNull UUID2<Library> libraryId, int numberOfBooksToCreate) {
         log.d(this, "libraryId: " + libraryId + ", numberOfBooksToCreate: " + numberOfBooksToCreate);
         LibraryInfo libraryInfo = database.get(libraryId);
 
