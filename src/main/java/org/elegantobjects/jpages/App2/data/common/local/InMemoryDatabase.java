@@ -39,12 +39,11 @@ class InMemoryDatabase<TEntity extends EntityInfo, TUUID2 extends IUUID2> implem
         return new Result.Success<>(infoResult);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Result<TEntity> updateEntityInfo(@NotNull TEntity entityInfo) {
         // Simulate the request
         try {
-            database.put((UUID2<TUUID2>) entityInfo.id(), entityInfo);
+            database.put(entityInfo.id(), entityInfo);
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
@@ -59,7 +58,7 @@ class InMemoryDatabase<TEntity extends EntityInfo, TUUID2 extends IUUID2> implem
         if (database.containsKey((UUID2<TUUID2>) entityInfo.id())) {
             return new Result.Failure<>(new Exception("DB: Entity already exists, entityInfo: " + entityInfo));
         }
-        if (database.put((UUID2<TUUID2>) entityInfo.id(), entityInfo) == null) {
+        if (database.put(entityInfo.id(), entityInfo) == null) {
             return new Result.Failure<>(new Exception("DB: Failed to add entity, entityInfo: " + entityInfo));
         }
 

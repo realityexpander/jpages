@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.Context;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
@@ -16,15 +17,15 @@ public interface Info<TInfo> {
     // TInfo info;                        // Requires a field named `info` of type `TInfo` (is there a way to enforce this in java?)
 
     UUID2<?> id();                        // Returns the UUID2 of the Info object
-    TInfo fetchInfo();                    // Fetches info for object from server/DB
-    boolean isInfoFetched();              // Returns true if info has been fetched from server/DB
-    Result<TInfo> fetchInfoResult();      // Fetches Result<T> for info object from server/DB
-    Result<TInfo> updateInfo(TInfo info); // Updates info for object to server/DB
-    Result<TInfo> refreshInfo();          // Refreshes info for object from server/DB
-    String fetchInfoFailureReason();      // Returns reason for failure of last fetchInfo() call, or null if successful
+    TInfo fetchInfo();                    // Fetches data for the Info from server/DB
+    boolean isInfoFetched();              // Returns true if Info has been fetched from server/DB
+    Result<TInfo> fetchInfoResult();      // Fetches Result<T> for the Info from server/DB
+    Result<TInfo> updateInfo(TInfo info); // Updates Info to server/DB
+    Result<TInfo> refreshInfo();          // Set Info data to `null` and fetches Info from server/DB
+    String fetchInfoFailureReason();      // Returns reason for failure of last fetchInfo() call, or `null` if successful
 
     @SuppressWarnings("unchecked")
-    default TInfo deepCopyInfo() {                // Returns a deep copy of the Info object
+    default TInfo deepCopyInfo() {        // Returns a deep copy of the Info object
         Gson gson = new Gson();
 
         // hacky but works.
@@ -38,7 +39,7 @@ public interface Info<TInfo> {
         UUID2<?> id();             // Returns the UUID2 of the Info object
 
         @SuppressWarnings("unchecked")
-        default TInfo getInfo() {         // Returns the Info object
+        default TInfo info() {     // Returns the Info object
             //noinspection unchecked
             return (TInfo) this;
         }
@@ -54,7 +55,7 @@ public interface Info<TInfo> {
 
     static <
             TToInfo extends ToInfo<?> // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
-            > TToInfo createInfoFromJson(
+        > @Nullable TToInfo createInfoFromJson(
             String json,
             Class<TToInfo> infoClazz, // type of `Info` object to create
             Context context

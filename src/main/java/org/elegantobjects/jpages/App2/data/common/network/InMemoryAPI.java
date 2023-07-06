@@ -3,6 +3,7 @@ package org.elegantobjects.jpages.App2.data.common.network;
 import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,11 +50,10 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTOInfo> implements IA
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Result<TDTOInfo> updateDtoInfo(TDTOInfo dtoInfo) {
         try {
             // Simulate Network
-            database.put((UUID2<TUUID2>) dtoInfo.id(), dtoInfo);
+            database.put(dtoInfo.id(), dtoInfo);
         } catch (Exception e) {
             return new Result.Failure<>(e);
         }
@@ -63,13 +63,13 @@ class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTOInfo> implements IA
 
     @Override
     @SuppressWarnings("unchecked")
-    public Result<TDTOInfo> addDtoInfo(TDTOInfo dtoInfo) {
+    public Result<TDTOInfo> addDtoInfo(@NotNull TDTOInfo dtoInfo) {
         // Simulate Network
         if (database.containsKey((UUID2<TUUID2>) dtoInfo.id())) {
             return new Result.Failure<>(new Exception("API: DtoInfo already exists, use UPDATE, id=" + dtoInfo.id()));
         }
 
-        database.put((UUID2<TUUID2>) dtoInfo.id(), dtoInfo);
+        database.put(dtoInfo.id(), dtoInfo);
 
         return new Result.Success<>(dtoInfo);
     }
