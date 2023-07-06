@@ -103,7 +103,7 @@ public class DTOBookInfo extends DTOInfo
 
     @Override
     public DTOBookInfo toDeepCopyInfo() {
-        // note: implement deep copy, if needed.
+        // note: implement deep copy, if class is not flat..
         return new DTOBookInfo(this);
     }
 }
