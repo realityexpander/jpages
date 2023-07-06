@@ -7,6 +7,7 @@ import org.elegantobjects.jpages.App2.data.common.Info;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class EntityBookInfo extends EntityInfo
     implements
@@ -23,10 +24,10 @@ public class EntityBookInfo extends EntityInfo
     public
     EntityBookInfo(
         @NotNull UUID2<Book> id,
-        String title,
-        String author,
-        String description,
-        String extraFieldToShowThisIsAnEntity
+        @NotNull String title,
+        @NotNull String author,
+        @NotNull String description,
+        @Nullable String extraFieldToShowThisIsAnEntity
     ) {
         super(id);
         this.title = title;
