@@ -30,10 +30,10 @@ Private Library
 public class PrivateLibrary extends Library implements IUUID2 {
 
     // This a Private Library is not part of any system Library.
-    // ie: It is a "Personal" Library, a library for a single found book, or a Library for a newly created book, etc.
+    // ie: It is a "Personal" Library, a library for a single-found book, or a Library for a newly created book, etc.
     //
-    // This not a system Library, so it doesn't access the Account Role Object for any account checks.
-    // - Any user can checkIn and checkOut Books from this Library.
+    //  This is not a system Library, so it doesn't access the Account Role Object for any account checks.
+    // - Any user can `checkIn` and `checkOut` Books from this Library.
     // - Users can have unlimited Private Libraries & unlimited number of Books in them.
     //
     // This is a system design alternative to:
@@ -47,11 +47,13 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //   - ORPHAN definition: An orphan is a child that has no parent.
     //     - For a Book, it would have no "source" Public Library.
     //   - If a Private Library is created from a BookId, it is called an ORPHAN Private Library
-    //     and it is sole duty is to hold ONLY 1 Book of one specific BookId, and no other BookIds.
+    //     and its sole duty is to hold ONLY 1 Book of one specific BookId, and never any other BookIds.
     //   - It can only ever hold 1 Book at a time.
     //   - System Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
     //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
     private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
+                                             // Note: the naming here conveys the intent the variable,
+                                             //       even if the reader doesn't know about orphan libraries.
 
     public
     PrivateLibrary(

@@ -1,5 +1,6 @@
 package org.elegantobjects.jpages.App2.common.util;
 
+@SuppressWarnings("unused")  // For T type parameter, which is actually used in Success<T> and Failure<T> subclasses...(todo - Why do we get that warning here?)
 public class Result<T> {
     public static class Success<T> extends Result<T> {
         private final T value;

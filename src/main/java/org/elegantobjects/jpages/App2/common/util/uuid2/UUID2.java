@@ -259,7 +259,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             curClazz = curClazz.getSuperclass();
         }
 
-        // Build Class Inheritance path from each Class name
+        // Build a Class Inheritance Path from each concrete Class name
         StringBuilder uuid2TypeStr = new StringBuilder();
         for(int i = superClassNames.size() - 1; i >= 0; i--) {
             uuid2TypeStr.append(
@@ -440,7 +440,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return "UUID"; // unspecified-type
         }
 
-        // Change any '$' in path of `uuid2TypeStr` into a '.'
+        // Change any '$' in the path of `uuid2TypeStr` into a '.'
         // - For some(?) reason Java returns delimiter `$` with: Model.Domain.BookInfo.class.getName();
         //   And returns returns `.` with: this.getClass().getName();
         StringBuilder normalizedTypeStr = new StringBuilder();
@@ -466,7 +466,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
     public static class Uuid2HashMapJsonDeserializer implements JsonDeserializer<UUID2.HashMap<?,?>> {
         // Note: Deserializes all JSON Numbers to Longs for all UUID2.HashMap Entity Number values.
-        // - for consistent number deserialization bc GSON defaults to Doubles.
+        // - For consistent number deserialization bc GSON defaults to Doubles.
 
         @Override
         public UUID2.HashMap<?,?> deserialize(
@@ -479,12 +479,6 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
             HashMap<? extends UUID2<?>, Object> uuid2ToUuidMap = new HashMap<>();
             try {
-//                JsonObject uuid2ToUuidMapJsonObj = null;
-//                if (jsonElement.getAsJsonObject().get("uuid2ToEntityMap") != null) {
-//                    uuid2ToUuidMapJsonObj = jsonElement.getAsJsonObject()
-//                        .get("uuid2ToEntityMap")
-//                        .getAsJsonObject();
-//                }
 
                 // Rebuild the UUID2<?> to Entity map
                 for (Map.Entry<?, ?> entry : uuid2HashMapFromJson.uuid2ToEntityMap.entrySet()) {

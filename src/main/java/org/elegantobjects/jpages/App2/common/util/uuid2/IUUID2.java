@@ -4,5 +4,5 @@ package org.elegantobjects.jpages.App2.common.util.uuid2;
 public interface IUUID2 {  // Keep this in global namespace to reduce wordiness at declaration sites (avoiding: UUID2<UUID2.hasUUID2> wordiness)
     String uuid2TypeStr();  // Returns the Type of the UUID2 as a String.
                                // - Usually the last 3 segments of the class hierarchy of the object
-                               // - ie: "Model.Domain.BookInfo" or "Object.IRole.Book"
+                               // - ie: "Model.DomainInfo.BookInfo" or "Role.Book"
 }

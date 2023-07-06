@@ -11,20 +11,26 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  <b>Model - Top of data "Info" hierarchy</b><br>
- Handles data "Info" conversion of DomainInfo to/from DTO/EntityInfo.<br>
+ <br>
+ Handles data "Info" conversion of {@code DomainInfo} <i>to/from</i> {@code DTOInfo/EntityInfo}.<br>
  <br>
  <b>Domain Info Classes</b><br>
- - {@code {Model}Info} Data "Holders" kept inside each Role Domain Object.<br>
- - Similar to an Entity for a database row or a DTO for a REST API endpoint, these objects are the
-   the objects contain the "data" or {@code Info} that is accessed by the {@code Role} object.<br>
- - They are the "source of truth" for the Domain object's "data" in the application.<br>
- - {@code {Domain}}Info hold the {@code Role Info} that resides elsewhere, usually on a local-server/db/api,
-   but the {@code Role} does not know where or care where the data comes from, it only knows the format.<br>
+ <ul>
+   <li>The {@code {Domain}Info} "Data Holder" class is kept inside each Domain {@code Role} Object.</li>
+   <li>Similar to an Entity for a database row or a DTO for a REST API endpoint, these objects
+   contain the "data" or {@code Info} that is accessed by the {@code Role} object.</li>
+   <li>These are the "source of truth" for the Domain object's "information" in the application.</li>
+   <li>{@code {Domain}Info} hold the {@code Role Info} that resides *elsewhere*, usually on a server/db/api.<br>
+       The {@code Role} does not know (or care) where the data comes from, it only knows the "data shapes"
+       that it accepts.</li>
+ </ul>
  <br>
  <b>DTO/Entity Info Classes</b><br>
- - {@code {DTO}Info} hold the API transfer "dumb" objects that transport info to/from their service/api/db.<br>
- - {@code {Entity}Info} hold the Database transfer "dumb" objects that transport info to/from their service/api/db.<br>
- - Validation occurs in the Domain layer, when an DTO/Entity is converted to a DomainInfo object.<br>
+ <ul>
+   <li>{@code {DTOInfo}Info} hold the API transfer "dumb" objects that transport info to/from their service/api/db.</li>
+   <li>{@code {EntityInfo}Info} hold the Database transfer "dumb" objects that transport info to/from their service/db.</li>
+   <li>Minimal validation occurs in the Domain layer, when an DTOInfo/EntityInfo object is converted into a DomainInfo object.</li>
+ </ul>
  **/
 public class Model {
     public UUID2<?> _id; // Can't make final due to need to set it during JSON deserialization. :(
@@ -67,7 +73,7 @@ public class Model {
     public interface ToDomainInfo<TDomainInfo extends DomainInfo> {
 
         // *MUST* override
-        // - Overridden method should return `id` with correct type of UUID2 for the domain
+        // - Overridden method should return `id` with the correct type of UUID2 for the domain
         //   ie: `UUID2<User>` for the `User`, `UUID2<UserInfo>` for the UserInfo, etc.
         UUID2<?> id();
 
@@ -90,6 +96,7 @@ public class Model {
             default @SuppressWarnings("unchecked") <TDomainInfo extends DomainInfo>
             TDomainInfo deepCopyDomainInfo() // Requires method override, should return a deep copy (no original references)
             {
+                // This method is a lazy convenience, and should really be overridden in each class.
                 // This is a hack to get around the fact that Java doesn't allow you to call a generic method from a generic class
                 return (TDomainInfo) ((TToInfo) this).toDeepCopyDomainInfo();
             }
