@@ -28,6 +28,8 @@
 
 ### Developer Experience is Paramount
 #developer-experience-is-paramount
+- Write code in a way that is oriented to the reader (not computer), as code is read 100x more than it is written,
+  and computers really dont care what the code looks like.
 - The developer experience is paramount, and should be the primary focus of the design.
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
