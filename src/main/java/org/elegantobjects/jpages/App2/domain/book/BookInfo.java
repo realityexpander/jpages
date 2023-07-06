@@ -90,11 +90,11 @@ public class BookInfo extends DomainInfo
 
     private void validateBookInfo() {
         if(title.length() > 100)
-            throw new IllegalArgumentException("DTOBookInfo.title cannot be longer than 100 characters");
+            throw new IllegalArgumentException("BookInfo.title cannot be longer than 100 characters");
         if(author.length() > 100)
-            throw new IllegalArgumentException("DTOBookInfo.author cannot be longer than 100 characters");
+            throw new IllegalArgumentException("BookInfo.author cannot be longer than 100 characters");
         if(description.length() > 1000)
-            throw new IllegalArgumentException("DTOBookInfo.description cannot be longer than 1000 characters");
+            throw new IllegalArgumentException("BookInfo.description cannot be longer than 1000 characters");
 
         // todo add enhanced validation here, or in the application layer
     }
