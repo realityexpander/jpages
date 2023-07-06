@@ -43,7 +43,7 @@
 - [Prefer Use of Early Return](#prefer-use-of-early-return)
 - [Single Responsibility of Role](#single-responsibility-of-role)
 - [Reverse-scope-naming Style](#reverse-scope-naming-style)
-- [Preferred Naming of "Inverse" methods](#preferred-naming-of-inverse-methods) 
+- [Naming of "Inverse" methods](#preferred-naming-of-inverse-methods) 
 - [Explicit Naming of "Transfer" methods](#explicit-naming-of-transfer-methods)
 - [Explicit Naming of "Find" methods](#explicit-naming-of-find-methods)
 - [Explicit Naming of "Maps" and "Lists"](#explicit-naming-of-maps-and-lists)
@@ -424,7 +424,7 @@ advantages and disadvantages.
   - ie: `OrphanPrivateLibrary` is preferred over `Orphan`
   - ie: `updatedAccountStatus` is preferred over `updated` or `status`
 
-### Preferred Naming of "Inverse" methods
+### Naming of "Inverse" methods
 #### preferred-naming-of-inverse-methods
 
 - Prefer using same verb and a short modifier than to use two different verbs for inverse/opposite methods.
@@ -608,9 +608,11 @@ advantages and disadvantages.
 
 # Library Application Details
 
-#### architecture
+You can find the sample Library App in the App2 folder, along with some tests to show functionality.
+
 
 ## Architecture
+#### architecture
 
 - ### Data
   - `Model`
