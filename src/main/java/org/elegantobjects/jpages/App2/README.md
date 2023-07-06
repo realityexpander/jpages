@@ -20,14 +20,19 @@
 - [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
 - [Code Style](#code-style)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
-- [No Dependency Injection Framework](#no-dependency-injection-framework)
 - [No `null` in Domain](#no-null-in-domain)
+- [No Dependency Injection Framework](#no-dependency-injection-framework)
+- [Constructor Convenience](#constructor-convenience)
+- [Anti-inheritance](#anti-inheritance)
+- [Shallow Hierarchies](#shallow-hierarchies)
+- [No Static Methods](#no-static-methods)
 
 
 - [Library Application Details](#architecture)
 
 ### Developer Experience is Paramount
 #developer-experience-is-paramount
+
 - Write code in a way that is oriented to the reader (not computer), as code is read 100x more than it is written,
   and computers really dont care what the code looks like.
 - The developer experience is paramount, and should be the primary focus of the design.
@@ -88,6 +93,7 @@ advantages and disadvantages.
 
 ### Encapsulation of Data via Intention-named methods
 #encapsulation-of-data-via-intention-named-methods
+
   - Set and Get methods are not used, instead methods are named for their intention.
   - Problem: The English word `set` and `get` are _extremely_ generic 
     - Hundreds of definitions, each with many subtle different meanings, based on context.
@@ -148,7 +154,6 @@ advantages and disadvantages.
 - No global accessing state of App (except via passed-in Context object)
 
 ### No Dependency Injection Framework
-
 #no-dependency-injection-framework
 
 - All dependencies passed in constructors
@@ -174,8 +179,10 @@ advantages and disadvantages.
   - Optimizations can be made later if needed, the architecture is designed to easily allow for this.
 
 ### Constructor Convenience
-- No Dependency Injection framework (_ugh..._)
-  - All dependencies passed in constructor
+#constructor-convenience
+
+- All dependencies passed in constructor
+  - No Dependency Injection framework (_anyone wanna google a thermosiphon?..._)
 - Many different constructors included for many different ways to create objects
 - Singletons passed in constructor, held in Context object
 - No `null` objects
@@ -187,6 +194,8 @@ advantages and disadvantages.
   - the only exception is for JSON and Info constructors, since they use special types.
 
 ### Anti-inheritance
+#anti-inheritance
+
 - Minimal & shallow use of inheritance
   - <code>Model ➤➤ {Domain} ➤➤ {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
     - ie: <code>Model.DTOInfo.DTOBookInfo</code>
@@ -209,6 +218,8 @@ advantages and disadvantages.
     - Keep the Class Inheritance simple, and allow the package arrangement can be complex.
 
 ### Shallow Hierarchies
+#shallow-hierarchies
+
 - Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
 - If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
   - example: 
@@ -218,6 +229,8 @@ advantages and disadvantages.
   - prefer the shallower hierarchy with the `isOrphan` flag. 
   
 ### No `Static` Methods (with extremely limited exceptions)
+#no-static-methods
+
 - Use of `Static` methods is severely limited to only those that are:
   - Pure functions ie: have no side effects that change data outside the function.
   - Used to create objects from JSON, XML, another object, the network, etc.
