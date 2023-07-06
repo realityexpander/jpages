@@ -14,7 +14,21 @@
   - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
   - David West, PhD's book "Object Thinking"
 
+### Contents
+
+- [Developer Experience is Paramount](#developer-experience-is-paramount)
+- [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
+- [Code Style](#code-style)
+- [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
+- [No Dependency Injection Framework](#no-dependency-injection-framework)
+- [No `null` in Domain](#no-null-in-domain)
+
+
+- [Library Application Details](#architecture)
+
 ### Developer Experience is Paramount
+#developer-experience-is-paramount
+- The developer experience is paramount, and should be the primary focus of the design.
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
   - One down side, the hierarchy is separated into different folders, so its not obvious what the hierarchy is.
@@ -24,6 +38,7 @@
 <br>
 
 #### Avoiding Ugly COP Paradigms
+#avoiding-ugly-cop-paradigms
 
 Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
@@ -46,26 +61,24 @@ advantages and disadvantages.
   - Factories, Builders, AbstractFactoryFactories and other hacky "creational" patterns.
 
 ## Code Style
+#code-style
 
-- Strive to make Domain layer code plain idiomatic Java as possible, and read like English prose.
-- Strive to make it read like regular English as possible, and to be able to understand it without 
-using IDE tools (like hover to find var types).
-- Limit language to plain-old Java 8
+- Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit intention-revealing names for everything.
 - Prefer verbosity of descriptions to brevity of code. Should be easy to read and understand.
-- Prevent "whats that for/do?" questions by using explicit intention-revealing names for everything.
-- Risk pedantic naming over brevity of code.
+- Risk pedantic naming over brevity of code. Strive to convey meaning as densely as possible, but not at the expense of clarity.
   - You may think you know what a variable/method is for, but the next person may not.
-  - Yes, this risks job security, but it also makes it easier to change code as you keep 
-    extending the code base. We risk improving the developer experience for our own sake.
+  - Yes, this risks job security, but it also makes it easier to change code as you keep.
+  - If you think someone will be confused by something, take extra time choosing names and add the minimum amount 
+    of comments to explain <b>WHY?</b> This is also the value of pair programming, someone else can ask you why you did something.
+  - Instead of just telling them, thats a place to find better names, or refactor the code to make it more clear, or add a "why" comment.
 - Even this short guide repeats ideas, to make it easier to understand what is important and what is not.
-- Some ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
-
-### Contents
-
-- [Library Application Details](#architecture)
-- [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
-- [No Dependency Injection Framework](#no-dependency-injection-framework)
-- [No `null` in Domain](#no-null-in-domain)
+- Strive to make code read like regular English as possible, and to be able to understand it without 
+  using IDE tools (like cursor-hover to find var types).
+    extending the code base. We risk improving the developer experience for our own sake.
+- Limit language to plain-old Java 8
+- Strive to write Domain layer code in plain-old idiomatic Java as much as possible, and read like English prose.
+- A person who doesn't code should be able to look at a method or variable and know what it does/means.
+- Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
 ### Encapsulation of Data via Intention-named methods
 #encapsulation-of-data-via-intention-named-methods
