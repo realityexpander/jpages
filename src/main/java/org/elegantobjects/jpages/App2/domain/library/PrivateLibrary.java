@@ -33,7 +33,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
     // ie: It is a "Personal" Library, a library for a single found book, or a Library for a newly created book, etc.
     //
     // This not a system Library, so it doesn't access the Account Role Object for any account checks.
-    // - Any user can access this Library.
+    // - Any user can checkIn and checkOut Books from this Library.
     // - Users can have unlimited Private Libraries & unlimited number of Books in them.
     //
     // This is a system design alternative to:
