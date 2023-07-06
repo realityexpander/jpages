@@ -9,14 +9,13 @@ import java.util.*;
 import static java.lang.String.format;
 
 /**
- <b>UUID2</b> is a type-safe wrapper for UUIDs.<br>
+ <b>{@code UUID2} is a type-safe wrapper for a UUID, and it can be used in place of a UUID.<br>
  <ul>
- <li> <b>{@code UUID2} is a wrapper for a UUID, and it can be used in place of a UUID.</li>
  <li> Benefits:<br>
     <ul>
-        <li>Useful to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
-        <li>Allows for easier debugging and exposing UUID types in Json payloads.</li>
-        <li>Includes type-safe {@code HashMap} for {@code UUID2}s.</li>
+        <li>Used to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
+        <li>Allows for easier debugging and defining the types of objects that the UUID is referencing in Json payloads.</li>
+        <li>Includes implementation of type-safe {@code HashMap} for {@code UUID2}s.</li>
         <li>{@code UUID2} is immutable.</li>
     </ul>
  <li> {@code IUUID2} is a marker interface for Domain objects that can be used with UUID2.</li>
