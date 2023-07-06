@@ -66,6 +66,14 @@ public class LibraryInfo extends DomainInfo
         return this.toPrettyJson();
     }
 
+    ////////////////////////
+    // Creational Methods //
+    ////////////////////////
+
+    public LibraryInfo withName(@NotNull String name) {
+        return new LibraryInfo(this.id(), name, this.registeredUserIdToCheckedOutBookIdMap, this.bookIdToNumBooksAvailableMap);
+    }
+
     /////////////////////////////////////////////
     // Published Domain Business Logic Methods //
     /////////////////////////////////////////////
