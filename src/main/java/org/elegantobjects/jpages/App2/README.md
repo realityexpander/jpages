@@ -276,8 +276,8 @@ using IDE tools (like hover to find var types).
 - We know this now because recent language versions have remediated <i>some</i> of these issues, and other languages 
   like Kotlin show how to address these issues in a more sane and comprehensible manner. 
 - Combined with BOOP, many of the patterns just don't make sense and add unnecessary complexity.
-<br>
-<br>
+
+
 - No Factory patterns
   - Just use constructors. 
 - No Builder patterns
