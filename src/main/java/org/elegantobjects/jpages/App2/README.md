@@ -34,11 +34,11 @@
 #developer-experience-is-paramount
 
 - Write code in a way that is oriented to the reader (not computer), as code is read 100x more than it is written,
-  and computers really dont care what the code looks like.
+  and computers really don't care what the code looks like.
 - The developer experience is paramount, and should be the primary focus of the design.
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
-  - One down side, the hierarchy is separated into different folders, so its not obvious what the hierarchy is.
+  - One downside, the hierarchy is separated into different folders, so it's not obvious what the hierarchy is.
   - To remedy this, documentation about the data hierarchy should exist near the code (maybe a README). 
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
@@ -50,7 +50,7 @@
 Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
 Class "wrappers" instead of just data structures, files and functions (procedures) like in C.
-Much of what most people call OOP is actually just COP, and is not actually OOP at all. Its important
+Much of what most people call OOP is actually just COP, and is not actually OOP at all. It's important
 to know the difference, because the two styles are very different, and have very different
 advantages and disadvantages.
 
@@ -98,7 +98,7 @@ advantages and disadvantages.
   - Problem: The English word `set` and `get` are _extremely_ generic 
     - Hundreds of definitions, each with many subtle different meanings, based on context.
     - `set` and `get` do not reveal the underlying intention of the method. 
-    - It's a very convenient short-hand for the code-writer and always confusing for the code-reader.<br> 
+    - It's a very convenient shorthand for the code-writer and always confusing for the code-reader.<br> 
       Requires investigation into what is actually going on, specifically network, CPU or disk access.
 - No setters
   - All changes must be made via intention-named methods.
@@ -165,7 +165,7 @@ advantages and disadvantages.
     - The `UUID2` `id` and `UUIDType` values for all objects are kept mutable due to limitations of java:
     - These are mutable because of how JSON imports work. 
       - The `id` must first be extracted from the JSON data before the new Object is created. 
-      - The `UUIDType` is mutable because its not known at object creation time, and must be set after the JSON is parsed.
+      - The `UUIDType` is mutable because it is not known at object creation time, and must be set after the JSON is parsed.
       - This is a known limitation, and I am unaware of a workaround that doesn't involve a lot of complexity.
       - We keep the id private, and only expose it via `id()` method.
       - The setter function is public but noted with a `_` prefix to indicate its special case.
@@ -182,7 +182,7 @@ advantages and disadvantages.
 #constructor-convenience
 
 - All dependencies passed in constructor
-  - No Dependency Injection framework (_anyone wanna google a thermosiphon?..._)
+  - No Dependency Injection framework (_anyone want to google a thermosiphon?..._)
 - Many different constructors included for many different ways to create objects
 - Singletons passed in constructor, held in Context object
 - No `null` objects
@@ -222,19 +222,21 @@ advantages and disadvantages.
 
 - Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
 - If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
-  - example: 
+  - example:
     - [Library ➤➤ PrivateLibrary with `isOrphan` flag] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ⬅︎ shallow is preferred
-    - vs 
+    - vs
     - [Library ➤➤ PrivateLibrary ➤➤ OrphanPrivateLibrary]
-  - prefer the shallower hierarchy with the `isOrphan` flag. 
+  - prefer the shallower hierarchy with the `isOrphan` flag.
   
-### No `Static` Methods (with extremely limited exceptions)
+### No `Static` Methods 
+
 #no-static-methods
 
 - Use of `Static` methods is severely limited to only those that are:
   - Pure functions ie: have no side effects that change data outside the function.
   - Used to create objects from JSON, XML, another object, the network, etc.
   - No modification or creation of global state
+  - No modification of any state outside the function
 
 ### Dumb Container Objects for Data Transfer Only to/from Domain
 - Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
@@ -246,10 +248,10 @@ advantages and disadvantages.
   - Code for conditions check first and return early if condition is not met.
   - Last return is always "happy path" success return (unless for rare exceptional cases.)
   - Only for specific exceptional rare cases use `else` blocks.
-    - Always ask if it can be written in a way that doesnt use `else`. 
+    - Always ask if it can be written in a way that doesn't use `else`. 
 
 ### No `Void` Methods
-  - All methods return something, even if its just a `Boolean` or `Result` object.
+  - All methods return something, even if it's just a `Boolean` or `Result` object.
 
 ### No `Null` Checks
   - Avoid if any way possible any `null` checks in code
@@ -303,12 +305,12 @@ advantages and disadvantages.
 - Many of the ideas were so bad that a common set of workarounds were created and passed around the community 
   (or discovered independently). These eventually became "industry standard" which slowly turned into "best practices."
 - These were then catalogued in many books, sold in lectures and conferences, made into clever repeatable acronyms,
-  and eventually became a "gospel holy truth" and assumed "just the way its done", even though it was often taught
+  and eventually became a "gospel holy truth" and assumed "just the way it's done", even though it was often taught
   without any explanation of why it was done that way, or proof any of it works optimally, or even works at all.
 - Turns out many of the patterns were after-thought workarounds to fundamental language design flaws, directly
   inherited from C++ and C (and other languages) that never were resolved properly much less questioned.
 - We know this now because recent language versions have remediated <i>some</i> of these issues, and other languages 
-  like Kotlin illustate how to address these flaws in a more sane, comprehensible and maintainable manner. 
+  like Kotlin illustrate how to address these flaws in a more sane, comprehensible and maintainable manner. 
 - Combined with BOOP, many of the popular design patterns just don't make sense and add unnecessary 
   complexity and confusion. <i>But it did pay a lot of presenters and authors bills for a long time!</i>
 
@@ -346,7 +348,8 @@ advantages and disadvantages.
 
 ### Reverse-scope-naming Style
 - Starts with the most specific adjective to more general adjectives, and ends with the name of the actual concrete type.
-- Domain objects are the most plain
+- Domain objects are the plainest named.
+  - ie: `User` and `Account`
 - Subtypes are always given an adjective name that differentiates it
   - ie: `Library` and `PrivateLibary`
 - If it's a generic item, adding a descriptor is encouraged.
@@ -365,7 +368,7 @@ advantages and disadvantages.
   - ie: `updatedAccountStatus` is preferred over `updated` or `status`
 
 ### Preferred Naming of "Inverse" methods
-- Prefer using same verb and a short modifier, than to use two different verbs for inverse/opposite methods.
+- Prefer using same verb and a short modifier than to use two different verbs for inverse/opposite methods.
 - ie: Prefer `CheckIn` and `CheckOut` to `Borrow` and `Return`
 - ie: Prefer `Register` and `UnRegister` to `register` and `delete` (or `remove`)
 - ie: Prefer `Suspend` and `UnSuspend` to `suspend` and `reinstate`
@@ -379,7 +382,7 @@ advantages and disadvantages.
 - Use of `From` and `To` encouraged, to show explicit intent.
   - ie: `checkOutBookToUser` is preferred over `checkOut` or `checkOutBook`
   - ie: `transferBookSourceLibraryToThisLibrary` is preferred over `transferBook`
-    - yes, its wordier, but leaves no doubt as to what is going on. 
+    - yes, it's wordier, but leaves no doubt as to what is going on. 
 - Use of `By` if there is an authorization, or a delegate.
   - ie: `activateAccountByStaff` is preferred over `staffActivateAccount`
   - ie: `findAllCheckedOutBooksByUserId` is preferred over `findAllUserIdCheckedOutBooks`
@@ -397,7 +400,7 @@ advantages and disadvantages.
 - ie: `acceptedBookIdToSourceLibraryIdMap` is preferred over `acceptedBooks`
 - ie: `timeStampToAccountAuditLogItemMap` is preferred over `auditLog`
 - This makes the JSON data easy to read and understand out of context.
-- `List` can refer to Arrays or an "single column" data.
+- `List` can refer to Arrays or a "single column" data.
 - `Map` can refer to any Map or "two column lookup" data.
 
 ### Guard Clauses
@@ -566,7 +569,7 @@ advantages and disadvantages.
 
 ### My Java Complaints
 - Type system... for a language that is dealing with types, it sure does forget types a lot... design flaw!
-- Wow the verbosity is outlandish and quite pedantic and very irregular syntax defining using generic types 
+- Wow, the verbosity is outlandish and quite pedantic and very irregular syntax defining using generic types 
   for class or functions.
 
 ## Arbitrary Domain Design decisions
@@ -579,9 +582,9 @@ flexibility and power.
 
 #### Some Arbitrary Rules:
 - Like the fact that `Users` of the system can have `PrivateLibrary`, and can give `Books` to other `Users`.
-- Or a `User` can create their own book and add it to the their library first, then to a public library.
+- Or a `User` can create their own book and add it to their library first, then to a public library.
 - Or a `User` can "find" a book, and add it to their `PrivateLibrary`, and then give it to a public library. 
-- So some books need to respect system Account rules, and others dont.
+- So some books need to respect system Account rules, and others don't.
 - A normal library system would likely _not_ be set up like this, but would also have other arbitrary rules that would
   need to be modeled with minimal additional code complexity.
 - Things could be set up differently to simplify the Domain
@@ -608,7 +611,7 @@ flexibility and power.
   only if the other `User` is registered & `Account` is in `Good Standing` with the `Library` that the `Book` was checked out from.
 
 ### Private Libraries & Books with Orphan Private Libraries
-- A `PrivateLibrary` is a sub-type of `Library` that is used to track `Books` that are not associated with any System `Library`.
+- A `PrivateLibrary` is a subtype of `Library` that is used to track `Books` that are not associated with any System `Library`.
 - A `Book` can exist without being associated with any system `Library`. 
   - These `Books` have a `PrivateLibrary` for their `sourceLibrary`.
 - `Users` can `checkout` `Books` from `PrivateLibraries` just like any other `Library`.
