@@ -20,18 +20,19 @@
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
 - [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
 
-#### Code Style
+#### Code Style & Rules
 
 - [Code Style](#code-style)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No `null` in Domain](#no-null-in-domain)
 - [Intention Revealing Error Messages](#intention-revealing-error-messages)
+- [No Shared Global State](#no-shared-global-state)
 - [No Dependency Injection Framework](#no-dependency-injection-framework)
 - [Constructor Convenience](#constructor-convenience)
 - [Anti-inheritance](#anti-inheritance)
 - [Shallow Hierarchies](#shallow-hierarchies)
 - [No Static Methods](#no-static-methods)
-- [Dumb Container Objects for Data Transfer Only to/from Domain](#dumb-container-objects)
+- [Dumb Container Objects for Data Transfer Only to/from Domain](#dumb-container-objects-for-data-transfer-only-tofrom-domain)
 - [Extremely Limit use of `Else` blocks](#extremely-limit-use-of-else-blocks)
 - [No `Void` Methods](#no-void-methods)
 - [No `Null` Checks](#no-null-checks)
@@ -43,7 +44,7 @@
 - [Prefer Use of Early Return](#prefer-use-of-early-return)
 - [Single Responsibility of Role](#single-responsibility-of-role)
 - [Reverse-scope-naming Style](#reverse-scope-naming-style)
-- [Naming of "Inverse" methods](#preferred-naming-of-inverse-methods) 
+- [Naming of "Inverse" methods](#naming-of-inverse-methods) 
 - [Explicit Naming of "Transfer" methods](#explicit-naming-of-transfer-methods)
 - [Explicit Naming of "Find" methods](#explicit-naming-of-find-methods)
 - [Explicit Naming of "Maps" and "Lists"](#explicit-naming-of-maps-and-lists)
@@ -62,7 +63,6 @@
 - [Private Libraries & Books with Orphan Private Libraries](#private-libraries--books-with-orphan-private-libraries)
 
 ### Developer Experience is Paramount
-#### developer-experience-is-paramount
 
 - Write code in a way that is oriented to the reader (not computer), as code is read 100x more than it is written,
   and computers really don't care what the code looks like.
@@ -76,7 +76,6 @@
 <br>
 
 #### Avoiding Ugly COP Paradigms
-#### avoiding-ugly-cop-paradigms
 
 Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
@@ -99,7 +98,6 @@ advantages and disadvantages.
   - Factories, Builders, AbstractFactoryFactories and other hacky "creational" patterns.
 
 ## Code Style
-#### code-style
 
 - Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit 
   intention-revealing names, pedantically for everything.
@@ -123,7 +121,6 @@ advantages and disadvantages.
 - Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
 ### Encapsulation of Data via Intention-named methods
-#### encapsulation-of-data-via-intention-named-methods
 
   - Set and Get methods are not used, instead methods are named for their intention.
   - Problem: The English word `set` and `get` are _extremely_ generic 
@@ -155,7 +152,6 @@ advantages and disadvantages.
   - Prefer  `sourceLibrary()` over `getSourceLibrary()`
 
 ### No `null` in Domain
-#### no-null-in-domain
 
 - `null` only allowed to be passed in constructors
   - used to indicate <i>"use a reasonable default value for this parameter"</i>
@@ -174,20 +170,19 @@ advantages and disadvantages.
   - `null` still used outside of Domain, but prefer to limit its use in general.
 
 ### Intention Revealing Error Messages
-#### intention-revealing-error-messages
 
 - Error messages should be human-readable, clearly reveal the issue encountered.
 - include `id` of associated object(s) in message or useful data for the issue.
 - This is to prevent guessing and hunting what the cause of the issue may be.
 - The unhappy path is the more complex path, so doing this helps reduce its complexity.
 
-### No Global State
+### No Shared Global State
+
 - No shared mutable state
 - No static/global variables
 - No global accessing state of App (except via passed-in Context object)
 
 ### No Dependency Injection Framework
-#### no-dependency-injection-framework
 
 - All dependencies passed in constructors
 - Singleton objects reside in the Context object, and are passed in constructors.
@@ -212,7 +207,6 @@ advantages and disadvantages.
   - Optimizations can be made later if needed, the architecture is designed to easily allow for this.
 
 ### Constructor Convenience
-#### constructor-convenience
 
 - All dependencies passed in constructor
   - No Dependency Injection framework (_anyone want to google a thermosiphon?..._)
@@ -227,7 +221,6 @@ advantages and disadvantages.
   - the only exception is for JSON and Info constructors, since they use special types.
 
 ### Anti-inheritance
-#### anti-inheritance
 
 - Minimal & shallow use of inheritance
   - <code>Model ➤➤ {Domain} ➤➤ {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
@@ -251,7 +244,6 @@ advantages and disadvantages.
     - Keep the Class Inheritance simple, and allow the package arrangement can be complex.
 
 ### Shallow Hierarchies
-#### shallow-hierarchies
 
 - Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
 - If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
@@ -262,7 +254,6 @@ advantages and disadvantages.
   - prefer the shallower hierarchy with the `isOrphan` flag.
   
 ### No `Static` Methods
-#### no-static-methods
 
 - Use of `Static` methods is severely limited to only those that are:
   - Pure functions ie: have no side effects that change data outside the function.
@@ -271,7 +262,6 @@ advantages and disadvantages.
   - No modification of any state outside the function
 
 ### Dumb-Container-Objects for Data Transfer Only to/from Domain
-#### dumb-container-objects
 
 - Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
   to domain `Role` objects.
@@ -279,7 +269,6 @@ advantages and disadvantages.
   world outside domain, and allows independent changing and versioning of the domain/DTO/Entity objects.
 
 ### Extremely Limit use of `Else` blocks
-#### extremely-limit-use-of-else-blocks
 
   - Code for conditions check first and return early if condition is not met.
   - Last return is always "happy path" success return (unless for rare exceptional cases.)
@@ -287,23 +276,19 @@ advantages and disadvantages.
     - Always ask if it can be written in a way that doesn't use `else`. 
 
 ### No `Void` Methods
-#### no-void-methods
 
   - All methods return something, even if it's just a `Boolean` or `Result` object.
 
 ### No `Null` Checks
-#### no-null-checks
 
   - Avoid if any way possible any `null` checks in code
 
 ### Synchronous Code
-#### synchronous-code
 
   - Keep code as synchronous as possible, or looking synchronous.
   - If callbacks are needed, they should be wrapped to look synchronous.
 
-### Encourage Explicit Boolean Naming 
-#### encourage-explicit-boolean-naming
+### Encourage Explicit Boolean Naming
 
 - Boolean variables and methods are named explicitly
   - `is{something}`
@@ -318,7 +303,6 @@ advantages and disadvantages.
     - ie: `hasFines` is preferred over `isBalanceOverZero`
 
 ### Encourage Variable Naming with Explicit Types
-#### encourage-variable-naming-with-explicit-types
 
   - Slight nod to Hungarian Notation, it is still useful for readability in limited cases.
   - The emphasis on reading without IDE assistance is important, and explicit type naming helps with this.
@@ -338,7 +322,6 @@ advantages and disadvantages.
       - ie: `user` is preferred over `userInfo` in this case.
 
 ### Use Result Object for Errors & Exceptions
-#### use-result-object-for-errors--exceptions
 
 - Use of `Result` object to return success or failure
   - Encapsulate the error message in an `Exception` object.
@@ -349,7 +332,6 @@ advantages and disadvantages.
   - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
 
 ### Avoid C++/Java Design Pattern Hacks
-#### avoid-cjava-design-pattern-hacks
 
 - Java has inherited many bad ideas from C, C++ and other languages. 
 - Many of the ideas were so bad that a common set of workarounds were created and passed around the community 
@@ -378,7 +360,6 @@ advantages and disadvantages.
   and are encouraged. <i>Even a broken clock is right twice a day!</i>
 
 ### Prefer Use of Early Return
-#### prefer-use-of-early-return
 
 - Multiple early `returns` for ease of error handling 
   - Unhappy path errors `return` immediately
@@ -387,8 +368,6 @@ advantages and disadvantages.
   - Maybe break up into 2 functions?
 
 ### Single Responsibility of Role
-#### single-responsibility-of-role
-
 
 - BOOP makes clear separation of concerns easy and understandable.
 - Each Role has a single responsibility, and only handles that responsibility, and delegates all other responsibilities
@@ -402,7 +381,6 @@ advantages and disadvantages.
 - No need for a separate `update()` method, in most cases.
 
 ### Reverse-scope-naming Style
-#### reverse-scope-naming-style
 
 - Starts with the most specific adjective to more general adjectives, and ends with the name of the actual concrete type.
 - Domain objects are the plainest named.
@@ -425,7 +403,6 @@ advantages and disadvantages.
   - ie: `updatedAccountStatus` is preferred over `updated` or `status`
 
 ### Naming of "Inverse" methods
-#### preferred-naming-of-inverse-methods
 
 - Prefer using same verb and a short modifier than to use two different verbs for inverse/opposite methods.
 - ie: Prefer `CheckIn` and `CheckOut` to `Borrow` and `Return`
@@ -438,7 +415,6 @@ advantages and disadvantages.
   - `Push` and `Pop` are preferred over `Push` and `UnPush` (unless the domain specifies it)
 
 ### Explicit Naming of "Transfer" methods
-#### explicit-naming-of-transfer-methods
 
 
 - Use of `From` and `To` encouraged, to show explicit intent.
@@ -451,14 +427,13 @@ advantages and disadvantages.
     - even though both convey the same meaning, one is easier to comprehend in English.
 
 ### Explicit Naming of "Find" methods
-#### explicit-naming-of-find-methods
+
 
 - Use of `Of` is encouraged
  - ie: `findUserIdOfCheckedOutBook` instead of `findCheckedOutBookUserId`
  - even though both convey the same meaning, one is easier to read in English.
 
 ### Explicit Naming of "Maps" and "Lists"
-#### explicit-naming-of-maps-and-lists
 
 - List the `from` type and the `to` type in the name of the map.
 - It is preferred to use `To` between the `from` and `to` types.
@@ -470,13 +445,11 @@ advantages and disadvantages.
 - `Map` can refer to any Map or "two column lookup" data.
 
 ### Guard Clauses
-#### guard-clauses
 
 - Guard clauses are used to check for errors and return early if error is found.
 - Basic data validation
 
 ### Domain Role Object can create other Domain Role Objects
-#### domain-role-object-can-create-other-domain-role-objects
 
 - This is acceptable for Domain objects!
   - They all can instantiate themselves & others.
@@ -485,12 +458,10 @@ advantages and disadvantages.
   - `Role` objects are essentially smart pointers to their `Info` objects & other `Role` objects.
 
 ### Minimal Annotations
-#### minimal-annotations
 
 - Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, @Suppress, etc.
 
 ### Acceptable Acronyms, Prefixes, and Suffixes
-#### acceptable-acronyms-prefixes-and-suffixes
 
 <table>
   <tr>
@@ -612,7 +583,6 @@ You can find the sample Library App in the App2 folder, along with some tests to
 
 
 ## Architecture
-#### architecture
 
 - ### Data
   - `Model`
