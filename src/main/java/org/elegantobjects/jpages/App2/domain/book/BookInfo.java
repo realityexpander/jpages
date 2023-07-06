@@ -31,7 +31,6 @@ public class BookInfo extends DomainInfo
         this.title = title;
         this.author = author;
         this.description = description;
-//        this.id = id;
     }
     public
     BookInfo(@NotNull UUID uuid, @NotNull String title, @NotNull String author, @NotNull String description) {
@@ -60,30 +59,50 @@ public class BookInfo extends DomainInfo
     // - Accept both `DTO.BookInfo` and `Entity.BookInfo`
     // - Convert to Domain.BookInfo
     public
-    BookInfo(@NotNull DTOBookInfo bookInfo) {
-        // Converts from DTO to Domain
-
-        // Domain decides what to include from the DTO
-        // todo add validation here
+    BookInfo(@NotNull DTOBookInfo dtoBookInfo) {
+        // Converts from DTOInfo to DomainInfo
         this(
-            new UUID2<Book>(bookInfo.id()), // change to domain type
-            bookInfo.title,
-            bookInfo.author,
-            bookInfo.description
+            new UUID2<Book>(dtoBookInfo.id()), // change to domain UUID2 type
+            dtoBookInfo.title,
+            dtoBookInfo.author,
+            dtoBookInfo.description
         );
+
+        // Validation = Domain decides what to include from the DTO
+        validateDTOBookInfo(dtoBookInfo);
     }
-    public
-    BookInfo(@NotNull EntityBookInfo bookInfo) {
-        // Converts from Entity to Domain
+    private void validateDTOBookInfo(@NotNull DTOBookInfo dtoBookInfo) {
+        if(!dtoBookInfo.id().uuid2TypeStr().equals(UUID2.calcUUID2TypeStr(DTOBookInfo.class)) )
+            throw new IllegalArgumentException("DTOBookInfo.id must be of type " + UUID2.calcUUID2TypeStr(DTOBookInfo.class));
+        validateBookInfo();
+    }
 
-        // Domain decides what to include from the Entities
-        // todo add validation here
+    public
+    BookInfo(@NotNull EntityBookInfo entityBookInfo) {
+        // Converts from EntityInfo to DomainInfo
         this(
-            new UUID2<Book>(bookInfo.id()), // change to domain type
-            bookInfo.title,
-            bookInfo.author,
-            bookInfo.description
+            new UUID2<Book>(entityBookInfo.id()), // change to domain UUID2 type
+            entityBookInfo.title,
+            entityBookInfo.author,
+            entityBookInfo.description
         );
+
+        // Validation - Domain decides what to include from the Entities
+        validateEntityBookInfo(entityBookInfo);
+    }
+    private void validateEntityBookInfo(@NotNull EntityBookInfo entityBookInfo) {
+        if(!entityBookInfo.id().uuid2TypeStr().equals(UUID2.calcUUID2TypeStr(EntityBookInfo.class)) )
+            throw new IllegalArgumentException("EntityBookInfo.id must be of type " + UUID2.calcUUID2TypeStr(DTOBookInfo.class));
+        validateBookInfo();
+    }
+
+    private void validateBookInfo() {
+        if(title.length() > 100)
+            throw new IllegalArgumentException("DTOBookInfo.title cannot be longer than 100 characters");
+        if(author.length() > 100)
+            throw new IllegalArgumentException("DTOBookInfo.author cannot be longer than 100 characters");
+        if(description.length() > 1000)
+            throw new IllegalArgumentException("DTOBookInfo.description cannot be longer than 1000 characters");
     }
 
     ////////////////////////////////

@@ -72,9 +72,15 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
     /// Support creating Book from DTO & Entity
     public Book(@NotNull DTOBookInfo infoDTO, @Nullable Library sourceLibrary, @NotNull Context context) {
+        // todo Validate DTO
+        // - like validate that the UUID2 of the DTO is in the system, etc.
+
         this(new BookInfo(infoDTO), sourceLibrary, context);
     }
     public Book(@NotNull EntityBookInfo infoEntity, @NotNull Library sourceLibrary, @NotNull Context context) {
+        // todo Validate Entity
+        // - like validate that the UUID2 of the Entity is in the system, etc.
+
         this(new BookInfo(infoEntity), sourceLibrary, context);
     }
 

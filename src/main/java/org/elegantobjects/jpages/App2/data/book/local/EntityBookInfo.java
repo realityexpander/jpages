@@ -29,7 +29,6 @@ public class EntityBookInfo extends EntityInfo
         String extraFieldToShowThisIsAnEntity
     ) {
         super(id);
-//        this.id = id;
         this.title = title;
         this.author = author;
         this.description = description;
@@ -41,16 +40,33 @@ public class EntityBookInfo extends EntityInfo
         }
     }
 
+    //////////////////////////////////////////////////////
+    // DTO <-> Domain conversion                        //
+    // Note: Intentionally DON'T accept `DTO.BookInfo`  //
+    //   - to keep DB layer separate from API layer)    //
+    //////////////////////////////////////////////////////
 
-    public @SuppressWarnings("unchecked")
-    EntityBookInfo(@NotNull EntityBookInfo bookInfo) {
-        this((UUID2<Book>) bookInfo.id(), bookInfo.title, bookInfo.author, bookInfo.description, bookInfo.extraFieldToShowThisIsAnEntity);
+    public
+    EntityBookInfo(@NotNull EntityBookInfo bookInfo) {  // from EntityInfo.EntityBookInfo -> EntityInfo.EntityBookInfo
+        this(
+            new UUID2<Book>(bookInfo.id()),
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description,
+            bookInfo.extraFieldToShowThisIsAnEntity
+        );
     }
     public
-    EntityBookInfo(@NotNull BookInfo bookInfo) {
-        this(bookInfo.id(), bookInfo.title, bookInfo.author, bookInfo.description, "Imported from Domain.DomainBookInfo");
+    EntityBookInfo(@NotNull BookInfo bookInfo) {  // from DomainInfo.BookInfo -> EntityInfo.BookInfo
+        this(
+            bookInfo.id(),
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description,
+            "Imported from Domain.DomainBookInfo"
+        );
     }
-    // Note: Intentionally DON'T accept `DTO.BookInfo` (to keep DB layer separate from API layer)
+
 
     @Override
     public String toString() {
@@ -74,11 +90,6 @@ public class EntityBookInfo extends EntityInfo
         return new BookInfo(this);
     }
 
-//    @Override
-//    public UUID2<?> domainInfoId() {
-//        return this.id;
-//    }
-
     /////////////////////////////
     // ToInfo implementation   //
     /////////////////////////////
@@ -88,10 +99,4 @@ public class EntityBookInfo extends EntityInfo
         // note: implement deep copy, if structure is not flat.
         return new EntityBookInfo(this);
     }
-
-//    @SuppressWarnings("unchecked")
-//    @Override
-//    public UUID2<Book> getInfoId() {
-//        return (UUID2<Book>) this.id;
-//    }
 }

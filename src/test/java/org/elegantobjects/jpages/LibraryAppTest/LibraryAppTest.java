@@ -27,7 +27,7 @@ public class LibraryAppTest {
     Context ctx;
     TestingUtils testUtils;
 
-    static final boolean shouldDisplayAllDebugLogs = false;
+    static final boolean shouldDisplayAllDebugLogs = true;
 
     @Before
     public void setUp() {
@@ -416,7 +416,7 @@ public class LibraryAppTest {
             "{\n" +
             "  \"_id\": {\n" +
             "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-            "    \"uuid2Type\": \"Model.DTOInfo.BookInfo\"\n" +
+            "    \"_uuid2Type\": \"Model.DTOInfo.BookInfo\"\n" +
             "  },\n" +
             "  \"title\": \"The Great Gatsby\",\n" +
             "  \"author\": \"F. Scott Fitzgerald\",\n" +

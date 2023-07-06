@@ -8,6 +8,7 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DTOBookInfo extends DTOInfo
         implements
@@ -24,10 +25,10 @@ public class DTOBookInfo extends DTOInfo
     public
     DTOBookInfo(
         @NotNull UUID2<Book> id,
-        String title,
-        String author,
-        String description,
-        String extraFieldToShowThisIsADTO
+        @NotNull String title,
+        @NotNull String author,
+        @NotNull String description,
+        @Nullable String extraFieldToShowThisIsADTO
     ) {
         super(id);
         this.title = title;
@@ -41,35 +42,41 @@ public class DTOBookInfo extends DTOInfo
         }
     }
     public
-    DTOBookInfo(String json, @NotNull Context context) {
+    DTOBookInfo(@NotNull String json, @NotNull Context context) {
         this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTOInfo.BookInfo from the JSON
     }
 
-    // Note: Intentionally DON'T accept `Entity.EntityBookInfo` (to keep DB layer separate from API layer)
+    ////////////////////////////////////////////////////////////////
+    // Entity <-> Domain conversion                               //
+    // Note: Intentionally DON'T accept `Entity.EntityBookInfo`   //
+    //   - to keep DB layer separate from API layer)              //
+    ////////////////////////////////////////////////////////////////
+
     public
-    DTOBookInfo(@NotNull DTOBookInfo bookInfo) {
+    DTOBookInfo(@NotNull DTOBookInfo bookInfo) {  // from DTOInfo.DTOBookInfo -> DTOInfo.DTOBookInfo
         this(
-            new UUID2<Book>(bookInfo.id()), //.uuid(), Book.class),
+            new UUID2<Book>(bookInfo.id()),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
             bookInfo.extraFieldToShowThisIsADTO);
     }
     public
-    DTOBookInfo(@NotNull BookInfo bookInfo) {
+    DTOBookInfo(@NotNull BookInfo bookInfo) { // from Domain.BookInfo -> DTOInfo.BookInfo
         this(
-            new UUID2<Book>(bookInfo.id()), //.uuid(), Book.class),
+            bookInfo.id(),
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
             "Imported from Domain.BookInfo");
     }
-    // Never accept Entity.BookInfo to keep the API layer separate from the DB layer
-    // Note: no constructor for BookInfo(Entity.BookInfo bookInfo)
 
     @Override
     public String toString() {
-        return "Book (" + this.id() + ") : " + this.title + " by " + this.author + ", " + this.description + ", " + this.extraFieldToShowThisIsADTO;
+        return "Book (" + this.id() + ") : " +
+                this.title + " by " + this.author + ", " +
+                this.description + ", " +
+                this.extraFieldToShowThisIsADTO;
     }
 
     ///////////////////////////////////////////
