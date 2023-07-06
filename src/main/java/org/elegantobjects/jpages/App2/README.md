@@ -62,7 +62,7 @@
 - [Private Libraries & Books with Orphan Private Libraries](#private-libraries--books-with-orphan-private-libraries)
 
 ### Developer Experience is Paramount
-#developer-experience-is-paramount
+#### developer-experience-is-paramount
 
 - Write code in a way that is oriented to the reader (not computer), as code is read 100x more than it is written,
   and computers really don't care what the code looks like.
@@ -76,7 +76,7 @@
 <br>
 
 #### Avoiding Ugly COP Paradigms
-#avoiding-ugly-cop-paradigms
+#### avoiding-ugly-cop-paradigms
 
 Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
@@ -99,7 +99,7 @@ advantages and disadvantages.
   - Factories, Builders, AbstractFactoryFactories and other hacky "creational" patterns.
 
 ## Code Style
-#code-style
+#### code-style
 
 - Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit 
   intention-revealing names, pedantically for everything.
@@ -123,7 +123,7 @@ advantages and disadvantages.
 - Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
 ### Encapsulation of Data via Intention-named methods
-#encapsulation-of-data-via-intention-named-methods
+#### encapsulation-of-data-via-intention-named-methods
 
   - Set and Get methods are not used, instead methods are named for their intention.
   - Problem: The English word `set` and `get` are _extremely_ generic 
@@ -155,7 +155,7 @@ advantages and disadvantages.
   - Prefer  `sourceLibrary()` over `getSourceLibrary()`
 
 ### No `null` in Domain
-#no-null-in-domain
+#### no-null-in-domain
 
 - `null` only allowed to be passed in constructors
   - used to indicate <i>"use a reasonable default value for this parameter"</i>
