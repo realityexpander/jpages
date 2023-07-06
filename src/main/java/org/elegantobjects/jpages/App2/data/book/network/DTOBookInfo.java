@@ -59,7 +59,8 @@ public class DTOBookInfo extends DTOInfo
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
-            bookInfo.extraFieldToShowThisIsADTO);
+            bookInfo.extraFieldToShowThisIsADTO
+        );
     }
     public
     DTOBookInfo(@NotNull BookInfo bookInfo) { // from Domain.BookInfo -> DTOInfo.BookInfo
@@ -68,7 +69,8 @@ public class DTOBookInfo extends DTOInfo
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
-            "Imported from Domain.BookInfo");
+            "Imported from Domain.BookInfo"
+        );
     }
 
     @Override
@@ -81,6 +83,8 @@ public class DTOBookInfo extends DTOInfo
 
     ///////////////////////////////////////////
     // DTOs don't have any business logic    //
+    // - All "Info" changes are done in the  //
+    //   domain layer.                       //
     ///////////////////////////////////////////
 
     ///////////////////////////////////

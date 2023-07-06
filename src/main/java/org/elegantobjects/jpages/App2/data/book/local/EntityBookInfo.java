@@ -78,6 +78,8 @@ public class EntityBookInfo extends EntityInfo
 
     ////////////////////////////////////////////
     // Entities don't have any business logic //
+    // - All "Info" changes are done in the   //
+    //   domain layer.                        //
     ////////////////////////////////////////////
 
     /////////////////////////////////
