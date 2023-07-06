@@ -277,6 +277,7 @@ using IDE tools (like hover to find var types).
   like Kotlin show how to address these issues in a more sane and comprehensible manner. 
 - Combined with BOOP, many of the patterns just don't make sense and add unnecessary complexity.
 
+#### Examples
 
 - No Factory patterns
   - Just use constructors. 
