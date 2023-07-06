@@ -1,3 +1,3 @@
-- [No Static Methods](#ccc)
+- [ccc](#ccc)
 
 #ccc

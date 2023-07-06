@@ -26,6 +26,7 @@
 - [Anti-inheritance](#anti-inheritance)
 - [Shallow Hierarchies](#shallow-hierarchies)
 - [No Static Methods](#no-static-methods)
+- [Dumb Container Objects for Data Transfer Only to/from Domain](#dumb-container-objects)
 
 
 - [Library Application Details](#architecture)
@@ -228,9 +229,8 @@ advantages and disadvantages.
     - [Library ➤➤ PrivateLibrary ➤➤ OrphanPrivateLibrary]
   - prefer the shallower hierarchy with the `isOrphan` flag.
   
-### No `Static` Methods 
-
-#no-static-methods
+### No `Static` Methods
+#### no-static-methods
 
 - Use of `Static` methods is severely limited to only those that are:
   - Pure functions ie: have no side effects that change data outside the function.
@@ -238,7 +238,9 @@ advantages and disadvantages.
   - No modification or creation of global state
   - No modification of any state outside the function
 
-### Dumb Container Objects for Data Transfer Only to/from Domain
+### Dumb-Container-Objects for Data Transfer Only to/from Domain
+#### dumb-container-objects
+
 - Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
   to domain `Role` objects.
 - Note: DTOs and Entities are still useful to maintain separation of concerns and to communicate with
