@@ -70,8 +70,8 @@ public class EntityBookInfo extends EntityInfo
 
     @Override
     public String toString() {
-        return "Book (" + this.id() + ") : "
-                + this.title + " by " + this.author + ", " +
+        return "Book (" + this.id() + ") : " +
+                this.title + " by " + this.author + ", " +
                 this.extraFieldToShowThisIsAnEntity + ", " +
                 this.description;
     }
