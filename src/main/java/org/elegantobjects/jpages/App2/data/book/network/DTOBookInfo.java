@@ -46,11 +46,11 @@ public class DTOBookInfo extends DTOInfo
         this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTOInfo.BookInfo from the JSON
     }
 
-    ////////////////////////////////////////////////////////////////
-    // Entity <-> Domain conversion                               //
-    // Note: Intentionally DON'T accept `Entity.EntityBookInfo`   //
-    //   - to keep DB layer separate from API layer)              //
-    ////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
+    // EntityInfo <-> DomainInfo conversion                            //
+    // Note: Intentionally DON'T accept `EntityInfo.EntityBookInfo`    //
+    //   - to keep DB layer separate from API layer)                   //
+    /////////////////////////////////////////////////////////////////////
 
     public
     DTOBookInfo(@NotNull DTOBookInfo bookInfo) {  // from DTOInfo.DTOBookInfo -> DTOInfo.DTOBookInfo

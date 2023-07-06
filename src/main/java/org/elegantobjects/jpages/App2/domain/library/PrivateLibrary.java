@@ -12,11 +12,21 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
-// Defines a Private Library for Books which are not part of any Library (ie: Personal Books)
-// Used as an alternate to "NoLibrary".
-// A PrivateLibrary is not a real library, so it doesnt checkin/checkout books to users.
-// It is used to represent a Book which is not part of any Library.
-// A PrivateLibrary usually has only a single Book in it.
+/**
+
+Private Library
+
+<ul>
+ <li>A {@code PrivateLibrary} is a {@code Library} for {@code Book}s which are not part of
+     any system {@code Library}.</li>
+ <li>Used as an alternate to using {@code null} or "NoLibrary".</li>
+ <li>A PrivateLibrary is identical to a regular library, except it doesn't verify any Account info and
+     anyone can {@code checkIn} and {@code checkOut} {@code Books}.</li>
+ <br>
+ <li><i>Note: A special case for {@code PrivateLibrary} is an Orphan {@code PrivateLibrary} which only allows
+     a single Book of a specific id to be checked into/out of it.</i></li>
+</ul>
+**/
 public class PrivateLibrary extends Library implements IUUID2 {
 
     // This a Private Library is not part of any system Library.

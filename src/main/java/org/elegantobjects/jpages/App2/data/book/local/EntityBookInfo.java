@@ -41,11 +41,11 @@ public class EntityBookInfo extends EntityInfo
         }
     }
 
-    //////////////////////////////////////////////////////
-    // DTO <-> Domain conversion                        //
-    // Note: Intentionally DON'T accept `DTO.BookInfo`  //
-    //   - to keep DB layer separate from API layer)    //
-    //////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    // DTOInfo <-> DomainInfo conversion                    //
+    // Note: Intentionally DON'T accept `DTOInfo.BookInfo`  //
+    //   - to keep DB layer separate from API layer)        //
+    //////////////////////////////////////////////////////////
 
     public
     EntityBookInfo(@NotNull EntityBookInfo bookInfo) {  // from EntityInfo.EntityBookInfo -> EntityInfo.EntityBookInfo

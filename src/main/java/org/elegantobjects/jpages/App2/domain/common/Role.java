@@ -37,14 +37,14 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     @SuppressWarnings("unchecked")
     private final Class<TDomainInfo> infoClazz =
         getClass().getGenericSuperclass() instanceof ParameterizedType
-            ? (Class<TDomainInfo>) ((ParameterizedType) getClass() // 1. Get clazz from this class... ⬇︎
+            ? (Class<TDomainInfo>) ((ParameterizedType) getClass() // 1. Get clazz for "Info" from this class... ⬇︎
                 .getGenericSuperclass())
                 .getActualTypeArguments()[0]
             : (Class<TDomainInfo>) (
                     (ParameterizedType) (
                         (Class<?>) (
                             this.getClass()
-                                .getGenericSuperclass()            // 2. ⬆︎ ...or from the superClass generic type.
+                                .getGenericSuperclass()            // 2. ⬆︎ ...or from the superClass' generic type.
                         )
                     ).getGenericSuperclass()
               ).getActualTypeArguments()[0];
@@ -55,7 +55,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         @Nullable TDomainInfo info,
         @NotNull Context context
     ) {
-        this.id = UUID2.fromUUID(id); // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
+        this.id = UUID2.fromUUID(id); // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as `null`.
         this.info = info;
         this.context = context;
     }
