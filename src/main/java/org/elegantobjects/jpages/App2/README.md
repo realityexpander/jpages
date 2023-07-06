@@ -90,13 +90,13 @@ using IDE tools (like hover to find var types).
     - Prefer `Result` or `Empty` object instead of `null`
     - `boolean` is acceptable, over `null`.
 - Methods that require network, disk access or CPU time should be labeled with that intent.
-  - ie: `calculateTotalCost()` is preferred over `getTotalCost()`
-  - ie: `fetchInfo()` is preferred over `getInfo()`
-  - ie: `findUserIdOfCheckedOutBook` is preferred over `getCheckedOutBookUserId()`
+  - Prefer `calculateTotalCost()` over `getTotalCost()`
+  - Prefer `fetchInfo()` over `getInfo()`
+  - Prefer `findUserIdOfCheckedOutBook` over `getCheckedOutBookUserId()`
 - When the method is a simple data-accessor that just returns a simple field or object, no need to use prefix `get`.
-  - Prefer `id()` over `getId()` for readability and simplicity.
-  - Prefer  `info()` is preferred over `getInfo()`
-  - Prefer  `sourceLibrary()` is preferred over `getSourceLibrary()`
+  - Prefer `id()` over `getId()`
+  - Prefer  `info()` over `getInfo()`
+  - Prefer  `sourceLibrary()` over `getSourceLibrary()`
 
 ### No `null` in Domain
 #no-null-in-domain
