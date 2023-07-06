@@ -9,7 +9,7 @@ import java.util.*;
 import static java.lang.String.format;
 
 /**
- <b>{@code UUID2} is a type-safe wrapper for a UUID, and it can be used in place of a UUID.<br>
+ <b>{@code UUID2}</b> is a type-safe wrapper for a UUID, and it can be used in place of a UUID.<br>
  <ul>
  <li> Benefits:<br>
     <ul>
@@ -18,10 +18,11 @@ import static java.lang.String.format;
         <li>Includes implementation of type-safe {@code HashMap} for {@code UUID2}s.</li>
         <li>{@code UUID2} is immutable.</li>
     </ul>
- <li> {@code IUUID2} is a marker interface for Domain objects that can be used with UUID2.</li>
+ <li> {@code IUUID2} is a marker interface for classes that will be used with UUID2.</li>
  <li> Domain objects must be marked with the {@code IUUID2} marker interface to be used with {@code UUID2}.</li>
  <br>
  <li> The {@code UUID2Type} is the "Class <b>Inheritance</b> Path", <b>NOT</b> the "Class Path" (also called "Package" Path), like so: <br>
+      <br>
       <b>{@code Model.Domain.BookInfo}</b> ⬅︎ <i>"Class Inheritance path" is the UUID2Type</i><br>
       <i>instead of:</i> <br>
       <b>{@code org.elegantobjects.jpages.App2.domain.book.BookInfo}</b> ⬅︎ <i>"Class Path"</i><br>
