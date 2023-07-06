@@ -226,7 +226,8 @@ advantages and disadvantages.
   - <code>Model ➤➤ {Domain} ➤➤ {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
     - ie: <code>Model.DTOInfo.DTOBookInfo</code>
     - ie: <code>Model.DomainInfo.BookInfo</code> 
-      - note:`BookInfo` is <i>not</i> a `DomainBookInfo` bc the Domain is the core and more plain java-like.
+      - note:`BookInfo` is <i>not</i> a `DomainBookInfo` because the Domain is the core and more plain java-like, 
+        so we use a simplest name for it.
   - <code>IRepo ➤➤ Repo ➤➤ {Domain}Repo</code> for the `Repo` objects
     - ie: <code>Repo.BookInfoRepo</code> 
   - <code>Role ➤➤ {DomainRole}</code> for the `Role` objects
@@ -245,7 +246,7 @@ advantages and disadvantages.
 
 ### Shallow Hierarchies
 
-- Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
+- Keep hierarchies as flat as possible, because deep hierarchies are difficult to understand and change.
 - If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
   - example:
     - [Library ➤➤ PrivateLibrary with `isOrphan` flag] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ⬅︎ shallow is preferred
@@ -372,7 +373,8 @@ advantages and disadvantages.
 - BOOP makes clear separation of concerns easy and understandable.
 - Each Role has a single responsibility, and only handles that responsibility, and delegates all other responsibilities
   to other Roles.
-- Each Role has a many methods to handle its responsibility, and return encapsulated intention-revealing data to other Roles.
+- Each Role has a many methods to handle its responsibility, and return encapsulated intention-revealing data to 
+  other Roles.
 - No direct access to any other Role's data, all data is encapsulated and only accessed through methods.
 - All Role Info is returned as copies, never direct references.
   - This makes it possible to have a Role change independently of other Role objects. By defining communication
@@ -600,10 +602,12 @@ You can find the sample Library App in the App2 folder, along with some tests to
       - `LibraryInfoRepo` - Handles persistence of `LibraryInfo` objects
     - `EntityInfo`
       - `BookInfoEntity` - Handles transfer of `BookInfo` objects to database 
-      - currently only one `Entity` in the system, to be expanded later to include `AccountInfoEntity`, `UserInfoEntity`, `LibraryInfoEntity`
+      - currently only one `Entity` in the system, to be expanded later to 
+        include `AccountInfoEntity`, `UserInfoEntity`, `LibraryInfoEntity`
     - `DTOInfo`
       - `BookInfoDTO`  - Handles transfer of `BookInfo` objects to API
-      - currently only one `DTO` in the system, to be expanded later to include `AccountInfoDTO`, `UserInfoDTO`, `LibraryInfoDTO`
+      - currently only one `DTO` in the system, to be expanded later to 
+        include `AccountInfoDTO`, `UserInfoDTO`, `LibraryInfoDTO`
       
 - ### Role
   - `User` - Handles `User` actions, like `giveBookToUser()`, `checkOutBook()`, `checkInBook()`, etc.
@@ -617,8 +621,8 @@ You can find the sample Library App in the App2 folder, along with some tests to
 ### _"BOOP is made for modeling the capriciousness of the Real World..."_ 
 
 Some decisions have been made capriciously and with intentionally irrationally haphazard in order 
-to see how much inherent domain complexity can be modeled using BOOP. This is not a criticism of BOOP, but rather a test of its
-flexibility and power.
+to see how much inherent domain complexity can be modeled using BOOP. This is not a criticism of BOOP, but 
+rather a test of its flexibility and power.
 
 #### Some Arbitrary Rules:
 
@@ -667,7 +671,8 @@ flexibility and power.
     create a `Library` first. 
   - This is an arbitrary decision to see if I could stretch how the system works, and is not a 
     real world use case. 
-  - In a well-conceived "normal" Library system, all `Books` would be associated with a particular system `Library` at the time of creation.
+  - In a well-conceived "normal" Library system, all `Books` would be associated with a particular 
+    system `Library` at the time of creation.
 
 ### My Java Complaints
 - Type system... for a language that is dealing with types, it sure does forget types a lot... design flaw!
