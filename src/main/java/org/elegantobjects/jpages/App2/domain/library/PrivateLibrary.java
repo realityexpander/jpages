@@ -43,7 +43,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
     private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
 
-    public PrivateLibrary(
+    public
+    PrivateLibrary(
         @NotNull LibraryInfo info,
         @NotNull Context context
     ) {
@@ -51,7 +52,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
         this.id()._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
-    public PrivateLibrary(
+    public
+    PrivateLibrary(
         @NotNull UUID2<Library> id,
         @NotNull Context context
     ) {
@@ -59,9 +61,10 @@ public class PrivateLibrary extends Library implements IUUID2 {
         this.id()._setUUID2TypeStr(UUID2.calcUUID2TypeStr(PrivateLibrary.class));
         this.isForOnlyOneBook = false;
     }
-    public PrivateLibrary(
+    public
+    PrivateLibrary(
         @NotNull UUID2<Book> bookId,
-        boolean isForOnlyOneBook, // always true
+        boolean isForOnlyOneBook, // note: always true for this constructor
         @NotNull Context context
     ) {
         // Note: This creates an ORPHAN private library.

@@ -55,7 +55,7 @@ public class DTOBookInfo extends DTOInfo
     public
     DTOBookInfo(@NotNull DTOBookInfo bookInfo) {  // from DTOInfo.DTOBookInfo -> DTOInfo.DTOBookInfo
         this(
-            new UUID2<Book>(bookInfo.id()),
+            new UUID2<Book>(bookInfo.id()),  // change `UUID2Type` to UUID2<Book>
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,

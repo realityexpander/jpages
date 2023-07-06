@@ -39,7 +39,7 @@ import static java.lang.String.format;
  ^^^^^-- Always prefixed with `UUID2`                                     
       ^-- `:` divides between Prefix and Type                             
        ^^^^^^^^^^^^^^^^-- UUID2Type                                       
-                       ^-- `@` divides the Type block and Value           
+                       ^-- `@` divides the UUID2Type and UUID Value
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-- UUID Value 
  </pre>
  </div>
@@ -73,19 +73,17 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     UUID2(TUUID2 uuid2) {
         this(uuid2, uuid2.uuid2TypeStr());
     }
-    @SuppressWarnings("unchecked")
-    public
+    public @SuppressWarnings("unchecked")
     UUID2(@NotNull UUID2<?> uuid2) {
         this((TUUID2) uuid2, uuid2.uuid2TypeStr());
     }
-    @SuppressWarnings("unchecked")
-    public
+    public @SuppressWarnings("unchecked")
     UUID2(UUID uuid, Class<?> clazz) {
         this((TUUID2) UUID2.fromUUID(uuid), clazz);
     }
 
     public static
-    UUID2<?> fromUUID2String(@NotNull String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
+    UUID2<?> fromUUID2String(@NotNull String uuid2FormattedString) throws IllegalArgumentException {
         // format example:
         //
         // UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001
@@ -118,28 +116,27 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public
     UUID uuid() { return uuid; }
 
-    public @Override
-    String uuid2TypeStr() {
+    @Override
+    public String uuid2TypeStr() {
         return _uuid2Type;
     }
 
-    public @Override
-    String toString() {
+    @Override
+    public String toString() {
         return  "UUID2:" + _uuid2Type + "@" + uuid;
     }
 
-    public @Override
-    int hashCode() {
+    @Override
+    public int hashCode() {
         return this.uuid().hashCode();
     }
 
-    public
-    boolean isOnlyUUIDEqual(@NotNull UUID2<?> other) {
+    public boolean isOnlyUUIDEqual(@NotNull UUID2<?> other) {
         return (other).uuid().equals(uuid());
     }
 
-    public @Override
-    boolean equals(Object other) {
+    @Override
+    public boolean equals(Object other) {
         if(other == null) return false;
         if(!(other instanceof UUID2)) return false;
 
@@ -150,15 +147,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             );
     }
 
-    public
-    boolean isMatchingUUID2Type(@NotNull UUID2<?> checkUUID2) {
+    public boolean isMatchingUUID2Type(@NotNull UUID2<?> checkUUID2) {
         return this.uuid2TypeStr().equals(checkUUID2.uuid2TypeStr());
     }
-    public
-    boolean isMatchingUUID2TypeStr(@NotNull String checkUUID2TypeStr) {
+    public boolean isMatchingUUID2TypeStr(@NotNull String checkUUID2TypeStr) {
         return this.uuid2TypeStr().equals(checkUUID2TypeStr);
     }
-
     static boolean isMatchingUUID2TypeStr(String firstUuid2Str, String secondUuid2Str) {
         if(firstUuid2Str == null) return false;  // note: null checks are acceptable for static methods.
         if(secondUuid2Str == null) return false;
@@ -168,7 +162,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             UUID2<?> secondUUID2 = UUID2.fromUUID2String(secondUuid2Str);
 
             return firstUUID2.isMatchingUUID2Type(secondUUID2);
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             System.err.println("Error: Unable to find class for UUID2: " + firstUuid2Str);
             e.printStackTrace();
             return false;
@@ -235,8 +229,8 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     UUID2<TDomainUUID2> createFakeUUID2(final Integer id) {
         return createFakeUUID2(id, IUUID2.class);
     }
-    @SuppressWarnings("unchecked")
-    private static <TDomainUUID2 extends IUUID2> @NotNull
+
+    private static @SuppressWarnings("unchecked") <TDomainUUID2 extends IUUID2> @NotNull
     UUID2<TDomainUUID2> _createFakeUUID2(final Integer id, String clazzPathStr) {
         Integer nonNullId = id;
         if (nonNullId == null) nonNullId = 0; // default value
@@ -280,8 +274,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     }
 
     // Note: Should only be used when importing JSON
-    @SuppressWarnings("UnusedReturnValue")
-    public
+    public @SuppressWarnings({"UnusedReturnValue", "SameReturnValue"})
     boolean _setUUID2TypeStr(String uuid2TypeStr) {
         this._uuid2Type = getNormalizedUuid2TypeString(uuid2TypeStr);
         return true; // always return `true` instead of a `void` return type
@@ -326,16 +319,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
         public
         HashMap() {}
-
-        // Creates a copy of another UUID2.HashMap
         public
-        HashMap(UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
+        HashMap(UUID2.HashMap<TUUID2, TEntity> sourceDatabase) { // Creates a copy of another UUID2.HashMap
             this.putAll(sourceDatabase);
         }
         public
-        HashMap(java.util.HashMap<TUUID2, TEntity> sourceDatabase) {
-
-            // Copy the sourceDatabase into this HashMap
+        HashMap(java.util.HashMap<TUUID2, TEntity> sourceDatabase) { // Creates a copy of another Database
             for (Map.Entry<TUUID2, TEntity> entry : sourceDatabase.entrySet()) {
                 TUUID2 uuid2 = entry.getKey();
                 TEntity entity = entry.getValue();
@@ -344,25 +333,22 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         }
 
         @Override
-        public
-        String toString() {
+        public String toString() {
             return uuid2ToEntityMap.toString();
         }
 
-        public
-        TEntity get(@NotNull TUUID2 uuid2) {
+        public TEntity get(@NotNull TUUID2 uuid2) {
             return _uuidToEntityMap.get(uuid2.uuid());
         }
 
         @SuppressWarnings("unchecked")
-        public
-        TEntity put(@NotNull UUID2<?> uuid2, TEntity value) {
+        public TEntity put(@NotNull UUID2<?> uuid2, TEntity value) {
             uuid2ToEntityMap.put((TUUID2) uuid2, value);
             return _uuidToEntityMap.put(uuid2.uuid(), value);
         }
 
-        public
-        ArrayList<TEntity> putAll(@NotNull UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
+        @SuppressWarnings("UnusedReturnValue")
+        public ArrayList<TEntity> putAll(@NotNull UUID2.HashMap<TUUID2, TEntity> sourceDatabase) {
             ArrayList<TEntity> entities = new ArrayList<>();
 
             for (Map.Entry<TUUID2, TEntity> entry : sourceDatabase.uuid2ToEntityMap.entrySet()) {
@@ -378,24 +364,20 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return entities;
         }
 
-        public
-        TEntity remove(@NotNull TUUID2 uuid2) {
+        public TEntity remove(@NotNull TUUID2 uuid2) {
             uuid2ToEntityMap.remove(uuid2);
             return _uuidToEntityMap.remove(uuid2.uuid());
         }
 
-        public
-        boolean containsKey(@NotNull TUUID2 uuid2) {
+        public boolean containsKey(@NotNull TUUID2 uuid2) {
             return _uuidToEntityMap.containsKey(uuid2.uuid());
         }
 
-        public
-        boolean containsValue(TEntity entity) {
+        public boolean containsValue(TEntity entity) {
             return _uuidToEntityMap.containsValue(entity);
         }
 
-        public
-        Set<TUUID2> keySet() throws RuntimeException {
+        public Set<TUUID2> keySet() throws RuntimeException {
             Set<TUUID2> uuid2Set = new HashSet<>();
 
             try {
@@ -411,8 +393,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return uuid2Set;
         }
 
-        public
-        Set<Map.Entry<TUUID2, TEntity>> entrySet() throws RuntimeException {
+        public Set<Map.Entry<TUUID2, TEntity>> entrySet() throws RuntimeException {
             Set<Map.Entry<TUUID2, TEntity>> uuid2Set = new HashSet<>();
 
             try {
@@ -432,8 +413,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             return uuid2Set;
         }
 
-        public
-        ArrayList<TEntity> values() throws RuntimeException {
+        public ArrayList<TEntity> values() throws RuntimeException {
             ArrayList<TEntity> entityValues = new ArrayList<>();
 
             try {
@@ -455,8 +435,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     ///// Private helpers //////
     ////////////////////////////
 
-    private @NotNull
-    String getNormalizedUuid2TypeString(String uuid2TypeStr) {
+    private String getNormalizedUuid2TypeString(String uuid2TypeStr) {
         if(uuid2TypeStr == null) {
             return "UUID"; // unspecified-type
         }
@@ -476,8 +455,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
         return normalizedTypeStr.toString();
     }
 
-    private static
-    String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
+    private static String getLastSegmentOfTypeStrPath(@NotNull String classPath) {
         String[] segments = classPath.split("\\.");
         if(segments.length == 1) {
             return classPath;
@@ -501,12 +479,12 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
 
             HashMap<? extends UUID2<?>, Object> uuid2ToUuidMap = new HashMap<>();
             try {
-                JsonObject uuid2ToUuidMapJsonObj = null;
-                if (jsonElement.getAsJsonObject().get("uuid2ToEntityMap") != null) {
-                    uuid2ToUuidMapJsonObj = jsonElement.getAsJsonObject()
-                        .get("uuid2ToEntityMap")
-                        .getAsJsonObject();
-                }
+//                JsonObject uuid2ToUuidMapJsonObj = null;
+//                if (jsonElement.getAsJsonObject().get("uuid2ToEntityMap") != null) {
+//                    uuid2ToUuidMapJsonObj = jsonElement.getAsJsonObject()
+//                        .get("uuid2ToEntityMap")
+//                        .getAsJsonObject();
+//                }
 
                 // Rebuild the UUID2<?> to Entity map
                 for (Map.Entry<?, ?> entry : uuid2HashMapFromJson.uuid2ToEntityMap.entrySet()) {
@@ -526,7 +504,7 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
                     uuid2ToUuidMap.put(uuid2Key, entity);
                 }
 
-            } catch (IllegalArgumentException | ClassNotFoundException e) {
+            } catch (IllegalArgumentException e) {
                 System.err.println(e.getMessage());
                 throw new RuntimeException(e);
             }

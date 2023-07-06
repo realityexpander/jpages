@@ -1,19 +1,16 @@
 package org.elegantobjects.jpages.App2.domain.user;
 
 import org.elegantobjects.jpages.App2.common.util.Pair;
-import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.Result;
+import org.elegantobjects.jpages.App2.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.account.Account;
 import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
-import org.elegantobjects.jpages.App2.domain.Context;
 import org.elegantobjects.jpages.App2.domain.library.Library;
-import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
-import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +21,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
     private final UserInfoRepo repo;
     private final Account account; // User's Account Role Object
 
-    public User(
+    public
+    User(
         @NotNull UserInfo info,
         @NotNull Account account,
         @NotNull Context context
@@ -35,7 +33,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
         context.log.d(this,"User (" + this.id().toString() + ") created from Info");
     }
-    public User(
+    public
+    User(
         @NotNull UUID2<User> id,
         @NotNull Account account,
         @NotNull Context context
@@ -46,7 +45,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
         context.log.d(this,"User (" + this.id().toString() + ") created from id with no Info");
     }
-    public User(
+    public
+    User(
         @NotNull String json,
         @NotNull Class<UserInfo> clazz,  // class type of json object
         @NotNull Account account,
@@ -58,10 +58,12 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
         context.log.d(this,"User (" + this.id().toString() + ") created Json with class: " + clazz.getName());
     }
-    public User(@NotNull String json, @NotNull Account account, @NotNull Context context) {
+    public
+    User(@NotNull String json, @NotNull Account account, @NotNull Context context) {
         this(json, UserInfo.class, account, context);
     }
-    public User(@NotNull Account account, @NotNull Context context) {
+    public
+    User(@NotNull Account account, @NotNull Context context) {
         this(UUID2.randomUUID2(), account, context);
     }
 
@@ -166,9 +168,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
     @Override
     public String uuid2TypeStr() {
-//        return this.getClass().getName();
-//        return UUID2.getUUID2TypeStr(User.class);
-        return UUID2.calcUUID2TypeStr(this.getClass()); // todo test does this work?
+        return UUID2.calcUUID2TypeStr(this.getClass());
     }
 
     /////////////////////////////////////////

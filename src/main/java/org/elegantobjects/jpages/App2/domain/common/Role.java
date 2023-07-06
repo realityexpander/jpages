@@ -32,18 +32,19 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // Singletons
     protected final Context context;
 
-    // Class of the Info<TDomain> info object (for Gson serialization) (also JAVA REFLECTION IS UGLY!!)
+    // Class of the Info<TDomain> info object (for Gson serialization)
+    // - also JAVA REFLECTION IS UGLY!!
     @SuppressWarnings("unchecked")
     private final Class<TDomainInfo> infoClazz =
         getClass().getGenericSuperclass() instanceof ParameterizedType
-            ? (Class<TDomainInfo>) ((ParameterizedType) getClass() // Get clazz from this class...
+            ? (Class<TDomainInfo>) ((ParameterizedType) getClass() // 1. Get clazz from this class... ⬇︎
                 .getGenericSuperclass())
                 .getActualTypeArguments()[0]
             : (Class<TDomainInfo>) (
                     (ParameterizedType) (
                         (Class<?>) (
                             this.getClass()
-                                .getGenericSuperclass()            // ...or from the superClass generic type.
+                                .getGenericSuperclass()            // 2. ⬆︎ ...or from the superClass generic type.
                         )
                     ).getGenericSuperclass()
               ).getActualTypeArguments()[0];
@@ -98,19 +99,23 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     Role(Context context) {
         this(UUID.randomUUID(), null, context);
     }
-    // LEAVE for reference, for static Context instance implementation
+    // LEAVE FOR REFERENCE, for static Context instance implementation
     //Role(String json) {
     //    this(json, null);
     //    this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
     //}
 
-    ////////////////////
-    // Simple getter  //
-    ////////////////////
+    /////////////////////
+    // Simple getters  //
+    /////////////////////
 
     public UUID2<?> id() {
         return this.id;
     }
+
+    ///////////////////////////
+    // Static Constructors   //
+    ///////////////////////////
 
     // Creates new `Domain.{Domain}Info` object with id from JSON string of `Domain.{Domain}Info` object
     // - Implemented as a static method bc it can be called from a constructor.
@@ -140,7 +145,6 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             // Set UUID2Type to match type of TDomainInfo object
             String domainInfoClazzName = UUID2.calcUUID2TypeStr(domainInfoClazz);
             domainInfoClazz.cast(obj)
-//                    .domainInfoId()
                     .id()
                     ._setUUID2TypeStr(domainInfoClazzName);
 
@@ -154,7 +158,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             context.log.d( "Role:createInfoFromJson()", "Failed to createInfoFromJson() for " +
                     "class: " + domainInfoClazz.getName() + ", " +
                     "json: " + json + ", " +
-                    "exception: " + e.toString());
+                    "exception: " + e);
 
             return null;
         }
@@ -201,18 +205,18 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     }
 
     /////////////////////////////////////////////////////
-    // Methods required to be overridden in subclasses //
+    // Methods REQUIRED to be overridden in subclasses //
     /////////////////////////////////////////////////////
 
     // Defines how to fetch info from server
-    // - *MUST* be overridden/implemented in subclasses
+    // - REQUIRED - *MUST* be overridden/implemented in subclasses
     @Override
     public Result<TDomainInfo> fetchInfoResult() {
         return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
     }
 
     // Updates the info object with a new info object
-    // - *MUST* be overridden/implemented in subclasses
+    // - REQUIRED - *MUST* be overridden/implemented in subclasses
     // - Call super.updateInfo(info) to update the info<TDomainInfo> object
     //   (caller decides when appropriate, ie: optimistic updates, or after server confirms update)
     @Override

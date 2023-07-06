@@ -20,7 +20,7 @@ public class TestingUtils {
     //////////////////////// TESTING Helper Methods //////////////////////
     //////////////////////////////////////////////////////////////////////
 
-    Context context;
+    final Context context;
 
     public
     TestingUtils(@NotNull Context context) {

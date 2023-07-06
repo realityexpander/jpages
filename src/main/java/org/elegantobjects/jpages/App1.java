@@ -1,7 +1,6 @@
 package org.elegantobjects.jpages;
 
 
-import java.awt.print.Book;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,7 +42,7 @@ public final class App1 extends IOException {
 
     static class Session {
 
-        private Resource resource;
+        private final Resource resource;
         private Map<String, String> params;
 
         public Session(Resource resource) {

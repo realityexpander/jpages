@@ -35,7 +35,6 @@ public interface Info<TInfo> {
     }
 
     interface ToInfo<TInfo> {
-//        UUID2<?> getInfoId();             // Returns the UUID2 of the Info object
         UUID2<?> id();             // Returns the UUID2 of the Info object
 
         @SuppressWarnings("unchecked")
@@ -45,15 +44,15 @@ public interface Info<TInfo> {
         }
 
         @SuppressWarnings("unchecked")
-        default TInfo toDeepCopyInfo() {    // **MUST** override, method should return a DEEP copy (& no original references)
-            //noinspection unchecked
+        // **MUST** override, method should return a DEEP copy (& no original references)
+        default TInfo toDeepCopyInfo() {
             return ((Info<TInfo>) this).deepCopyInfo();
 
             // throw new RuntimeException("Info:ToInfo:toDeepCopyInfo(): Must override this method"); // todo Should force override? or use this default behavior?
         }
     }
 
-    public static <
+    static <
             TToInfo extends ToInfo<?> // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
             > TToInfo createInfoFromJson(
             String json,
@@ -68,7 +67,6 @@ public interface Info<TInfo> {
             // Set the UUID2 typeStr to match the Info Class name
             String infoClazzName = UUID2.calcUUID2TypeStr(infoClazz);
             infoClazz.cast(obj)
-//                    .getInfoId()
                     .id()
                     ._setUUID2TypeStr(infoClazzName);
 
@@ -77,7 +75,7 @@ public interface Info<TInfo> {
             context.log.d( "Info:createInfoFromJson()", "Failed to createInfoFromJson() for " +
                     "class: " + infoClazz.getName() + ", " +
                     "json: " + json + ", " +
-                    "exception: " + e.toString());
+                    "exception: " + e);
 
             return null;
         }

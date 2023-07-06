@@ -70,14 +70,21 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         this(new BookInfo(UUID2.randomUUID2(Book.class)), null, context);
     }
 
-    /// Support creating Book from DTO & Entity
-    public Book(@NotNull DTOBookInfo infoDTO, @Nullable Library sourceLibrary, @NotNull Context context) {
+    /////////////////////////////////////////
+    // Entity 🡒 Domain 🡐 DTO        //
+    // - Converters to keep DB/API layer   //
+    //   separate from Domain layer        //
+    /////////////////////////////////////////
+
+    public
+    Book(@NotNull DTOBookInfo infoDTO, @Nullable Library sourceLibrary, @NotNull Context context) {
         // todo Validate DTO
         // - like validate that the UUID2 of the DTO is in the system, etc.
 
         this(new BookInfo(infoDTO), sourceLibrary, context);
     }
-    public Book(@NotNull EntityBookInfo infoEntity, @NotNull Library sourceLibrary, @NotNull Context context) {
+    public
+    Book(@NotNull EntityBookInfo infoEntity, @NotNull Library sourceLibrary, @NotNull Context context) {
         // todo Validate Entity
         // - like validate that the UUID2 of the Entity is in the system, etc.
 
@@ -90,7 +97,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
 
     public static Result<Book> fetchBook(
         @NotNull UUID2<Book> uuid2,
-        @Nullable Library sourceLibrary,
+        @Nullable Library sourceLibrary,   // `null` means use default (ie: Orphan PrivateLibrary)
         @NotNull Context context
     ) {
         BookInfoRepo repo = context.bookInfoRepo();
@@ -175,7 +182,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return !this.isBookFromPrivateLibrary();
     }
 
-    public Result<Book> transferToLibrary(Library library) {
+    public Result<Book> transferToLibrary(@NotNull Library library) {
         if(this.sourceLibrary == library) {
             return new Result.Success<>(this);
         }
@@ -196,26 +203,26 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return library.transferBookSourceLibraryToThisLibrary(this);
     }
 
-    public Result<BookInfo> updateAuthor(String author) {
+    public Result<BookInfo> updateAuthor(@NotNull String author) {
         BookInfo updatedInfo = this.info().withAuthor(author);
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
-    public Result<BookInfo> updateTitle(String title) {
+    public Result<BookInfo> updateTitle(@NotNull String title) {
         BookInfo updatedInfo = this.info().withTitle(title);
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
-    public Result<BookInfo> updateDescription(String description) {
+    public Result<BookInfo> updateDescription(@NotNull String description) {
         BookInfo updatedInfo = this.info().withDescription(description);
         return this.updateInfo(updatedInfo); // delegate to Info Object
     }
 
     // Role Role-specific business logic in a Role Object.
-    public Result<Book> updateSourceLibrary(Library sourceLibrary) {
+    public Result<Book> updateSourceLibrary(@NotNull Library sourceLibrary) {
         // NOTE: This method is primarily used by the Library Role Object when moving a Book from one Library
         //   to another Library.
-        // It is NOT saved with the Book's BookInfo, as it only applies to the Book Role Object.
-        // - shows example of Role-specific business logic in a Role Object.
-        // - ie: sourceLibrary only exists in this Book Role as BookInfo does NOT have a sourceLibrary field.
+        // This info is *NOT* saved with the Book's BookInfo, as it only applies to the Book Role Object.
+        // - Shows example of Role-specific business logic in a Role Object that is not saved in the Info Object.
+        // - ie: sourceLibrary only exists in this Book Role Object as `BookInfo` does NOT have a `sourceLibrary` field.
 
         Book updatedBook = new Book(this.info(), sourceLibrary, this.context);
         return new Result.Success<>(updatedBook);
@@ -226,9 +233,9 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     ////////////////////////////////////////
 
     private Library pickSourceLibrary(
-        Library sourceLibrary,
-        UUID2<Book> bookId,
-        Context context
+        @Nullable Library sourceLibrary,
+        @NotNull UUID2<Book> bookId,
+        @NotNull Context context
     ) {
         // If a sourceLibrary was not provided, create a new ORPHAN PrivateLibrary for this Book.
         if(sourceLibrary == null) {

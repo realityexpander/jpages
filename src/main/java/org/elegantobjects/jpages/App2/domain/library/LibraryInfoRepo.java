@@ -6,6 +6,7 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -14,7 +15,8 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     // simulate a database on server
     private final UUID2.HashMap<UUID2<Library>, LibraryInfo> database = new UUID2.HashMap<>();
 
-    public LibraryInfoRepo(ILog log) {
+    public
+    LibraryInfoRepo(@NotNull  ILog log) {
         super(log);
     }
 

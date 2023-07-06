@@ -6,7 +6,6 @@ import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.DomainInfo;
 import org.elegantobjects.jpages.App2.domain.user.User;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -18,6 +17,7 @@ import java.util.*;
 // - Current Fine Amount
 // - Max books allowed to be checked out
 // - Role objects contain the "Model.{XXX}.{Domain}Info" and the associated business logic to manipulate it
+@SuppressWarnings("CommentedOutCode")
 public class AccountInfo extends DomainInfo
         implements
         Model.ToDomainInfo<AccountInfo>
@@ -51,7 +51,6 @@ public class AccountInfo extends DomainInfo
         @NotNull HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap
     ) {
         super(id);
-//        this.id = id;
         this.userId = new UUID2<>(id); // set the Accounts' User UUID to match the Account's UUID
         this.name = name;
         this.accountStatus = accountStatus;
@@ -72,10 +71,8 @@ public class AccountInfo extends DomainInfo
             new HashMap<>()
         );
     }
-    public @SuppressWarnings("unchecked")
-    AccountInfo(@NotNull AccountInfo accountInfo) {
+    public AccountInfo(@NotNull AccountInfo accountInfo) {
         this(
-//            (UUID2<Account>) accountInfo.id(),
             accountInfo.id(),
             accountInfo.name,
             accountInfo.accountStatus,
@@ -98,13 +95,13 @@ public class AccountInfo extends DomainInfo
         ACTIVE,
         INACTIVE,
         SUSPENDED,
-        CLOSED;
+        CLOSED
     }
 
     static class AccountAuditLogItem {
-        Long timeStampLongMillis;
-        String operation;
-        HashMap<String, String> entries;  // keyString -> valueString
+        final Long timeStampLongMillis;
+        final String operation;
+        final HashMap<String, String> entries;  // keyString -> valueString
 
         public
         AccountAuditLogItem(
@@ -140,7 +137,6 @@ public class AccountInfo extends DomainInfo
     // Published Role Business Logic Methods //
     /////////////////////////////////////////////
 
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> activateAccountByStaff(String reason, String staffMemberName) {
         if (reason == null || reason.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("reason is null or empty"));
@@ -151,7 +147,6 @@ public class AccountInfo extends DomainInfo
 
         return new Result.Success<>(
             new AccountInfo(
-//                (UUID2<Account>) this.id(),
                 this.id(),
                 this.name,
                 AccountStatus.ACTIVE,
@@ -161,7 +156,6 @@ public class AccountInfo extends DomainInfo
                 this.timeStampToAccountAuditLogItemMap
         ));
     }
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> deactivateAccountByStaff(String reason, String staffMemberName) {
         if (reason == null || reason.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("reason is null or empty"));
@@ -172,7 +166,6 @@ public class AccountInfo extends DomainInfo
 
         return new Result.Success<>(
             new AccountInfo(
-//                (UUID2<Account>) this.id(),
                 this.id(),
                 this.name,
                 AccountStatus.INACTIVE,
@@ -182,7 +175,6 @@ public class AccountInfo extends DomainInfo
                 this.timeStampToAccountAuditLogItemMap
         ));
     }
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> suspendAccountByStaff(String reason, String staffMemberName) {
         if (reason == null || reason.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("reason is null or empty"));
@@ -202,7 +194,6 @@ public class AccountInfo extends DomainInfo
                 this.timeStampToAccountAuditLogItemMap
         ));
     }
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> closeAccountByStaff(String reason, String staffMemberName) {
         if (reason == null || reason.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("reason is null or empty"));
@@ -223,7 +214,6 @@ public class AccountInfo extends DomainInfo
         ));
     }
 
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> addFineForBook(int fineAmountPennies, UUID2<Book> bookId) {
         if (fineAmountPennies < 0)
             return new Result.Failure<>(new IllegalArgumentException("fineAmountPennies is negative"));
@@ -236,7 +226,6 @@ public class AccountInfo extends DomainInfo
         if (calculateAccountStatus() != this.accountStatus)
             updatedAccountStatus = calculateAccountStatus();
 
-        //noinspection unchecked
         return new Result.Success<>(
 //            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
@@ -248,7 +237,6 @@ public class AccountInfo extends DomainInfo
                 this.timeStampToAccountAuditLogItemMap
         ));
     }
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> payFine(int fineAmountPennies) {
         if (fineAmountPennies < 0)
             return new Result.Failure<>(new IllegalArgumentException("fineAmountPennies is negative"));
@@ -259,9 +247,7 @@ public class AccountInfo extends DomainInfo
         if (calculateAccountStatus() != this.accountStatus)
             updatedAccountStatus = calculateAccountStatus();
 
-        //noinspection unchecked
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 updatedAccountStatus,
@@ -272,7 +258,6 @@ public class AccountInfo extends DomainInfo
         ));
 
     }
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> adjustFineByStaff(int newCurrentFineAmount, String reason, String staffMemberName) { // todo make staffMemberName a User.Staff object
         if (newCurrentFineAmount < 0)
             return new Result.Failure<>(new IllegalArgumentException("newCurrentFineAmount is negative"));
@@ -283,9 +268,7 @@ public class AccountInfo extends DomainInfo
         if (calculateAccountStatus() != this.accountStatus)
             updatedAccountStatus = calculateAccountStatus();
 
-        //noinspection unchecked
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 updatedAccountStatus,
@@ -296,16 +279,13 @@ public class AccountInfo extends DomainInfo
         ));
     }
 
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> changeMaxBooksByStaff(int maxBooks, String reason, String staffMemberName) { // todo make staffMemberName a User.Staff object
         if (maxBooks < 0)
             return new Result.Failure<>(new IllegalArgumentException("maxBooks is negative"));
 
         addAuditLogEntry("changeMaxBooksByStaff", "reason", reason, "staffMember", staffMemberName);
 
-        //noinspection unchecked
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 this.accountStatus,
@@ -314,16 +294,13 @@ public class AccountInfo extends DomainInfo
                 this.maxFinePennies,
                 this.timeStampToAccountAuditLogItemMap));
     }
-    @SuppressWarnings("unchecked")
     public Result<AccountInfo> changeMaxFineByStaff(int maxFine, String reason, String staffMemberName) { // todo make staffMemberName a User.Staff object
         if (maxFine < 0)
             return new Result.Failure<>(new IllegalArgumentException("maxFine is negative"));
 
         addAuditLogEntry("changeMaxFineByStaff", "reason", reason, "staffMember", staffMemberName);
 
-        //noinspection unchecked
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 this.accountStatus,
@@ -497,19 +474,15 @@ public class AccountInfo extends DomainInfo
         addAuditLogEntry(System.currentTimeMillis(), operation);
     }
 
-    @SuppressWarnings("unchecked")
     private Result<AccountInfo> withName(@NotNull String newName) {
         if (newName.isEmpty())
             return new Result.Failure<>(new IllegalArgumentException("newName is null or empty"));
 
-//        return new Result.Success<>(new AccountInfo((UUID2<Account>) this.id(), newName));
         return new Result.Success<>(new AccountInfo(this.id(), newName));
     }
-    @SuppressWarnings("unchecked")
     private  Result<AccountInfo> withAccountStatus(@NotNull AccountStatus newAccountStatus) {
         return new Result.Success<>(
             new AccountInfo(
-//                (UUID2<Account>) this.id(),
                 this.id(),
                 this.name,
                 newAccountStatus,
@@ -519,14 +492,12 @@ public class AccountInfo extends DomainInfo
                 this.timeStampToAccountAuditLogItemMap
         ));
     }
-    @SuppressWarnings("unchecked")
     private Result<AccountInfo> withCurrentFineAmountPennies(int newCurrentFineAmountPennies) {
         if (newCurrentFineAmountPennies < 0)
             return new Result.Failure<>(new IllegalArgumentException("newCurrentFineAmountPennies is negative")); // todo - allow credits for Fines?
 
         return new Result.Success<>(
             new AccountInfo(
-//                (UUID2<Account>) this.id(),
                 this.id(),
                 this.name,
                 this.accountStatus,
@@ -536,14 +507,12 @@ public class AccountInfo extends DomainInfo
                 this.timeStampToAccountAuditLogItemMap
         ));
     }
-    @SuppressWarnings("unchecked")
     private Result<AccountInfo> withMaxBooks(int newMaxBooks) {
         if (newMaxBooks < 0)
             return new Result.Failure<>(new IllegalArgumentException("newMaxBooks is negative"));
 
         return new Result.Success<>(
             new AccountInfo(
-//                (UUID2<Account>) this.id(),
                 this.id(),
                 this.name,
                 this.accountStatus,
@@ -559,12 +528,11 @@ public class AccountInfo extends DomainInfo
     /////////////////////////////////
 
     // note: currently no DB or API for UserInfo (so no .ToEntity() or .ToDTO())
-    @Override @SuppressWarnings("unchecked")
+    @Override
     public AccountInfo toDeepCopyDomainInfo() {
         // Note: *MUST* return a deep copy
 
         return new AccountInfo(
-//                (UUID2<Account>) this.id(),
                 this.id(),
                 this.name,
                 this.accountStatus,
@@ -574,9 +542,4 @@ public class AccountInfo extends DomainInfo
                 new HashMap<>(this.timeStampToAccountAuditLogItemMap)  // deep copy
         );
     }
-
-//    @Override
-//    public UUID2<?> domainInfoId() {
-//        return this.id;
-//    }
 }

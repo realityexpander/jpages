@@ -22,8 +22,9 @@ public class UUID2Test {
     UUID2<User> user02;
 
     @Before
+    @SuppressWarnings("EmptyMethod")
     public void setUp() {
-
+        // no-op
     }
 
     private void setUpUuid2HashMapTest() {
@@ -68,7 +69,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void Create_new_UUID2_from_another_UUID2_are_Equal() throws ClassNotFoundException {
+    public void Create_new_UUID2_from_another_UUID2_are_Equal() {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
 
@@ -80,7 +81,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void UUID2_values_with_equal_UUIDs_using_onlyUUIDEquals_are_Equal() throws ClassNotFoundException {
+    public void UUID2_values_with_equal_UUIDs_using_onlyUUIDEquals_are_Equal() {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
         UUID2<User> user1200Id = UUID2.createFakeUUID2(1200, User.class);
@@ -97,7 +98,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void Equal_UUID2_values_are_Equal() throws ClassNotFoundException {
+    public void Equal_UUID2_values_are_Equal() {
         // • ARRANGE
         UUID2<Book> book9999Id = UUID2.createFakeUUID2(9999, Book.class);
         UUID2<Book> book9999Ida = UUID2.createFakeUUID2(9999, Book.class);
@@ -201,8 +202,8 @@ public class UUID2Test {
         } catch (IllegalArgumentException e) {
             // • ASSERT
             assertTrue( true);
-        } catch (ClassNotFoundException e) {
-            fail("Unexpected ClassNotFoundException");
+        } catch (Exception e) {
+            fail(e.getMessage());
         }
     }
 

@@ -13,11 +13,13 @@ import org.elegantobjects.jpages.App2.domain.book.BookInfoRepo;
 import org.elegantobjects.jpages.App2.domain.library.LibraryInfoRepo;
 import org.elegantobjects.jpages.App2.domain.user.UserInfoRepo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static org.elegantobjects.jpages.App2.domain.Context.ContextKind.PRODUCTION;
 
+@SuppressWarnings("CommentedOutCode")
 public class Context implements IContext {
-    // static public Context INSTANCE = null;  // Enforces singleton instance & allows global access, LEAVE for reference
+    // static public Context INSTANCE = null;  // LEAVE for reference - Enforces singleton instance & allows global access
 
     // Repository Singletons
     private final BookInfoRepo bookInfoRepo;
@@ -31,12 +33,12 @@ public class Context implements IContext {
 
     public
     Context(
-            BookInfoRepo bookInfoRepo,
-            UserInfoRepo userInfoRepo,
-            LibraryInfoRepo libraryInfoRepo,
-            AccountInfoRepo accountInfoRepo,
-            Gson gson,
-            ILog log
+        @NotNull BookInfoRepo bookInfoRepo,
+        @NotNull UserInfoRepo userInfoRepo,
+        @NotNull LibraryInfoRepo libraryInfoRepo,
+        @NotNull AccountInfoRepo accountInfoRepo,
+        @NotNull Gson gson,
+        @NotNull ILog log
     ) {
         this.bookInfoRepo = bookInfoRepo;
         this.userInfoRepo = userInfoRepo;
@@ -46,21 +48,27 @@ public class Context implements IContext {
         this.gson = gson;
     }
 
+    //////////////////////////////
+    // Static Constructors      //
+    //////////////////////////////
+
     public enum ContextKind {
         PRODUCTION,
         TEST
     }
 
-    public static Context setupProductionInstance(ILog log) {
+    public static
+    Context setupProductionInstance(@Nullable ILog log) {
         if (log == null)
             return setupInstance(PRODUCTION, new Log(), null);
         else
             return setupInstance(PRODUCTION, log, null);
     }
-    public static Context setupInstance(
+    public static
+    Context setupInstance(
         @NotNull Context.ContextKind contextKind,
         @NotNull ILog log,
-        Context context
+        @Nullable Context context
     ) {
         switch (contextKind) {
             case PRODUCTION:
@@ -74,14 +82,15 @@ public class Context implements IContext {
         throw new RuntimeException("Context.setupInstance(): Invalid ContextType");
     }
 
-    // Generate sensible default singletons for the production application
-    private static Context generateDefaultProductionContext(ILog log) {
+    // Generate sensible default singletons for the PRODUCTION application
+    private static
+    Context generateDefaultProductionContext(@NotNull ILog log) {
 
         return new Context(
             new BookInfoRepo(
                 new BookInfoApi(),
                 new BookInfoDatabase(),
-                    log
+                log
             ),
             new UserInfoRepo(log),
             new LibraryInfoRepo(log),
@@ -90,11 +99,11 @@ public class Context implements IContext {
                 .registerTypeAdapter(UUID2.HashMap.class, new UUID2.Uuid2HashMapJsonDeserializer())
                 .setPrettyPrinting()
                 .create(),
-                log
+            log
         );
     }
 
-//    LEAVE for Reference - This is how you would enforce a singleton instance using a static method & variable
+//    LEAVE FOR REFERENCE - This is how you would enforce a singleton instance using a static method & variable
 //    // If `context` is `null` OR `StaticContext` this returns the default static Context,
 //    // otherwise returns the `context` passed in.
 //    public static Context setupINSTANCE(Context context) {

@@ -9,7 +9,6 @@ import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.Context;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +20,8 @@ import static java.lang.String.format;
 public class Library extends Role<LibraryInfo> implements IUUID2 {
     private final LibraryInfoRepo repo;
 
-    public Library(
+    public
+    Library(
         @NotNull LibraryInfo info,
         @NotNull Context context
     ) {
@@ -30,7 +30,8 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         context.log.d(this,"Library (" + this.id() + ") created from Info");
     }
-    public Library(
+    public
+    Library(
         @NotNull String json,
         @NotNull Class<LibraryInfo> clazz,
         @NotNull Context context
@@ -40,7 +41,8 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         context.log.d(this,"Library (" + this.id() + ") created from Json with class: " + clazz.getName());
     }
-    public Library(
+    public
+    Library(
         @NotNull UUID2<Library> id,
         @NotNull Context context
     ) {
@@ -49,8 +51,10 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         context.log.d(this,"Library (" + this.id() + ") created using id with no Info");
     }
-    public Library(@NotNull String json, @NotNull Context context) { this(json, LibraryInfo.class, context); }
-    public Library(@NotNull Context context) {
+    public
+    Library(@NotNull String json, @NotNull Context context) { this(json, LibraryInfo.class, context); }
+    public
+    Library(@NotNull Context context) {
         this(UUID2.randomUUID2(Library.class), context);
     }
     // LEAVE for reference, for static Context instance implementation

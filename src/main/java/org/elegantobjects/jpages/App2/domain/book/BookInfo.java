@@ -58,25 +58,18 @@ public class BookInfo extends DomainInfo
     // DomainInfo objects Must:
     // - Accept both `DTO.BookInfo` and `Entity.BookInfo`
     // - Convert to Domain.BookInfo
-    @SuppressWarnings("unchecked")
     public
     BookInfo(@NotNull DTOBookInfo dtoBookInfo) {
         // Converts from DTOInfo to DomainInfo
         this(
-//            new UUID2<Book>(dtoBookInfo.id()), // change id to domain UUID2<Book> type
-//            (UUID2<Book>) UUID2.fromUUID2(dtoBookInfo.id(), Book.class), // change id to domain UUID2<Book> type
             new UUID2<Book>(dtoBookInfo.id().uuid(), Book.class), // change id to domain UUID2<Book> type
             dtoBookInfo.title,
             dtoBookInfo.author,
             dtoBookInfo.description
         );
 
-        // Validation = Domain decides what to include from the DTO
-        validateDTOBookInfo(dtoBookInfo);
-    }
-    private void validateDTOBookInfo(@NotNull DTOBookInfo dtoBookInfo) {
-        if(!dtoBookInfo.id().isMatchingUUID2TypeStr(UUID2.calcUUID2TypeStr(DTOBookInfo.class)))
-            throw new IllegalArgumentException("DTOBookInfo.id must be of type " + UUID2.calcUUID2TypeStr(DTOBookInfo.class) + " but was " + dtoBookInfo.id().uuid2TypeStr());
+        // Basic Validation = Domain decides what to include from the DTO
+        // - must be done after conversion
         validateBookInfo();
     }
 
@@ -90,12 +83,8 @@ public class BookInfo extends DomainInfo
             entityBookInfo.description
         );
 
-        // Validation - Domain decides what to include from the Entities
-        validateEntityBookInfo(entityBookInfo);
-    }
-    private void validateEntityBookInfo(@NotNull EntityBookInfo entityBookInfo) {
-        if(!entityBookInfo.id().isMatchingUUID2TypeStr(UUID2.calcUUID2TypeStr(EntityBookInfo.class)))
-            throw new IllegalArgumentException("EntityBookInfo.id must be of type " + UUID2.calcUUID2TypeStr(EntityBookInfo.class) + " but was " + entityBookInfo.id().uuid2TypeStr());
+        // Basic Validation - Domain decides what to include from the Entities
+        // - must be done after conversion
         validateBookInfo();
     }
 
@@ -106,6 +95,8 @@ public class BookInfo extends DomainInfo
             throw new IllegalArgumentException("DTOBookInfo.author cannot be longer than 100 characters");
         if(description.length() > 1000)
             throw new IllegalArgumentException("DTOBookInfo.description cannot be longer than 1000 characters");
+
+        // todo add enhanced validation here, or in the application layer
     }
 
     ////////////////////////////////

@@ -18,8 +18,8 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     private final BookInfoApi api;
     private final BookInfoDatabase database;
 
-    public BookInfoRepo(BookInfoApi api,
-                        BookInfoDatabase database,
+    public BookInfoRepo(@NotNull BookInfoApi api,
+                        @NotNull BookInfoDatabase database,
                         ILog log
     ) {
         super(log);

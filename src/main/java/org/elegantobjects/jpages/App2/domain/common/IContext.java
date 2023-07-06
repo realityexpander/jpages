@@ -9,10 +9,5 @@ import org.elegantobjects.jpages.App2.domain.user.UserInfoRepo;
 
 // Context is a singleton class that holds all the repositories and global objects like Gson
 public interface IContext {
-    BookInfoRepo bookInfoRepo = null;
-    UserInfoRepo userInfoRepo = null;
-    LibraryInfoRepo libraryInfoRepo = null;
-    AccountInfoRepo accountInfoRepo = null;
-    Gson gson = null;
-    ILog log = null;
+    // Keeps references to repositories & other application singletons
 }

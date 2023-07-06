@@ -22,7 +22,7 @@ import java.util.*;
 
 final class LibraryApp {
 
-    Context ctx;
+    final Context ctx;
 
     public static void main(final String... args) throws Exception {
 
@@ -77,7 +77,7 @@ final class LibraryApp {
                 ctx.log.d(this, "Book Missing --> book id: " + book.id() + " >> " + " is null");
                 assert false;
             } else
-                ctx.log.d(this, "Book Info --> " + bookInfo3.toString());
+                ctx.log.d(this, "Book Info --> " + bookInfo3);
 
             // Try to get a book id that doesn't exist
             Book book2 = new Book(UUID2.createFakeUUID2(1200, Book.class), null, ctx);

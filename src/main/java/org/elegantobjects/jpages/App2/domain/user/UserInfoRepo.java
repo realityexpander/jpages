@@ -5,13 +5,15 @@ import org.elegantobjects.jpages.App2.common.util.log.ILog;
 import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.App2.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 // Holds User info for all users in the system (simple CRUD operations)
 public class UserInfoRepo extends Repo implements IUserInfoRepo {
     // Simulate a database on a server somewhere
     private final UUID2.HashMap<UUID2<User>, UserInfo> database = new UUID2.HashMap<>();
 
-    public UserInfoRepo(ILog log) {
+    public
+    UserInfoRepo(@NotNull  ILog log) {
         super(log);
     }
 

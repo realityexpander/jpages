@@ -278,14 +278,15 @@ using IDE tools (like hover to find var types).
 - Combined with BOOP, many of the patterns just don't make sense and add unnecessary complexity.
 <br>
 <br>
-- No factory patterns
+- No Factory patterns
   - Just use constructors. 
-- No builder patterns
+- No Builder patterns
   - Create a new object modified copy from the old object, and return the new object. 
   - No need for a builder. 
   - Use `.with{someField}(updatedValue)` method to update `someField` member field.
-- No fluent interfaces
+- No Fluent interfaces
   - Use `.with{someField}(updatedValue)` to update each `someField` member field.
+- Interestingly, use of `Singleton` and `Repository` patterns fit well with BOOP. Sometimes you win!
 
 ### Prefer Use of Early Return
 - Multiple early `returns` for ease of error handling 

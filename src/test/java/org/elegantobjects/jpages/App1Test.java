@@ -24,7 +24,7 @@ public class App1Test extends TestCase {
         // Create the session with the resource to be served
         final App1.Session session = new App1.Session(
                 new App1.Resource() {
-                    Map<String, String> params = new HashMap<>();
+                    final Map<String, String> params = new HashMap<>();
 
                     @Override
                     public App1.Resource define(String name, String value) {
