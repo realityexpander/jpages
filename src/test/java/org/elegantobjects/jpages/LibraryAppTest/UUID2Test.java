@@ -55,7 +55,7 @@ public class UUID2Test {
     }
 
     @Test
-    public void Create_new_UUID2_from_UUID2_String_are_Equal() throws ClassNotFoundException {
+    public void Create_new_UUID2_from_UUID2_String_are_Equal() {
         // • ARRANGE
         UUID2<Book> book1200Id = UUID2.createFakeUUID2(1200, Book.class);
         String book1200UUID2Str = book1200Id.toString();
@@ -141,7 +141,7 @@ public class UUID2Test {
     public void Remove_UUID2HashMap_item_using_new_UUID2_is_Success() {
         // • ARRANGE
         setUpUuid2HashMapTest();
-        UUID2<User> user = uuid2ToEntityMap.get(book1);
+        UUID2<User> user;
 
         // • ACT
         uuid2ToEntityMap.remove(book1);
@@ -160,7 +160,6 @@ public class UUID2Test {
     public void Put_UUID2HashMap_item_twice_only_upserts_single_item() {
         // • ARRANGE
         setUpUuid2HashMapTest();
-        UUID2<User> user = uuid2ToEntityMap.get(book1);
         uuid2ToEntityMap.remove(book1);
 
         // • ACT
@@ -199,6 +198,9 @@ public class UUID2Test {
             @SuppressWarnings("unchecked")
             UUID2<Book> book1200aId = (UUID2<Book>) UUID2.fromUUID2String(invalidUUID2Str);
             fail("Expected IllegalArgumentException");
+
+            // This is only here to satisfy the compiler warnings.  It should never be reached.
+            System.err.printf("SHOULD NEVER SEE THIS - book1200aId=%s", book1200aId);
         } catch (IllegalArgumentException e) {
             // • ASSERT
             assertTrue( true);

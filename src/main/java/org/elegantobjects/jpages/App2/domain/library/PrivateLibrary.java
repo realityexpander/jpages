@@ -21,7 +21,7 @@ Private Library
      any system {@code Library}.</li>
  <li>Used as an alternate to using {@code null} or "NoLibrary".</li>
  <li>A PrivateLibrary is identical to a regular library, except it doesn't verify any Account info and
-     anyone can {@code checkIn} and {@code checkOut} {@code Books}.</li>
+     any {@code User} can {@code checkIn} and {@code checkOut} {@code Books}.</li>
  <br>
  <li><i>Note: A special case for {@code PrivateLibrary} is an Orphan {@code PrivateLibrary} which only allows
      a single Book of a specific id to be checked into/out of it.</i></li>
@@ -49,7 +49,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //   - If a Private Library is created from a BookId, it is called an ORPHAN Private Library
     //     and its sole duty is to hold ONLY 1 Book of one specific BookId, and never any other BookIds.
     //   - It can only ever hold 1 Book at a time.
-    //   - System Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
+    //   - ORPHAN PrivateLibraries have the `isForOnlyOneBook` flag set to true.
+    //   - App Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
     //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
     private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
                                              // Note: the naming here conveys the intent the variable,

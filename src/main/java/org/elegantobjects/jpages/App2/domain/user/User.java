@@ -161,7 +161,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
             return infoResult;
         }
 
-        // Update self with Repo result
+        // Update self with the Repo result
         this.info = ((Result.Success<UserInfo>) infoResult).value();
         return infoResult;
     }
@@ -266,7 +266,7 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id() + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        // Create  list of Domain Books from the list of Accepted Book ids
+        // Create the list of Domain Books from the list of Accepted Book ids
         ArrayList<Book> books = new ArrayList<>();
         for (Map.Entry<UUID2<Book>, UUID2<Library>> entry :
                 this.info.findAllAcceptedBookIdToLibraryIdMap().entrySet()
@@ -283,9 +283,9 @@ public class User extends Role<UserInfo> implements IUUID2 {
     }
 
     // Note: *ONLY* the Role Objects can take a Book from one User and give it to another User.
-    // - Also notice that we are politely asking each Role object to Accept and UnAccept a Book.
-    // - No where is there any databases being accessed directly, nor knowledge of where the data comes from.
-    // - All Role interactions are SOLELY directed via the Role object's public methods. (no access to references)
+    // - Notice that we are politely asking each Role object to Accept and UnAccept a Book.
+    // - No where are there any databases being accessed directly, nor knowledge of where the data comes from.
+    // - All Role interactions are SOLELY directed via the Role object's public methods. (No access to references)
     public Result<ArrayList<UUID2<Book>>> giveBookToUser(@NotNull Book book, @NotNull User receivingUser) {
         context.log.d(this,"User (" + this.id() + ") - book: " + book.id() + ", to receivingUser: " + receivingUser.id());
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
@@ -306,9 +306,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
             return new Result.Failure<>(((Result.Failure<Book>) swapCheckoutResult).exception());
 
         // LEAVE FOR REFERENCE
-        // Note: no update needed as each Role method used performs its own updates, as needed.
-        // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
-        //   need to be performed.
+        // Note: No update() needed as each Role method called performs its own updates on its own Info, as needed.
+        //
+        // IMPORTANT NOTE!
+        //   - if a local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
+        //     need to be performed.
 
         //noinspection ArraysAsListWithZeroOrOneArgument
         return new Result.Success<>(new ArrayList<>(Arrays.asList(book.id())));
@@ -328,9 +330,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         // LEAVE FOR REFERENCE
-        // Note: no update needed as each Role method used performs its own updates, as needed.
-        // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
-        //   need to be performed.
+        // Note: no update() needed as each Role method called performs its own updates on its own Info, as needed.
+        //
+        // IMPORTANT NOTE!
+        //   - if a local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
+        //     need to be performed.
 
         return new Result.Success<>(((Result.Success<Book>) bookResult).value().id());
     }
@@ -349,9 +353,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         // LEAVE FOR REFERENCE
-        // Note: no update needed as each Role method used performs its own updates, as needed.
-        // - But if a Local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
-        //   need to be performed.
+        // Note: no update() needed as each Role method called performs its own updates on its own Info, as needed.
+        //
+        // IMPORTANT NOTE!
+        //   - if a local object/variable (like a hashmap) was changed after this event, an `.updateInfo(this.info)` would
+        //     need to be performed.
 
         return new Result.Success<>(((Result.Success<Book>) bookResult).value().id());
     }
