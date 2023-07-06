@@ -416,7 +416,7 @@ public class LibraryAppTest {
             "{\n" +
             "  \"_id\": {\n" +
             "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-            "    \"_uuid2Type\": \"Model.DTOInfo.BookInfo\"\n" +
+            "    \"_uuid2Type\": \"Model.DTOInfo.DTOBookInfo\"\n" +
             "  },\n" +
             "  \"title\": \"The Great Gatsby\",\n" +
             "  \"author\": \"F. Scott Fitzgerald\",\n" +

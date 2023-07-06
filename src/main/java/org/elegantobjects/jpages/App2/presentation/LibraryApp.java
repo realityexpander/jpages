@@ -413,7 +413,7 @@ final class LibraryApp {
                         "{\n" +
                         "  \"_id\": {\n" +
                         "    \"uuid\": \"00000000-0000-0000-0000-000000000010\",\n" +
-                        "    \"uuid2TypeStr\": \"Model.DTOInfo.BookInfo\"\n" +
+                        "    \"uuid2TypeStr\": \"Model.DTOInfo.DTOBookInfo\"\n" +
                         "  },\n" +
                         "  \"title\": \"The Great Gatsby\",\n" +
                         "  \"author\": \"F. Scott Fitzgerald\",\n" +

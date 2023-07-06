@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DTOBookInfo extends DTOInfo
-        implements
+    implements
         Model.ToDomainInfo<BookInfo>,
         Model.ToDomainInfo.hasToDeepCopyDomainInfo<BookInfo>,
         Info.ToInfo<DTOBookInfo>,

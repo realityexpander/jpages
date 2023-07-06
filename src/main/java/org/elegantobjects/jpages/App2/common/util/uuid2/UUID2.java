@@ -9,9 +9,9 @@ import java.util.*;
 import static java.lang.String.format;
 
 /**
- UUID2 is a type-safe wrapper for UUIDs.<br>
+ <b>UUID2</b> is a type-safe wrapper for UUIDs.<br>
  <ul>
- <li> {@code UUID2} is a wrapper for a UUID, so it can be used in place of a UUID.</li>
+ <li> <b>{@code UUID2} is a wrapper for a UUID, and it can be used in place of a UUID.</li>
  <li> Benefits:<br>
     <ul>
         <li>Useful to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
@@ -21,12 +21,28 @@ import static java.lang.String.format;
     </ul>
  <li> {@code IUUID2} is a marker interface for Domain objects that can be used with UUID2.</li>
  <li> Domain objects must be marked with the {@code IUUID2} marker interface to be used with {@code UUID2}.</li>
- <li> {@code UUID2Type} is the Class <b>Inheritance</b> path, <b>NOT</b> the Class Path (ie: Package path). <br>
-      {@code Model.Domain.BookInfo} <-- "Class Inheritance path"<br>
+ <br>
+ <li> The {@code UUID2Type} is the "Class <b>Inheritance</b> Path", <b>NOT</b> the "Class Path" (also called "Package" Path), like so: <br>
+      <b>{@code Model.Domain.BookInfo}</b> ⬅︎ <i>"Class Inheritance path" is the UUID2Type</i><br>
       <i>instead of:</i> <br>
-      {@code org.elegantobjects.jpages.App2.domain.book.BookInfo} <-- "Class Path"<br>
+      <b>{@code org.elegantobjects.jpages.App2.domain.book.BookInfo}</b> ⬅︎ <i>"Class Path"</i><br>
  </li>
- <li><i>Design note: The java "Class Path" changes if the package of a Class changes, so UUID2 uses the Class Inheritance Path instead.</i></li>
+ <br>
+ <i>Design note: The java "Class Path" of a Class changes if the package or package structure of a Class changes,
+ so UUID2 uses the <b>"Class Inheritance Path"</b> for more stable id's instead.</i>
+ </ul>
+ <br>
+ <i></i>UUID2 String Format example:</i><br><br>
+ <div style="font-family:Jetbrains Mono;">
+ <pre>
+ UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001              
+ ^^^^^-- Always prefixed with `UUID2`                                     
+      ^-- `:` divides between Prefix and Type                             
+       ^^^^^^^^^^^^^^^^-- UUID2Type                                       
+                       ^-- `@` divides the Type block and Value           
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-- UUID Value 
+ </pre>
+ </div>
 </ul>
 **/
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
@@ -71,11 +87,13 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     public static
     UUID2<?> fromUUID2String(@NotNull String uuid2FormattedString) throws IllegalArgumentException, ClassNotFoundException {
         // format example:
+        //
         // UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001
-        // ^-- Always prefixed with `UUID2`
+        // ^^^^^-- Always prefixed with `UUID2`
         //      ^-- `:` divides between Prefix and Type
-        //       ^-- UUID2Type
+        //       ^^^^^^^^^^^^^^^^-- UUID2Type
         //                       ^-- `@` divides the Type block and Value
+        //                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-- UUID Value
 
         String[] segments = uuid2FormattedString.split("@");
         if(segments.length != 2) {
@@ -132,8 +150,13 @@ public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
             );
     }
 
+    public
     boolean isMatchingUUID2Type(@NotNull UUID2<?> checkUUID2) {
         return this.uuid2TypeStr().equals(checkUUID2.uuid2TypeStr());
+    }
+    public
+    boolean isMatchingUUID2TypeStr(@NotNull String checkUUID2TypeStr) {
+        return this.uuid2TypeStr().equals(checkUUID2TypeStr);
     }
 
     static boolean isMatchingUUID2TypeStr(String firstUuid2Str, String secondUuid2Str) {
