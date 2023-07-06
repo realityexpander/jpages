@@ -30,7 +30,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     protected Result<TDomainInfo> infoResult = null;
 
     // Singletons
-    protected final Context context;  // All roles have access the the Context singleton
+    protected final Context context;  // All roles have access the Context singleton
 
     // Class of the Info<TDomain> info object (for Gson serialization)
     // - also JAVA REFLECTION IS UGLY!!
@@ -44,7 +44,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                     (ParameterizedType) (
                         (Class<?>) (
                             this.getClass()
-                                .getGenericSuperclass()            // 2. ⬆︎ ...or from the superClass' generic type.
+                                .getGenericSuperclass()            // 2. ⬆︎ ...or from the superClass generic type.
                         )
                     ).getGenericSuperclass()
               ).getActualTypeArguments()[0];
@@ -55,7 +55,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         @Nullable TDomainInfo info,
         @NotNull Context context
     ) {
-        this.id = UUID2.fromUUID(id); // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as `null`.
+        this.id = UUID2.fromUUID(id); // Note: NOT validating "id==info.id" due to need to pass in `info` as `null`
         this.info = info;
         this.context = context;
     }
@@ -100,10 +100,10 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         this(UUID.randomUUID(), null, context);
     }
     // LEAVE FOR REFERENCE, for static Context instance implementation
-    //Role(String json) {
+    // Role(String json) {
     //    this(json, null);
     //    this.context = Context.setupInstance(context);  // LEAVE for reference, for static Context instance implementation
-    //}
+    // }
 
     /////////////////////
     // Simple getters  //
@@ -129,8 +129,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     @SuppressWarnings("unchecked") // for _setIdFromImportedJson() call
     public static <
             TDomain extends DomainInfo,  // restrict to Domain subclasses, ie: Domain.BookInfo
-            TDomainInfo extends Model.ToDomainInfo<? extends TDomain>, // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
-            TToInfo extends ToInfo<?>
+            TDomainInfo extends Model.ToDomainInfo<? extends TDomain> // implementations of ToInfo<TDomain> interfaces MUST have Info<TDomain> objects
         > TDomainInfo createInfoFromJson(
             String json,
             @NotNull Class<TDomainInfo> domainInfoClazz, // type of `Domain.TDomainInfo` object to create
@@ -142,7 +141,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
             TDomainInfo obj = context.gson.fromJson(json, (Type) domainInfoClazz);
             context.log.d("Role:createInfoFromJson()", "obj = " + obj);
 
-            // Set UUID2Type to match type of TDomainInfo object
+            // Set UUID2Type to match the type of TDomainInfo object
             String domainInfoClazzName = UUID2.calcUUID2TypeStr(domainInfoClazz);
             domainInfoClazz.cast(obj)
                     .id()
