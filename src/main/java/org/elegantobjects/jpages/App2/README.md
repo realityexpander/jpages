@@ -3,7 +3,7 @@
 ## Design Goals
 
 ### Inspiration
-- Have a pure domain layer that adheres to Alan Kay and Yegor Bugayenko OO styles
+- Have a pure domain layer that adheres to Alan Kay's and Yegor Bugayenko's OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
   - Back to original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
@@ -14,7 +14,7 @@
   - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
   - David West, PhD's book "Object Thinking"
 
-### Developer Experience
+### Developer Experience is Paramount
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
   - One down side, the hierarchy is separated into different folders, so its not obvious what the hierarchy is.
@@ -23,11 +23,14 @@
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 <br>
 
-#### Avoiding COP Paradigms
+#### Avoiding Ugly COP Paradigms
 
-Class Oriented Programming (COP) is a style of programming that seem to be primarily focused 
+Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
-Class wrappers instead of just files and functions (procedures) like in C.
+Class "wrappers" instead of just data structures, files and functions (procedures) like in C.
+Much of what most people call OOP is actually just COP, and is not actually OOP at all. Its important
+to know the difference, because the two styles are very different, and have very different
+advantages and disadvantages.
 
 - Prefer to entirely avoid the COP (Class Oriented Programming) paradigms & idioms, such as:<br>
   - Using Classes as dumb data containers, with no methods or minimal methods.
@@ -38,6 +41,9 @@ Class wrappers instead of just files and functions (procedures) like in C.
   - Allowing `null` to be returned from methods.
   - `Null` checks everywhere.
   - Allowing multiple shared access to static global variables/state.
+  - Lots of inheritance, and deep inheritance hierarchies.
+  - Lots of "Design Patterns" to solve problems that should not exist in the first place.
+  - Factories, Builders, AbstractFactoryFactories and other hacky "creational" patterns.
 
 ## Code Style
 
@@ -87,10 +93,10 @@ using IDE tools (like hover to find var types).
   - ie: `calculateTotalCost()` is preferred over `getTotalCost()`
   - ie: `fetchInfo()` is preferred over `getInfo()`
   - ie: `findUserIdOfCheckedOutBook` is preferred over `getCheckedOutBookUserId()`
-- When the method is a simple data-accessor that just returns a simple field, no need to use get.
+- When the method is a simple data-accessor that just returns a simple field or object, no need to use prefix `get`.
   - Prefer `id()` over `getId()` for readability and simplicity.
-  - ie: `info()` is preferred over `getInfo()`
-  - ie: `id()` is preferred over `getId()`
+  - Prefer  `info()` is preferred over `getInfo()`
+  - Prefer  `sourceLibrary()` is preferred over `getSourceLibrary()`
 
 ### No `null` in Domain
 #no-null-in-domain
@@ -497,7 +503,7 @@ using IDE tools (like hover to find var types).
     - `DomainInfo`
       - `AccountInfo` - Handles library account details for the `User`, like fines, status, max books, etc. 
         - Note: NO BOOKS TRACKED HERE, only account details and limits for a `User` for all Libraries in the system.
-      - `Bookinfo`    - Handles book details, like title, author, source library, etc.
+      - `BookInfo`    - Handles book details, like title, author, source library, etc.
       - `UserInfo`    - Handles user details, like name, email, books held, can give books to other users, etc.
       - `LibraryInfo` - Handles library details, lists of books on hand, users registered to it, checking books in and out,
     
