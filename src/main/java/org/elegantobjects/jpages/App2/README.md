@@ -3,6 +3,7 @@
 ## Design Goals
 
 ### Inspiration
+
 - Have a pure domain layer that adheres to Alan Kay's and Yegor Bugayenko's OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
@@ -18,18 +19,47 @@
 
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
 - [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
+
+#### Code Style
+
 - [Code Style](#code-style)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No `null` in Domain](#no-null-in-domain)
+- [Intention Revealing Error Messages](#intention-revealing-error-messages)
 - [No Dependency Injection Framework](#no-dependency-injection-framework)
 - [Constructor Convenience](#constructor-convenience)
 - [Anti-inheritance](#anti-inheritance)
 - [Shallow Hierarchies](#shallow-hierarchies)
 - [No Static Methods](#no-static-methods)
 - [Dumb Container Objects for Data Transfer Only to/from Domain](#dumb-container-objects)
+- [Extremely Limit use of `Else` blocks](#extremely-limit-use-of-else-blocks)
+- [No `Void` Methods](#no-void-methods)
+- [No `Null` Checks](#no-null-checks)
+- [Synchronous Code](#synchronous-code)
+- [Encourage Explicit Boolean Naming](#encourage-explicit-boolean-naming)
+- [Encourage Variable Naming with Explicit Types](#encourage-variable-naming-with-explicit-types)
+- [Use Result Object for Errors & Exceptions](#use-result-object-for-errors--exceptions)
+- [Avoid C++/Java Design Pattern Hacks](#avoid-cjava-design-pattern-hacks)
+- [Prefer Use of Early Return](#prefer-use-of-early-return)
+- [Single Responsibility of Role](#single-responsibility-of-role)
+- [Reverse-scope-naming Style](#reverse-scope-naming-style)
+- [Preferred Naming of "Inverse" methods](#preferred-naming-of-inverse-methods) 
+- [Explicit Naming of "Transfer" methods](#explicit-naming-of-transfer-methods)
+- [Explicit Naming of "Find" methods](#explicit-naming-of-find-methods)
+- [Explicit Naming of "Maps" and "Lists"](#explicit-naming-of-maps-and-lists)
+- [Guard Clauses](#guard-clauses)
+- [Domain Role Object can create other Domain Role Objects](#domain-role-object-can-create-other-domain-role-objects)
+- [Minimal Annotations](#minimal-annotations)
+- [Acceptable Acronyms, Prefixes, and Suffixes](#acceptable-acronyms-prefixes-and-suffixes)
 
+#### Sample Use-case Library Application Implementation Details
 
 - [Library Application Details](#architecture)
+- [Arbitrary Domain Design decisions](#arbitrary-domain-design-decisions)
+- [Some Arbitrary Rules](#some-arbitrary-rules)
+- [Flat Hierarchies](#flat-hierarchies)
+- [More Arbitrary Rules for: Domain User, Book, Library, Account](#more-arbitrary-domain-user-book-library-account-rules)
+- [Private Libraries & Books with Orphan Private Libraries](#private-libraries--books-with-orphan-private-libraries)
 
 ### Developer Experience is Paramount
 #developer-experience-is-paramount
@@ -144,6 +174,8 @@ advantages and disadvantages.
   - `null` still used outside of Domain, but prefer to limit its use in general.
 
 ### Intention Revealing Error Messages
+#### intention-revealing-error-messages
+
 - Error messages should be human-readable, clearly reveal the issue encountered.
 - include `id` of associated object(s) in message or useful data for the issue.
 - This is to prevent guessing and hunting what the cause of the issue may be.
@@ -155,7 +187,7 @@ advantages and disadvantages.
 - No global accessing state of App (except via passed-in Context object)
 
 ### No Dependency Injection Framework
-#no-dependency-injection-framework
+#### no-dependency-injection-framework
 
 - All dependencies passed in constructors
 - Singleton objects reside in the Context object, and are passed in constructors.
@@ -180,7 +212,7 @@ advantages and disadvantages.
   - Optimizations can be made later if needed, the architecture is designed to easily allow for this.
 
 ### Constructor Convenience
-#constructor-convenience
+#### constructor-convenience
 
 - All dependencies passed in constructor
   - No Dependency Injection framework (_anyone want to google a thermosiphon?..._)
@@ -195,7 +227,7 @@ advantages and disadvantages.
   - the only exception is for JSON and Info constructors, since they use special types.
 
 ### Anti-inheritance
-#anti-inheritance
+#### anti-inheritance
 
 - Minimal & shallow use of inheritance
   - <code>Model ➤➤ {Domain} ➤➤ {Entity}{Domain}Info</code> for the `Info` objects inside each `Domain` Object.
@@ -219,7 +251,7 @@ advantages and disadvantages.
     - Keep the Class Inheritance simple, and allow the package arrangement can be complex.
 
 ### Shallow Hierarchies
-#shallow-hierarchies
+#### shallow-hierarchies
 
 - Keep hierarchies as flat as possible, bc deep hierarchies are difficult to understand and change.
 - If reasonable parameterized behavior can be captured in a `Role`, it is preferred over creating 2 or more classes.
@@ -247,22 +279,32 @@ advantages and disadvantages.
   world outside domain, and allows independent changing and versioning of the domain/DTO/Entity objects.
 
 ### Extremely Limit use of `Else` blocks
+#### extremely-limit-use-of-else-blocks
+
   - Code for conditions check first and return early if condition is not met.
   - Last return is always "happy path" success return (unless for rare exceptional cases.)
   - Only for specific exceptional rare cases use `else` blocks.
     - Always ask if it can be written in a way that doesn't use `else`. 
 
 ### No `Void` Methods
+#### no-void-methods
+
   - All methods return something, even if it's just a `Boolean` or `Result` object.
 
 ### No `Null` Checks
+#### no-null-checks
+
   - Avoid if any way possible any `null` checks in code
 
 ### Synchronous Code
+#### synchronous-code
+
   - Keep code as synchronous as possible, or looking synchronous.
   - If callbacks are needed, they should be wrapped to look synchronous.
 
 ### Encourage Explicit Boolean Naming 
+#### encourage-explicit-boolean-naming
+
 - Boolean variables and methods are named explicitly
   - `is{something}`
   - `has{something}`
@@ -276,6 +318,8 @@ advantages and disadvantages.
     - ie: `hasFines` is preferred over `isBalanceOverZero`
 
 ### Encourage Variable Naming with Explicit Types
+#### encourage-variable-naming-with-explicit-types
+
   - Slight nod to Hungarian Notation, it is still useful for readability in limited cases.
   - The emphasis on reading without IDE assistance is important, and explicit type naming helps with this.
   - `{Domain}Id` vs `{Domain}` Types
@@ -294,6 +338,8 @@ advantages and disadvantages.
       - ie: `user` is preferred over `userInfo` in this case.
 
 ### Use Result Object for Errors & Exceptions
+#### use-result-object-for-errors--exceptions
+
 - Use of `Result` object to return success or failure
   - Encapsulate the error message in an `Exception` object.
   - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
@@ -303,6 +349,8 @@ advantages and disadvantages.
   - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
 
 ### Avoid C++/Java Design Pattern Hacks
+#### avoid-cjava-design-pattern-hacks
+
 - Java has inherited many bad ideas from C, C++ and other languages. 
 - Many of the ideas were so bad that a common set of workarounds were created and passed around the community 
   (or discovered independently). These eventually became "industry standard" which slowly turned into "best practices."
@@ -330,6 +378,8 @@ advantages and disadvantages.
   and are encouraged. <i>Even a broken clock is right twice a day!</i>
 
 ### Prefer Use of Early Return
+#### prefer-use-of-early-return
+
 - Multiple early `returns` for ease of error handling 
   - Unhappy path errors `return` immediately
 - One success `return` at the end is preferred.
@@ -337,6 +387,9 @@ advantages and disadvantages.
   - Maybe break up into 2 functions?
 
 ### Single Responsibility of Role
+#### single-responsibility-of-role
+
+
 - BOOP makes clear separation of concerns easy and understandable.
 - Each Role has a single responsibility, and only handles that responsibility, and delegates all other responsibilities
   to other Roles.
@@ -349,6 +402,8 @@ advantages and disadvantages.
 - No need for a separate `update()` method, in most cases.
 
 ### Reverse-scope-naming Style
+#### reverse-scope-naming-style
+
 - Starts with the most specific adjective to more general adjectives, and ends with the name of the actual concrete type.
 - Domain objects are the plainest named.
   - ie: `User` and `Account`
@@ -370,6 +425,8 @@ advantages and disadvantages.
   - ie: `updatedAccountStatus` is preferred over `updated` or `status`
 
 ### Preferred Naming of "Inverse" methods
+#### preferred-naming-of-inverse-methods
+
 - Prefer using same verb and a short modifier than to use two different verbs for inverse/opposite methods.
 - ie: Prefer `CheckIn` and `CheckOut` to `Borrow` and `Return`
 - ie: Prefer `Register` and `UnRegister` to `register` and `delete` (or `remove`)
@@ -381,6 +438,9 @@ advantages and disadvantages.
   - `Push` and `Pop` are preferred over `Push` and `UnPush` (unless the domain specifies it)
 
 ### Explicit Naming of "Transfer" methods
+#### explicit-naming-of-transfer-methods
+
+
 - Use of `From` and `To` encouraged, to show explicit intent.
   - ie: `checkOutBookToUser` is preferred over `checkOut` or `checkOutBook`
   - ie: `transferBookSourceLibraryToThisLibrary` is preferred over `transferBook`
@@ -391,11 +451,15 @@ advantages and disadvantages.
     - even though both convey the same meaning, one is easier to comprehend in English.
 
 ### Explicit Naming of "Find" methods
+#### explicit-naming-of-find-methods
+
 - Use of `Of` is encouraged
  - ie: `findUserIdOfCheckedOutBook` instead of `findCheckedOutBookUserId`
  - even though both convey the same meaning, one is easier to read in English.
 
 ### Explicit Naming of "Maps" and "Lists"
+#### explicit-naming-of-maps-and-lists
+
 - List the `from` type and the `to` type in the name of the map.
 - It is preferred to use `To` between the `from` and `to` types.
 - It is preferred to add `Map` or `List` at the end of the variable names.
@@ -406,10 +470,14 @@ advantages and disadvantages.
 - `Map` can refer to any Map or "two column lookup" data.
 
 ### Guard Clauses
+#### guard-clauses
+
 - Guard clauses are used to check for errors and return early if error is found.
 - Basic data validation
 
 ### Domain Role Object can create other Domain Role Objects
+#### domain-role-object-can-create-other-domain-role-objects
+
 - This is acceptable for Domain objects!
   - They all can instantiate themselves & others.
   - They all can be instantiated by others.
@@ -417,9 +485,12 @@ advantages and disadvantages.
   - `Role` objects are essentially smart pointers to their `Info` objects & other `Role` objects.
 
 ### Minimal Annotations
+#### minimal-annotations
+
 - Annotations are used sparingly, and only for the most important things, like @NotNull, @Override, @Suppress, etc.
 
 ### Acceptable Acronyms, Prefixes, and Suffixes
+#### acceptable-acronyms-prefixes-and-suffixes
 
 <table>
   <tr>
@@ -537,7 +608,7 @@ advantages and disadvantages.
 
 # Library Application Details
 
-#architecture
+#### architecture
 
 ## Architecture
 
@@ -569,11 +640,6 @@ advantages and disadvantages.
   - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
   - `Book` - Handles `Book` actions like changing `title`, `author`, `description`, `sourceLibrary`, etc.
 
-### My Java Complaints
-- Type system... for a language that is dealing with types, it sure does forget types a lot... design flaw!
-- Wow, the verbosity is outlandish and quite pedantic and very irregular syntax defining using generic types 
-  for class or functions.
-
 ## Arbitrary Domain Design decisions
 
 ### _"BOOP is made for modeling the capriciousness of the Real World..."_ 
@@ -583,6 +649,7 @@ to see how much inherent domain complexity can be modeled using BOOP. This is no
 flexibility and power.
 
 #### Some Arbitrary Rules:
+
 - Like the fact that `Users` of the system can have `PrivateLibrary`, and can give `Books` to other `Users`.
 - Or a `User` can create their own book and add it to their library first, then to a public library.
 - Or a `User` can "find" a book, and add it to their `PrivateLibrary`, and then give it to a public library. 
@@ -594,12 +661,14 @@ flexibility and power.
   - But that would be less fun, and less of a test of BOOP's flexibility and power.
 
 #### Flat Hierarchies
+
 - In order to keep the hierarchies flat and adhere to other design considerations, some decisions break
   the strict BOOP paradigm and opt for a functional or procedural approach internal to Role objects.
   - the further away from the `Domain` core layer, the more functional/procedural the code becomes. 
 - `Role` objects themselves adhere strictly to BOOP when interacting in the `Domain` layer.
 
 ### More Arbitrary Domain User, Book, Library, Account Rules
+
 - Possession of a given `Book` is primarily tracked by the `User` and partially tracked by the `Library`. 
   - This is because the `User` is the one who checks out the `Book`, and the `User` is the one who returns the `Book`. 
   - The `Library` is only the intermediary between the `User` and the `Book`.
@@ -613,6 +682,7 @@ flexibility and power.
   only if the other `User` is registered & `Account` is in `Good Standing` with the `Library` that the `Book` was checked out from.
 
 ### Private Libraries & Books with Orphan Private Libraries
+
 - A `PrivateLibrary` is a subtype of `Library` that is used to track `Books` that are not associated with any System `Library`.
 - A `Book` can exist without being associated with any system `Library`. 
   - These `Books` have a `PrivateLibrary` for their `sourceLibrary`.
@@ -626,3 +696,8 @@ flexibility and power.
   - This is an arbitrary decision to see if I could stretch how the system works, and is not a 
     real world use case. 
   - In a well-conceived "normal" Library system, all `Books` would be associated with a particular system `Library` at the time of creation.
+
+### My Java Complaints
+- Type system... for a language that is dealing with types, it sure does forget types a lot... design flaw!
+- Wow, the verbosity is outlandish and quite pedantic and very irregular syntax defining using generic types
+  for class or functions.
