@@ -120,11 +120,9 @@ public class UserInfo extends DomainInfo
             this.acceptedBookIdToSourceLibraryIdMap.keySet()
         );
     }
-
     public HashMap<UUID2<Book>, UUID2<Library>> findAllAcceptedBookIdToLibraryIdMap() {
         return new HashMap<>(this.acceptedBookIdToSourceLibraryIdMap);
     }
-
     public ArrayList<UUID2<Book>> findAllAcceptedPublicLibraryBookIds() {
         ArrayList<UUID2<Book>> acceptedPublicLibraryBookIds = new ArrayList<>();
 
@@ -141,7 +139,6 @@ public class UserInfo extends DomainInfo
 
         return acceptedPublicLibraryBookIds;
     }
-
     public ArrayList<UUID2<Book>> findAllAcceptedPrivateLibraryBookIds() {
         ArrayList<UUID2<Book>> acceptedPrivateLibraryBookIds = new ArrayList<>();
         for (UUID2<Book> bookId : this.acceptedBookIdToSourceLibraryIdMap.keySet()) {
