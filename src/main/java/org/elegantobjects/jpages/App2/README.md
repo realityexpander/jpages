@@ -267,15 +267,18 @@ using IDE tools (like hover to find var types).
   - Use instead of throwing an `Exception`, return a `Result` object with the error message and `Exception`.
 
 ### Avoid C++/Java Design Pattern Hacks
-- Java has inherited many bad ideas from C++. 
-- Many of the bad ideas were so bad that a common set of workarounds were passed around the community 
-  (or discovered independently) and had become "industry standard" which slowly turned into "best practices" 
-  and catalogued in many books, and eventually became as "gospel truth" and assumed "just the way its done".
+- Java has inherited many bad ideas from C, C++ and other languages. 
+- Many of the ideas were so bad that a common set of workarounds were created and passed around the community 
+  (or discovered independently). These eventually became "industry standard" which slowly turned into "best practices."
+- These were then catalogued in many books, sold in lectures and conferences, made into clever repeatable acronyms,
+  and eventually became a "gospel holy truth" and assumed "just the way its done", even though it was often taught
+  without any explanation of why it was done that way, or proof any of it works optimally, or even works at all.
 - Turns out many of the patterns were after-thought workarounds to fundamental language design flaws, directly
-  inherited from C++ and C that never were resolved properly much less questioned.
+  inherited from C++ and C (and other languages) that never were resolved properly much less questioned.
 - We know this now because recent language versions have remediated <i>some</i> of these issues, and other languages 
-  like Kotlin show how to address these issues in a more sane and comprehensible manner. 
-- Combined with BOOP, many of the patterns just don't make sense and add unnecessary complexity.
+  like Kotlin illustate how to address these flaws in a more sane, comprehensible and maintainable manner. 
+- Combined with BOOP, many of the popular design patterns just don't make sense and add unnecessary 
+  complexity and confusion. <i>But it did pay a lot of presenters and authors bills for a long time!</i>
 
 #### Examples
 
@@ -529,8 +532,10 @@ using IDE tools (like hover to find var types).
   - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
   - `Book` - Handles `Book` actions like changing `title`, `author`, `description`, `sourceLibrary`, etc.
 
-### Java Complaints
+### My Java Complaints
 - Type system... for a language that is dealing with types, it sure does forget types a lot... design flaw!
+- Wow the verbosity is outlandish and quite pedantic and very irregular syntax defining using generic types 
+  for class or functions.
 
 ## Arbitrary Domain Design decisions
 
@@ -557,8 +562,8 @@ flexibility and power.
   - the further away from the `Domain` core layer, the more functional/procedural the code becomes. 
 - `Role` objects themselves adhere strictly to BOOP when interacting in the `Domain` layer.
 
-### Arbitrary Domain User, Book, Library, Account Rules
-- Possession of a `Book` are primarily by the `User` and partially tracked by the `Library`. 
+### More Arbitrary Domain User, Book, Library, Account Rules
+- Possession of a given `Book` is primarily tracked by the `User` and partially tracked by the `Library`. 
   - This is because the `User` is the one who checks out the `Book`, and the `User` is the one who returns the `Book`. 
   - The `Library` is only the intermediary between the `User` and the `Book`.
 - `Books` are not tracked by the `Account`, because the `Account` is only for the `User`.
