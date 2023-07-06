@@ -47,7 +47,7 @@ Much of what most people call OOP is actually just COP, and is not actually OOP 
 to know the difference, because the two styles are very different, and have very different
 advantages and disadvantages.
 
-- Prefer to entirely avoid the COP (Class Oriented Programming) paradigms & idioms, such as:<br>
+- BOOP seeks to entirely <b>avoid</b> the COP (Class Oriented Programming) paradigms & idioms, such as:<br>
   - Using Classes as dumb data containers, with no methods or minimal methods.
   - Using Classes as name space for static methods, with no associated data.
   - Using static methods to modify objects data directly.
@@ -63,14 +63,17 @@ advantages and disadvantages.
 ## Code Style
 #code-style
 
-- Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit intention-revealing names for everything.
+- Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit 
+  intention-revealing names, pedantically for everything.
 - Prefer verbosity of descriptions to brevity of code. Should be easy to read and understand.
-- Risk pedantic naming over brevity of code. Strive to convey meaning as densely as possible, but not at the expense of clarity.
+- Risk pedantic naming over brevity of code. Strive to convey meaning as densely as possible, 
+  but not at the expense of clarity.
   - You may think you know what a variable/method is for, but the next person may not.
   - Yes, this risks job security, but it also makes it easier to change code as you keep.
   - If you think someone will be confused by something, take extra time choosing names and add the minimum amount 
-    of comments to explain <b>WHY?</b> This is also the value of pair programming, someone else can ask you why you did something.
-  - Instead of just telling them, thats a place to find better names, or refactor the code to make it more clear, or add a "why" comment.
+    of comments to explain <b>WHY?</b> This is also the value of pair programming, someone else can ask you why 
+    you did something. Instead of just telling them, that's a place to find better names, or refactor the code to 
+    make it more clear, or add a "why?" answer comment.
 - Even this short guide repeats ideas, to make it easier to understand what is important and what is not.
 - Strive to make code read like regular English as possible, and to be able to understand it without 
   using IDE tools (like cursor-hover to find var types).

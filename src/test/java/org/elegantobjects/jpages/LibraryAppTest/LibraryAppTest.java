@@ -524,7 +524,7 @@ public class LibraryAppTest {
     }
 
     @Test
-    public void Give_Checked_Out_Book_From_User_To_User_is_Success() {
+    public void Give_CheckedOut_Book_From_User_To_User_is_Success() {
         // • ARRANGE
         TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
