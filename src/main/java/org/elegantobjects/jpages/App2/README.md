@@ -65,7 +65,8 @@ advantages and disadvantages.
 
 - Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit 
   intention-revealing names, pedantically for everything.
-- Prefer verbosity of descriptions to brevity of code. Should be easy to read and understand.
+- Prefer verbosity of descriptions to brevity of code. Should always be conveying intent as dense as possible 
+  but still readable English.
 - Risk pedantic naming over brevity of code. Strive to convey meaning as densely as possible, 
   but not at the expense of clarity.
   - You may think you know what a variable/method is for, but the next person may not.
