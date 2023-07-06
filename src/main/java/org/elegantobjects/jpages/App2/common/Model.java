@@ -33,8 +33,8 @@ import org.jetbrains.annotations.NotNull;
  </ul>
  **/
 public class Model {
-    public UUID2<?> _id; // Can't make final due to need to set it during JSON deserialization. :(
-                         // Also can't make it private due to Gson's need to access it during deserialization. :(
+    public UUID2<?> _id; // Can't make final due to need to set it during JSON deserialization. 🫤
+                         // Also can't make it private due to Gson's need to access it during deserialization. 🫤
                          // todo Is there a better way to do this? (maybe another JSON library?)
 
     protected
