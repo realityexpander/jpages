@@ -287,7 +287,8 @@ using IDE tools (like hover to find var types).
   - Use `.with{someField}(updatedValue)` method to update `someField` member field.
 - No Fluent interfaces
   - Use `.with{someField}(updatedValue)` to update each `someField` member field.
-- Interestingly, use of `Singleton` and `Repository` patterns fit well with BOOP. Sometimes you win!
+- Interestingly, limited use of the hated `Singleton` and `Repository` patterns do actually fit well with BOOP 
+  and are encouraged. <i>Even a broken clock is right twice a day!</i>
 
 ### Prefer Use of Early Return
 - Multiple early `returns` for ease of error handling 
