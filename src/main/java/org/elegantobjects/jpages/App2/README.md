@@ -23,11 +23,15 @@
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 <br>
 
-#### Looking to Avoid
-- Prefer to avoid entirely the COP (Class Oriented Programming) paradigms, such as:<br>
-  - Note: These all seem to be primarily focused around continuing to use old procedural methods leftover from C and C++.
-  - Using Classes as dumb data containers, with no methods.
-  - Using Classes as name space for methods, with no data.
+#### Avoiding COP Paradigms
+
+Class Oriented Programming (COP) is a style of programming that seem to be primarily focused 
+around continuing to use old procedural/imperative styles leftover from C and C++, but with
+Class wrappers instead of just files and functions (procedures) like in C.
+
+- Prefer to entirely avoid the COP (Class Oriented Programming) paradigms & idioms, such as:<br>
+  - Using Classes as dumb data containers, with no methods or minimal methods.
+  - Using Classes as name space for static methods, with no associated data.
   - Using static methods to modify objects data directly.
   - Using static methods and static variables to avoid having to create objects.
   - Exposing internal data structures and mutable objects.
