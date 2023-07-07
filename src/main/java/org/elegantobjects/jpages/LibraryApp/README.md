@@ -17,6 +17,12 @@
 
 ### Contents
 
+- LibraryApp is in the Presentation package, look for the test!
+- run test: 
+  ```console
+  ./gradlew 
+  ```
+
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
 - [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
 

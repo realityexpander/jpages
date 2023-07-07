@@ -119,11 +119,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
         if (!isForOnlyOneBook) {
             // note: PrivateLibraries bypass all normal Library User Account checks
-            return super.info().checkOutPrivateLibraryBookToUser(book, user);
+            return super.info.checkOutPrivateLibraryBookToUser(book, user);
         }
-
-        if (fetchInfoFailureReason() != null)
-            return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Orphan Libraries can only check out 1 Book to 1 User.
         if (this.info.findAllKnownBookIds().size() != 1)
@@ -154,10 +151,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
         if (!isForOnlyOneBook) {
             // note: we bypass all normal Library User Account checking
-            return super.info().checkInPrivateLibraryBookFromUser(book, user);
+            return super.info.checkInPrivateLibraryBookFromUser(book, user);
         }
-
-        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Orphan Libraries can only check in 1 Book from Users.
         if (this.info.findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id()));
