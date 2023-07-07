@@ -1,6 +1,6 @@
 package org.elegantobjects.jpages.LibraryAppTest.testFakes.common.util.log;
 
-import org.elegantobjects.jpages.App2.common.util.log.Log;
+import org.elegantobjects.jpages.LibraryApp.common.util.log.Log;
 import org.jetbrains.annotations.NotNull;
 
 public class TestLog extends Log {

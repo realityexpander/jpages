@@ -1,0 +1,109 @@
+package org.elegantobjects.jpages.LibraryApp.data.book.network;
+
+import org.elegantobjects.jpages.LibraryApp.common.Model;
+import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.LibraryApp.data.common.network.DTOInfo;
+import org.elegantobjects.jpages.LibraryApp.data.common.Info;
+import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
+import org.elegantobjects.jpages.LibraryApp.domain.Context;
+import org.elegantobjects.jpages.LibraryApp.domain.book.BookInfo;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class DTOBookInfo extends DTOInfo
+    implements
+        Model.ToDomainInfo<BookInfo>,
+        Model.ToDomainInfo.hasToDeepCopyDomainInfo<BookInfo>,
+        Info.ToInfo<DTOBookInfo>,
+        Info.hasToDeepCopyInfo<DTOBookInfo>
+{
+    public final String title;
+    public final String author;
+    public final String description;
+    public final String extraFieldToShowThisIsADTO;
+
+    public
+    DTOBookInfo(
+        @NotNull UUID2<Book> id,
+        @NotNull String title,
+        @NotNull String author,
+        @NotNull String description,
+        @Nullable String extraFieldToShowThisIsADTO
+    ) {
+        super(id);
+        this.title = title;
+        this.author = author;
+        this.description = description;
+
+        if (extraFieldToShowThisIsADTO == null) {
+            this.extraFieldToShowThisIsADTO = "This is a DTO";
+        } else {
+            this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
+        }
+    }
+    public
+    DTOBookInfo(@NotNull String json, @NotNull Context context) {
+        this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTOInfo.BookInfo from the JSON
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    // EntityInfo <-> DomainInfo conversion                            //
+    // Note: Intentionally DON'T accept `EntityInfo.EntityBookInfo`    //
+    //   - to keep DB layer separate from API layer)                   //
+    /////////////////////////////////////////////////////////////////////
+
+    public
+    DTOBookInfo(@NotNull DTOBookInfo bookInfo) {  // from DTOInfo.DTOBookInfo -> DTOInfo.DTOBookInfo
+        this(
+            new UUID2<Book>(bookInfo.id()),  // change `UUID2Type` to UUID2<Book>
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description,
+            bookInfo.extraFieldToShowThisIsADTO
+        );
+    }
+    public
+    DTOBookInfo(@NotNull BookInfo bookInfo) { // from Domain.BookInfo -> DTOInfo.BookInfo
+        this(
+            bookInfo.id(),
+            bookInfo.title,
+            bookInfo.author,
+            bookInfo.description,
+            "Imported from Domain.BookInfo"
+        );
+    }
+
+    @Override
+    public String toString() {
+        return "Book (" + this.id() + ") : " +
+                this.title + " by " + this.author + ", " +
+                this.description + ", " +
+                this.extraFieldToShowThisIsADTO;
+    }
+
+    ///////////////////////////////////////////
+    // DTOs don't have any business logic    //
+    // - All "Info" changes are done in the  //
+    //   domain layer.                       //
+    ///////////////////////////////////////////
+
+    ///////////////////////////////////
+    // ToDomainInfo implementation   //
+    ///////////////////////////////////
+
+    @Override
+    public BookInfo toDeepCopyDomainInfo() {
+        // note: implement deep copy, if class is not flat.
+        return new BookInfo(this);
+    }
+
+    /////////////////////////////
+    // ToInfo implementation   //
+    /////////////////////////////
+
+    @Override
+    public DTOBookInfo toDeepCopyInfo() {
+        // note: implement deep copy, if class is not flat.
+        return new DTOBookInfo(this);
+    }
+}

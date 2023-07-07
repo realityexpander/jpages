@@ -1,9 +1,9 @@
 package org.elegantobjects.jpages.LibraryAppTest;
 
-import org.elegantobjects.jpages.App2.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.App2.domain.Context;
-import org.elegantobjects.jpages.App2.domain.book.Book;
-import org.elegantobjects.jpages.App2.domain.user.User;
+import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.LibraryApp.domain.Context;
+import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
+import org.elegantobjects.jpages.LibraryApp.domain.user.User;
 import org.junit.Before;
 import org.junit.Test;
 
