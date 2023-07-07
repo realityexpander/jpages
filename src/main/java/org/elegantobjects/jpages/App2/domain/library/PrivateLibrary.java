@@ -76,9 +76,10 @@ public class PrivateLibrary extends Library implements IUUID2 {
     }
     public
     PrivateLibrary(
-        @NotNull UUID2<Book> bookId,
-        boolean isForOnlyOneBook, // note: always true for this constructor
-        @NotNull Context context
+            @NotNull UUID2<Book> bookId,
+            @SuppressWarnings("unused")
+            boolean isForOnlyOneBook, // note: always true for this constructor
+            @NotNull Context context
     ) {
         // Note: This creates an ORPHAN private library.
         // It is an ORPHAN bc it is NOT associated with any other system Library (private or not).

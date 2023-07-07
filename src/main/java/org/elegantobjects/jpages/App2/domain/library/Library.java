@@ -236,7 +236,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("Book's Source Library is not known, bookId: " + bookToTransfer.id()));
 
         // Check if Book is known at `from` Source Library
-        if(!fromSourceLibrary.info.isBookKnown(bookToTransfer))
+        if(!fromSourceLibrary.info.isKnownBook(bookToTransfer))
             return new Result.Failure<>(new Exception("Book is not known at from Source Library, bookId: " + bookToTransfer.id()));
 
 
@@ -301,7 +301,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library(%s) Book id: %s\n", this.id(), book.id()));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookKnown(book);
+        return this.info.isKnownBook(book);
     }
     public boolean isUnknownBook(@NotNull Book book) {
         return !isKnownBook(book);
@@ -311,7 +311,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) User id: %s", this.id(), user.id()));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isUserKnown(user);
+        return this.info.isKnownUser(user);
     }
 
     public boolean isBookAvailable(@NotNull Book book) {
@@ -360,7 +360,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("User is not known, userId: " + user.id()));
         }
 
-        Result<ArrayList<UUID2<Book>>> entriesResult = this.info.findBooksCheckedOutByUserId(user.id());
+        Result<ArrayList<UUID2<Book>>> entriesResult = this.info.findAllCheckedOutBookIdsByUserId(user.id());
         if (entriesResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) entriesResult).exception());
         }
@@ -433,7 +433,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) book: %s, fromUser: %s, toUser: %s", this.id(), book, fromUser, toUser));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<Book> transferResult = this.info().transferBookAndCheckOutFromUserToUser(book, fromUser, toUser);
+        Result<Book> transferResult = this.info().transferCheckedOutBookFromUserToUser(book, fromUser, toUser);
         if (transferResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) transferResult).exception());
 
         // Update the Info

@@ -14,7 +14,7 @@ import java.util.UUID;
 // It is the "single source of truth" for the Domain object.
 // Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
 public interface Info<TInfo> {
-    // TInfo info;                        // Requires a field named `info` of type `TInfo` (is there a way to enforce this in java?)
+    // TInfo info;  // Requires a field named `info` of type `TInfo` (is there a way to enforce this in java?)
 
     UUID2<?> id();                        // Returns the UUID2 of the Info object
     TInfo fetchInfo();                    // Fetches data for the Info from server/DB
