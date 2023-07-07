@@ -6,7 +6,7 @@
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
   - Back to the original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
-  - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice)
+  - Built to allow any Role object to be easily separated into an independently horizontally scalable entity. (ie: microservice)
 
 ### Inspiration
 
@@ -74,7 +74,6 @@
   - To remedy this, documentation about the data hierarchy should exist near the code (maybe a README). 
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
-<br>
 
 #### Avoiding Ugly COP Paradigms
 
@@ -88,15 +87,15 @@ advantages and disadvantages.
 - BOOP seeks to entirely <b>avoid</b> the COP (Class Oriented Programming) paradigms & idioms, such as:<br>
   - Using Classes as dumb data containers, with no methods or minimal methods.
   - Using Classes as name space for static methods, with no associated data.
-  - Using static methods to modify objects data directly.
+  - Using static methods to modify object data directly.
   - Using static methods and static variables to avoid having to create objects.
   - Exposing internal data structures and mutable objects.
   - Allowing `null` to be returned from methods.
   - `Null` checks everywhere.
   - Allowing multiple shared access to static global variables/state.
-  - Lots of inheritance, and deep inheritance hierarchies.
-  - Lots of "Design Patterns" to solve problems that should not exist in the first place.
-  - Factories, Builders, AbstractFactoryFactories and other hacky "creational" patterns.
+  - Over use of inheritance, and deep inheritance hierarchies.
+  - Lots of "Design Patterns" implementations to solve problems that should not exist in the first place.
+  - Factories, Builders, AbstractFactoryFactories, AbstractFactoryBuilderFactory and other hacky "creational" patterns.
 
 ## Code Style
 
@@ -108,11 +107,11 @@ advantages and disadvantages.
   but not at the expense of clarity.
   - You may think you know what a variable/method is for, but the next person may not.
   - Yes, this risks job security, but it also makes it easier to change code as you keep.
-  - If you think someone will be confused by something, take extra time choosing names and add the minimum amount 
+  - If you think someone will be confused by something, take extra time choosing names and add the minimum number 
     of comments to explain <b>WHY?</b> This is also the value of pair programming, someone else can ask you why 
     you did something. Instead of just telling them, that's a place to find better names, or refactor the code to 
-    make it more clear, or add a "why?" answer comment.
-- Even this short guide repeats ideas, to make it easier to understand what is important and what is not.
+    make it clearer, or add a "why?" answer comment.
+- Even this short guide repeats ideas to make it easier to understand what is important and what is not.
 - Strive to make code read like regular English as possible, and to be able to understand it without 
   using IDE tools (like cursor-hover to find var types).
     extending the code base. We risk improving the developer experience for our own sake.
@@ -121,13 +120,13 @@ advantages and disadvantages.
 - A person who doesn't code should be able to look at a method or variable and know what it does/means.
 - Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
-#### A Note on Line Comprehension Complexity
+### A Note on Line Comprehension Complexity
 
-- Humans can handle 7±2 item in their short-term working memory at a given time, so code lines
+- Humans can handle 7±2 items in their short-term working memory at a given time, so code lines
   should be broken up when approaching 6 items on a given line.
 - Horizontal line complexity should never have more than 8 items on a given line.
-- Strive to keep line complexity to 5 items maximum, and know when you got past that it causes an 
-  increase cognitive load that slow comprehension.
+- Strive to keep line complexity to maximum of 6 "items," and know when you get past that number, it causes a 
+  dramatic increase in the cognitive load which slows comprehension.
 
 ### Encapsulation of Data via Intention-named methods
 
@@ -143,9 +142,9 @@ advantages and disadvantages.
 - No Direct Reference Getters 
   - No references to internal mutable objects (all fields are `final`)
   - Only return copies of information.
-  - Never reveal internal structures - always return _curated_ copies for a specific intended purpose.
+  - Never reveal internal structures—always return _curated_ copies for a specific intended purpose.
   - Returning/Exposing `Role` objects or `id's` is OK.
-    - `Role` objects are immutable, and contain references to their mutable `Info` data.
+    - `Role` objects are immutable and contain references to their mutable `Info` data.
     - `id` is immutable, and is used to fetch Info objects from their respective Repositories.
   - Should never return `null`
     - Return an intention-revealing object instead
@@ -181,7 +180,7 @@ advantages and disadvantages.
 ### Intention Revealing Error Messages
 
 - Error messages should be human-readable, clearly reveal the issue encountered.
-- include `id` of associated object(s) in message or useful data for the issue.
+- include `id` of associated object(s) in the message or useful data for the issue.
 - This is to prevent guessing and hunting what the cause of the issue may be.
 - The unhappy path is the more complex path, so doing this helps reduce its complexity.
 
@@ -189,7 +188,7 @@ advantages and disadvantages.
 
 - No shared mutable state
 - No static/global variables
-- No global accessing state of App (except via passed-in Context object)
+- No global accessing state of App (except via a passed-in Context object)
 
 ### No Dependency Injection Framework
 
@@ -203,8 +202,9 @@ advantages and disadvantages.
     - These are mutable because of how JSON imports work. 
       - The `id` must first be extracted from the JSON data before the new Object is created. 
       - The `UUIDType` is mutable because it is not known at object creation time, and must be set after the JSON is parsed.
-      - This is a known limitation, and I am unaware of a workaround that doesn't involve a lot of complexity.
-      - We keep the id private, and only expose it via `id()` method.
+      - This is a known limitation, and I am unaware of a workaround that doesn't involve a lot of complexities.
+      - We have to keep `_id` public, and prefer to have it accessed via public `id()` method.
+      - The `_id` must be kept public for the `Gson` deserialization... if there is another way to do this, I would like to know.
       - The setter function is public but noted with a `_` prefix to indicate its special case.
 - `Role` objects are immutable and communicate or contain other Role objects.
 - `Role` objects contain references to their mutable data (Info) which is updated or fetched automatically when the
@@ -218,9 +218,9 @@ advantages and disadvantages.
 ### Constructor Convenience
 
 - All dependencies passed in constructor
-  - No Dependency Injection framework (_anyone want to google a thermosiphon?..._)
+  - No Dependency Injection framework (_does anyone want to google a thermosiphon?..._)
 - Many different constructors included for many different ways to create objects
-- Singletons passed in constructor, held in Context object
+- Singletons passed in constructor, held in the Context object
 - No `null` objects
   - `null` checks on the input to the constructor for special case constructor handling 
   - `Null` is normally intended to generate reasonable default values
@@ -236,7 +236,7 @@ advantages and disadvantages.
     - ie: <code>Model.DTOInfo.DTOBookInfo</code>
     - ie: <code>Model.DomainInfo.BookInfo</code> 
       - note:`BookInfo` is <i>not</i> a `DomainBookInfo` because the Domain is the core and more plain java-like, 
-        so we use a simplest name for it.
+        so we use the simplest name for it.
   - <code>IRepo ➤➤ Repo ➤➤ {Domain}Repo</code> for the `Repo` objects
     - ie: <code>Repo.BookInfoRepo</code> 
   - <code>Role ➤➤ {DomainRole}</code> for the `Role` objects
@@ -276,14 +276,15 @@ advantages and disadvantages.
 - Dumb Container objects (`InfoDTO`, `InfoEntity`) are immutable and only used to pass data to/from outside domain
   to domain `Role` objects.
 - Note: DTOs and Entities are still useful to maintain separation of concerns and to communicate with
-  world outside domain, and allows independent changing and versioning of the domain/DTO/Entity objects.
+  the world outside domain, and allows independent changing and versioning of the domain/DTO/Entity objects.
 
 ### Extremely Limit use of `Else` blocks
 
-  - Code for conditions check first and return early if condition is not met.
-  - Last return is always "happy path" success return (unless for rare exceptional cases.)
-  - Only for specific exceptional rare cases use `else` blocks.
-    - Always ask if it can be written in a way that doesn't use `else`. 
+  - Code for conditions checks first and `return`s early if the condition is not met.
+  - A final `return` is always the "happy path" success `return` (unless for rare exceptional cases.)
+  - Only in rare, exceptional rare cases resort to using `else` blocks.
+    - Always ask if it can be written in a way that doesn't use `else`.
+    - Maybe split into two functions?
 
 ### No `Void` Methods
 
@@ -352,9 +353,9 @@ advantages and disadvantages.
 - Turns out many of the patterns were after-thought workarounds to fundamental language design flaws, directly
   inherited from C++ and C (and other languages) that never were resolved properly much less questioned.
 - We know this now because recent language versions have remediated <i>some</i> of these issues, and other languages 
-  like Kotlin illustrate how to address these flaws in a more sane, comprehensible and maintainable manner. 
+  like Kotlin illustrate how to address these flaws in a more consistent, comprehensible and maintainable manner. 
 - Combined with BOOP, many of the popular design patterns just don't make sense and add unnecessary 
-  complexity and confusion. <i>But it did pay a lot of presenters and authors bills for a long time!</i>
+  complexity and confusion. <i>But it did pay a lot of presenters' and authors bills for a long time!</i>
 
 #### Examples
 
@@ -382,7 +383,7 @@ advantages and disadvantages.
 - BOOP makes clear separation of concerns easy and understandable.
 - Each Role has a single responsibility, and only handles that responsibility, and delegates all other responsibilities
   to other Roles.
-- Each Role has a many methods to handle its responsibility, and return encapsulated intention-revealing data to 
+- Each Role has many methods to handle its responsibility, and return encapsulated intention-revealing data to 
   other Roles.
 - No direct access to any other Role's data, all data is encapsulated and only accessed through methods.
 - All Role Info is returned as copies, never direct references.
@@ -415,7 +416,7 @@ advantages and disadvantages.
 
 ### Naming of "Inverse" methods
 
-- Prefer using same verb and a short modifier than to use two different verbs for inverse/opposite methods.
+- Prefer using the same verb and a short adjective modifier than to use two different verbs for inverse/opposite methods.
 - ie: Prefer `CheckIn` and `CheckOut` to `Borrow` and `Return`
 - ie: Prefer `Register` and `UnRegister` to `register` and `delete` (or `remove`)
 - ie: Prefer `Suspend` and `UnSuspend` to `suspend` and `reinstate`
@@ -424,9 +425,9 @@ advantages and disadvantages.
   - For CRUD operations, it is acceptable to use standard opposite terms: `create`, `add`, `insert`, `delete`
   - `Close` and `Open` are preferred over `Open` and `UnOpen` (unless the domain specifies it)
   - `Push` and `Pop` are preferred over `Push` and `UnPush` (unless the domain specifies it)
+  - `Put` and `Get` are for primitive `Map`-like operations only.
 
 ### Explicit Naming of "Transfer" methods
-
 
 - Use of `From` and `To` encouraged, to show explicit intent.
   - ie: `checkOutBookToUser` is preferred over `checkOut` or `checkOutBook`
@@ -438,7 +439,6 @@ advantages and disadvantages.
     - even though both convey the same meaning, one is easier to comprehend in English.
 
 ### Explicit Naming of "Find" methods
-
 
 - Use of `Of` is encouraged
  - ie: `findUserIdOfCheckedOutBook` instead of `findCheckedOutBookUserId`
@@ -464,8 +464,8 @@ advantages and disadvantages.
 
 - This is acceptable for Domain objects!
   - They all can instantiate themselves & others.
-  - They all can be instantiated by others.
-  - Their `Info` gets pulled in from their Repository on demand with a call to `info()`.
+  - Others can instantiate them.
+  - Their `Info` gets pulled in from their respective `Info` Repository on demand with a call to `info()`.
   - `Role` objects are essentially smart pointers to their `Info` objects & other `Role` objects.
 
 ### Minimal Annotations
@@ -604,7 +604,7 @@ You can find the sample Library App in the App2 folder, along with some tests to
       - `UserInfo`    - Handles user details, like name, email, books held, can give books to other users, etc.
       - `LibraryInfo` - Handles library details, lists of books on hand, users registered to it, checking books in and out,
     - `EntityInfo`
-      - `BookInfoEntity` - Handles transfer of `BookInfo` objects to database 
+      - `BookInfoEntity` - Handles transfer of `BookInfo` objects to the database 
       - currently only one `Entity` in the system, to be expanded later to 
         include `AccountInfoEntity`, `UserInfoEntity`, `LibraryInfoEntity`
     - `DTOInfo`
@@ -618,7 +618,7 @@ You can find the sample Library App in the App2 folder, along with some tests to
     communicates with other `Role` objects to perform application business logic.<br>
     <br>
     - `User` - Handles `User` actions, like `giveBookToUser()`, `checkOutBook()`, `checkInBook()`, etc.
-      - `User` encapsulates an `Account` `Role` object, which itself contains it's own encapsulated `AccountInfo` object.  
+      - `User` encapsulates an `Account` `Role` object, which itself contains its own encapsulated `AccountInfo` object.  
     - `Account` - Handles `Account` actions, like paying fines, checking account status, checking limits etc.
     - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook`, `isKnownUser` etc.
     - `PrivateLibrary` - Handles `PrivateLibrary` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
@@ -639,7 +639,7 @@ You can find the sample Library App in the App2 folder, along with some tests to
 
 ### _"BOOP is made for modeling the capriciousness of the Real World..."_ 
 
-Some decisions have been made capriciously and with intentionally irrationally haphazard in order 
+Some decisions have been made capriciously and intentionally irrationally haphazard in order 
 to see how much inherent domain complexity can be modeled using BOOP. This is not a criticism of BOOP, but 
 rather a test of its flexibility and power.
 
