@@ -77,7 +77,7 @@ public class BookInfo extends DomainInfo
     BookInfo(@NotNull EntityBookInfo entityBookInfo) {
         // Converts from EntityInfo to DomainInfo
         this(
-            new UUID2<Book>(entityBookInfo.id()), // change to domain UUID2 type
+            new UUID2<Book>(entityBookInfo.id()), // change to the Domain UUID2 type
             entityBookInfo.title,
             entityBookInfo.author,
             entityBookInfo.description

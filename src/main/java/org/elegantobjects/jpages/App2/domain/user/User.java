@@ -10,6 +10,7 @@ import org.elegantobjects.jpages.App2.domain.account.AccountInfo;
 import org.elegantobjects.jpages.App2.domain.book.Book;
 import org.elegantobjects.jpages.App2.domain.common.Role;
 import org.elegantobjects.jpages.App2.domain.library.Library;
+import org.elegantobjects.jpages.App2.domain.library.LibraryInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -296,8 +297,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
         // Have Library Swap the checkout of Book from this User to the receiving User
         Result<Book> swapCheckoutResult =
-                book.sourceLibrary().info()
-                    .transferBookAndCheckoutFromUserToUser(
+                book.sourceLibrary()
+                    .transferBookAndCheckOutFromUserToUser(
                           book,
                           this,
                           receivingUser

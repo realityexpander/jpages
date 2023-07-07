@@ -122,7 +122,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return infoResult;
         }
 
-        // Update self with Repo result
+        // Update self with the Repo result
         super.updateInfo(((Result.Success<LibraryInfo>) infoResult).value());
         return infoResult;
     }
@@ -167,7 +167,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id()));
 
         // Check out Book to User
-        Result<Book> checkOutBookresult = this.info.checkOutBookToUser(book, user);
+        Result<Book> checkOutBookresult = this.info.checkOutPublicLibraryBookToUser(book, user);
         if (checkOutBookresult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
 
@@ -185,7 +185,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         if (isUnableToFindOrRegisterUser(user)) return new Result.Failure<>(new Exception("User is not known, id: " + user.id()));
 
-        Result<Book> checkInBookResult = this.info.checkInBookFromUser(book, user);
+        Result<Book> checkInBookResult = this.info.checkInPublicLibraryBookFromUser(book, user);
         if (checkInBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
 
         // Update Info, since we modified data for this Library
@@ -209,6 +209,10 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         // Check out Book to User from this Library
         Result<Book> checkOutBookResult = checkOutBookToUser(bookToTransfer, user);
         if (checkOutBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkOutBookResult).exception());
+
+        // Update Info, since we modified data for this Library
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(bookToTransfer);
     }
@@ -282,11 +286,13 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         }
 
         // Automatically register a new User entry in the Library (if not already known)
+        // Note: todo - In a real system, this would be a separate step, and the User would have to confirm their registration.
         Result<UUID2<User>> addRegisteredUserResult = this.info.registerUser(user.id());
-        //noinspection RedundantIfStatement
-        if (addRegisteredUserResult instanceof Result.Failure) {
-            return true;
-        }
+        if (addRegisteredUserResult instanceof Result.Failure) return true;
+
+        // Update Info, bc data was modified for this Library
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        if (updateInfoResult instanceof Result.Failure) return true;
 
         return false;
     }
@@ -322,14 +328,10 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         return this.info.isBookIdCheckedOutByAnyUser(book.id());
     }
 
-    // Note: This method creates a new User Object from the User id found in the Book checkout record.
     public Result<User> getUserOfCheckedOutBook(@NotNull Book book) {
         context.log.d(this, format("Library (%s) Book id: %s", this.id(), book));
         if (fetchInfoFailureReason() != null)
             return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
-
-        if(this instanceof PrivateLibrary)
-            return new Result.Failure<>(new Exception("PrivateLibrary does not support registration of users, libraryId: " + this.id()));
 
         // get the User's id from the Book checkout record
         Result<UUID2<User>> userIdResult = this.info.findUserIdOfCheckedOutBook(book);
@@ -406,6 +408,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id(), book, count));
         return addBookToLibrary(book, count);
     }
+
     public Result<Book> addBookToLibrary(@NotNull Book book, @NotNull Integer count) {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id(), book, count));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
@@ -426,5 +429,17 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         System.out.println();
     }
 
-}
+    public Result<Book> transferBookAndCheckOutFromUserToUser(Book book, User fromUser, User toUser) {
+        context.log.d(this, format("Library (%s) book: %s, fromUser: %s, toUser: %s", this.id(), book, fromUser, toUser));
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
+        Result<Book> transferResult = this.info().transferBookAndCheckOutFromUserToUser(book, fromUser, toUser);
+        if (transferResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) transferResult).exception());
+
+        // Update the Info
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
+
+        return new Result.Success<>(book);
+    }
+}

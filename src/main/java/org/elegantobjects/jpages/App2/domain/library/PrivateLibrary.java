@@ -53,8 +53,8 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //   - App Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
     //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
     private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
-                                             // Note: the naming here conveys the intent the variable,
-                                             //       even if the reader doesn't know about orphan libraries.
+                                             // Note: the naming here conveys the intent of the variable,
+                                             //       even if the reader doesn't know about "Orphan" libraries.
 
     public
     PrivateLibrary(
@@ -106,44 +106,25 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //////////////////////////////////////////////////
 
     @Override
-    public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
-        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id(), book.id(), user.id()));
-
-        if (!isForOnlyOneBook) {
-            return super.info()
-                    .checkInBookFromUser(book, user);  // note: we bypass all normal Library User Account checking
-        }
-
-        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
-
-        // Orphan Libraries can only check in 1 Book from Users.
-        if (this.info.findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id()));
-
-        // Only allow check in if the Book Id matches the initial Book Id that created this Orphan Library.
-        Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
-        @SuppressWarnings("unchecked")
-        UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0]; // there should only be 1 bookId
-        if (!firstBookId.equals(book.id())) {
-            return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id()));
-        }
-
-        return super.info()
-                .checkInBookFromUser(book, user); // note: we bypass all normal Library User Account checking
-    }
-
-    @Override
     public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
         context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id(), book.id(), user.id()));
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Automatically upsert the User into the Library's User Register
+        // - Private libraries are open to all users, so we don't need to check if the user is registered.
+        Result<UUID2<User>> addRegisteredUserResult = this.info.registerUser(user.id());
+        if (addRegisteredUserResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception("Failed to register User in Library, userId: " + user.id()));
 
         if (!isForOnlyOneBook) {
-            return super.info()
-                    .checkInBookFromUser(book, user);  // note: we bypass all normal Library User Account checking
+            // note: PrivateLibraries bypass all normal Library User Account checks
+            return super.info().checkOutPrivateLibraryBookToUser(book, user);
         }
 
         if (fetchInfoFailureReason() != null)
             return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        // Orphan Libraries can only check out 1 Book to Users.
+        // Orphan Libraries can only check out 1 Book to 1 User.
         if (this.info.findAllKnownBookIds().size() != 1)
             return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users, bookId: " + book.id()));
 
@@ -154,7 +135,48 @@ public class PrivateLibrary extends Library implements IUUID2 {
         if (!firstBookId.equals(book.id()))
             return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id()));
 
-        return super.info()
-                .checkOutBookToUser(book, user); // note: we bypass all normal Library User Account checking
+        Result<Book> checkOutResult = super.info().checkOutPrivateLibraryBookToUser(book, user); // note: we bypass all normal Library User Account checking
+        if (checkOutResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception("Failed to check-out Book from Private Library, bookId: " + book.id()));
+
+        // Update the Info
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
+
+        return checkOutResult;
+    }
+
+    @Override
+    public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
+        context.log.d(this, format("Library (%s) - userId: %s, bookId: %s", this.id(), book.id(), user.id()));
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        if (!isForOnlyOneBook) {
+            // note: we bypass all normal Library User Account checking
+            return super.info().checkInPrivateLibraryBookFromUser(book, user);
+        }
+
+        if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
+
+        // Orphan Libraries can only check in 1 Book from Users.
+        if (this.info.findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id()));
+
+        // Only allow checkIn if the BookId matches the initial BookId that created this Orphan PrivateLibrary.
+        Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
+        @SuppressWarnings("unchecked")
+        UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0]; // there should only be 1 BookId
+        if (!firstBookId.equals(book.id())) {
+            return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users and must be the same Id as the initial Book placed in the PrivateLibrary, bookId: " + book.id()));
+        }
+
+        // note: we bypass all normal Library User Account checking
+        Result<Book> checkInResult = super.info.checkInPrivateLibraryBookFromUser(book, user);
+        if (checkInResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInResult).exception());
+
+        // Update the Info
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
+
+        return checkInResult;
     }
 }

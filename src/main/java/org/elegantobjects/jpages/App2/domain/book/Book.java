@@ -160,7 +160,7 @@ public class Book extends Role<BookInfo> implements IUUID2 {
             return infoResult;
         }
 
-        // Update self with repo result
+        // Update self with the Repo Result
         this.info = ((Result.Success<BookInfo>) infoResult).value();
         return infoResult;
     }

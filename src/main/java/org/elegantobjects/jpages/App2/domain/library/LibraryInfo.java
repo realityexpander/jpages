@@ -78,23 +78,29 @@ public class LibraryInfo extends DomainInfo
     // Published Domain Business Logic Methods //
     /////////////////////////////////////////////
 
-    public Result<Book> checkOutBookToUser(@NotNull Book book, @NotNull User user) {
-        if(book.isBookFromPublicLibrary()) { // No checks for private library books.
-            Result<UUID2<Book>> checkedOutUUID2Book = _checkOutPublicLibraryBookIdToUserId(book.id(), user.id());
-            if (checkedOutUUID2Book instanceof Result.Failure)
-                return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) checkedOutUUID2Book).exception().getMessage()));
+    public Result<Book> checkOutPublicLibraryBookToUser(@NotNull Book book, @NotNull User user) {
+    //  if(!book.isBookFromPublicLibrary())   // todo - should only allow public library books to be checked out from public libraries?
+    //    return new Result.Failure<>(new IllegalArgumentException("Book is not from a public library, bookId: " + book.id()));
 
-            Result<ArrayList<Book>> unacceptBookResult = user.acceptBook(book);
-            if (unacceptBookResult instanceof Result.Failure)
-                return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<Book>>) unacceptBookResult).exception().getMessage()));
+        Result<UUID2<Book>> checkedOutUUID2Book = checkOutPublicLibraryBookIdToUserId(book.id(), user.id());
+        if (checkedOutUUID2Book instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) checkedOutUUID2Book).exception().getMessage()));
 
-            return new Result.Success<>(book);
-        }
+        Result<ArrayList<Book>> unacceptBookResult = user.acceptBook(book);
+        if (unacceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<Book>>) unacceptBookResult).exception().getMessage()));
 
+        return new Result.Success<>(book);
+    }
+    public Result<Book> checkOutPrivateLibraryBookToUser(@NotNull Book book, @NotNull User user) {
         // Private library book check-outs skip Account checks.
         Result<Void> checkOutBookResult = _checkOutBookIdToUserId(book.id(), user.id());
         if (checkOutBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkOutBookResult).exception().getMessage()));
+
+        Result<UUID2<Book>> addBookResult = addBookIdToRegisteredUser(book.id(), user.id());
+        if (addBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) addBookResult).exception().getMessage()));
 
         Result<ArrayList<Book>> acceptBookResult = user.acceptBook(book);
         if (acceptBookResult instanceof Result.Failure)
@@ -102,7 +108,7 @@ public class LibraryInfo extends DomainInfo
 
         return new Result.Success<>(book);
     }
-    public Result<UUID2<Book>> _checkOutPublicLibraryBookIdToUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
+    public Result<UUID2<Book>> checkOutPublicLibraryBookIdToUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         if (!isBookIdKnown(bookId))
             return new Result.Failure<>(new IllegalArgumentException("BookId is not known. bookId: " + bookId));
         if (!isUserIdKnown(userId))
@@ -123,20 +129,29 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
 
-    public Result<Book> checkInBookFromUser(@NotNull Book book, @NotNull User user) {
-        if(book.isBookFromPublicLibrary()) {
-            Result<UUID2<Book>> returnedBookIdResult = _checkInPublicLibraryBookIdFromUserId(book.id(), user.id());
-            if (returnedBookIdResult instanceof Result.Failure)
-                return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) returnedBookIdResult).exception().getMessage()));
+    public Result<Book> checkInPublicLibraryBookFromUser(@NotNull Book book, @NotNull User user) {
+        //    if(!book.isBookFromPublicLibrary()) // todo - should only allow public library books to be checked in?
+        //        return new Result.Failure<>(new IllegalArgumentException("Book is not from a public library, bookId: " + book.id()));
 
-            Result<ArrayList<UUID2<Book>>> unacceptBookResult = user.unacceptBook(book);
-            if (unacceptBookResult instanceof Result.Failure)
-                return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception().getMessage()));
+        Result<UUID2<Book>> returnedBookIdResult = checkInPublicLibraryBookIdFromUserId(book.id(), user.id());
+        if (returnedBookIdResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) returnedBookIdResult).exception().getMessage()));
 
-            return new Result.Success<>(book);
-        }
+        Result<ArrayList<UUID2<Book>>> unacceptBookResult = user.unacceptBook(book);
+        if (unacceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception().getMessage()));
 
-        // Private Library Book check-ins skip Account checks.
+        Result<UUID2<Book>> removeBookResult = removeBookIdFromRegisteredUserId(book.id(), user.id());
+        if (removeBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removeBookResult).exception().getMessage()));
+
+        return new Result.Success<>(book);
+    }
+    public Result<Book> checkInPrivateLibraryBookFromUser(@NotNull Book book, @NotNull User user) {
+        //    if(!book.isBookFromPrivateLibrary()) // todo - should not allow private library books to be checked in from public library?
+        //        return new Result.Failure<>(new IllegalArgumentException("Book is not from private library, bookId: " + book.id()));
+
+        // Private Library Book check-ins skip all Public Library User Account checks.
         Result<Void> checkInBookResult = _checkInBookIdFromUserId(book.id(), user.id());
         if (checkInBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkInBookResult).exception().getMessage()));
@@ -145,9 +160,13 @@ public class LibraryInfo extends DomainInfo
         if (unacceptBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptBookResult).exception().getMessage()));
 
+        Result<UUID2<Book>> removeBookResult = removeBookIdFromRegisteredUserId(book.id(), user.id());
+        if (removeBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removeBookResult).exception().getMessage()));
+
         return new Result.Success<>(book);
     }
-    public Result<UUID2<Book>> _checkInPublicLibraryBookIdFromUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
+    public Result<UUID2<Book>> checkInPublicLibraryBookIdFromUserId(@NotNull UUID2<Book> bookId, @NotNull UUID2<User> userId) {
         if (!isBookIdKnown(bookId))
             return new Result.Failure<>(new IllegalArgumentException("BookId is not known, bookId: " + bookId));  // todo - do we allow unknown books to be checked in, and just add them to the list?
         if (!isUserIdKnown(userId))
@@ -159,14 +178,10 @@ public class LibraryInfo extends DomainInfo
         if (checkInBookResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkInBookResult).exception().getMessage()));
 
-        Result<UUID2<Book>> removeBookResult = removeBookIdFromRegisteredUser(bookId, userId);
-        if (removeBookResult instanceof Result.Failure)
-            return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removeBookResult).exception().getMessage()));
-
         return new Result.Success<>(bookId);
     }
 
-    public Result<Book> transferBookAndCheckoutFromUserToUser(
+    public Result<Book> transferBookAndCheckOutFromUserToUser(
         @NotNull Book book,
         @NotNull User fromUser,
         @NotNull User toUser
@@ -190,13 +205,13 @@ public class LibraryInfo extends DomainInfo
                 return new Result.Failure<>(new IllegalArgumentException("toUser has reached max number of accepted Public Library Books, toUser: " + toUser.id()));
         }
 
-        Result<Book> returnedBookResult = checkInBookFromUser(book, fromUser);
+        Result<Void> returnedBookResult = _checkInBookIdFromUserId(book.id(), fromUser.id());
         if (returnedBookResult instanceof Result.Failure)
-            return new Result.Failure<>(new Exception(((Result.Failure<Book>) returnedBookResult).exception().getMessage()));
+            return new Result.Failure<>(new Exception(((Result.Failure<Void>) returnedBookResult).exception().getMessage()));
 
-        Result<Book> checkedOutBookIdResult = checkOutBookToUser(book, toUser);
+        Result<Void> checkedOutBookIdResult = _checkOutBookIdToUserId(book.id(), toUser.id());
         if (checkedOutBookIdResult instanceof Result.Failure)
-            return new Result.Failure<>(new Exception(((Result.Failure<Book>) checkedOutBookIdResult).exception().getMessage()));
+            return new Result.Failure<>(new Exception(((Result.Failure<Void>) checkedOutBookIdResult).exception().getMessage()));
 
         return new Result.Success<>(book);
     }
@@ -426,7 +441,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(book);
     }
 
-    private Result<UUID2<Book>> removeBookIdFromRegisteredUser(UUID2<Book> bookId, UUID2<User> userId) {
+    private Result<UUID2<Book>> removeBookIdFromRegisteredUserId(UUID2<Book> bookId, UUID2<User> userId) {
         if (!isBookIdKnown(bookId))
             return new Result.Failure<>(new IllegalArgumentException("bookId is not known, bookId: " + bookId));
         if (!isUserIdKnown(userId))
@@ -445,7 +460,7 @@ public class LibraryInfo extends DomainInfo
         return new Result.Success<>(bookId);
     }
     private Result<Book> removeBookFromUser(@NotNull Book book, @NotNull User user) {
-        Result<UUID2<Book>> removedUUID2Book = removeBookIdFromRegisteredUser(book.id(), user.id());
+        Result<UUID2<Book>> removedUUID2Book = removeBookIdFromRegisteredUserId(book.id(), user.id());
 
         if (removedUUID2Book instanceof Result.Failure) {
             return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) removedUUID2Book).exception().getMessage()));
