@@ -1,14 +1,14 @@
-# Library App using BOOP Style
+# Library App built using BOOP Style
 
 ## Design Goals
-
-### Inspiration
 
 - Have a pure domain layer that adheres to Alan Kay's and Yegor Bugayenko's OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
   - Back to original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
   - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice)
+
+### Inspiration
 
 - BOOP is a design pattern that is inspired by:
   - Alan Kay's OO style & lectures, HyperCard, the ideas behind Smalltalk.
