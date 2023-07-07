@@ -5,7 +5,7 @@
 - Have a pure domain layer that adheres to Alan Kay's and Yegor Bugayenko's OO styles
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
-  - Back to original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
+  - Back to the original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
   - Built to have any Role object be easily separated into an independently horizontally scalable. (ie: microservice)
 
 ### Inspiration
@@ -23,6 +23,7 @@
 #### Code Style & Rules
 
 - [Code Style](#code-style)
+- [A Note on Line Comprehension Complexity](#a-note-on-line-comprehension-complexity)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No `null` in Domain](#no-null-in-domain)
 - [Intention Revealing Error Messages](#intention-revealing-error-messages)
@@ -64,7 +65,7 @@
 
 ### Developer Experience is Paramount
 
-- Write code in a way that is oriented to the reader (not computer), as code is read 100x more than it is written,
+- Write code in a way that is oriented to the human reader (not computer), as code is read 100x more than it is written,
   and computers really don't care what the code looks like.
 - The developer experience is paramount, and should be the primary focus of the design.
 - Architected by layer, and each layer is grouped by feature
@@ -119,6 +120,14 @@ advantages and disadvantages.
 - Strive to write Domain layer code in plain-old idiomatic Java as much as possible, and read like English prose.
 - A person who doesn't code should be able to look at a method or variable and know what it does/means.
 - Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
+
+#### A Note on Line Comprehension Complexity
+
+- Humans can handle 7±2 item in their short-term working memory at a given time, so code lines
+  should be broken up when approaching 6 items on a given line.
+- Horizontal line complexity should never have more than 8 items on a given line.
+- Strive to keep line complexity to 5 items maximum, and know when you got past that it causes an 
+  increase cognitive load that slow comprehension.
 
 ### Encapsulation of Data via Intention-named methods
 
