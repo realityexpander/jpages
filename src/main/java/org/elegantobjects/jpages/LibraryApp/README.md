@@ -101,7 +101,8 @@ advantages and disadvantages.
   - `Null` checks everywhere.
   - Allowing multiple shared access to static global variables/state.
   - Over use of inheritance, and deep inheritance hierarchies.
-  - Lots of "Design Patterns" implementations to solve problems that should not exist in the first place.
+  - Many "Gang of Four Design Pattern" implementations to solve language design problems that should not exist in 
+    the first place.
   - Factories, Builders, AbstractFactoryFactories, AbstractFactoryBuilderFactory and other hacky "creational" patterns.
  
 #### Some Useful Design Choice Departures from Strict BOOP
@@ -140,8 +141,8 @@ advantages and disadvantages.
 - Humans can handle 7±2 items in their short-term working memory at a given time, so code lines
   should be broken up when approaching 6 items on a given line.
 - Horizontal line complexity should never have more than 8 items on a given line.
-- Strive to keep line complexity to maximum of 6 "items," and know when you get past that number, it causes a 
-  dramatic increase in the cognitive load which slows comprehension.
+- Strive to keep line complexity to maximum of 6 "items," and know when the complexity passes that number, it causes a 
+  dramatic increase in the cognitive load which slows comprehension, for most readers.
 
 ### Encapsulation of Data via Intention-named methods
 
