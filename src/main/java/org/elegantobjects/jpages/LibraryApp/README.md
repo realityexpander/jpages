@@ -57,7 +57,7 @@
 - [Minimal Annotations](#minimal-annotations)
 - [Acceptable Acronyms, Prefixes, and Suffixes](#acceptable-acronyms-prefixes-and-suffixes)
 
-### Sample Use-case Library Application Implementation Details
+### Example Use-case Library Application Implementation Details
 
 - Run the sample `Library Application` from Markdown in IntelliJ:
 - Click play (in IntelliJ): `LibraryAppTest` is in the `test/java/.../LibraryAppTest/` package
