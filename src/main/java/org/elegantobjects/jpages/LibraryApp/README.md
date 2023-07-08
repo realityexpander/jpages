@@ -126,7 +126,7 @@ advantages and disadvantages.
   - If you think someone will be confused by something, take extra time choosing names and add the minimum number 
     of comments to explain <b>WHY?</b> This is also the value of pair programming, someone else can ask you why 
     you did something. Instead of just telling them, that's a time to find better names, or refactor the code to 
-    make it clearer, or add a "why?" answer comment.
+    make it clearer, or add a "why?" comment to clarify.
 - Even this short guide repeats ideas to make it easier to understand what is important and what is not.
 - Strive to make code read like regular English as possible, and to be able to understand it without 
   using IDE tools (like cursor-hover to find var types).
