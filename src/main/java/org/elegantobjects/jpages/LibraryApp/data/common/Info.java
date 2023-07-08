@@ -10,13 +10,13 @@ import java.lang.reflect.Type;
 import java.util.UUID;
 
 /**
- <b>{@code Info}</b> is a data holder class for transferring data to/from the Domain from Database.<br>
+ <b>{@code Info}</b> is a smart data holder class for transferring data to/from the Domain to/from Database/Api.<br>
  <ul>
-   <li><b>{@code TInfo info}</b> - Caches the Model Object's "Info" and defines required Info operations.</li>
-   <li>The <b>{@code Info}</b> object stores the "business data" for the Domain object.</li>
+   <li><b>{@code TInfo info}</b> - Caches the Role Object's "Info" (data) and defines required operations to mutate
+       the 'Info' object.</li>
+   <li>The <b>{@code Info}</b> object stores the "business data" for the Domain object & logic to change it.</li>
    <li>It is the "single source of truth" for the Domain object's mutable data.</li>
  </ul>
- Domain objects keep a single-source-of-truth reference to their data, and load/save it to/from the server/DB as needed.
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
 **/
@@ -60,9 +60,8 @@ public interface Info<TInfo> {
         }
     }
 
-    static <
-            TToInfo extends ToInfo<?> // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
-        > @Nullable TToInfo createInfoFromJson(
+    static <TToInfo extends ToInfo<?>> @Nullable // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
+    TToInfo createInfoFromJson(
             String json,
             Class<TToInfo> infoClazz, // type of `Info` object to create
             Context context
@@ -93,7 +92,6 @@ public interface Info<TInfo> {
     // - Just add `implements ToInfo.hasDeepCopyInfo<ToInfo<{InfoClass}>>` to the class
     //   definition, and the toDeepCopyInfo() method will be added.
     interface hasToDeepCopyInfo<TInfo extends ToInfo<?>> {
-
         @SuppressWarnings("unchecked")
         default TInfo deepCopyInfo() {
             // This is a default implementation for deepCopyInfo() that simply calls the toDeepCopyInfo() method implemented in the subclass
@@ -103,7 +101,6 @@ public interface Info<TInfo> {
     }
 
     default Result<TInfo> checkJsonInfoIdMatchesThisInfoId(TInfo infoFromJson, Class<?> infoClazz) {
-
         try {
             // Ensure JSON Info object has an `_id` field
             Class<?> rootInfoClazz = _getRootClazz(infoClazz);
