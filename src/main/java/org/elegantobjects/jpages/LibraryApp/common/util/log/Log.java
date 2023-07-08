@@ -82,7 +82,7 @@ public class Log implements ILog {
     }
 
     public @NotNull String calcMethodName() {
-        return Thread.currentThread().getStackTrace()[2].getMethodName();
+        return Thread.currentThread().getStackTrace()[4].getMethodName();
     }
 
     public @NotNull String calcSimpleName(@NotNull Object obj) {

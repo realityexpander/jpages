@@ -1,6 +1,7 @@
 package org.elegantobjects.jpages.LibraryApp.data.book.network;
 
 import org.elegantobjects.jpages.LibraryApp.common.Model;
+import org.elegantobjects.jpages.LibraryApp.common.util.HumanDate;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.data.common.network.DTOInfo;
 import org.elegantobjects.jpages.LibraryApp.data.common.Info;
@@ -21,6 +22,9 @@ public class DTOBookInfo extends DTOInfo
     public final String author;
     public final String description;
     public final String extraFieldToShowThisIsADTO;
+    public long creationTimeMillis;
+    public long lastModifiedTimeMillis;
+    public boolean isDeleted;
 
     public
     DTOBookInfo(
@@ -28,7 +32,10 @@ public class DTOBookInfo extends DTOInfo
         @NotNull String title,
         @NotNull String author,
         @NotNull String description,
-        @Nullable String extraFieldToShowThisIsADTO
+        @Nullable String extraFieldToShowThisIsADTO,
+        long creationTimeMillis,
+        long lastModifiedTimeMillis,
+        boolean isDeleted
     ) {
         super(id);
         this.title = title;
@@ -40,10 +47,14 @@ public class DTOBookInfo extends DTOInfo
         } else {
             this.extraFieldToShowThisIsADTO = extraFieldToShowThisIsADTO;
         }
+
+        this.creationTimeMillis = creationTimeMillis;
+        this.lastModifiedTimeMillis = lastModifiedTimeMillis;
+        this.isDeleted = isDeleted;
     }
     public
     DTOBookInfo(@NotNull String json, @NotNull Context context) {
-        this(context.gson.fromJson(json, DTOBookInfo.class));  // creates a DTOInfo.BookInfo from the JSON
+        this(context.gson.fromJson(json, DTOBookInfo.class));
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -59,7 +70,10 @@ public class DTOBookInfo extends DTOInfo
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
-            bookInfo.extraFieldToShowThisIsADTO
+            bookInfo.extraFieldToShowThisIsADTO,
+            bookInfo.creationTimeMillis,
+            bookInfo.lastModifiedTimeMillis,
+            bookInfo.isDeleted
         );
     }
     public
@@ -69,16 +83,22 @@ public class DTOBookInfo extends DTOInfo
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
-            "Imported from Domain.BookInfo"
+            "Extra info added during creation of DTOInfo.DTOBookInfo",
+            bookInfo.creationTimeMillis,
+            bookInfo.lastModifiedTimeMillis,
+            bookInfo.isDeleted
         );
     }
 
     @Override
     public String toString() {
         return "Book (" + this.id() + ") : " +
-                this.title + " by " + this.author + ", " +
-                this.description + ", " +
-                this.extraFieldToShowThisIsADTO;
+                this.title + " by " + this.author + ", created=" +
+                new HumanDate(this.creationTimeMillis).toDateStr() + ", " +
+                "modified=" + new HumanDate(this.lastModifiedTimeMillis).toTimeAgoStr() + ", " +
+                "isDeleted=" + this.isDeleted + ", " +
+                this.extraFieldToShowThisIsADTO + ", " +
+                this.description;
     }
 
     ///////////////////////////////////////////
@@ -87,9 +107,9 @@ public class DTOBookInfo extends DTOInfo
     //   domain layer.                       //
     ///////////////////////////////////////////
 
-    ///////////////////////////////////
-    // ToDomainInfo implementation   //
-    ///////////////////////////////////
+    /////////////////////////////////
+    // ToDomainInfo implementation //
+    /////////////////////////////////
 
     @Override
     public BookInfo toDeepCopyDomainInfo() {
@@ -107,3 +127,5 @@ public class DTOBookInfo extends DTOInfo
         return new DTOBookInfo(this);
     }
 }
+
+

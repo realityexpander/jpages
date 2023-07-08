@@ -17,6 +17,7 @@ import org.elegantobjects.jpages.LibraryApp.domain.library.Library;
 import org.elegantobjects.jpages.LibraryApp.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.*;
 
 
@@ -41,7 +42,7 @@ final class LibraryApp {
         TestingUtils testUtil = new TestingUtils(ctx);
 
         ctx.log.d(this,"Populating Book DB and API");
-        testUtil.PopulateFakeBookInfoInContextBookRepoDBandAPI();
+        testUtil.populateFakeBookInfoInBookRepoDBandAPI();
 
         // Create fake AccountInfo
         AccountInfo accountInfo = new AccountInfo(
@@ -67,7 +68,10 @@ final class LibraryApp {
                         book.id(),
                         "The Updated Title",
                         "The Updated Author",
-                        "The Updated Description"
+                        "The Updated Description",
+                        Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                        System.currentTimeMillis(),
+                        false
                     ));
             ctx.log.d(this, book.fetchInfoResult().toString());
 
@@ -87,7 +91,7 @@ final class LibraryApp {
             } else
                 ctx.log.d(this, "Book Exists --> " + ((Result.Success<BookInfo>) book2.fetchInfoResult()).value());
 
-            testUtil.DumpBookDBandAPI();
+            testUtil.printBookInfoDBandAPIEntries();
         }
 
         Populate_the_library_and_user_DBs:
@@ -97,7 +101,7 @@ final class LibraryApp {
             ////////////////////////////////////////
 
             // Create & populate a Library in the Library Repo
-            final Result<LibraryInfo> libraryInfo = testUtil.createFakeLibraryInfoInContextLibraryRepo(1);
+            final Result<LibraryInfo> libraryInfo = testUtil.createFakeLibraryInfoInLibraryInfoRepo(1);
             if (libraryInfo instanceof Result.Failure) {
                 ctx.log.d(this,"Create Library FAILURE --> " + ((Result.Failure<LibraryInfo>) libraryInfo));
 
@@ -110,15 +114,15 @@ final class LibraryApp {
             ctx.libraryInfoRepo().populateWithFakeBooks(library1InfoId, 10);
 
             // create Accounts for Users
-            final Result<AccountInfo> accountInfo1Result = testUtil.createFakeAccountInfoInContextAccountRepo(1);
-            final Result<AccountInfo> accountInfo2Result = testUtil.createFakeAccountInfoInContextAccountRepo(2);
+            final Result<AccountInfo> accountInfo1Result = testUtil.createFakeAccountInfoInAccountRepo(1);
+            final Result<AccountInfo> accountInfo2Result = testUtil.createFakeAccountInfoInAccountRepo(2);
             assert accountInfo1Result != null;  // assume success
             assert accountInfo2Result != null;  // assume success
             final AccountInfo accountInfo1 = ((Result.Success<AccountInfo>) accountInfo1Result).value(); // assume success
             final AccountInfo accountInfo2 = ((Result.Success<AccountInfo>) accountInfo2Result).value(); // assume success
 
             // Create & populate User1 in the User Repo for the Context
-            final Result<UserInfo> user1InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+            final Result<UserInfo> user1InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(1);
             if(user1InfoResult == null) throw new Exception("user1InfoResult is null");
             final UserInfo user1Info = ((Result.Success<UserInfo>) user1InfoResult).value(); // assume success
 
@@ -438,10 +442,10 @@ final class LibraryApp {
                 ctx.log.d(this,"Check_out_Book_via_User: ");
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(2);
                 assert user2InfoResult != null;
                 final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2 , ctx);
-                final Result<BookInfo> book12Result = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+                final Result<BookInfo> book12Result = testUtil.addFakeBookInfoToBookInfoRepo(12);
 
                 if (book12Result instanceof Result.Failure) {
                     ctx.log.e(this,"Book Error: " + ((Result.Failure<BookInfo>) book12Result).exception().getMessage());
@@ -476,15 +480,15 @@ final class LibraryApp {
                 ctx.log.d(this,"Give_Book_To_User: ");
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+                final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(1);
                 assert user01InfoResult != null;
                 final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), account1 , ctx);
 
-                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(2);
                 assert user2InfoResult != null;
                 final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
 
-                final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
+                final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoToBookInfoRepo(12);
 
                 if (book12InfoResult instanceof Result.Failure) {
                     ctx.log.e(this,"Book Error: " +
@@ -508,71 +512,17 @@ final class LibraryApp {
                 }
             }
 
-            Give_Checked_Out_Book_From_User_To_User:
-            if (true) {
-                System.out.println();
-                ctx.log.d(this,"Transfer_Checked_Out_Book_From_User_To_User: ");
-                ctx.log.d(this, "----------------------------------");
-
-                final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
-                assert user01InfoResult != null;
-                final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), account1 , ctx);
-
-                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
-                assert user2InfoResult != null;
-                final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
-
-                final Result<BookInfo> book12InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(12);
-                assert book12InfoResult != null;
-                final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
-                final Book book12 = new Book(book12id, library1, ctx);
-
-                // Add book12 to library1
-                final Result<Book> book12UpsertResult = library1.addTestBookToLibrary(book12, 1);
-                if (book12UpsertResult instanceof Result.Failure) {
-                    ctx.log.e(this, "Upsert Book Error: " + ((Result.Failure<Book>) book12UpsertResult).exception().getMessage());
-                    throw ((Result.Failure<Book>) book12UpsertResult).exception();
-                }
-
-                // Register user1 to library1
-                final Result<UUID2<User>> user01UpsertResult = library1.info().registerUser(user01.id());
-                if (user01UpsertResult instanceof Result.Failure) {
-                    ctx.log.e(this, "Upsert User Error: " + ((Result.Failure<UUID2<User>>) user01UpsertResult).exception().getMessage());
-                    throw ((Result.Failure<UUID2<User>>) user01UpsertResult).exception();
-                }
-
-                // Make user2 checkout book12 from library1
-                final Result<UUID2<Book>> checkedOutBookResult = user2.checkOutBookFromLibrary(book12, library1);
-                if (checkedOutBookResult instanceof Result.Failure) {
-                    ctx.log.e(this, "Checkout book FAILURE --> " + ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception().getMessage());
-                    throw ((Result.Failure<UUID2<Book>>) checkedOutBookResult).exception();
-                } else
-                    ctx.log.d(this, "Checkout Book SUCCESS --> checkedOutBook:" + ((Result.Success<UUID2<Book>>) checkedOutBookResult).value());
-
-                ctx.log.d(this,"User (2):" + user2.id() + " Transfer Checked-Out Book:" + book12id + " to User(1):" + user01.id());
-
-                // Give book from user2 to user01
-                // Note: The Library that the book is checked out from transfers the checkout to the new user.
-                // Will only allow the transfer to complete if the receiving user has an account in good standing (ie: no fines, etc.)
-                final Result<ArrayList<UUID2<Book>>> transferBookToUserResult = user2.giveBookToUser(book12, user01);
-                if (transferBookToUserResult instanceof Result.Failure) {
-                    ctx.log.e(this, "Transfer book FAILURE --> Book:" + ((Result.Failure<ArrayList<UUID2<Book>>>) transferBookToUserResult).exception().getMessage());
-                    throw ((Result.Failure<ArrayList<UUID2<Book>>>) transferBookToUserResult).exception();
-                } else
-                    ctx.log.d(this, "Transfer Book SUCCESS --> Book:" + ((Result.Success<ArrayList<UUID2<Book>>>) transferBookToUserResult).value());
-            }
-
             Give_Book_From_User_To_User:
             if (true) {
                 System.out.println();
                 ctx.log.d(this, "Give_Book_From_User_To_User: ");
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(1);
+                final Result<UserInfo> user01InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(1);
                 assert user01InfoResult != null;
                 final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), account1, ctx);
 
-                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(2);
                 assert user2InfoResult != null;
                 final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
 
@@ -597,12 +547,12 @@ final class LibraryApp {
                 ctx.log.d(this, "Transfer_Checked_out_Book_Source_Library_to_Destination_Library: ");
                 ctx.log.d(this, "----------------------------------");
 
-                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInContextUserInfoRepo(2);
+                final Result<UserInfo> user2InfoResult = testUtil.createFakeUserInfoInUserInfoRepo(2);
                 assert user2InfoResult != null;
                 final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), account2, ctx);
 
                 // Book12 represents a found book that is not in the library
-                final Result<BookInfo> book13InfoResult = testUtil.addFakeBookInfoInContextBookInfoRepo(13);
+                final Result<BookInfo> book13InfoResult = testUtil.addFakeBookInfoToBookInfoRepo(13);
                 assert book13InfoResult != null;
                 final UUID2<Book> book13id = ((Result.Success<BookInfo>) book13InfoResult).value().id();
                 final Book book13 = new Book(book13id, null, ctx); // note: sourceLibrary is null, so this book comes from an ORPHAN Library

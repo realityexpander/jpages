@@ -10,6 +10,7 @@ import org.elegantobjects.jpages.LibraryApp.domain.account.AccountInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 import org.elegantobjects.jpages.LibraryApp.domain.common.Role;
 import org.elegantobjects.jpages.LibraryApp.domain.library.Library;
+import org.elegantobjects.jpages.LibraryApp.domain.library.LibraryInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -328,6 +329,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (bookResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<Book>) bookResult).exception());
         }
+
+        // Update Info, since we modified data for this Library
+        Result<UserInfo> updateInfoResult = this.updateInfo(this.info);
+        if (updateInfoResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<UserInfo>) updateInfoResult).exception());
 
         // LEAVE FOR REFERENCE
         // Note: no update() needed as each Role method called performs its own updates on its own Info, as needed.

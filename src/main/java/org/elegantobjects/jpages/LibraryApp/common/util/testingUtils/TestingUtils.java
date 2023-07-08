@@ -2,6 +2,8 @@ package org.elegantobjects.jpages.LibraryApp.common.util.testingUtils;
 
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
+import org.elegantobjects.jpages.LibraryApp.data.book.local.EntityBookInfo;
+import org.elegantobjects.jpages.LibraryApp.data.book.network.DTOBookInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.Context;
 import org.elegantobjects.jpages.LibraryApp.domain.account.Account;
 import org.elegantobjects.jpages.LibraryApp.domain.account.AccountInfo;
@@ -14,11 +16,13 @@ import org.elegantobjects.jpages.LibraryApp.domain.user.UserInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+
 public class TestingUtils {
 
-    //////////////////////////////////////////////////////////////////////
-    //////////////////////// TESTING Helper Methods //////////////////////
-    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
+    /////////////////// TESTING Helper Utility Methods ///////////////
+    //////////////////////////////////////////////////////////////////
 
     final Context context;
 
@@ -27,12 +31,12 @@ public class TestingUtils {
         this.context = context;
     }
 
-    public void PopulateFakeBookInfoInContextBookRepoDBandAPI() {
-        context.bookInfoRepo().populateDatabaseWithFakeBookInfo();
-        context.bookInfoRepo().populateApiWithFakeBookInfo();
+    public void populateFakeBookInfoInBookRepoDBandAPI() {
+        populateDBWithFakeBookInfo();
+        populateApiWithFakeBookInfo();
     }
 
-    public void DumpBookDBandAPI() {
+    public void printBookInfoDBandAPIEntries() {
         System.out.print("\n");
         context.log.d(this,"DB Dump");
         context.bookInfoRepo().printDB();
@@ -44,7 +48,7 @@ public class TestingUtils {
         System.out.print("\n");
     }
 
-    public Result<LibraryInfo> createFakeLibraryInfoInContextLibraryRepo(
+    public Result<LibraryInfo> createFakeLibraryInfoInLibraryInfoRepo(
         final Integer id
     ) {
         Integer someNumber = id;
@@ -60,7 +64,7 @@ public class TestingUtils {
     }
 
 
-    public @Nullable Result<AccountInfo> createFakeAccountInfoInContextAccountRepo(
+    public @Nullable Result<AccountInfo> createFakeAccountInfoInAccountRepo(
         final Integer id
     ) {
         Integer someNumber = id;
@@ -84,7 +88,7 @@ public class TestingUtils {
 
         return accountInfoResult;
     }
-    public @Nullable Result<UserInfo> createFakeUserInfoInContextUserInfoRepo(
+    public @Nullable Result<UserInfo> createFakeUserInfoInUserInfoRepo(
         final Integer id
     ) {
         Integer someNumber = id;
@@ -107,13 +111,9 @@ public class TestingUtils {
         return upsertUserInfoResult;
     }
 
-    public Result<BookInfo> addFakeBookInfoInContextBookInfoRepo(
-        final Integer id
-    ) {
+    public Result<BookInfo> addFakeBookInfoToBookInfoRepo(final Integer id) {
         final BookInfo bookInfo = createFakeBookInfo(id);
-
-        return context.bookInfoRepo()
-                .upsertBookInfo(bookInfo);
+        return context.bookInfoRepo().upsertBookInfo(bookInfo);
     }
 
     public BookInfo createFakeBookInfo(final Integer id) {
@@ -124,10 +124,62 @@ public class TestingUtils {
         uuid2 = UUID2.createFakeUUID2(fakeId, Book.class);
 
         return new BookInfo(
-                uuid2,
-                "Book " + fakeId,
-                "Author " + fakeId,
-                "Description " + fakeId
+            uuid2,
+            "Book " + fakeId,
+            "Author " + fakeId,
+            "Description " + fakeId,
+            Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+            Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+            false
         );
+    }
+
+    public void populateDBWithFakeBookInfo() {
+        for (int i = 0; i < 10; i++) {
+            final int id = 1000+i*100;
+
+            Result<BookInfo> result = context.bookInfoRepo()
+                .upsertTestEntityBookInfoToDB(
+                    new EntityBookInfo(
+                        UUID2.createFakeUUID2(id, Book.class),
+                        "Title " + id,
+                        "Author " + id,
+                        "Description " + id,
+                        "Some extra info from the Entity" + id,
+                        Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                        Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                    false
+                    )
+            );
+
+            if (result instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<BookInfo>) result).exception();
+                context.log.d(this, exception.getMessage());
+            }
+        }
+    }
+
+    public void populateApiWithFakeBookInfo() {
+        for (int i = 0; i < 10; i++) {
+            final int id = 1000+i*100;
+
+            Result<BookInfo> result = context.bookInfoRepo().upsertTestDTOBookInfoToApi(
+                new DTOBookInfo(
+                    UUID2.createFakeUUID2(id, Book.class),
+                    "Title " + id,
+                    "Author " + id,
+                    "Description " + id,
+                    "Some extra info from the DTO" + id,
+                    Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                    Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                    false
+                )
+            );
+
+            if (result instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<BookInfo>) result).exception();
+                context.log.d(this, exception.getMessage());
+            }
+        }
     }
 }

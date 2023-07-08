@@ -1,9 +1,11 @@
 package org.elegantobjects.jpages.LibraryApp.data.book.local;
 
 import org.elegantobjects.jpages.LibraryApp.common.Model;
+import org.elegantobjects.jpages.LibraryApp.common.util.HumanDate;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.data.common.local.EntityInfo;
 import org.elegantobjects.jpages.LibraryApp.data.common.Info;
+import org.elegantobjects.jpages.LibraryApp.domain.Context;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 import org.elegantobjects.jpages.LibraryApp.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
@@ -21,31 +23,46 @@ public class EntityBookInfo extends EntityInfo
     public final String description;
     public final String extraFieldToShowThisIsAnEntity;
 
+    public final long creationTimeMillis;
+    public final long lastModifiedTimeMillis;
+    public final boolean isDeleted;
+
     public
     EntityBookInfo(
-        @NotNull UUID2<Book> id,
-        @NotNull String title,
-        @NotNull String author,
-        @NotNull String description,
-        @Nullable String extraFieldToShowThisIsAnEntity
+            @NotNull UUID2<Book> id,
+            @NotNull String title,
+            @NotNull String author,
+            @NotNull String description,
+            @Nullable String extraFieldToShowThisIsAnEntity,
+            long creationTimeMillis,
+            long lastModifiedTimeMillis,
+            boolean isDeleted
     ) {
         super(id);
         this.title = title;
         this.author = author;
         this.description = description;
 
+        this.creationTimeMillis = creationTimeMillis;
+        this.lastModifiedTimeMillis = lastModifiedTimeMillis;
+        this.isDeleted = isDeleted;
+
         if(extraFieldToShowThisIsAnEntity == null) {
-            this.extraFieldToShowThisIsAnEntity = "This is an Entity";
+            this.extraFieldToShowThisIsAnEntity = "This is an EntityBookInfo"; // default value
         } else {
             this.extraFieldToShowThisIsAnEntity = extraFieldToShowThisIsAnEntity;
         }
     }
+    public
+    EntityBookInfo(@NotNull String json, @NotNull Context context) {
+        this(context.gson.fromJson(json, EntityBookInfo.class));
+    }
 
-    //////////////////////////////////////////////////////////
-    // DTOInfo <-> DomainInfo conversion                    //
-    // Note: Intentionally DON'T accept `DTOInfo.BookInfo`  //
-    //   - to keep DB layer separate from API layer)        //
-    //////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+    // DTOInfo <-> DomainInfo conversion                      //
+    // Note: Intentionally DON'T accept `DTOInfo.DTOBookInfo` //
+    //   - to keep DB layer separate from API layer)          //
+    ////////////////////////////////////////////////////////////
 
     public
     EntityBookInfo(@NotNull EntityBookInfo bookInfo) {  // from EntityInfo.EntityBookInfo -> EntityInfo.EntityBookInfo
@@ -54,7 +71,10 @@ public class EntityBookInfo extends EntityInfo
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
-            bookInfo.extraFieldToShowThisIsAnEntity
+            bookInfo.extraFieldToShowThisIsAnEntity,
+            bookInfo.creationTimeMillis,
+            bookInfo.lastModifiedTimeMillis,
+            bookInfo.isDeleted
         );
     }
     public
@@ -64,16 +84,20 @@ public class EntityBookInfo extends EntityInfo
             bookInfo.title,
             bookInfo.author,
             bookInfo.description,
-            "Imported from Domain.DomainBookInfo"
+            "Extra info added during creation of EntityInfo.EntityBookInfo",
+            bookInfo.creationTimeMillis,
+            bookInfo.lastModifiedTimeMillis,
+            false
         );
     }
-
 
     @Override
     public String toString() {
         return "Book (" + this.id() + ") : " +
-                this.title + " by " + this.author + ", " +
-                this.extraFieldToShowThisIsAnEntity + ", " +
+                this.title + " by " + this.author + ", created=" +
+                new HumanDate(this.creationTimeMillis).toDateStr() + ", " +
+                "modified=" + new HumanDate(this.lastModifiedTimeMillis).toTimeAgoStr() + ", " +
+                "isDeleted=" + this.isDeleted + ", " +
                 this.description;
     }
 

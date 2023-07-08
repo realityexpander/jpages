@@ -15,20 +15,19 @@ import java.util.Map;
 
 // Business logic for Book Repo (simple CRUD operations; converts to/from DTOs/Entities/Domains)
 public class BookInfoRepo extends Repo implements IBookInfoRepo {
-    private final BookInfoApi api;
-    private final BookInfoDatabase database;
+    private final BookInfoApi bookInfoApi;
+    private final BookInfoDatabase bookInfoDatabase;
 
     public
     BookInfoRepo(
-        @NotNull BookInfoApi api,
-        @NotNull BookInfoDatabase database,
-        ILog log
+        @NotNull BookInfoApi bookInfoApi,
+        @NotNull BookInfoDatabase bookInfoDatabase,
+        @NotNull ILog log
     ) {
         super(log);
-        this.api = api;
-        this.database = database;
+        this.bookInfoApi = bookInfoApi;
+        this.bookInfoDatabase = bookInfoDatabase;
     }
-
     public
     BookInfoRepo() {
         this(new BookInfoApi(), new BookInfoDatabase(), new Log());
@@ -39,11 +38,11 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         log.d(this, "bookId " + id);
 
         // Make the request to API
-        Result<DTOBookInfo> bookInfoApiResult = api.getBookInfo(id);
+        Result<DTOBookInfo> bookInfoApiResult = bookInfoApi.getBookInfo(id);
         if (bookInfoApiResult instanceof Result.Failure) {
 
             // If API fails, try to get from cached DB
-            Result<EntityBookInfo> bookInfoResult = database.getBookInfo(id);
+            Result<EntityBookInfo> bookInfoResult = bookInfoDatabase.getBookInfo(id);
             if (bookInfoResult instanceof Result.Failure) {
                 Exception exception = ((Result.Failure<EntityBookInfo>) bookInfoResult).exception();
                 return new Result.Failure<BookInfo>(exception);
@@ -59,7 +58,7 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
                 .toDeepCopyDomainInfo();
 
         // Cache to Local DB
-        Result<EntityBookInfo> resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
+        Result<EntityBookInfo> resultDB = bookInfoDatabase.updateBookInfo(bookInfo.toInfoEntity());
         if (resultDB instanceof Result.Failure) {
             Exception exception = ((Result.Failure<EntityBookInfo>) resultDB).exception();
             return new Result.Failure<>(exception);
@@ -72,43 +71,44 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
     public Result<BookInfo> updateBookInfo(@NotNull BookInfo bookInfo) {
         log.d(this, "bookInfo: " + bookInfo);
 
-        Result<BookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.UPDATE);
-        if (bookResult instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<BookInfo>) bookResult).exception();
+        Result<BookInfo> saveResult = saveBookInfoToApiAndDB(bookInfo, UpdateKind.UPDATE);
+        if (saveResult instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<BookInfo>) saveResult).exception();
             return new Result.Failure<>(exception);
         }
 
-        return bookResult;
+        return saveResult;
     }
 
     @Override
     public Result<BookInfo> addBookInfo(@NotNull BookInfo bookInfo) {
         log.d(this, "bookInfo: " + bookInfo);
 
-        Result<BookInfo> bookResult = saveBookToApiAndDB(bookInfo, UpdateKind.ADD);
-        if (bookResult instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<BookInfo>) bookResult).exception();
+        Result<BookInfo> saveResult = saveBookInfoToApiAndDB(bookInfo, UpdateKind.ADD);
+        if (saveResult instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<BookInfo>) saveResult).exception();
             return new Result.Failure<>(exception);
         }
 
-        return bookResult;
+        return saveResult;
     }
 
     @Override
     public Result<BookInfo> upsertBookInfo(@NotNull BookInfo bookInfo) {
         log.d(this, "bookId: " + bookInfo.id());
 
-        if (database.getBookInfo(bookInfo.id()) != null) {
-            return updateBookInfo(bookInfo);
-        } else {
-            return addBookInfo(bookInfo);
+        Result<BookInfo> saveResult = saveBookInfoToApiAndDB(bookInfo, UpdateKind.UPSERT);
+        if (saveResult instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<BookInfo>) saveResult).exception();
+            return new Result.Failure<>(exception);
         }
+
+        return saveResult;
     }
 
     /////////////////////////////
     // Private Helper Methods  //
     /////////////////////////////
-
 
     private enum UpdateKind {
         ADD,
@@ -117,102 +117,96 @@ public class BookInfoRepo extends Repo implements IBookInfoRepo {
         DELETE
     }
 
-    private Result<BookInfo> saveBookToApiAndDB(
+    private Result<BookInfo> saveBookInfoToApiAndDB(
         @NotNull BookInfo bookInfo,
         @NotNull UpdateKind updateKind
     ) {
         log.d(this, "updateType: " + updateKind + ", id: " + bookInfo.id());
 
         // Make the API request
-        Result<DTOBookInfo> resultApi;
+        Result<DTOBookInfo> apiResult;
         switch (updateKind) {
             case UPDATE:
-                resultApi = api.updateBookInfo(bookInfo.toInfoDTO());
+                Result<DTOBookInfo> bookExistsResult = bookInfoApi.getBookInfo(bookInfo.id());
+                if(bookExistsResult instanceof Result.Failure)
+                    return new Result.Failure<>(((Result.Failure<DTOBookInfo>) bookExistsResult).exception());
+                apiResult = bookInfoApi.updateBookInfo(bookInfo.toInfoDTO());
+                break;
+            case UPSERT:
+                apiResult = bookInfoApi.updateBookInfo(bookInfo.toInfoDTO());
                 break;
             case ADD:
-                resultApi = api.addBookInfo(bookInfo.toInfoDTO());
+                apiResult = bookInfoApi.addBookInfo(bookInfo.toInfoDTO());
                 break;
             default:
                 return new Result.Failure<>(new Exception("UpdateType not supported: " + updateKind));
         }
 
-        if (resultApi instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<DTOBookInfo>) resultApi).exception();
+        if (apiResult instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<DTOBookInfo>) apiResult).exception();
             return new Result.Failure<>(exception);
         }
 
         // Save to Local DB
-        Result<EntityBookInfo> resultDB;
+        Result<EntityBookInfo> dbResult;
         switch (updateKind) {
             case UPDATE:
-                resultDB = database.updateBookInfo(bookInfo.toInfoEntity());
+                Result<EntityBookInfo> bookExistsResult = bookInfoDatabase.getBookInfo(bookInfo.id());
+                if(bookExistsResult instanceof Result.Failure)
+                    return new Result.Failure<>(((Result.Failure<EntityBookInfo>) bookExistsResult).exception());
+                dbResult = bookInfoDatabase.updateBookInfo(bookInfo.toInfoEntity());
+                break;
+            case UPSERT:
+                dbResult = bookInfoDatabase.updateBookInfo(bookInfo.toInfoEntity());
                 break;
             case ADD:
-                resultDB = database.addBookInfo(bookInfo.toInfoEntity());
+                dbResult = bookInfoDatabase.addBookInfo(bookInfo.toInfoEntity());
                 break;
             default:
                 return new Result.Failure<>(new Exception("UpdateType not supported: " + updateKind));
         }
 
-        if (resultDB instanceof Result.Failure) {
-            Exception exception = ((Result.Failure<EntityBookInfo>) resultDB).exception();
+        if (dbResult instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<EntityBookInfo>) dbResult).exception();
             return new Result.Failure<>(exception);
         }
 
         return new Result.Success<>(bookInfo);
     }
 
+    public Result<BookInfo> upsertTestEntityBookInfoToDB(EntityBookInfo entityBookInfo) {
+        Result<EntityBookInfo> result = bookInfoDatabase.upsertBookInfo(entityBookInfo);
+        if (result instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<EntityBookInfo>) result).exception();
+            return new Result.Failure<>(exception);
+        }
+
+        return new Result.Success<>(entityBookInfo.toDeepCopyDomainInfo());
+    }
+
+    public Result<BookInfo> upsertTestDTOBookInfoToApi(DTOBookInfo dtoBookInfo) {
+        Result<DTOBookInfo> result = bookInfoApi.upsertBookInfo(dtoBookInfo);
+        if (result instanceof Result.Failure) {
+            Exception exception = ((Result.Failure<DTOBookInfo>) result).exception();
+            return new Result.Failure<>(exception);
+        }
+
+        return new Result.Success<>(dtoBookInfo.toDeepCopyDomainInfo());
+    }
 
     /////////////////////////////////////////////////////
-    // Debugging / Testing Methods                     //
+    // Debugging Methods                               //
     //  - not part of interface or used in production) //
     /////////////////////////////////////////////////////
 
-    public void populateDatabaseWithFakeBookInfo() {
-        for (int i = 0; i < 10; i++) {
-            final int id = 1000+i*100;
-
-            database.addBookInfo(
-                new EntityBookInfo(
-                    UUID2.createFakeUUID2(id, EntityBookInfo.class),
-                    "Title " + id,
-                    "Author " + id,
-                    "Description " + id,
-                    "Some extra info from the Entity" + id
-                )
-            );
-        }
-    }
-
-    public void populateApiWithFakeBookInfo() {
-        for (int i = 0; i < 10; i++) {
-            final int id = 1000+i*100;
-
-            Result<DTOBookInfo> result = api.addBookInfo(
-                new DTOBookInfo(
-                    UUID2.createFakeUUID2(id, DTOBookInfo.class),
-                    "Title " + id,
-                    "Author " + id,
-                    "Description " + id,
-                    "Some extra info from the DTO" + id
-                )
-            );
-
-            if (result instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<DTOBookInfo>) result).exception();
-                log.d(this, exception.getMessage());
-            }
-        }
-    }
-
     public void printDB() {
-        for (Map.Entry<UUID2<Book>, EntityBookInfo> entry : database.getAllBookInfos().entrySet()) {
+        for (Map.Entry<UUID2<Book>, EntityBookInfo> entry : bookInfoDatabase.getAllBookInfos().entrySet()) {
             log.d(this, entry.getKey() + " = " + entry.getValue());
         }
     }
 
     public void printAPI() {
-        for (Map.Entry<UUID2<Book>, DTOBookInfo> entry : api.getAllBookInfos().entrySet()) {
+        for (Map.Entry<UUID2<Book>, DTOBookInfo> entry : bookInfoApi.getAllBookInfos().entrySet()) {
             log.d(this, entry.getKey() + " = " + entry.getValue());
         }
     }

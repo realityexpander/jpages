@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -27,7 +28,7 @@ public class LibraryAppTest {
     Context ctx;
     TestingUtils testUtils;
 
-    static final boolean shouldDisplayAllDebugLogs = false;  // make true to see all debug logs
+    static final boolean shouldDisplayAllDebugLogs = true;  // Set to `true` to see all debug logs
 
     @Before
     public void setUp() {
@@ -86,10 +87,10 @@ public class LibraryAppTest {
         ////////////////////////////////////////
 
         // • Put some fake BookInfo into the DB & API for BookInfo's
-        testUtils.PopulateFakeBookInfoInContextBookRepoDBandAPI();
+        testUtils.populateFakeBookInfoInBookRepoDBandAPI();
 
         // • Create & populate a Library in the Library Repo
-        final Result<LibraryInfo> libraryInfo = testUtils.createFakeLibraryInfoInContextLibraryRepo(1);
+        final Result<LibraryInfo> libraryInfo = testUtils.createFakeLibraryInfoInLibraryInfoRepo(1);
         assertTrue("Create Library FAILURE --> " + libraryInfo, libraryInfo instanceof Result.Success);
         UUID2<Library> library1InfoId = ((Result.Success<LibraryInfo>) libraryInfo).value().id();
         ctx.log.d(this,"Library Created --> id: " + ((Result.Success<LibraryInfo>) libraryInfo).value().id() + ", name: "+ ((Result.Success<LibraryInfo>) libraryInfo).value().name);
@@ -101,8 +102,8 @@ public class LibraryAppTest {
         // • Create Accounts for Users //
         /////////////////////////////////
 
-        final Result<AccountInfo> accountInfo1Result = testUtils.createFakeAccountInfoInContextAccountRepo(1);
-        final Result<AccountInfo> accountInfo2Result = testUtils.createFakeAccountInfoInContextAccountRepo(2);
+        final Result<AccountInfo> accountInfo1Result = testUtils.createFakeAccountInfoInAccountRepo(1);
+        final Result<AccountInfo> accountInfo2Result = testUtils.createFakeAccountInfoInAccountRepo(2);
         assertNotNull(accountInfo1Result);
         assertNotNull(accountInfo2Result);
         assertTrue(accountInfo1Result instanceof Result.Success);
@@ -111,7 +112,7 @@ public class LibraryAppTest {
         final AccountInfo accountInfo2 = ((Result.Success<AccountInfo>) accountInfo2Result).value();
 
         // Create & populate User1 in the User Repo for the Context
-        final Result<UserInfo> user1InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user1InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(1);
         assertNotNull(user1InfoResult);
         assertTrue(user1InfoResult instanceof Result.Success);
         final UserInfo user1Info = ((Result.Success<UserInfo>) user1InfoResult).value();
@@ -145,12 +146,21 @@ public class LibraryAppTest {
     @Test
     public void Update_BookInfo_is_Success() {
         // • ARRANGE
+
+        // Create fake book info in the DB & API
+        int bookId = 1100;
+        testUtils.addFakeBookInfoToBookInfoRepo(bookId);
+
         // Create a book object (it only has an id)
-        Book book = new Book(UUID2.createFakeUUID2(1100, Book.class), null, ctx);
+        Book book = new Book(UUID2.createFakeUUID2(bookId, Book.class), null, ctx);
         ctx.log.d(this, book.fetchInfoResult().toString());
+
         String expectedUpdatedTitle = "The Updated Title";
         String expectedUpdatedAuthor = "The Updated Author";
         String expectedUpdatedDescription = "The Updated Description";
+        long expectedUpdatedCreationTimeMillis = Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli();
+        long expectedUpdatedLastModifiedTimeMillis = Instant.parse("2023-02-01T00:00:00.00Z").toEpochMilli();
+        boolean expectedUpdatedIsDeleted = true;
 
         // • ACT
         // Update info for a book
@@ -160,11 +170,15 @@ public class LibraryAppTest {
                     book.id(),
                     expectedUpdatedTitle,
                     expectedUpdatedAuthor,
-                    expectedUpdatedDescription
+                    expectedUpdatedDescription,
+                    expectedUpdatedCreationTimeMillis,
+                    expectedUpdatedLastModifiedTimeMillis,
+                    expectedUpdatedIsDeleted
                 ));
-        ctx.log.d(this, book.fetchInfoResult().toString());
 
         // •ASSERT
+        assert(bookInfoResult instanceof Result.Success);
+
         // Get the bookInfo (null if not loaded)
         BookInfo bookInfo3 = book.fetchInfo();
         if (bookInfo3 == null) {
@@ -173,7 +187,6 @@ public class LibraryAppTest {
         }
 
         // Check the title for updated info
-        assert(bookInfoResult instanceof Result.Success);
         assertEquals(expectedUpdatedTitle, ((Result.Success<BookInfo>) bookInfoResult).value().title);
         assertEquals(expectedUpdatedAuthor, ((Result.Success<BookInfo>) bookInfoResult).value().author);
         assertEquals(expectedUpdatedDescription, ((Result.Success<BookInfo>) bookInfoResult).value().description);
@@ -463,12 +476,12 @@ public class LibraryAppTest {
         // • ARRANGE
         TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
-        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(2);
         assertNotNull(user2InfoResult);
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2 , ctx);
         assertNotNull(user2);
 
-        final Result<BookInfo> book12Result = testUtils.addFakeBookInfoInContextBookInfoRepo(12);
+        final Result<BookInfo> book12Result = testUtils.addFakeBookInfoToBookInfoRepo(12);
         assertTrue("Book12 should have been added to Library1", book12Result instanceof Result.Success);
 
         // • ACT & ASSERT
@@ -493,19 +506,19 @@ public class LibraryAppTest {
         // • ARRANGE
         TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
-        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(1);
         assertNotNull(user01InfoResult);
         assertTrue("User01 should have been added to UserInfoRepo", user01InfoResult instanceof Result.Success);
         final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1 , ctx);
         assertNotNull(user01);
 
-        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(2);
         assertNotNull(user2InfoResult);
         assertTrue("User2 should have been added to UserInfoRepo", user2InfoResult instanceof Result.Success);
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
         assertNotNull(user2);
 
-        final Result<BookInfo> book12InfoResult = testUtils.addFakeBookInfoInContextBookInfoRepo(12);
+        final Result<BookInfo> book12InfoResult = testUtils.addFakeBookInfoToBookInfoRepo(12);
         assertTrue("Book12 should have been added to Library1", book12InfoResult instanceof Result.Success);
 
         final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
@@ -528,15 +541,15 @@ public class LibraryAppTest {
         // • ARRANGE
         TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
-        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(1);
         assert user01InfoResult != null;
         final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1 , ctx);
 
-        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(2);
         assert user2InfoResult != null;
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
 
-        final Result<BookInfo> book12InfoResult = testUtils.addFakeBookInfoInContextBookInfoRepo(12);
+        final Result<BookInfo> book12InfoResult = testUtils.addFakeBookInfoToBookInfoRepo(12);
         assert book12InfoResult != null;
         final UUID2<Book> book12id = ((Result.Success<BookInfo>) book12InfoResult).value().id();
         final Book book12 = new Book(book12id, roles.library1, ctx);
@@ -563,6 +576,8 @@ public class LibraryAppTest {
         final Result<ArrayList<UUID2<Book>>> transferBookToUserResult = user2.giveBookToUser(book12, user01);
         assertTrue("User2 should have given Book12 to User01", transferBookToUserResult instanceof Result.Success);
         ctx.log.d(this, "Transfer Book SUCCESS --> Book:" + ((Result.Success<ArrayList<UUID2<Book>>>) transferBookToUserResult).value());
+
+        testUtils.printBookInfoDBandAPIEntries();
     }
 
     @Test
@@ -570,11 +585,11 @@ public class LibraryAppTest {
         // • ARRANGE
         TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
-        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(1);
+        final Result<UserInfo> user01InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(1);
         assert user01InfoResult != null;
         final User user01 = new User(((Result.Success<UserInfo>) user01InfoResult).value(), roles.account1, ctx);
 
-        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(2);
         assert user2InfoResult != null;
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
 
@@ -592,12 +607,12 @@ public class LibraryAppTest {
         // • ARRANGE
         TestRoles roles = setupDefaultRolesAndScenario(ctx, testUtils);
 
-        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInContextUserInfoRepo(2);
+        final Result<UserInfo> user2InfoResult = testUtils.createFakeUserInfoInUserInfoRepo(2);
         assert user2InfoResult != null;
         final User user2 = new User(((Result.Success<UserInfo>) user2InfoResult).value(), roles.account2, ctx);
 
         // Book12 represents a found book that is not in the library
-        final Result<BookInfo> book13InfoResult = testUtils.addFakeBookInfoInContextBookInfoRepo(13);
+        final Result<BookInfo> book13InfoResult = testUtils.addFakeBookInfoToBookInfoRepo(13);
         assert book13InfoResult != null;
         final UUID2<Book> book13id = ((Result.Success<BookInfo>) book13InfoResult).value().id();
         final Book book13 = new Book(book13id, null, ctx); // note: sourceLibrary is null, so this book comes from an ORPHAN Library

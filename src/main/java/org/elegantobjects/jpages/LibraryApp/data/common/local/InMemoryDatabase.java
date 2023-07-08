@@ -56,11 +56,9 @@ class InMemoryDatabase<TEntity extends EntityInfo, TUUID2 extends IUUID2> implem
     public Result<TEntity> addEntityInfo(@NotNull TEntity entityInfo) {
         // Simulate the request
         if (database.containsKey((UUID2<TUUID2>) entityInfo.id())) {
-            return new Result.Failure<>(new Exception("DB: Entity already exists, entityInfo: " + entityInfo));
+            return new Result.Failure<>(new Exception("DB: Entity already exists, did you mean update?, entityInfo: " + entityInfo));
         }
-        if (database.put(entityInfo.id(), entityInfo) == null) {
-            return new Result.Failure<>(new Exception("DB: Failed to add entity, entityInfo: " + entityInfo));
-        }
+        database.put(entityInfo.id(), entityInfo);
 
         return new Result.Success<>(entityInfo);
     }
