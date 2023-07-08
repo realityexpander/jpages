@@ -42,6 +42,7 @@
 - [Synchronous Code](#synchronous-code)
 - [Encourage Explicit Boolean Naming](#encourage-explicit-boolean-naming)
 - [Encourage Variable Naming with Explicit Types](#encourage-variable-naming-with-explicit-types)
+- [Encourage Explicit Naming of Any Overloaded Term](#encourage-explicit-naming-of-any-overloaded-term)
 - [Use Result Object for Errors & Exceptions](#use-result-object-for-errors--exceptions)
 - [Avoid C++/Java Design Pattern Hacks](#avoid-cjava-design-pattern-hacks)
 - [Prefer Use of Early Return](#prefer-use-of-early-return)
@@ -347,6 +348,12 @@ advantages and disadvantages.
       - ie: `userInfo` is preferred over `user` or plain `info`
     - Using the plain `{Domain}` name is preferred if the object is a domain `Role` object
       - ie: `user` is preferred over `userInfo` in this case.
+
+### Encourage Explicit Naming of Any Overloaded Term
+
+- If you must use a overloaded generic terms (like `set` or `get`), always find a name that is very specific.
+- ie: `setBookInfo` is preferred over `setInfo`
+- ie: `getUUID2TypeStr` is preferred over `getType`
 
 ### Use Result Object for Errors & Exceptions
 
