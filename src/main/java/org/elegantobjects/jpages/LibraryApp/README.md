@@ -1,6 +1,6 @@
 # Library App built using BOOP Style
 
-## Design Goals
+## Introduction & Design Goals
 
 - Create a sample application with a pure BOOP domain that adheres to Alan Kay's and Yegor Bugayenko's OOP styles
 - Document the design decisions and rules that were made to create the sample application.
@@ -16,13 +16,13 @@
   - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
   - David West, PhD's book "Object Thinking"
 
-### Contents
+## Contents
 
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
 - [Avoid Ugly COP Paradigms](#avoid-ugly-cop-paradigms)
 - [Some Useful Design Choice Departures from Strict BOOP](#some-useful-design-choice-departures-from-strict-boop)
 
-#### Code Style & Rules
+### Code Style & Rules
 
 - [Code Style](#code-style)
 - [A Note on Line Comprehension Complexity](#a-note-on-line-comprehension-complexity)
@@ -56,7 +56,7 @@
 - [Minimal Annotations](#minimal-annotations)
 - [Acceptable Acronyms, Prefixes, and Suffixes](#acceptable-acronyms-prefixes-and-suffixes)
 
-## Sample Use-case Library Application Implementation Details
+### Sample Use-case Library Application Implementation Details
 
 - Run the sample `Library Application` from Markdown in IntelliJ:
 - Click play (in IntelliJ): `LibraryAppTest` is in the `test/java/.../LibraryAppTest/` package
@@ -82,7 +82,7 @@
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
-#### Avoid Ugly COP Paradigms
+### Avoid Ugly COP Paradigms
 
 Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
@@ -105,7 +105,7 @@ advantages and disadvantages.
     the first place.
   - Factories, Builders, AbstractFactoryFactories, AbstractFactoryBuilderFactory and other hacky "creational" patterns.
  
-#### Some Useful Design Choice Departures from Strict BOOP
+### Some Useful Design Choice Departures from Strict BOOP
 
 - Some constructors use code for validation and importing JSON and will throw exceptions when not valid. These are the exceptional cases and not normal happy path.
 - Some constructors accept `null` values to indicate “use a default value here” but not used anywhere else in the App. All values passed around the Domain layer must be non-null.
