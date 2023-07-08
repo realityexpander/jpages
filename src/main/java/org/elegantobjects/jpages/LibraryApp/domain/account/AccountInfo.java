@@ -19,7 +19,6 @@ AccountInfo contains data about a single User's account status in the LibraryApp
  <li>Current Fine Amount
  <li>Max books allowed to be checked out
 </ul>
- Role objects contain the <b>{@code Model.{XXX}.{Domain}Info}</b> and the associated business logic to manipulate it.<br>
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11

@@ -8,7 +8,9 @@ import org.elegantobjects.jpages.LibraryApp.domain.common.Role;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Account Role Object - *ONLY* interacts with its own Repo, Context, and other Role Objects
+ * Account Role Object
+ *
+ * Only interacts with its own Repo, Context, and other Role Objects
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
