@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * HumanDate - Utility class for converting epoch millis to human readable date/time strings.
+ * HumanDate - Utility class for converting epoch millis to human-readable date/time strings.
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
