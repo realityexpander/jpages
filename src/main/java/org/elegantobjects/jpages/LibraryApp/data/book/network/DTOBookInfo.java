@@ -60,7 +60,7 @@ public class DTOBookInfo extends DTOInfo
     /////////////////////////////////////////////////////////////////////
     // EntityInfo <-> DomainInfo conversion                            //
     // Note: Intentionally DON'T accept `EntityInfo.EntityBookInfo`    //
-    //   - to keep DB layer separate from API layer)                   //
+    //   - to keep DB layer separate from API layer                    //
     /////////////////////////////////////////////////////////////////////
 
     public
@@ -113,7 +113,7 @@ public class DTOBookInfo extends DTOInfo
 
     @Override
     public BookInfo toDeepCopyDomainInfo() {
-        // note: implement deep copy, if class is not flat.
+        // note: implement deep copy (if class is not flat.)
         return new BookInfo(this);
     }
 
@@ -123,7 +123,7 @@ public class DTOBookInfo extends DTOInfo
 
     @Override
     public DTOBookInfo toDeepCopyInfo() {
-        // note: implement deep copy, if class is not flat.
+        // note: implement deep copy (if class is not flat.)
         return new DTOBookInfo(this);
     }
 }

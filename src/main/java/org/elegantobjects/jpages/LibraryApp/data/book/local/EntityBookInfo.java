@@ -22,7 +22,6 @@ public class EntityBookInfo extends EntityInfo
     public final String author;
     public final String description;
     public final String extraFieldToShowThisIsAnEntity;
-
     public final long creationTimeMillis;
     public final long lastModifiedTimeMillis;
     public final boolean isDeleted;
@@ -113,7 +112,7 @@ public class EntityBookInfo extends EntityInfo
 
     @Override
     public BookInfo toDeepCopyDomainInfo() {
-        // implement deep copy, if structure is not flat.
+        // implement deep copy (if structure is not flat.)
         return new BookInfo(this);
     }
 
@@ -123,7 +122,7 @@ public class EntityBookInfo extends EntityInfo
 
     @Override
     public EntityBookInfo toDeepCopyInfo() {
-        // note: implement deep copy, if structure is not flat.
+        // note: implement deep copy (if structure is not flat.)
         return new EntityBookInfo(this);
     }
 }

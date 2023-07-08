@@ -184,7 +184,6 @@ public class AccountInfo extends DomainInfo
         addAuditLogEntry("suspendAccountByStaff", "reason", reason, "staffMemberName", staffMemberName);
 
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 AccountStatus.SUSPENDED,
@@ -203,7 +202,6 @@ public class AccountInfo extends DomainInfo
         addAuditLogEntry("closeAccountByStaff", "reason", reason, "staffMemberName", staffMemberName);
 
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 AccountStatus.CLOSED,
@@ -227,7 +225,6 @@ public class AccountInfo extends DomainInfo
             updatedAccountStatus = calculateAccountStatus();
 
         return new Result.Success<>(
-//            new AccountInfo((UUID2<Account>) this.id(),
             new AccountInfo(this.id(),
                 this.name,
                 updatedAccountStatus,

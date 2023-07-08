@@ -51,20 +51,4 @@ public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
 
         return new Result.Success<>(accountInfo);
     }
-
-    ///////////////////////////////////
-    /// Published Helper methods    ///
-    ///////////////////////////////////
-
-    public void populateWithFakeAuditMessages(@NotNull UUID2<Account> accountId, int numberOfMessagesToCreate) {
-        log.d(this, "accountId: " + accountId + ", numberOfAccountsToCreate: " + numberOfMessagesToCreate);
-        AccountInfo account = database.get(accountId);
-
-        for (int i = 0; i < numberOfMessagesToCreate; i++) {
-            account.addTestAuditLogMessage(
-                "Test Audit message " + i + " for account: " + account.id()
-            );
-        }
-    }
-
 }

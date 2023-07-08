@@ -99,7 +99,7 @@ public interface Info<TInfo> {
 
         try {
             // Ensure JSON Info object has an `_id` field
-            Class<?> rootInfoClazz = _getRootClass(infoClazz);
+            Class<?> rootInfoClazz = _getRootClazz(infoClazz);
             Object idField = rootInfoClazz.getDeclaredField("_id").get(infoFromJson);
             if(idField == null) {
                 return new Result.Failure<>(new Exception("checkJsonInfoIdMatchesThisInfoId(): Info class does not have an _id field"));
@@ -121,7 +121,7 @@ public interface Info<TInfo> {
         return new Result.Success<>(infoFromJson);
     }
 
-    default Class<?> _getRootClass(Class<?> infoClazz) {
+    default Class<?> _getRootClazz(Class<?> infoClazz) {
 
         Class<?> rootClazz = infoClazz;
         while(!rootClazz.getSuperclass().getSimpleName().equals("Object")) {

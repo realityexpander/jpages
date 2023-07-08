@@ -20,7 +20,6 @@ public class BookInfo extends DomainInfo
     public final String title;
     public final String author;
     public final String description;
-
     public long creationTimeMillis;
     public long lastModifiedTimeMillis;
     public boolean isDeleted;

@@ -53,7 +53,6 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
         this(UUID2.randomUUID2(), context);
     }
 
-
     /////////////////////////
     // Static constructors //
     /////////////////////////

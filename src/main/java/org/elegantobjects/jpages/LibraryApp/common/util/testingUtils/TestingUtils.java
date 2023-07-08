@@ -182,4 +182,21 @@ public class TestingUtils {
             }
         }
     }
+
+    public void populateAccountWithFakeAuditMessages(@NotNull UUID2<Account> accountId, int numberOfMessagesToCreate) {
+        context.log.d(this, "accountId: " + accountId + ", numberOfAccountsToCreate: " + numberOfMessagesToCreate);
+        Result<AccountInfo> infoResult = context.accountInfoRepo().fetchAccountInfo(accountId);
+        if (infoResult instanceof Result.Failure) {
+            context.log.d(this, "Error: " + ((Result.Failure<AccountInfo>) infoResult).exception().getMessage());
+            return;
+        }
+        AccountInfo accountInfo = ((Result.Success<AccountInfo>) infoResult).value();
+
+
+        for (int i = 0; i < numberOfMessagesToCreate; i++) {
+            accountInfo.addTestAuditLogMessage(
+                    "Test Audit message " + i + " for account: " + accountInfo.id()
+            );
+        }
+    }
 }
