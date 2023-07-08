@@ -109,7 +109,7 @@ advantages and disadvantages.
 - Some constructors use code for validation and importing JSON and will throw exceptions when not valid. These are the exceptional cases and not normal happy path.
 - Some constructors accept `null` values to indicate “use a default value here” but not used anywhere else in the App. All values passed around the Domain layer must be non-null.
 - I had to make `id` of objects public and mutable to work with Gson json importing, I don’t know a workaround for it.
-- I had to do some type introspection and casting in the data layer and to handle type-safe UUID’s.
+- I had to do some java reflection and casting in the data layer and to handle type-safe UUID’s.
 
 ## Code Style
 
