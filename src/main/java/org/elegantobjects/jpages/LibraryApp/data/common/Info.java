@@ -88,7 +88,7 @@ public interface Info<TInfo> {
         }
     }
 
-    // This interface used to enforce all {Domain}Info objects have a `deepCopy()` method
+    // This interface used to enforce all {Domain}Info objects have a `deepCopy()` method.
     // - Just add `implements ToInfo.hasDeepCopyInfo<ToInfo<{InfoClass}>>` to the class
     //   definition, and the toDeepCopyInfo() method will be added.
     interface hasToDeepCopyInfo<TInfo extends ToInfo<?>> {
