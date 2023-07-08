@@ -28,7 +28,7 @@ public class LibraryAppTest {
     Context ctx;
     TestingUtils testUtils;
 
-    static final boolean shouldDisplayAllDebugLogs = true;  // Set to `true` to see all debug logs
+    static final boolean shouldDisplayAllDebugLogs = false;  // Set to `true` to see all debug logs
 
     @Before
     public void setUp() {
