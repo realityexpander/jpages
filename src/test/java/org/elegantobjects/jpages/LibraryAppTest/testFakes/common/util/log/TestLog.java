@@ -57,7 +57,7 @@ public class TestLog extends Log {
     }
 
     @Override
-    public @NotNull String calcMethodName() {
+    protected @NotNull String calcMethodName() {
         return Thread.currentThread().getStackTrace()[4].getMethodName(); // note: 4, not 3. Tests run differently than production.
     }
 

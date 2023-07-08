@@ -9,27 +9,32 @@ import java.util.*;
 import static java.lang.String.format;
 
 /**
- <b>{@code UUID2}</b> is a type-safe wrapper for a UUID, and it can be used in place of a UUID.<br>
+ <b>{@code UUID2}</b> is a type-safe wrapper for an <b>{@code UUID}</b>, and it can be used in place
+    of an <b>{@code UUID}</b>.<br>
  <ul>
  <li> Benefits:<br>
     <ul>
-        <li>Used to enforce type-constrained UUIDs for Objects that expect specific types of UUIDs.</li>
-        <li>Allows for easier debugging and defining the types of objects that the UUID is referencing in Json payloads.</li>
-        <li>Includes implementation of type-safe {@code HashMap} for {@code UUID2}s.</li>
-        <li>{@code UUID2} is immutable.</li>
+        <li>Used to enforce type-constrained <b>{@code UUID}s</b> for Objects that expect a specific
+            type of <b>{@code UUID}</b>.</li>
+        <li>Allows for easier debugging and defining of types of objects that the <b>{@code UUID}</b> is
+            referencing in Json payloads.</li>
+        <li>Includes implementation of type-safe <b>{@code HashMap}</b> for <b>{@code UUID2}s</b>.</li>
+        <li><b>{@code UUID2}</b> is immutable.</li>
     </ul>
- <li> {@code IUUID2} is a marker interface for classes that will be used with UUID2.</li>
- <li> Domain objects must be marked with the {@code IUUID2} marker interface to be used with {@code UUID2}.</li>
+ <li> <b>{@code IUUID2}</b> is a marker interface for classes that will be used with <b>{@code UUID2}</b>.</li>
+ <li> Domain objects must be marked with the <b>{@code IUUID2}</b> marker interface to be used with
+      <b>{@code UUID2}</b>.</li>
  <br>
- <li> The {@code UUID2Type} is the "Class <b>Inheritance</b> Path", <b>NOT</b> the "Class Path" (also called "Package" Path), like so: <br>
+ <li> The <b>{@code UUID2Type}</b> is derived from the "Class <b>Inheritance</b> Path", <b>NOT</b> the "Class Path" (also
+      called "Package" Path), like so: <br>
       <br>
-      <b>{@code Model.Domain.BookInfo}</b> ⬅︎ <i>"Class Inheritance path" is the UUID2Type</i><br>
-      <i>instead of:</i> <br>
+      <b>{@code Model.Domain.BookInfo}</b> ⬅︎ <i>"Class Inheritance path" is the <b>{@code UUID2Type}.</b></i><br>
+      <i>⩥⩥⩥ instead of:</i> <br>
       <b>{@code org.elegantobjects.jpages.App2.domain.book.BookInfo}</b> ⬅︎ <i>"Class Path"</i><br>
  </li>
  <br>
  <i>Design note: The java "Class Path" of a Class changes if the package or package structure of a Class changes,
- so UUID2 uses the <b>"Class Inheritance Path"</b> for more stable id's instead.</i>
+ so <b>{@code UUID2}</b> uses the <b>"Class Inheritance Path"</b> to have more stable types.</i>
  </ul>
  <br>
  <i></i>UUID2 String Format example:</i><br><br>
@@ -38,7 +43,7 @@ import static java.lang.String.format;
  UUID2:Object.Role.User@00000000-0000-0000-0000-000000000001              
  ^^^^^-- Always prefixed with `UUID2`                                     
       ^-- `:` divides between Prefix and Type                             
-       ^^^^^^^^^^^^^^^^-- UUID2Type                                       
+       ^^^^^^^^^^^^^^^^-- UUID2Type
                        ^-- `@` divides the UUID2Type and UUID Value
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-- UUID Value 
  </pre>
@@ -47,6 +52,7 @@ import static java.lang.String.format;
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
 **/
+
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;
     private String _uuid2Type; // Class Inheritance Path of the object the UUID refers to. '.' separated.

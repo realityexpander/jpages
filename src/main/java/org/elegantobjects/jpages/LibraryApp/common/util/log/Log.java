@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Log Role<br>
+ * <br>
  * Logs to the system console
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
@@ -83,15 +84,15 @@ public class Log implements ILog {
         error(calcLogPrefix(tag), msg);
     }
 
-    public @NotNull String calcLogPrefix(Object obj) {
+    protected @NotNull String calcLogPrefix(Object obj) {
         return calcSimpleName(obj) + "➤" + calcMethodName() + "()";
     }
 
-    public @NotNull String calcMethodName() {
+    protected @NotNull String calcMethodName() {
         return Thread.currentThread().getStackTrace()[4].getMethodName();
     }
 
-    public @NotNull String calcSimpleName(@NotNull Object obj) {
+    protected @NotNull String calcSimpleName(@NotNull Object obj) {
         return obj.getClass().getSimpleName();
     }
 }

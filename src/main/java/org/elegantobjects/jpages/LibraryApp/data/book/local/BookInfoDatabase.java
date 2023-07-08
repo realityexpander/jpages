@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * BookInfoDatabase
- *
+ * <p>
  * This class uses domain specific language and wraps an implementation of the IDatabase interface
  * for EntityBookInfo.
  *

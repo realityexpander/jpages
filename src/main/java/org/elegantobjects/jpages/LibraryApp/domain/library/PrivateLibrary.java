@@ -16,42 +16,45 @@ import static java.lang.String.format;
 
 Private Library
 
-<ul>
- <li>A <b>{@code PrivateLibrary}</b> is a <b>{@code Library}</b that is not part of
-     any system {@code Library}.</li>
- <li>A <b>{@code PrivateLibrary}</b> is identical to a regular library, except it doesn't verify any
-     <b>{@code Account}</b> info and any {@code User} can {@code checkIn} and {@code checkOut} any {@code Book}.</li>
- <li>Used as a BOOP style alternate to using {@code null} or "NoLibrary".</li>
+ A Private Library is not a system Library, so it doesn't access the Account Role Object for any account checks.<br>
  <br>
- <li><i>Note: A special case for <b>{@code PrivateLibrary}</b> is an Orphan <b{@code PrivateLibrary}</b> which only allows
-     a single Book of a specific id to be checked into/out of it.</i></li>
+ Used to represent a "Personal" Library, or a library for a single "found" book, or a Library for a newly created
+ book, etc.<br>
+
+ <ul>
+ <li>Any <b>{@code User}</b> can <b>{@code checkIn}</b> and <b>{@code checkOut}</b> any Book from this Library.</li>
+ <li>A <b>{@code PrivateLibrary}</b> is a <b>{@code Library}</b> that is not part of
+ any system <b>{@code Library}</b>.</li>
+ <li>Users can have unlimited Private Libraries & unlimited number of Books in them.</li>
+ <li>A <b>{@code PrivateLibrary}</b> is identical to a regular library, except it doesn't verify any
+     <b>{@code Account}</b> info and any <b>{@code User}</b> can <b>{@code checkIn}</b> and
+     <b>{@code checkOut}</b> any <b>{@code Book}</b>.</li>
+ <li><i>Note: A special case <b>{@code PrivateLibrary}</b> is an Orphan <b{@code PrivateLibrary}</b> which
+     only allows a single Book of a specific id to be checked into/out of it. See below.</i></li>
 </ul>
+ <br>
+  BOOP design notes for this <b>{@code PrivateLibrary}</b> class:<br>
+ <br>This is a system design <b>alternative</b> to:<br>
+ <ul>
+ <li>... using null to represent a Book which is not part of any Library.</li>
+ <li>... naming this class "NoLibrary" or "PersonalLibrary" or "UnassignedLibrary"</li>
+ <li>... to using "null" we create an object that conveys the intention behind what "null" means in this context.</li>
+ <li>Question: What is the concept of a "null" Library? Maybe it is a Library which is not part of any system Library?</li>
+ <li>How about a "Library" which is not part of any system Library is called a "PrivateLibrary"?</li>
+ </ul>
+ORPHAN Private Libraries:
+ <ul>
+ <li>Orphan definition: <i>An orphan is a child that has no parent.</i><br></li>
+ <li>For a Book, it would have no "source" Public Library.</li>
+ <li>If a Private Library is created from a BookId, it is called an ORPHAN Private Library</li>
+      and its sole duty is to hold ONLY 1 Book of one specific BookId, and never any other BookIds.</li>
+ <li>It can only ever hold 1 Book at a time.</li>
+ <li>ORPHAN PrivateLibraries have the <b>{@code isForOnlyOneBook}</b> flag set to true.</li>
+ <li>note: I could have subclassed <b>{@code PrivateLibrary}</b> into <b>{@code OrphanPrivateLibrary}</b>,</li>
+     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.</li>
+ </ul>
 **/
 public class PrivateLibrary extends Library implements IUUID2 {
-
-    // This a Private Library is not part of any system Library.
-    // ie: It is a "Personal" Library, a library for a single-found book, or a Library for a newly created book, etc.
-    //
-    //  This is not a system Library, so it doesn't access the Account Role Object for any account checks.
-    // - Any user can `checkIn` and `checkOut` Books from this Library.
-    // - Users can have unlimited Private Libraries & unlimited number of Books in them.
-    //
-    // This is a system design alternative to:
-    //   - Using `null` to represent a Book which is not part of any Library.
-    //   - or naming it "NoLibrary" or "PersonalLibrary" or "UnassignedLibrary"
-    //   - Instead of using "null" we create an object that conveys the intention behind what "null" means in this context.
-    //     ie: what is the concept of a "null" Library? Maybe it is a Library which is not part of any system Library?
-    //     How about a "Library" which is not part of any system Library is called a "PrivateLibrary"?
-
-    // ORPHAN Private Library:
-    //   - ORPHAN definition: An orphan is a child that has no parent.
-    //     - For a Book, it would have no "source" Public Library.
-    //   - If a Private Library is created from a BookId, it is called an ORPHAN Private Library
-    //     and its sole duty is to hold ONLY 1 Book of one specific BookId, and never any other BookIds.
-    //   - It can only ever hold 1 Book at a time.
-    //   - ORPHAN PrivateLibraries have the `isForOnlyOneBook` flag set to true.
-    //   - App Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
-    //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
 
     private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
                                              // Note: the naming here conveys the intent of the variable,

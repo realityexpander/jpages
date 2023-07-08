@@ -1,9 +1,9 @@
 package org.elegantobjects.jpages.LibraryApp.common.util.uuid2;
 
 /**
- * IUUID2 Marker interface.<br>
+ * <b>{@code IUUID2}</b> Marker interface.<br>
  *
- * Marker interface for any Domain Role class for use in UUID2<{Domain}> identifiers.<br>
+ * Marker interface for any Domain <b>{@code Role}</b> class for use in <b>{@code UUID2<{Domain}>}</b> identifiers.<br>
  *
  * This interface is also used to get the type of the UUID2 as a String.
  *
@@ -13,6 +13,6 @@ package org.elegantobjects.jpages.LibraryApp.common.util.uuid2;
 
 public interface IUUID2 {  // Keep this in global namespace to reduce wordiness at declaration sites (avoiding: UUID2<UUID2.hasUUID2> wordiness)
     String uuid2TypeStr();  // Returns the Type of the UUID2 as a String.
-                               // - Usually the last 3 segments of the class hierarchy of the object
-                               // - ie: "Model.DomainInfo.BookInfo" or "Role.Book"
+                            // - Usually the class inheritance hierarchy path of the object
+                            // - ie: "Model.DomainInfo.BookInfo" or "Role.Book"
 }

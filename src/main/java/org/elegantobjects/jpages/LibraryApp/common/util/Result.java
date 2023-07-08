@@ -2,8 +2,18 @@ package org.elegantobjects.jpages.LibraryApp.common.util;
 
 /**
  * Result Utility class.
- *
+ * <p>
  * Utility class to hold a result of an operation.
+ *
+ * @param <T> Type of the result.<br>
+ * Example:<br>
+ * <pre>
+ * Result&lt;String&gt; result = new Result.Success&lt;&gt;("Hello");
+ * </pre>
+ * Example:
+ * <pre>
+ * Result&lt;String&gt; result = new Result.Failure&lt;&gt;(new Exception("Error"));
+ * </pre>
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
