@@ -78,7 +78,7 @@
 - The developer experience is paramount, and should be the primary focus of the design.
 - Architected by layer, and each layer is grouped by feature
 - Allows convenient and easy to comprehend navigation of the code.
-  - One downside, the hierarchy is separated into different folders, so it's not obvious what the hierarchy is.
+  - One downside, the hierarchy is separated into different folders, so it's not obvious what the class hierarchy is.
   - To remedy this, documentation about the data hierarchy should exist near the code (maybe a README). 
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
