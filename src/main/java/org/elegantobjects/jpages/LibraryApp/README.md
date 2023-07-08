@@ -606,8 +606,11 @@ advantages and disadvantages.
 
 # Library Application Details
 
-You can find the sample Library App in the App2 folder, along with some tests to show functionality.
+You can find the sample Library App in the `LibraryApp` package, along with some tests to show functionality.
 
+- You can Run the sample `Library Application` from Markdown in IntelliJ:
+- Click play (in IntelliJ): `LibraryAppTest` is in the `test/java/.../LibraryAppTest/` package
+- Click play (in IntelliJ): `LibraryApp` is in the `src/main/.../jpages/LibraryApp/` package
 
 ## Architecture
 
