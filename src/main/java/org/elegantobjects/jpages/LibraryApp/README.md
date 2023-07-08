@@ -618,7 +618,7 @@ advantages and disadvantages.
   </tr>
 </table>
 
-# Library Application Details
+# Example Library Application Details
 
 You can find the sample Library App in the `LibraryApp` package, along with some tests to show functionality.
 
