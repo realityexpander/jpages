@@ -143,7 +143,7 @@ advantages and disadvantages.
   should be broken up when approaching 6 items on a given line.
 - Horizontal line complexity should never have more than 8 items on a given line.
 - Strive to keep line complexity to maximum of 6 "items," and know when the complexity passes that number, it causes a 
-  dramatic increase in the cognitive load which slows comprehension, for most readers.
+  dramatic increase in the cognitive load which slows comprehension for most readers.
 
 ### Encapsulation of Data via Intention-named methods
 
@@ -351,7 +351,7 @@ advantages and disadvantages.
 
 ### Encourage Explicit Naming of Any Overloaded Term
 
-- If you must use a overloaded generic terms (like `set` or `get`), always find a name that is very specific.
+- If you must use an overloaded generic terms (like `set` or `get`), always find a name that is very specific.
 - ie: `setBookInfo` is preferred over `setInfo`
 - ie: `getUUID2TypeStr` is preferred over `getType`
 
