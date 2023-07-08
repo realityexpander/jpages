@@ -177,9 +177,9 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id()));
 
         // Check out Book to User
-        Result<Book> checkOutBookresult = this.info.checkOutPublicLibraryBookToUser(book, user);
-        if (checkOutBookresult instanceof Result.Failure)
-            return new Result.Failure<>(((Result.Failure<Book>) checkOutBookresult).exception());
+        Result<Book> checkOutBookResult = this.info.checkOutPublicLibraryBookToUser(book, user);
+        if (checkOutBookResult instanceof Result.Failure)
+            return new Result.Failure<>(((Result.Failure<Book>) checkOutBookResult).exception());
 
         // Update Info, since we modified data for this Library
         Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
