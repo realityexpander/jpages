@@ -3,6 +3,10 @@
     <module name="jpages" />
     <extension name="coverage">
       <pattern>
+        <option name="PATTERN" value="org.elegantobjects.jpages.LibraryApp.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+      <pattern>
         <option name="PATTERN" value="org.elegantobjects.jpages.LibraryAppTest.*" />
         <option name="ENABLED" value="true" />
       </pattern>
