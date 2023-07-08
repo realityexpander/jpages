@@ -110,11 +110,12 @@ advantages and disadvantages.
 - Some constructors accept `null` values to indicate “use a default value here” but not used anywhere else in the App. All values passed around the Domain layer must be non-null.
 - I had to make `id` of objects public and mutable to work with Gson json importing, I don’t know a workaround for it.
 - I had to do some java reflection and casting in the data layer and to handle type-safe UUID’s.
+- Use of Early Return for error conditions, and to avoid deep nesting of code.
 
 ## Code Style
 
 - Prevent <b>"Whats this for?"</b> and <b>"What does that do?"</b> questions by using explicit 
-  intention-revealing names, pedantically for everything.
+  intention-revealing names, pedantically and mildly patronizing for everything.
 - Prefer verbosity of descriptions to brevity of code. Should always be conveying intent as dense as possible 
   but still readable English.
 - Risk pedantic naming over brevity of code. Strive to convey meaning as densely as possible, 
