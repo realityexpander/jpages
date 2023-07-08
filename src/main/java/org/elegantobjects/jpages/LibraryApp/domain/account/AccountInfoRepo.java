@@ -7,8 +7,8 @@ import org.elegantobjects.jpages.LibraryApp.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * AccountInfoRepo is a Repo for AccountInfo objects.
- *
+ * AccountInfoRepo is a Repo for AccountInfo objects.<br>
+ * <br>
  * Holds Account info for all the users in the system (simple CRUD operations)
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
