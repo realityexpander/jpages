@@ -2,7 +2,8 @@
 
 ## Design Goals
 
-- Have a pure domain layer that adheres to Alan Kay's and Yegor Bugayenko's OO styles
+- Create a sample application a pure domain layer that adheres to Alan Kay's and Yegor Bugayenko's OO styles
+- Document the design decisions and rules that were made to create the sample application.
   - BOOP stands for "Back-to Object Oriented Programming" or "Bugayenko Object Oriented Programming"
   - Writing code that is easy to change & comprehend quickly using English prose.
   - Back to the original OO conceptual basics approach for Java coding style in the Domain layer for Role objects.
