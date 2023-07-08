@@ -17,13 +17,9 @@
 
 ### Contents
 
-- `LibraryAppTest` is in the `test/.../LibraryAppTest` package
-- `LibraryApp` is in the `src/main/.../jpages/LibraryApp` package
-
-
-
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
 - [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
+- [Some Useful Design Choice Departures from Strict BOOP](#some-useful-design-choice-departures-from-strict-boop)
 
 #### Code Style & Rules
 
@@ -59,7 +55,12 @@
 - [Minimal Annotations](#minimal-annotations)
 - [Acceptable Acronyms, Prefixes, and Suffixes](#acceptable-acronyms-prefixes-and-suffixes)
 
-#### Sample Use-case Library Application Implementation Details
+## Sample Use-case Library Application Implementation Details
+
+- Run the sample `Library Application` from Markdown
+- Click play: `LibraryAppTest` is in the `test/java/.../LibraryAppTest/` package
+- Click play: `LibraryApp` is in the `src/main/.../jpages/LibraryApp/` package
+
 
 - [Library Application Details](#architecture)
 - [Arbitrary Domain Design decisions](#arbitrary-domain-design-decisions)
@@ -101,6 +102,13 @@ advantages and disadvantages.
   - Over use of inheritance, and deep inheritance hierarchies.
   - Lots of "Design Patterns" implementations to solve problems that should not exist in the first place.
   - Factories, Builders, AbstractFactoryFactories, AbstractFactoryBuilderFactory and other hacky "creational" patterns.
+ 
+#### Some Useful Design Choice Departures from Strict BOOP
+
+- Some constructors use code for validation and importing JSON and will throw exceptions when not valid. These are the exceptional case and not normal happy path.
+- Some constructors accept `null` values to indicate “use a default value here” but not used anywhere else in the App. All values passed around the Domain layer must be non-null.
+- I had to make `id` of objects public and mutable to work with Gson json importing, I don’t know a work around for it.
+- I had to do some type introspection and casting in the data layer and to handle type-safe UUID’s.
 
 ## Code Style
 
