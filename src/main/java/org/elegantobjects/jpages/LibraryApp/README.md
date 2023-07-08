@@ -594,12 +594,13 @@ advantages and disadvantages.
     </td>
     <td>
       • Append to a string variable name that represents a specific type.<br>
-      • ie: <code>UUID2TypeStr</code>> is preferred over <code>UUID2Type</code>.<br>
+      • ie: <code>UUID2TypeStr</code> is preferred over <code>UUID2Type</code>.<br>
       <br>
       <i>Reasoning:</i> Because casual reading of the type name <code>UUID2Type</code> 
-      could be easily misunderstood for a <code>"clazz"</code> of 
-      <code>Class&lt;UUID2&lt?&gt&gt</code> in plain reading of the name in code. Without the 
-      <code>Str</code> at the end, you would need to take an extra step to look up the actual type.
+      could be easily misunderstood for a <code>"clazz"</code> of <br>
+      <code>Class&lt;UUID2&lt;?&gt;&gt;</code> in plain reading of the name in code. Without the 
+      <code>Str</code> at the end, you would need to take an extra step<br>
+      to look up the actual type.
     </td>
   </tr>
 </table>
