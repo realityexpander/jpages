@@ -22,11 +22,12 @@ Private Library
  book, etc.<br>
 
  <ul>
- <li>Any <b>{@code User}</b> can <b>{@code checkIn}</b> and <b>{@code checkOut}</b> any Book from this Library.</li>
  <li>A <b>{@code PrivateLibrary}</b> is a <b>{@code Library}</b> that is not part of
  any system <b>{@code Library}</b>.</li>
+ <li>Any <b>{@code User}</b> can <b>{@code checkIn}</b> and <b>{@code checkOut}</b> any <b>{@code Book}</b>
+ from this <b>{@code PrivateLibrary}</b>.</li>
  <li>Users can have unlimited Private Libraries & unlimited number of Books in them.</li>
- <li>A <b>{@code PrivateLibrary}</b> is identical to a regular library, except it doesn't verify any
+ <li>A <b>{@code PrivateLibrary}</b> is identical to a normal <b>{@code Library}</b>, except it doesn't verify any
      <b>{@code Account}</b> info and any <b>{@code User}</b> can <b>{@code checkIn}</b> and
      <b>{@code checkOut}</b> any <b>{@code Book}</b>.</li>
  <li><i>Note: A special case <b>{@code PrivateLibrary}</b> is an Orphan <b{@code PrivateLibrary}</b> which
