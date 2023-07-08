@@ -19,7 +19,7 @@
 ### Contents
 
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
-- [Avoiding Ugly COP Paradigms](#avoid-ugly-cop-paradigms)
+- [Avoid Ugly COP Paradigms](#avoid-ugly-cop-paradigms)
 - [Some Useful Design Choice Departures from Strict BOOP](#some-useful-design-choice-departures-from-strict-boop)
 
 #### Code Style & Rules
