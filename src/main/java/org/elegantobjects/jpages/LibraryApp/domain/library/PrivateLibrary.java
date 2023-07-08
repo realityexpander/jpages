@@ -14,8 +14,8 @@ import static java.lang.String.format;
 
 /**
 
-Private Library
-
+Private Library<br>
+<br>
  A Private Library is not a system Library, so it doesn't access the Account Role Object for any account checks.<br>
  <br>
  Used to represent a "Personal" Library, or a library for a single "found" book, or a Library for a newly created
