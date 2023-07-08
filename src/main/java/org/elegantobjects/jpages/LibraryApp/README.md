@@ -58,8 +58,8 @@
 ## Sample Use-case Library Application Implementation Details
 
 - Run the sample `Library Application` from Markdown
-- Click play: `LibraryAppTest` is in the `test/java/.../LibraryAppTest/` package
-- Click play: `LibraryApp` is in the `src/main/.../jpages/LibraryApp/` package
+- Click play in IntelliJ: `LibraryAppTest` is in the `test/java/.../LibraryAppTest/` package
+- Click play in IntelliJ: `LibraryApp` is in the `src/main/.../jpages/LibraryApp/` package
 
 
 - [Library Application Details](#architecture)
