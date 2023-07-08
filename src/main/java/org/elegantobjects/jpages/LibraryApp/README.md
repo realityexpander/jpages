@@ -463,6 +463,12 @@ advantages and disadvantages.
 
 ### Explicit Naming of "Find" methods
 
+- For "search" functions use the word `find` in the name.
+  - ie: `findCheckedOutBooks` is preferred over `searchForCheckedOutBooks`
+- Use of `By` is encouraged
+  - ie: `findCheckedOutBooksByUserId` is preferred over `findCheckedOutBooks`
+  - ie: `findCheckedOutBooksByUserIdAndLibraryId` is preferred over `findCheckedOutBooks`
+    - even though both convey the same meaning, one is easier to read in English.
 - Use of `Of` is encouraged
  - ie: `findUserIdOfCheckedOutBook` instead of `findCheckedOutBookUserId`
  - even though both convey the same meaning, one is easier to read in English.
