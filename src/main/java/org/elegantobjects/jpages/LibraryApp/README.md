@@ -18,7 +18,7 @@
 ### Contents
 
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
-- [Avoiding Ugly COP Paradigms](#avoiding-ugly-cop-paradigms)
+- [Avoiding Ugly COP Paradigms](#avoid-ugly-cop-paradigms)
 - [Some Useful Design Choice Departures from Strict BOOP](#some-useful-design-choice-departures-from-strict-boop)
 
 #### Code Style & Rules
@@ -81,7 +81,7 @@
 - Built to test from start to finish, with no external dependencies.
 - Everything is fake-able (mock-able) and isolated for ease and speed of testing.
 
-#### Avoiding Ugly COP Paradigms
+#### Avoid Ugly COP Paradigms
 
 Class Oriented Programming (COP) is a style of programming that seems to be primarily focused 
 around continuing to use old procedural/imperative styles leftover from C and C++, but with
@@ -105,9 +105,9 @@ advantages and disadvantages.
  
 #### Some Useful Design Choice Departures from Strict BOOP
 
-- Some constructors use code for validation and importing JSON and will throw exceptions when not valid. These are the exceptional case and not normal happy path.
+- Some constructors use code for validation and importing JSON and will throw exceptions when not valid. These are the exceptional cases and not normal happy path.
 - Some constructors accept `null` values to indicate “use a default value here” but not used anywhere else in the App. All values passed around the Domain layer must be non-null.
-- I had to make `id` of objects public and mutable to work with Gson json importing, I don’t know a work around for it.
+- I had to make `id` of objects public and mutable to work with Gson json importing, I don’t know a workaround for it.
 - I had to do some type introspection and casting in the data layer and to handle type-safe UUID’s.
 
 ## Code Style
