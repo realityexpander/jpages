@@ -21,33 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * The page with content type.
+ * The page.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class PageWithContentType implements Page {
+public final class KeyValuePage implements Page {
 
-    private final Page page;
-    private final String type;
+    private final Map<String, String> args;
 
-    PageWithContentType(final Page page, final String contentType) {
-        this.page = page;
-        this.type = contentType;
+    public KeyValuePage() {
+        this.args = new HashMap<>(0);
     }
 
     @Override
     public Page with(final String key, final String value) {
+        this.args.put(key, value);
         return this;
     }
 
     @Override
     public Output printTo(final Output output) {
-        return this.page.printTo(
-            output.with("Content-Type", this.type)
-        );
+        return new TextPage(
+            this.args
+                .entrySet()
+                .stream()
+                .map(e -> e.getKey() + ": " + e.getValue())
+                .collect(Collectors.joining("\n"))
+        ).printTo(output);
     }
 }

@@ -16,7 +16,17 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-// Library Role Object - *ONLY* interacts with its own Repo, Context, and other Role Objects
+/**
+ * Library Role Object<br>
+ * <br>
+ * Library is a Role Object that represents a Library in the LibraryApp domain.<br>
+ * <br>
+ * *ONLY* interacts with its own Repo, Context, and other Role Objects<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class Library extends Role<LibraryInfo> implements IUUID2 {
     private final LibraryInfoRepo repo;
 

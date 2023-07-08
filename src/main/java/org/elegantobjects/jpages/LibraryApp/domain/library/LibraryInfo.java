@@ -10,6 +10,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/**
+ * LibraryInfo is a DomainInfo class for the Library domain object.<br>
+ * <br>
+ * LibraryInfo is a mutable class that contains information about the Library domain object.<br>
+ * <br>
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class LibraryInfo extends DomainInfo
         implements
         Model.ToDomainInfo<LibraryInfo>

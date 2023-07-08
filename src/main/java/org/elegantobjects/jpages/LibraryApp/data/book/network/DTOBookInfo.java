@@ -11,6 +11,15 @@ import org.elegantobjects.jpages.LibraryApp.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * DTOBookInfo<br>
+ * <br>
+ * "Dumb" Data Transfer Object for BookInfo<br>
+ * <br>
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class DTOBookInfo extends DTOInfo
     implements
         Model.ToDomainInfo<BookInfo>,

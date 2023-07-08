@@ -6,7 +6,15 @@ import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
 
-// Holds User info for all users in the system (simple CRUD operations)
+/**
+ * UserInfoRepo is a repository for UserInfo objects.<br>
+ * <br>
+ * Holds User info for all the users in the system (simple CRUD operations).<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class UserInfoRepo extends Repo implements IUserInfoRepo {
     // Simulate a database on a server somewhere
     private final UUID2.HashMap<UUID2<User>, UserInfo> database = new UUID2.HashMap<>();

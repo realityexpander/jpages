@@ -44,6 +44,8 @@ import static java.lang.String.format;
  </pre>
  </div>
 </ul>
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
 **/
 public class UUID2<TUUID2 extends IUUID2> implements IUUID2 {
     private final UUID uuid;

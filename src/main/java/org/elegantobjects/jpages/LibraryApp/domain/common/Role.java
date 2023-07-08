@@ -15,9 +15,18 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.UUID;
 
-/////////////////////////////////////////////////////
-// Domain Role - Common Domain Role Abstract class //
-/////////////////////////////////////////////////////
+/**
+ * Domain Role - Common Domain Role Abstract class<br>
+<ul>
+ <li>Repo only accepts/returns Domain Models, and internally converts to/from DTOs/Entities/Domains</li>
+ <li>Works with the network API & local database to perform CRUD operations, and also performs validation.</li>
+ <li>Can also be used to implement caching.</li>
+</ul>
+  The Repo can easily accept fake APIs & Database for testing.
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public abstract class Role<TDomainInfo extends DomainInfo>
     implements
         Info<TDomainInfo>,

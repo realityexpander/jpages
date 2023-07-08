@@ -7,7 +7,13 @@ import org.elegantobjects.jpages.LibraryApp.domain.Context;
 import org.elegantobjects.jpages.LibraryApp.domain.common.Role;
 import org.jetbrains.annotations.NotNull;
 
-// Account Role Object - *ONLY* interacts with its own Repo, Context, and other Role Objects
+/**
+ * Account Role Object - *ONLY* interacts with its own Repo, Context, and other Role Objects
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class Account extends Role<AccountInfo> implements IUUID2 {
     public final UUID2<Account> id;
     private final AccountInfoRepo repo;

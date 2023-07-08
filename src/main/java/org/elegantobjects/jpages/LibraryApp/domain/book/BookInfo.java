@@ -11,6 +11,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+/**
+ * BookInfo - Contains information about a book like title, author, description, etc.<br>
+ * <br>
+ * This class uses domain-specific language to modify information for the BookInfo class.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class BookInfo extends DomainInfo
     implements
         Model.ToEntityInfo<EntityBookInfo>,
@@ -73,9 +82,12 @@ public class BookInfo extends DomainInfo
         this(uuid2.uuid(), "", "", "", 0, 0, false);
     }
 
-    // DomainInfo objects Must:
-    // - Accept both `DTO.BookInfo` and `Entity.BookInfo`
-    // - Convert to Domain.BookInfo
+    ////////////////////////////////////////////////////////
+    // DomainInfo objects Must:                           //
+    // - Accept both `DTO.BookInfo` and `Entity.BookInfo` //
+    // - Convert to Domain.BookInfo                       //
+    ////////////////////////////////////////////////////////
+
     public
     BookInfo(@NotNull DTOBookInfo dtoBookInfo) {
         // Converts from DTOInfo to DomainInfo

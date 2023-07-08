@@ -17,7 +17,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-// User Role Object - Only interacts with its own Repo, the Context, and other Role Objects
+/**
+ * User Role Object<br>
+ * <br>
+ * Only interacts with its own Repo, the Context, and other Role Objects
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class User extends Role<UserInfo> implements IUUID2 {
     private final UserInfoRepo repo;
     private final Account account; // User's Account Role Object

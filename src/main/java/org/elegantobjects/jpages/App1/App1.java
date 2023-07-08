@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1;
 
 
 import java.io.IOException;
@@ -15,13 +15,13 @@ public final class App1 extends IOException {
 
     private static final long serialVersionUID = 0x7523L;
 
-    interface Resource {
+    public interface Resource {
         Resource define(String name, String value);
 
         void printTo(Output output) throws IOException;
     }
 
-    interface Output {
+    public interface Output {
         void print(String name, String value) throws IOException;
     }
 
@@ -31,7 +31,7 @@ public final class App1 extends IOException {
         this.session = session;
     }
 
-    static class Session {
+    public static class Session {
 
         private final Resource resource;
         private Map<String, String> params;
@@ -163,7 +163,7 @@ public final class App1 extends IOException {
 
 
     // Start the server
-    void start(int port) throws IOException {
+    public void start(int port) throws IOException {
         try (ServerSocket server = new ServerSocket(port)) {
             server.setSoTimeout(1000);
 

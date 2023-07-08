@@ -13,7 +13,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-// Business logic for Book Repo (simple CRUD operations; converts to/from DTOs/Entities/Domains)
+/**
+ * BookInfoRepo is a repository for the BookInfo class.<br>
+ * <br>
+ * Business logic for Book Repo (simple CRUD operations; converts to/from DTOs/Entities/Domains)
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class BookInfoRepo extends Repo implements IBookInfoRepo {
     private final BookInfoApi bookInfoApi;
     private final BookInfoDatabase bookInfoDatabase;

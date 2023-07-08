@@ -21,31 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * The page.
+ * The output.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class HtmlTextPage implements Page {
+public final class SimpleTextOutput implements Output {
 
-    private final String html;
+    private final String before;
 
-    HtmlTextPage(final String html) {
-        this.html = html;
+    public SimpleTextOutput(final String txt) {
+        this.before = txt;
     }
 
     @Override
-    public Page with(final String key, final String value) {
-        return this;
+    public String toString() {
+        return this.before;
     }
 
     @Override
-    public Output printTo(final Output output) {
-        return output
-            .with("Content-Length", Integer.toString(this.html.length()))
-            .with("X-Body", this.html);
+    public Output with(final String name, final String value) {
+        final StringBuilder after = new StringBuilder(this.before);
+        if (after.length() == 0) {
+            after.append("HTTP/1.1 200 OK\r\n");
+        }
+        if ("X-Body".equals(name)) {
+            after.append("\r\n").append(value);
+        } else {
+            after.append(name).append(": ").append(value).append("\r\n");
+        }
+        return new SimpleTextOutput(after.toString());
+    }
+
+    @Override
+    public void writeTo(final OutputStream output) throws IOException {
+        output.write(this.before.getBytes());
     }
 }

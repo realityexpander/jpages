@@ -14,8 +14,17 @@ import org.elegantobjects.jpages.LibraryApp.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-// Book Role Object - Only interacts with its own repository, Context, and other Role Objects
-// Note: Use of @Nullable for `sourceLibrary` indicates "use default value" - see pickSourceLibrary() below.
+/**
+ * Book Role Object - Only interacts with its own repository, Context, and other Role Objects<br>
+ * <br>
+ * Note: Use of <b>@Nullable</b> for <b>sourceLibrary</b> indicates to <i>"use default value"</i><br>
+ * <br>
+ * Look at this.pickSourceLibrary() for more information.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class Book extends Role<BookInfo> implements IUUID2 {
     private final BookInfoRepo repo;
     private final Library sourceLibrary; // Book's source Library Role Object - owns this Book.

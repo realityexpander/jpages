@@ -17,6 +17,13 @@ import org.jetbrains.annotations.Nullable;
 
 import static org.elegantobjects.jpages.LibraryApp.domain.Context.ContextKind.PRODUCTION;
 
+/**
+ * Context is a singleton class that holds all the repositories and utility classes.<br>
+ * <br>
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 @SuppressWarnings("CommentedOutCode")
 public class Context implements IContext {
     // static public Context INSTANCE = null;  // LEAVE for reference - Enforces singleton instance & allows global access

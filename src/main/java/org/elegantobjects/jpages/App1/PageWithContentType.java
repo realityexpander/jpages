@@ -21,20 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1;
 
 /**
- * The text page.
+ * The page with content type.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class TextPage implements Page {
+public final class PageWithContentType implements Page {
 
-    private final String body;
+    private final Page page;
+    private final String type;
 
-    TextPage(final String text) {
-        this.body = text;
+    public PageWithContentType(final Page page, final String contentType) {
+        this.page = page;
+        this.type = contentType;
     }
 
     @Override
@@ -44,9 +46,8 @@ public final class TextPage implements Page {
 
     @Override
     public Output printTo(final Output output) {
-        return output
-            .with("Content-Type", "text/plain")
-            .with("Content-Length", Integer.toString(this.body.length()))
-            .with("X-Body", this.body);
+        return this.page.printTo(
+            output.with("Content-Type", this.type)
+        );
     }
 }

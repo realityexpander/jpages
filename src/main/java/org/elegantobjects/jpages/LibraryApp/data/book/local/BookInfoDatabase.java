@@ -9,6 +9,16 @@ import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 
 import java.util.Map;
 
+/**
+ * BookInfoDatabase
+ *
+ * This class uses domain specific language and wraps an implementation of the IDatabase interface
+ * for EntityBookInfo.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class BookInfoDatabase {
     private final IDatabase<Book, EntityBookInfo> database;
 

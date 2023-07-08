@@ -9,10 +9,17 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
-// Info - Caches the Model Object's "Info" and defines required Info operations.
-// Info object stores the "business data" for the Domain object.
-// It is the "single source of truth" for the Domain object.
-// Domain objects keep a single reference to their Info object, and load/save it to/from the server/DB as needed.
+/**
+ <b>{@code Info}</b> is a data holder class for transferring data to/from the Domain from Database.<br>
+ <ul>
+   <li><b>{@code TInfo info}</b> - Caches the Model Object's "Info" and defines required Info operations.</li>
+   <li>The <b>{@code Info}</b> object stores the "business data" for the Domain object.</li>
+   <li>It is the "single source of truth" for the Domain object's mutable data.</li>
+ </ul>
+ Domain objects keep a single-source-of-truth reference to their data, and load/save it to/from the server/DB as needed.
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+**/
 public interface Info<TInfo> {
     // TInfo info;  // Requires a field named `info` of type `TInfo` (is there a way to enforce this in java?)
 
@@ -122,7 +129,6 @@ public interface Info<TInfo> {
     }
 
     default Class<?> _getRootClazz(Class<?> infoClazz) {
-
         Class<?> rootClazz = infoClazz;
         while(!rootClazz.getSuperclass().getSimpleName().equals("Object")) {
             rootClazz = rootClazz.getSuperclass();

@@ -21,49 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.elegantobjects.jpages.App1;
 
 /**
- * The session.
+ * The page with a few routes.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public class Session {
+public final class PageWithRoutes implements Page {
 
-    private final Page page;
+    private final String path;
 
-    Session(final Page pge) {
-        this.page = pge;
+    private final Page success;
+    private final Page error;
+
+    public PageWithRoutes(final String path, final Page success, final Page error) {
+        this.path = path;
+        this.success = success;
+        this.error = error;
     }
 
-    final Page with(final String request) {
-        final Map<String, String> pairs = new HashMap<>(0);
-        final String[] lines = request.split("\r\n");
+    @Override
+    public Page with(final String key, final String value) {
+        if (key.equals("X-Path")) {
+            if (value.equals(this.path)) {
+                return this.success.with(key, value);
+            }
 
-        // Put all headers into the map
-        for (int idx = 1; idx < lines.length; ++idx) {
-            final String[] parts = lines[idx].split(":");
-            pairs.put(parts[0].trim(), parts[1].trim());
+            return this.error.with(key, value);
         }
 
-        // Define the method, path, query, and protocol
-        final String[] parts = lines[0].split(" ");
-        pairs.put("X-Method", parts[0]);
-        final String[] qparts = parts[1].split("\\?", 2);
-        pairs.put("X-Path", qparts[0]);
-        pairs.put("X-Query", qparts.length < 2 ? "" : qparts[1]);
-        pairs.put("X-Protocol", parts[2]);
-
-        // Define the body
-        Page target = this.page;
-        for (final Map.Entry<String, String> pair : pairs.entrySet()) {
-            target = target.with(pair.getKey(), pair.getValue());
-        }
-        return target;
+        return this;
     }
 
+    @Override
+    public Output printTo(final Output output) {
+        return output;
+    }
 }

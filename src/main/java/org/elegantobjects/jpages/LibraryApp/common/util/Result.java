@@ -1,5 +1,14 @@
 package org.elegantobjects.jpages.LibraryApp.common.util;
 
+/**
+ * Result Utility class.
+ *
+ * Utility class to hold a result of an operation.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 @SuppressWarnings("unused")  // For T type parameter, which is actually used in Success<T> and Failure<T> subclasses...(todo - Why do we get that warning here?)
 public class Result<T> {
     public static class Success<T> extends Result<T> {

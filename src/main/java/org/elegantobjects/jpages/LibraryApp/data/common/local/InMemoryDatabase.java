@@ -9,6 +9,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * InMemoryDatabase is an implementation of the IDatabase interface for the EntityInfo class.
+ *
+ * This class is a stub for a real database implementation.
+ *
+ * In a real implementation, this class would use a database driver to connect to a database for CRUD operations.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 @SuppressWarnings("FieldCanBeLocal")
 public
 class InMemoryDatabase<TEntity extends EntityInfo, TUUID2 extends IUUID2> implements IDatabase<TUUID2, TEntity> {

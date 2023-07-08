@@ -21,15 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1Test;
+
+import org.elegantobjects.jpages.App1.*;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Test;
 
 /**
- * The page.
+ * The test of the TextPage.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-interface Page {
-    Page with(String key, String value);
-    Output printTo(Output output);
+public final class TextPageTest {
+
+    @Test
+    public void testWorks() throws Exception {
+        final Page page = new PageWithContentType(
+            new HtmlTextPage("Hi!"),
+            "text/html"
+        );
+        page.with("X-Path", "/user/account")
+            .with("Accept", "text/html");
+        final Output output = page.printTo(new SimpleTextOutput(""));
+        MatcherAssert.assertThat(
+            output.toString(),
+            Matchers.containsString("")
+        );
+    }
+
 }

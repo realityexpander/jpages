@@ -11,6 +11,15 @@ import org.elegantobjects.jpages.LibraryApp.domain.book.BookInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
+/**
+ * EntityBookInfo is a Data Transfer Object (DTO) that is used to transfer data between the
+ * Domain Layer and the Data Layer.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class EntityBookInfo extends EntityInfo
     implements
         Model.ToDomainInfo<BookInfo>,

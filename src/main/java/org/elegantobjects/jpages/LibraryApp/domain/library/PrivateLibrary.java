@@ -17,13 +17,13 @@ import static java.lang.String.format;
 Private Library
 
 <ul>
- <li>A {@code PrivateLibrary} is a {@code Library} for {@code Book}s which are not part of
+ <li>A <b>{@code PrivateLibrary}</b> is a <b>{@code Library}</b that is not part of
      any system {@code Library}.</li>
- <li>Used as an alternate to using {@code null} or "NoLibrary".</li>
- <li>A PrivateLibrary is identical to a regular library, except it doesn't verify any Account info and
-     any {@code User} can {@code checkIn} and {@code checkOut} {@code Books}.</li>
+ <li>A <b>{@code PrivateLibrary}</b> is identical to a regular library, except it doesn't verify any
+     <b>{@code Account}</b> info and any {@code User} can {@code checkIn} and {@code checkOut} any {@code Book}.</li>
+ <li>Used as a BOOP style alternate to using {@code null} or "NoLibrary".</li>
  <br>
- <li><i>Note: A special case for {@code PrivateLibrary} is an Orphan {@code PrivateLibrary} which only allows
+ <li><i>Note: A special case for <b>{@code PrivateLibrary}</b> is an Orphan <b{@code PrivateLibrary}</b> which only allows
      a single Book of a specific id to be checked into/out of it.</i></li>
 </ul>
 **/
@@ -52,6 +52,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
     //   - ORPHAN PrivateLibraries have the `isForOnlyOneBook` flag set to true.
     //   - App Design Note: We could have subclassed PrivateLibrary into OrphanPrivateLibrary,
     //     but that would have added a deeper inheritance tree & complexity to the system for a simple edge use case.
+
     private final Boolean isForOnlyOneBook;  // true = ORPHAN Private Library, false = normal Private Library
                                              // Note: the naming here conveys the intent of the variable,
                                              //       even if the reader doesn't know about "Orphan" libraries.

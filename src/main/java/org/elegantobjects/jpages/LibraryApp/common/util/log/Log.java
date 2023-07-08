@@ -2,7 +2,13 @@ package org.elegantobjects.jpages.LibraryApp.common.util.log;
 
 import org.jetbrains.annotations.NotNull;
 
-// Logs to the system console
+/**
+ * Log Role<br>
+ * Logs to the system console
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
 public class Log implements ILog {
     // These could be swapped out for files or network calls.
     private void debug(String tag, String msg) {

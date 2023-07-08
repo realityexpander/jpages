@@ -10,6 +10,13 @@ import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * BookInfoApi encapsulates an in-memory API database simulation for the DTOBookInfo.<br>
+ * <br>
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 // Note: Use Domain-specific language to define the API
 public class BookInfoApi {
     private final InMemoryAPI<Book, DTOBookInfo> api;

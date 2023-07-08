@@ -13,6 +13,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+/**
+ * UserInfo is a DomainInfo class that holds the information about a User.<br>
+ * <br>
+ * Holds the information about a User, including the User's name, email, and the list of Books the User has accepted.<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class UserInfo extends DomainInfo
     implements
         Model.ToDomainInfo<UserInfo>

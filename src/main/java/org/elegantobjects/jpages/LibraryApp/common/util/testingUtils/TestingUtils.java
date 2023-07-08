@@ -18,6 +18,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 
+/**
+ * Testing Utility Methods<br>
+ * <br>
+ * Useful for adding fake data to the Repos, DB and API for testing purposes.<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class TestingUtils {
 
     //////////////////////////////////////////////////////////////////

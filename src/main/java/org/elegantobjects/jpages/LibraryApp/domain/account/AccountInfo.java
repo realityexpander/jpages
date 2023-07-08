@@ -12,11 +12,19 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-// AccountInfo contains data about a single User's account status in the LibraryApp system.
-// - Status of Account (active, inactive, suspended, etc.)
-// - Current Fine Amount
-// - Max books allowed to be checked out
-// - Role objects contain the "Model.{XXX}.{Domain}Info" and the associated business logic to manipulate it
+/**
+AccountInfo contains data about a single User's account status in the LibraryApp system.<br>
+<ul>
+ <li>Status of Account (active, inactive, suspended, etc.)</li>
+ <li>Current Fine Amount
+ <li>Max books allowed to be checked out
+</ul>
+ Role objects contain the <b>{@code Model.{XXX}.{Domain}Info}</b> and the associated business logic to manipulate it.<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 @SuppressWarnings("CommentedOutCode")
 public class AccountInfo extends DomainInfo
         implements

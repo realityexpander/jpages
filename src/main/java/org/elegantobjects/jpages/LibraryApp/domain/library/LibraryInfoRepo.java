@@ -9,7 +9,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-// Holds Library info for all the libraries in the system (simple CRUD operations)
+/**
+ * LibraryInfoRepo is a repository for LibraryInfo objects.<br>
+ * <br>
+ * Holds Library info for all the libraries in the system (simple CRUD operations).<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
     // simulate a database on server
     private final UUID2.HashMap<UUID2<Library>, LibraryInfo> database = new UUID2.HashMap<>();

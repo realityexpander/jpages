@@ -21,46 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
-
-import java.io.IOException;
-import java.io.OutputStream;
+package org.elegantobjects.jpages.App1;
 
 /**
- * The output.
+ * The text page.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class SimpleTextOutput implements Output {
+public final class TextPage implements Page {
 
-    private final String before;
+    private final String body;
 
-    SimpleTextOutput(final String txt) {
-        this.before = txt;
+    public TextPage(final String text) {
+        this.body = text;
     }
 
     @Override
-    public String toString() {
-        return this.before;
+    public Page with(final String key, final String value) {
+        return this;
     }
 
     @Override
-    public Output with(final String name, final String value) {
-        final StringBuilder after = new StringBuilder(this.before);
-        if (after.length() == 0) {
-            after.append("HTTP/1.1 200 OK\r\n");
-        }
-        if ("X-Body".equals(name)) {
-            after.append("\r\n").append(value);
-        } else {
-            after.append(name).append(": ").append(value).append("\r\n");
-        }
-        return new SimpleTextOutput(after.toString());
-    }
-
-    @Override
-    public void writeTo(final OutputStream output) throws IOException {
-        output.write(this.before.getBytes());
+    public Output printTo(final Output output) {
+        return output
+            .with("Content-Type", "text/plain")
+            .with("Content-Length", Integer.toString(this.body.length()))
+            .with("X-Body", this.body);
     }
 }

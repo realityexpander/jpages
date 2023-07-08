@@ -6,7 +6,15 @@ import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.common.Repo;
 import org.jetbrains.annotations.NotNull;
 
-// Holds Account info for all the users in the system (simple CRUD operations)
+/**
+ * AccountInfoRepo is a Repo for AccountInfo objects.
+ *
+ * Holds Account info for all the users in the system (simple CRUD operations)
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
+
 public class AccountInfoRepo extends Repo implements IAccountInfoRepo {
 
     // simulate a local database on server (UUID2<Account> is the key)

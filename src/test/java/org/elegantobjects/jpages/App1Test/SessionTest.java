@@ -21,32 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1Test;
 
+import org.elegantobjects.jpages.App1.Output;
+import org.elegantobjects.jpages.App1.Page;
+import org.elegantobjects.jpages.App1.Session;
+import org.elegantobjects.jpages.App1.SimpleTextOutput;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 /**
- * The test of the TextPage.
+ * The test of the Session.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-public final class TextPageTest {
+public final class SessionTest {
 
     @Test
     public void testWorks() throws Exception {
-        final Page page = new PageWithContentType(
-            new HtmlTextPage("Hi!"),
-            "text/html"
+        final Session session = new Session(
+            new Page() {
+                @Override
+                public Page with(final String name, final String value) {
+                    return this;
+                }
+                @Override
+                public Output printTo(final Output output) {
+                    return output.with("Content-Type", "text/plain")
+                        .with("Content-Length", "13")
+                        .with("X-Body", "Hello, world!");
+                }
+            }
         );
-        page.with("X-Path", "/user/account")
-            .with("Accept", "text/html");
+        final Page page = session.with("GET / HTTP/1.1\r\n");
         final Output output = page.printTo(new SimpleTextOutput(""));
         MatcherAssert.assertThat(
             output.toString(),
-            Matchers.containsString("")
+            Matchers.containsString("HTTP/1.1 200 OK\r\n")
         );
     }
 

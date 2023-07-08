@@ -8,9 +8,21 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * InMemoryAPI is an implementation of the IAPI interface for the DTOInfo.
+ *
+ * @param <TUUID2> The type of the UUID2
+ * @param <TDTOInfo> The type of the DTOInfo
+ * @since 0.11
+ */
+
 @SuppressWarnings("FieldCanBeLocal")
-public
-class InMemoryAPI<TUUID2 extends IUUID2, TDTOInfo extends DTOInfo> implements IAPI<TUUID2, TDTOInfo> {
+public class InMemoryAPI<
+        TUUID2 extends IUUID2,
+        TDTOInfo extends DTOInfo
+    > implements
+        IAPI<TUUID2, TDTOInfo>
+{
     private final URL url;
     private final HttpClient client;
 

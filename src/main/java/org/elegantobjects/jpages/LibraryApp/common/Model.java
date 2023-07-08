@@ -31,6 +31,8 @@ import org.jetbrains.annotations.NotNull;
    <li>{@code {EntityInfo}Info} hold the Database transfer "dumb" objects that transport info to/from their service/db.</li>
    <li>Minimal validation occurs in the Domain layer, when an DTOInfo/EntityInfo object is converted into a DomainInfo object.</li>
  </ul>
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
  **/
 public class Model {
     public UUID2<?> _id; // Can't make final due to need to set it during JSON deserialization. 🫤

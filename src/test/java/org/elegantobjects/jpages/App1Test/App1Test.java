@@ -1,8 +1,9 @@
-package org.elegantobjects.jpages;
+package org.elegantobjects.jpages.App1Test;
 
 import com.jcabi.http.request.JdkRequest;
 import com.jcabi.http.response.RestResponse;
 import junit.framework.TestCase;
+import org.elegantobjects.jpages.App1.App1;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Ignore;

@@ -21,18 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.elegantobjects.jpages;
-
-import java.io.IOException;
-import java.io.OutputStream;
+package org.elegantobjects.jpages.App1;
 
 /**
- * The output.
+ * The page.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @since 0.1
  */
-interface Output {
-    Output with(String name, String value);
-    void writeTo(OutputStream output) throws IOException;
+public final class HtmlTextPage implements Page {
+
+    private final String html;
+
+    public HtmlTextPage(final String html) {
+        this.html = html;
+    }
+
+    @Override
+    public Page with(final String key, final String value) {
+        return this;
+    }
+
+    @Override
+    public Output printTo(final Output output) {
+        return output
+            .with("Content-Length", Integer.toString(this.html.length()))
+            .with("X-Body", this.html);
+    }
 }
