@@ -62,9 +62,9 @@ public interface Info<TInfo> {
 
     static <TToInfo extends ToInfo<?>> @Nullable // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
     TToInfo createInfoFromJson(
-            String json,
-            Class<TToInfo> infoClazz, // type of `Info` object to create
-            Context context
+        String json,
+        Class<TToInfo> infoClazz, // type of `Info` object to create
+        Context context
     ) {
         try {
             TToInfo obj = context.gson.fromJson(json, (Type) infoClazz);
