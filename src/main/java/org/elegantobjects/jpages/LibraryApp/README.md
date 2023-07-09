@@ -26,7 +26,7 @@
 
 - [Code Style](#code-style)
 - [A Note on Managing Source-Code Line Complexity](#a-note-on-managing-source-code-line-complexity)
-- [A Note on Line Comprehension Complexity](#a-note-on-line-comprehension-complexity)
+- [### A Note on Managing Source-Code Line-Complexity](#a-note-on-managing-source-code-line-complexity)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No `null` in Domain](#no-null-in-domain)
 - [Intention Revealing Error Messages](#intention-revealing-error-messages)
@@ -140,8 +140,9 @@ advantages and disadvantages.
 
 ### A Note on Managing Source-Code Line-Complexity
 
-- Humans can handle 7±2 items in their short-term working memory at a given time, so code lines
-- Limit the complexity of each line of code to 6 items or less allows the reader to easier and faster comprehension.
+- Humans can handle 7±2 items in their short-term working memory at a given time. Limiting the number of items
+  allows the reader to comprehend what is written faster and easier.
+- Limiting the complexity of each line of code to 6 items improves the reader's speed and ease of comprehension.
 - Consider breaking up into multiple lines when nearing 6 items on a given line.
 - Line complexity should never have more than 9 items on a given line.
 - Strive to keep line complexity to maximum of 6 items, and know when the line complexity exceeds that number, it 
