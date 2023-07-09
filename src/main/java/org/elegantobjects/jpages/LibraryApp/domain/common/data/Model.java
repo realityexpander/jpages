@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  <b>Model - Top of data "Info" hierarchy</b><br>
  <br>
- Handles data "Info" conversion of {@code DomainInfo} <i>to/from</i> {@code DTOInfo/EntityInfo}.<br>
+ Defines interface for data "Info" conversion of <b>{@code DomainInfo}</b> <i>to/from</i> <b>{@code DTOInfo/EntityInfo}</b>.<br>
  <br>
  <b>Domain Info Classes</b><br>
  <ul>
