@@ -524,7 +524,7 @@ advantages and disadvantages.
       <code>Id</code>
     </td>
     <td>
-      for <code>Id</code>'s
+      for identifiers, ie: <code>userId</code>, <code>bookId</code>, <code>libraryId</code>, etc.
     </td>
   </tr>
   <tr>

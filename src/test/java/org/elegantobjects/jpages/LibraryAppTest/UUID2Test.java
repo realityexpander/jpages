@@ -13,6 +13,12 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
+/**
+ * UUID2Test - Unit tests for UUID2 class.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
 public class UUID2Test {
     Context ctx;
     UUID2.HashMap<UUID2<Book>, UUID2<User>> uuid2ToEntityMap;

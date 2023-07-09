@@ -23,6 +23,12 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
+/**
+ * LibraryAppTest integration tests for the LibraryApp.<br>
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
 public class LibraryAppTest {
 
     Context ctx;

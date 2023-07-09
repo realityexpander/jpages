@@ -17,6 +17,12 @@ import java.util.Collection;
 import static org.junit.Assert.*;
 import static org.junit.runners.Parameterized.*;
 
+/**
+ * HumanDateTest - Unit tests for HumanDate class.
+ *
+ * @author Chris Athanas (realityexpanderdev@gmail.com)
+ * @since 0.11
+ */
 @RunWith(Parameterized.class)
 public class HumanDateTest {
 
