@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.LibraryApp.common.data.network;
+package org.elegantobjects.jpages.LibraryApp.data.network;
 
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;

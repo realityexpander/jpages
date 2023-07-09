@@ -1,6 +1,6 @@
-package org.elegantobjects.jpages.LibraryApp.common.data.local;
+package org.elegantobjects.jpages.LibraryApp.data.local;
 
-import org.elegantobjects.jpages.LibraryApp.common.data.network.URL;
+import org.elegantobjects.jpages.LibraryApp.data.network.URL;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;

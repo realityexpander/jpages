@@ -2,9 +2,9 @@ package org.elegantobjects.jpages.LibraryApp.domain.book.data.local;
 
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.LibraryApp.common.data.local.IDatabase;
-import org.elegantobjects.jpages.LibraryApp.common.data.local.InMemoryDatabase;
-import org.elegantobjects.jpages.LibraryApp.common.data.network.URL;
+import org.elegantobjects.jpages.LibraryApp.data.local.IDatabase;
+import org.elegantobjects.jpages.LibraryApp.data.local.InMemoryDatabase;
+import org.elegantobjects.jpages.LibraryApp.data.network.URL;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 
 import java.util.Map;

@@ -1,4 +1,4 @@
-package org.elegantobjects.jpages.LibraryApp.common.data.network;
+package org.elegantobjects.jpages.LibraryApp.data.network;
 
 /**
  * HttpClient is a data holder class for transferring data to/from the Domain from API.<br>
