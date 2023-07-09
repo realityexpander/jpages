@@ -25,7 +25,7 @@
 ### Code Style & Rules
 
 - [Code Style](#code-style)
-- [A Note on Complexity of Per-Line Code-Comprehension](#a-note-on-complexity-of-per-line-code-comprehension)
+- [A Note on Managing Source-Code Line Complexity](#a-note-on-managing-source-code-line-complexity)
 - [A Note on Line Comprehension Complexity](#a-note-on-line-comprehension-complexity)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No `null` in Domain](#no-null-in-domain)
@@ -138,7 +138,7 @@ advantages and disadvantages.
 - A person who doesn't code should be able to look at a method or variable and know what it does/means.
 - Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
-### A Note on Managing Source-Code Line Complexity
+### A Note on Managing Source-Code Line-Complexity
 
 - Humans can handle 7±2 items in their short-term working memory at a given time, so code lines
 - Limit the complexity of each line of code to 6 items or less allows the reader to easier and faster comprehension.
