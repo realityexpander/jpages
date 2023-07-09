@@ -628,6 +628,7 @@ You can find the sample Library App in the `LibraryApp` package, along with some
 - You can Run the sample `Library Application` and tests from Markdown in IntelliJ:
 - Click play (in IntelliJ): `LibraryAppTest` is in the `test/java/.../LibraryAppTest/LibraryAppTest`
 - Click play (in IntelliJ): `UUID2Test` is in the `test/java/.../LibraryAppTest/UUID2Test`
+- Click play (in IntelliJ): `HumanDateTest` is in the `test/java/.../LibraryAppTest/HumanDateTest`
 - Click play (in IntelliJ): `LibraryApp` is in the `src/main/.../jpages/LibraryApp/LibraryApp`
 
 ## Architecture

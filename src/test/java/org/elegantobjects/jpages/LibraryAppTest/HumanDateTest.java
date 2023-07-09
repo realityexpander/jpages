@@ -1,5 +1,7 @@
-package org.elegantobjects.jpages.LibraryApp.common.util;
+package org.elegantobjects.jpages.LibraryAppTest;
 
+import org.elegantobjects.jpages.LibraryApp.common.util.HumanDate;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -61,7 +63,7 @@ public class HumanDateTest {
 
     @Test
     public void Calling_toDateTimeStr_returns_DateTime_string_is_Success() {
-        assertEquals(expectedDateTimeString,
+        Assert.assertEquals(expectedDateTimeString,
             new HumanDate(testDateTimeInstant, ZoneId.of("UTC")).toDateTimeStr()
         );
     }
@@ -97,13 +99,13 @@ public class HumanDateTest {
         // • ARRANGE
         long now = testDateTimeInstant.toEpochMilli();
         long timeInTheFuture = now + ONE_SECOND;
-        long timeAgoJustNow = now - ONE_SECOND + 500; // 500ms
-        long timeAgoSeconds = now - ONE_SECOND * 10;
-        long timeAgoMinutes = now - ONE_MINUTE * 10;
-        long timeAgoHours   = now - ONE_HOUR   * 10;
-        long timeAgoDays    = now - ONE_DAY    * 10;
-        long timeAgoMonths  = now - ONE_MONTH  * 10;
-        long timeAgoYears   = now - ONE_YEAR   * 10;
+        long timeAgoJustNow  = now - ONE_SECOND + 500; // 500ms
+        long timeAgoSeconds  = now - ONE_SECOND * 10;
+        long timeAgoMinutes  = now - ONE_MINUTE * 10;
+        long timeAgoHours    = now - ONE_HOUR   * 10;
+        long timeAgoDays     = now - ONE_DAY    * 10;
+        long timeAgoMonths   = now - ONE_MONTH  * 10;
+        long timeAgoYears    = now - ONE_YEAR   * 10;
 
         // • ACT & ASSERT
         assertEquals("in the future",  new HumanDate(timeInTheFuture).toTimeAgoStr(now));
