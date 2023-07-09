@@ -16,6 +16,9 @@
   - Yegor Bugayenko's lecture series on OOP and book Elegant Objects.
   - David West, PhD's book "Object Thinking"
 
+<i>"The key in making great and growable systems is much more to design how its modules communicate rather than what<br> 
+ their internal properties and behaviors should be." –– <b>Alan Kay</b></i>
+
 ## Contents
 
 - [Developer Experience is Paramount](#developer-experience-is-paramount)
