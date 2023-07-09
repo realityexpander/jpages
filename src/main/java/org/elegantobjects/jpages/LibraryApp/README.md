@@ -380,7 +380,7 @@ advantages and disadvantages.
 - Combined with BOOP, many of the popular design patterns just don't make sense and add unnecessary 
   complexity and confusion. <i>But it did pay a lot of presenters' and authors bills for a long time!</i>
 
-#### Examples
+#### Specific Examples of Bad Design Patterns
 
 - No Factory patterns
   - Just use constructors. 
