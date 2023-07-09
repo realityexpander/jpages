@@ -74,6 +74,7 @@
 
 ### Developer Experience is Paramount
 
+- Quick comprehension of code is paramount, code should exude intention.
 - Write code in a way that is oriented to the human reader (not computer), as code is read 100x more than it is written,
   and computers really don't care what the code looks like.
 - The developer experience is paramount, and should be the primary focus of the design.
