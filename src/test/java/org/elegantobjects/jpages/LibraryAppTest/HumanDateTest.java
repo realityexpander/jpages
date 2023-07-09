@@ -64,7 +64,6 @@ public class HumanDateTest {
         this.expectedTimeAgoStr = expectedTimeAgoStr;
     }
 
-
     @Test
     public void Calling_toDateTimeStr_returns_DateTime_string_is_Success() {
         Assert.assertEquals(expectedDateTimeString,

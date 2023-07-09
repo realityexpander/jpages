@@ -6,11 +6,9 @@ import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 import org.elegantobjects.jpages.LibraryApp.domain.user.User;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
 import static org.junit.Assert.*;
 
 /**

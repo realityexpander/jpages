@@ -17,10 +17,8 @@ import org.elegantobjects.jpages.LibraryAppTest.testFakes.common.util.log.TestLo
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.time.Instant;
 import java.util.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -30,7 +28,6 @@ import static org.junit.Assert.*;
  * @since 0.11
  */
 public class LibraryAppTest {
-
     Context ctx;
     TestingUtils testUtils;
 
