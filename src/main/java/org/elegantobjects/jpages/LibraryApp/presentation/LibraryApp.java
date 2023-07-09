@@ -2,17 +2,17 @@ package org.elegantobjects.jpages.LibraryApp.presentation;
 
 
 import org.elegantobjects.jpages.LibraryApp.common.util.log.Log;
-import org.elegantobjects.jpages.LibraryApp.common.util.testingUtils.TestingUtils;
+import org.elegantobjects.jpages.LibraryApp.presentation.testingUtils.TestingUtils;
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
-import org.elegantobjects.jpages.LibraryApp.data.book.network.DTOBookInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.book.data.network.DTOBookInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.account.Account;
-import org.elegantobjects.jpages.LibraryApp.domain.account.AccountInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.account.data.AccountInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 import org.elegantobjects.jpages.LibraryApp.domain.Context;
-import org.elegantobjects.jpages.LibraryApp.domain.book.BookInfo;
-import org.elegantobjects.jpages.LibraryApp.domain.library.LibraryInfo;
-import org.elegantobjects.jpages.LibraryApp.domain.user.UserInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.book.data.BookInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.library.data.LibraryInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.user.data.UserInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.library.Library;
 import org.elegantobjects.jpages.LibraryApp.domain.user.User;
 import org.jetbrains.annotations.NotNull;

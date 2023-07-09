@@ -1,12 +1,13 @@
 package org.elegantobjects.jpages.LibraryApp.domain.common;
 
 import com.google.gson.JsonSyntaxException;
-import org.elegantobjects.jpages.LibraryApp.common.Model;
+import org.elegantobjects.jpages.LibraryApp.domain.common.data.Model;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.IUUID2;
-import org.elegantobjects.jpages.LibraryApp.data.common.Info;
+import org.elegantobjects.jpages.LibraryApp.domain.common.data.info.Info;
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.Context;
+import org.elegantobjects.jpages.LibraryApp.domain.common.data.info.DomainInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

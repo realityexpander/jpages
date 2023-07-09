@@ -6,11 +6,12 @@ import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.Context;
 import org.elegantobjects.jpages.LibraryApp.domain.account.Account;
-import org.elegantobjects.jpages.LibraryApp.domain.account.AccountInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.account.data.AccountInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
 import org.elegantobjects.jpages.LibraryApp.domain.common.Role;
 import org.elegantobjects.jpages.LibraryApp.domain.library.Library;
-import org.elegantobjects.jpages.LibraryApp.domain.library.LibraryInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.user.data.UserInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.user.data.UserInfoRepo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

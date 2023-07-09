@@ -5,6 +5,7 @@ import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.Context;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
+import org.elegantobjects.jpages.LibraryApp.domain.library.data.LibraryInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.user.User;
 import org.jetbrains.annotations.NotNull;
 

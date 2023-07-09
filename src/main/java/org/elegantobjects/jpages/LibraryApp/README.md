@@ -665,7 +665,7 @@ You can find the sample Library App in the `LibraryApp` package, along with some
     - `Library` - Handles `Library` actions, like `checkoutBook`, `checkinBook`, `isKnownBook`, `isKnownUser` etc.
     - `PrivateLibrary` - Handles `PrivateLibrary` actions, like `checkoutBook`, `checkinBook`, `isKnownBook` etc.
     - `Book` - Handles `Book` actions like changing `title`, `author`, `description`, `sourceLibrary`, etc.
-  - #### Repositories
+  - #### Data ("Info") Repositories
     `Repo` - A repository Handles persistence of `Info` data referenced by `Domain` objects:<br>
     <br>
     - `BookInfoRepo` - Handles persistence of `BookInfo` objects 
