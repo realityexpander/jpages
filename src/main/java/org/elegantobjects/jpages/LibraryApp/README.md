@@ -26,7 +26,7 @@
 
 - [Code Style](#code-style)
 - [A Note on Managing Source-Code Line Complexity](#a-note-on-managing-source-code-line-complexity)
-- [### A Note on Managing Source-Code Line-Complexity](#a-note-on-managing-source-code-line-complexity)
+- [A Note on Managing Source-Code Line-Complexity](#a-note-on-managing-source-code-line-complexity)
 - [Encapsulation of Data via Intention-named methods](#encapsulation-of-data-via-intention-named-methods)
 - [No `null` in Domain](#no-null-in-domain)
 - [Intention Revealing Error Messages](#intention-revealing-error-messages)
