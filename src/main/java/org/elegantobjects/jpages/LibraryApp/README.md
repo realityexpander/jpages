@@ -138,13 +138,14 @@ advantages and disadvantages.
 - A person who doesn't code should be able to look at a method or variable and know what it does/means.
 - Some of these ideas are contradictory, and those are the ones that require more thought and consideration for the situation.
 
-### A Note on Complexity of Per-Line Code-Comprehension
+### A Note on Managing Source-Code Line Complexity
 
 - Humans can handle 7±2 items in their short-term working memory at a given time, so code lines
-  should be broken up when approaching 6 items on a given line.
-- Horizontal line complexity should never have more than 8 items on a given line.
-- Strive to keep line complexity to maximum of 6 "items," and know when the complexity passes that number, it causes a 
-  dramatic increase in the cognitive load which slows comprehension for most readers.
+- Limit the complexity of each line of code to 6 items or less allows the reader to easier and faster comprehension.
+- Consider breaking up into multiple lines when nearing 6 items on a given line.
+- Line complexity should never have more than 9 items on a given line.
+- Strive to keep line complexity to maximum of 6 items, and know when the line complexity exceeds that number, it 
+  causes a dramatic increase in the cognitive load which slows comprehension for most readers.
 
 ### Encapsulation of Data via Intention-named methods
 
