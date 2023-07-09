@@ -35,27 +35,25 @@ public class HumanDateTest {
 
     @Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(
-            new Object[][] {
-                { Instant.parse("2020-02-01T00:00:00.00Z"), "2020-02-01 00:00:00", "2020-02-01", "00:00:00", "2 years ago" },
-                { Instant.parse("2020-02-01T00:00:01.00Z"), "2020-02-01 00:00:01", "2020-02-01", "00:00:01", "2 years ago" },
-                { Instant.parse("2020-02-01T00:01:00.00Z"), "2020-02-01 00:01:00", "2020-02-01", "00:01:00", "2 years ago" },
-                { Instant.parse("2020-02-01T01:00:00.00Z"), "2020-02-01 01:00:00", "2020-02-01", "01:00:00", "2 years ago" },
-                { Instant.parse("2020-02-02T00:00:00.00Z"), "2020-02-02 00:00:00", "2020-02-02", "00:00:00", "2 years ago" },
-                { Instant.parse("2020-03-01T00:00:00.00Z"), "2020-03-01 00:00:00", "2020-03-01", "00:00:00", "2 years ago" },
-                { Instant.parse("2021-02-01T00:00:35.00Z"), "2021-02-01 00:00:35", "2021-02-01", "00:00:35", "2 years ago" },
-                { Instant.parse("2021-02-01T00:59:00.00Z"), "2021-02-01 00:59:00", "2021-02-01", "00:59:00", "2 years ago" },
-                { Instant.parse("2022-02-01T00:00:00.00Z"), "2022-02-01 00:00:00", "2022-02-01", "00:00:00", "2 years ago" },
-            }
-        );
+        return Arrays.asList(new Object[][] {
+            { Instant.parse("2020-02-01T00:00:00.00Z"), "2020-02-01 00:00:00", "2020-02-01", "00:00:00", "2 years ago" },
+            { Instant.parse("2020-02-01T00:00:01.00Z"), "2020-02-01 00:00:01", "2020-02-01", "00:00:01", "2 years ago" },
+            { Instant.parse("2020-02-01T00:01:00.00Z"), "2020-02-01 00:01:00", "2020-02-01", "00:01:00", "2 years ago" },
+            { Instant.parse("2020-02-01T01:00:00.00Z"), "2020-02-01 01:00:00", "2020-02-01", "01:00:00", "2 years ago" },
+            { Instant.parse("2020-02-02T00:00:00.00Z"), "2020-02-02 00:00:00", "2020-02-02", "00:00:00", "2 years ago" },
+            { Instant.parse("2020-03-01T00:00:00.00Z"), "2020-03-01 00:00:00", "2020-03-01", "00:00:00", "2 years ago" },
+            { Instant.parse("2021-02-01T00:00:35.00Z"), "2021-02-01 00:00:35", "2021-02-01", "00:00:35", "2 years ago" },
+            { Instant.parse("2021-02-01T00:59:00.00Z"), "2021-02-01 00:59:00", "2021-02-01", "00:59:00", "2 years ago" },
+            { Instant.parse("2022-02-01T00:00:00.00Z"), "2022-02-01 00:00:00", "2022-02-01", "00:00:00", "2 years ago" },
+        });
     }
 
     static final long ONE_SECOND = 1000L;
     static final long ONE_MINUTE = ONE_SECOND * 60;
-    static final long ONE_HOUR = ONE_MINUTE * 60;
-    static final long ONE_DAY = ONE_HOUR * 24;
-    static final long ONE_MONTH = ONE_DAY * 30;
-    static final long ONE_YEAR = ONE_DAY * 365;
+    static final long ONE_HOUR   = ONE_MINUTE * 60;
+    static final long ONE_DAY    = ONE_HOUR * 24;
+    static final long ONE_MONTH  = ONE_DAY * 30;
+    static final long ONE_YEAR   = ONE_DAY * 365;
 
     public
     HumanDateTest(Instant testDateTimeInstant, String expectedDateTimeString, String expectedDateStr, String expectedTimeStr, String expectedTimeAgoStr) {
