@@ -216,7 +216,7 @@ advantages and disadvantages.
 - Singleton objects reside in the Context object, and are passed in constructors.
 
 ### All Objects Immutable
-- All objects are immutable, except for the referred `Info` objects.
+- All objects are immutable, except for the referred `Info` objects which is only modified via `Role` methods.
   - Important exception:
     - The `UUID2` `id` and `UUIDType` values for all objects are kept mutable due to limitations of java:
     - These are mutable because of how JSON imports work. 
