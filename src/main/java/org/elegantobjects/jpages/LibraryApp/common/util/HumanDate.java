@@ -1,11 +1,14 @@
 package org.elegantobjects.jpages.LibraryApp.common.util;
 
 import org.jetbrains.annotations.Nullable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
- * HumanDate - Utility class for converting epoch millis to human-readable date/time strings.
+ * HumanDate - Utility class for converting Instants and EpochMillis to human-readable localized-time-zone date/time strings.
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
@@ -13,30 +16,61 @@ import java.util.Date;
 
 public class HumanDate {
 
-    private final long epochMillis;
+    private final Instant dateTimeInstant;
+    private final ZoneId timeZone;         // the local time zone for the user
 
     public
+    HumanDate(Instant dateTimeInstant, ZoneId timeZone) {
+        this.dateTimeInstant = dateTimeInstant;
+
+        if (timeZone != null) {
+            this.timeZone = timeZone;
+        } else {
+            this.timeZone = ZoneId.systemDefault();
+        }
+    }
+    public
+    HumanDate(Instant dateTimeInstant) {
+        this(dateTimeInstant, null);
+    }
+    public
     HumanDate(long epochMillis) {
-        this.epochMillis = epochMillis;
+        this(Instant.ofEpochMilli(epochMillis), null);
+    }
+    public
+    HumanDate(long epochMillis, ZoneId timeZone) {
+        this(Instant.ofEpochMilli(epochMillis), timeZone);
     }
 
     public String toDateTimeStr() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(epochMillis));
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .format(LocalDateTime.ofInstant(
+                    dateTimeInstant,
+                    timeZone
+                ));
     }
 
     public String toDateStr() {
-        return new SimpleDateFormat("yyyy-MM-dd").format(new Date(epochMillis));
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                .format(LocalDateTime.ofInstant(
+                    dateTimeInstant,
+                    timeZone
+                ));
     }
 
     public String toTimeStr() {
-        return new SimpleDateFormat("HH:mm:ss").format(new Date(epochMillis));
+        return DateTimeFormatter.ofPattern("HH:mm:ss")
+                .format(LocalDateTime.ofInstant(
+                    dateTimeInstant,
+                    timeZone
+                ));
     }
 
-    public String toTimeAgoStr(@Nullable Long nowMillis) {
-        if (nowMillis == null) {
-            nowMillis = System.currentTimeMillis();
+    public String toTimeAgoStr(@Nullable Instant nowInstant) {
+        if (nowInstant == null) {
+            nowInstant = Instant.now();
         }
-        long diff = nowMillis - epochMillis;
+        long diff = nowInstant.toEpochMilli() - dateTimeInstant.toEpochMilli();
 
         if (diff < 0) {
             return "in the future";
@@ -61,7 +95,14 @@ public class HumanDate {
         }
         return diff / (365 * 24 * 60 * 60 * 1000L) + " years ago";
     }
+    public String toTimeAgoStr(long nowMillis) {
+        return toTimeAgoStr(Instant.ofEpochMilli(nowMillis));
+    }
     public String toTimeAgoStr() {
-        return toTimeAgoStr(null);
+        return toTimeAgoStr(Instant.now());
+    }
+
+    public long millis() {
+        return dateTimeInstant.toEpochMilli();
     }
 }
