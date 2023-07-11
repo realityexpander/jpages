@@ -23,7 +23,7 @@ import java.util.Objects;
  */
 
 public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
-    // simulate a database on server
+    // simulate a database on a server
     private final UUID2.HashMap<UUID2<Library>, LibraryInfo> database = new UUID2.HashMap<>();
 
     public
@@ -67,24 +67,9 @@ public class LibraryInfoRepo extends Repo implements ILibraryInfoRepo {
         return new Result.Success<>(libraryInfo);
     }
 
-    ///////////////////////////////////
-    /// Published Helper methods    ///
-    ///////////////////////////////////
-
-    public void populateWithFakeBooks(@NotNull UUID2<Library> libraryId, int numberOfBooksToCreate) {
-        log.d(this, "libraryId: " + libraryId + ", numberOfBooksToCreate: " + numberOfBooksToCreate);
-        LibraryInfo libraryInfo = database.get(libraryId);
-
-        for (int i = 0; i < numberOfBooksToCreate; i++) {
-            Result<UUID2<Book>> result =
-                    libraryInfo.addTestBook(UUID2.createFakeUUID2(1000+i*100, Book.class), 1);
-
-            if (result instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<UUID2<Book>>) result).exception();
-                log.d(this, exception.getMessage());
-            }
-        }
-    }
+    /////////////////////////
+    /// Repo-specific Jobs //
+    /////////////////////////
 
     public void removeAllOrphanPrivateLibrariesWithNoBooksInInventory() {
         log.d(this, "removeAllPrivateLibrariesWithNoBooksInInventory");

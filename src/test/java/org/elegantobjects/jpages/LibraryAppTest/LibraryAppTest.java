@@ -99,7 +99,8 @@ public class LibraryAppTest {
         ctx.log.d(this,"Library Created --> id: " + ((Result.Success<LibraryInfo>) libraryInfo).value().id() + ", name: "+ ((Result.Success<LibraryInfo>) libraryInfo).value().name);
 
         // Populate the library with 10 books
-        ctx.libraryInfoRepo().populateWithFakeBooks(library1InfoId, 10);
+//        ctx.libraryInfoRepo().populateWithFakeBooks(library1InfoId, 10);
+        testUtils.populateLibraryWithFakeBooks(library1InfoId, 10);
 
         /////////////////////////////////
         // • Create Accounts for Users //

@@ -197,11 +197,30 @@ public class TestingUtils {
         }
         AccountInfo accountInfo = ((Result.Success<AccountInfo>) infoResult).value();
 
-
         for (int i = 0; i < numberOfMessagesToCreate; i++) {
             accountInfo.addTestAuditLogMessage(
                     "Test Audit message " + i + " for account: " + accountInfo.id()
             );
+        }
+    }
+
+    public void populateLibraryWithFakeBooks(@NotNull UUID2<Library> libraryId, int numberOfBooksToCreate) {
+        context.log.d(this, "libraryId: " + libraryId + ", numberOfBooksToCreate: " + numberOfBooksToCreate);
+        Result<LibraryInfo> libraryInfoResult = context.libraryInfoRepo().fetchLibraryInfo(libraryId);
+        if (libraryInfoResult instanceof Result.Failure) {
+            context.log.d(this, "Error: " + ((Result.Failure<LibraryInfo>) libraryInfoResult).exception().getMessage());
+            return;
+        }
+        LibraryInfo libraryInfo = ((Result.Success<LibraryInfo>) libraryInfoResult).value();
+
+        for (int i = 0; i < numberOfBooksToCreate; i++) {
+            Result<UUID2<Book>> result =
+                    libraryInfo.addTestBook(UUID2.createFakeUUID2(1000+i*100, Book.class), 1);
+
+            if (result instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<UUID2<Book>>) result).exception();
+                context.log.d(this, exception.getMessage());
+            }
         }
     }
 }
