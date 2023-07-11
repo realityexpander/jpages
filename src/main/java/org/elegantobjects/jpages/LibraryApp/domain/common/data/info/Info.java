@@ -107,6 +107,7 @@ public interface Info<TInfo extends Model> {
     }
 
     // Default naive implementation, returns a deep copy of the Info object.
+    // - Should be overloaded in the Info subclass to return a deep copy of the Info object.
     @SuppressWarnings("unchecked")
     default TInfo deepCopyInfo() {
         Gson gson = new Gson();
