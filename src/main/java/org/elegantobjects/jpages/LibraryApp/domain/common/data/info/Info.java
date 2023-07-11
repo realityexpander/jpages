@@ -11,10 +11,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- <b>{@code Info}</b> is a smart data holder class for transferring data to/from the Domain to/from Database/Api.<br>
+ <b>{@code Info}</b> is a smart "data holder" class for transferring data to/from the Domain to/from Database/Api.<br>
  <ul>
-   <li><b>{@code TInfo info}</b> - Caches the Role Object's "Info" (data) and defines required operations to mutate
-       the 'Info' object.</li>
+   <li><b>{@code AtomicReference<TInfo> info}</b> - Thread-safe Cache for the Role Object's "Info" (data)
+       and defines required business operations to mutate the 'Info' object.</li>
    <li>The <b>{@code Info}</b> object stores the "business data" for the Domain object & logic to change it.</li>
    <li>It is the "single source of truth" for the Domain object's mutable data.</li>
  </ul>

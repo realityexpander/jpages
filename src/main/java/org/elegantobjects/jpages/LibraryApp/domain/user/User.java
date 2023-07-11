@@ -121,8 +121,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
     public String toString() {
         String str = "User (" + this.id().toString() + ") - ";
 
-//        if (null != this.info)
-//            str += "info=" + this.info.toPrettyJson(context);
         if (null != this.info())
             str += "info=" + this.info().toPrettyJson(context);
         else
@@ -138,7 +136,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
     @Override
     public String toJson() {
-//        Pair<UserInfo, AccountInfo> pair = new Pair<>(info, account.info());
         Pair<UserInfo, AccountInfo> pair = new Pair<>(info(), account.info());
         return context.gson.toJson(pair);
     }
@@ -190,7 +187,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if(hasReachedMaxAmountOfAcceptedPublicLibraryBooks()) return new Result.Failure<>(new Exception("User (" + this.id() + ") has reached maximum amount of accepted Library Books"));
 
         Result<ArrayList<UUID2<Book>>> acceptResult =
-//                this.info.acceptBook(
                 this.info().acceptBook(
                     book.id(),
                     book.sourceLibrary().id()
@@ -198,7 +194,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if(acceptResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) acceptResult).exception());
 
-//        Result<UserInfo> result = this.updateInfo(this.info);
         Result<UserInfo> result = this.updateInfo(this.info());
         if (result instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
@@ -210,13 +205,11 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id() + "), bookId: " + book.id());
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-//        Result<ArrayList<UUID2<Book>>> unacceptResult = this.info.unacceptBook(book.id());
         Result<ArrayList<UUID2<Book>>> unacceptResult = this.info().unacceptBook(book.id());
         if(unacceptResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptResult).exception());
         }
 
-//        Result<UserInfo> result = this.updateInfo(this.info);
         Result<UserInfo> result = this.updateInfo(this.info());
         if (result instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
