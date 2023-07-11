@@ -95,7 +95,7 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
 
     @Override
     public Result<AccountInfo> updateInfo(@NotNull AccountInfo updatedInfo) {
-        // context.log.d(this,"Account (" + this.id.toString() + ") - updateInfo, newInfo: " + newInfo.toString());  // LEAVE for debugging
+        // context.log.d(this,"Account (" + this.id.toString() + ") - updateInfo);  // LEAVE for debugging
 
         // Optimistically Update the cached Info
         super.updateFetchInfoResult(new Result.Success<>(updatedInfo));

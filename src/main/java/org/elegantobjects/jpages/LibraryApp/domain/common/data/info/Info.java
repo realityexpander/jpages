@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.Context;
+import org.elegantobjects.jpages.LibraryApp.domain.common.data.Model;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -11,17 +12,20 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- <b>{@code Info}</b> is a smart "data holder" class for transferring data to/from the Domain to/from Database/Api.<br>
+ <b>{@code Info}</b> is an interface for smart "data holder" implementing class. It is used for transferring data
+    to/from the Domain to/from Database/Api.<br>
  <ul>
-   <li><b>{@code AtomicReference<TInfo> info}</b> - Thread-safe Cache for the Role Object's "Info" (data)
-       and defines required business operations to mutate the 'Info' object.</li>
-   <li>The <b>{@code Info}</b> object stores the "business data" for the Domain object & logic to change it.</li>
+   <li>The <b>{@code Info}</b> interface defines the logic to update and fetch the {Domain}Info object.</li>
+   <li><b>{@code TInfo}</b> - A required {Domain}Info subclass that contains all business logic to mutate
+       the 'Info' object, ie: <b>{@code BookInfo}</b> or <b>{@code EntityLibraryInfo}</b>.</li>
+   <li><b>{@code AtomicReference<TInfo> info}</b> - Is a required thread-safe cache object for the Role's "Info"
+          and is usually defined in the Role superclass.</li>
    <li>It is the "single source of truth" for the Domain object's mutable data.</li>
  </ul>
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
 **/
-public interface Info<TInfo> {
+public interface Info<TInfo extends Model> {
     // Note: Requires a field named `info` of type `AtomicReference<TInfo>` (todo is there a way to enforce this in java?)
     // private final AtomicReference<TInfo> info;
 
@@ -34,7 +38,7 @@ public interface Info<TInfo> {
     String fetchInfoFailureReason();      // Performs fetch for Info and returns failure reason, or `null` if successful.
     AtomicReference<TInfo> cachedInfo();  // Return thread-safe Info from cache.
 
-    interface ToInfo<TInfo> {
+    interface ToInfo<TInfo extends Model> {
         UUID2<?> id();             // Returns the UUID2 of the Info object
 
         @SuppressWarnings("unchecked")
