@@ -41,7 +41,7 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     ) {
         super(json, clazz, context);
         this.repo = this.context.accountInfoRepo();
-        this.id = this.info.id();
+        this.id = this.info().id();
 
         context.log.d(this,"Account (" + this.id + ") created from Json with class: " + clazz.getName());
     }
@@ -90,32 +90,18 @@ public class Account extends Role<AccountInfo> implements IUUID2 {
     public Result<AccountInfo> fetchInfoResult() {
         // context.log.d(this, "Account(" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
-        infoResult = this.repo.fetchAccountInfo(this.id);
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        this.info = ((Result.Success<AccountInfo>) infoResult).value();
-
-        return infoResult;
+        return this.repo.fetchAccountInfo(this.id);
     }
 
     @Override
     public Result<AccountInfo> updateInfo(@NotNull AccountInfo updatedInfo) {
         // context.log.d(this,"Account (" + this.id.toString() + ") - updateInfo, newInfo: " + newInfo.toString());  // LEAVE for debugging
 
-        // Update self optimistically
-        super.updateInfo(updatedInfo);
+        // Optimistically Update the cached Info
+        super.updateFetchInfoResult(new Result.Success<>(updatedInfo));
 
         // Update the Repo
-        Result<AccountInfo> infoResult = this.repo.updateAccountInfo(updatedInfo);
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        // Update self with Repo result
-        super.updateInfo(((Result.Success<AccountInfo>) infoResult).value());
-        return infoResult;
+        return this.repo.updateAccountInfo(updatedInfo);
     }
 
     @Override

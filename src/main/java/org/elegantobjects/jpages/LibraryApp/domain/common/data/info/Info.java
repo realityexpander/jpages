@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  <b>{@code Info}</b> is a smart data holder class for transferring data to/from the Domain to/from Database/Api.<br>
@@ -21,32 +22,23 @@ import java.util.UUID;
  * @since 0.11
 **/
 public interface Info<TInfo> {
-    // TInfo info;  // Requires a field named `info` of type `TInfo` (is there a way to enforce this in java?)
+    // Note: Requires a field named `info` of type `AtomicReference<TInfo>` (todo is there a way to enforce this in java?)
+    // private final AtomicReference<TInfo> info;
 
-    UUID2<?> id();                        // Returns the UUID2 of the Info object
-    TInfo fetchInfo();                    // Fetches data for the Info from server/DB
-    boolean isInfoFetched();              // Returns true if Info has been fetched from server/DB
-    Result<TInfo> fetchInfoResult();      // Fetches Result<T> for the Info from server/DB
-    Result<TInfo> updateInfo(TInfo info); // Updates Info to server/DB
-    Result<TInfo> refreshInfo();          // Set Info data to `null` and fetches Info from server/DB
-    String fetchInfoFailureReason();      // Returns reason for failure of last fetchInfo() call, or `null` if successful
-
-    @SuppressWarnings("unchecked")
-    default TInfo deepCopyInfo() {        // Returns a deep copy of the Info object
-        Gson gson = new Gson();
-
-        // hacky but works.
-        return (TInfo) gson.fromJson(
-            gson.toJson(this),
-            this.getClass()
-        );
-    }
+    UUID2<?> id();                        // Return the UUID2 of the Info object.
+    TInfo fetchInfo();                    // Fetch data for the Info from server/DB.
+    boolean isInfoFetched();              // Return true if Info has been successfully fetched from server/DB.
+    Result<TInfo> fetchInfoResult();      // Fetch Result<T> for the Info from server/DB.
+    Result<TInfo> updateInfo(TInfo info); // Update Info to server/DB.
+    Result<TInfo> refreshInfo();          // Set Info data to `null` and fetches Info from server/DB.
+    String fetchInfoFailureReason();      // Performs fetch for Info and returns failure reason, or `null` if successful.
+    AtomicReference<TInfo> cachedInfo();  // Return thread-safe Info from cache.
 
     interface ToInfo<TInfo> {
         UUID2<?> id();             // Returns the UUID2 of the Info object
 
         @SuppressWarnings("unchecked")
-        default TInfo info() {     // Returns the Info object
+        default TInfo info() {     // Fetches (if necessary) and Returns the Info object
             //noinspection unchecked
             return (TInfo) this;
         }
@@ -60,7 +52,7 @@ public interface Info<TInfo> {
         }
     }
 
-    static <TToInfo extends ToInfo<?>> @Nullable // implementations of ToInfo<TInfo> interfaces MUST have TInfo objects
+    static <TToInfo extends ToInfo<?>> @Nullable // implementations of ToInfo<TInfo> interfaces MUST define TInfo field named `info`
     TToInfo createInfoFromJson(
         String json,
         Class<TToInfo> infoClazz, // type of `Info` object to create
@@ -88,17 +80,42 @@ public interface Info<TInfo> {
         }
     }
 
-    // This interface used to enforce all {Domain}Info objects have a `deepCopy()` method.
+    // This interface used to enforce all {Domain}Info objects has a `deepCopy()` method.
     // - Just add `implements ToInfo.hasDeepCopyInfo<ToInfo<{InfoClass}>>` to the class
     //   definition, and the toDeepCopyInfo() method will be added.
     interface hasToDeepCopyInfo<TInfo extends ToInfo<?>> {
         @SuppressWarnings("unchecked")
         default TInfo deepCopyInfo() {
-            // This is a default implementation for deepCopyInfo() that simply calls the toDeepCopyInfo() method implemented in the subclass
+            // This default implementation for deepCopyInfo() simply calls the toDeepCopyInfo() implemented in the subclass.
             // This is a workaround for the fact that Java doesn't allow static methods in interfaces.
             return (TInfo) ((TInfo) this).toDeepCopyInfo(); // calls the toDeepCopyInfo() method of the implementing class
         }
     }
+
+    // Performs Atomic update of cachedInfo
+    default TInfo updateCachedInfo(final TInfo updatedInfo) {
+        return this.cachedInfo().updateAndGet(
+            curCachedInfo -> {
+                return updatedInfo;
+            }
+        );
+    }
+
+    // Default naive implementation, returns a deep copy of the Info object.
+    @SuppressWarnings("unchecked")
+    default TInfo deepCopyInfo() {
+        Gson gson = new Gson();
+
+        // hacky but works.
+        return (TInfo) gson.fromJson(
+            gson.toJson(this),
+            this.getClass()
+        );
+    }
+
+    //////////////////////////////
+    // Helper methods for Info  //
+    //////////////////////////////
 
     default Result<TInfo> checkJsonInfoIdMatchesThisInfoId(TInfo infoFromJson, Class<?> infoClazz) {
         try {

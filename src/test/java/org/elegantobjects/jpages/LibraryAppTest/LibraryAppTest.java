@@ -202,9 +202,10 @@ public class LibraryAppTest {
         // • ACT
         // Try to get a book id that doesn't exist - SHOULD FAIL
         Book book2 = new Book(UUID2.createFakeUUID2(99, Book.class), null, ctx);
+        Result<BookInfo> bookInfoResult2 = book2.fetchInfoResult();
 
         // • ASSERT
-        assertTrue("Book SHOULD NOT Exist, but does! --> " + book2.id(), book2.fetchInfoResult() instanceof Result.Failure);
+        assertTrue("Book SHOULD NOT Exist, but does! --> " + book2.id(), bookInfoResult2 instanceof Result.Failure);
     }
 
     @Test
@@ -377,8 +378,8 @@ public class LibraryAppTest {
             // // if(!library2.toJson().equals(json)) throw new Exception("Library2 JSON not equal to expected JSON");
 
             // check for same number of items
-            assertEquals("Library2 should have 10 books", 10, ((Result.Success<HashMap<Book, Long>>)
-                    library2.calculateAvailableBookIdToNumberAvailableList()).value().size());
+            assertEquals("Library2 should have 10 books", 10,
+                    ((Result.Success<HashMap<Book, Long>>) library2.calculateAvailableBookIdToNumberAvailableList()).value().size());
 
             // check existence of a particular book
             assertTrue("Library2 should have known Book with id 1500", library2.isKnownBook(book1500));

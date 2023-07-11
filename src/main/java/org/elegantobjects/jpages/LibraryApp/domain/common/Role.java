@@ -15,6 +15,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Domain Role - Common Domain Role Abstract class<br>
@@ -36,8 +37,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     private final UUID2<?> id;  // the UUID of the Domain object matches the UUID of the Info object
                                 // It is final and private in the Domain layer.
 
-    protected TDomainInfo info;  // Information object for Info<Domain.{Domain}Info>
-    protected Result<TDomainInfo> infoResult = null;
+    private final AtomicReference<TDomainInfo> info;  // Cached Information object for Info<Domain.{Domain}Info> interface
+    private final AtomicReference<Result<TDomainInfo>> infoResult = new AtomicReference<>(null); // Convenience for Repo Debugging and future UI use
 
     // Singletons
     protected final Context context;  // All roles have access the Context singleton
@@ -66,8 +67,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         @NotNull Context context
     ) {
         this.id = UUID2.fromUUID(id); // Note: NOT validating "id==info.id" due to need to pass in `info` as `null`
-        this.info = info;
         this.context = context;
+        this.info = new AtomicReference<>(info);
     }
     private
     Role(
@@ -76,8 +77,8 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         @NotNull Context context
     ) {
         this.id = id; // intentionally NOT validating `id==info.id` bc need to be able to pass in `info` as null.
-        this.info = info;
         this.context = context;
+        this.info = new AtomicReference<>(info);
     }
     protected <TDomainInfo_ extends Model.ToDomainInfo<TDomainInfo>> // All classes implementing ToDomain<> interfaces must have TDomainInfo field
     Role(
@@ -123,6 +124,13 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         return this.id;
     }
 
+    public AtomicReference<TDomainInfo> cachedInfo() {
+        return this.info;
+    }
+    public Result<TDomainInfo> infoResult() {
+        return this.infoResult.get();
+    }
+
     ///////////////////////////
     // Static Constructors   //
     ///////////////////////////
@@ -134,7 +142,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // - ie: The Library domain object has a Domain.LibraryInfo object which requires ToDomain<Domain.LibraryInfo>
     //   to be implemented.
     // - Only imports JSON to Domain objects.
-    //   The Domain.Entity and Domain.DTO layer are intentionally restricted to accept only Domain objects.
+    //   The Domain.EntityInfo and Domain.DTOInfo layer are intentionally restricted to accept only Domain objects.
     // - todo : Should change to a marker interface instead of a constraining to the ToDomain<TDomain> interface?
     @SuppressWarnings("unchecked") // for _setIdFromImportedJson() call
     public static <
@@ -221,24 +229,22 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // - REQUIRED - *MUST* be overridden/implemented in subclasses
     @Override
     public Result<TDomainInfo> fetchInfoResult() {
-        return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass"));
+        return new Result.Failure<>(new Exception("Not Implemented, should be implemented in subclass."));
     }
 
-    // Updates the info object with a new info object
+    // Updates the `Info` object with new data
     // - REQUIRED - *MUST* be overridden/implemented in subclasses
-    // - Call super.updateInfo(info) to update the info<TDomainInfo> object
+    // - Call `super.updateFetchInfoResult(newInfo)` to update the info<TDomainInfo> object
     //   (caller decides when appropriate, ie: optimistic updates, or after server confirms update)
-    @Override
-    public Result<TDomainInfo> updateInfo(@NotNull TDomainInfo info) { // **MUST** Override in subclasses
-        this.info = info;
-        return new Result.Success<>(this.info);
-    }
+    abstract public Result<TDomainInfo> updateInfo(TDomainInfo info); // **MUST** Override in subclasses
+
 
     // NOTE: Should be Implemented by subclasses but not required
     @Override
     public String toString() {
+
         // default toString() implementation
-        String infoString = this.info == null ? "null" : this.info.toString();
+        String infoString = this.info() == null ? "null" : this.info().toString();
         String nameOfClass = this.getClass().getName();
 
         return nameOfClass + ": " + this.id() + ", info=" + infoString;
@@ -248,22 +254,24 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     // Info<T> interface methods   //
     /////////////////////////////////
 
+    // Shorter named wrapper for fetchInfo()
     public TDomainInfo info() {
         return this.fetchInfo();
     }
 
-    // Returns the Info<T> object if it has been fetched, otherwise null.
+    // Returns the Info<T> object if it has been fetched, otherwise fetches and returns Result.
     // Used to access the Info object without having to handle the Result<T> object.
-    // NOTE: The Info object is not re-fetched if it has already been fetched.
+    // NOTE: A cached Info<T> object is returned if it has been fetched, otherwise a new Info<T> object is fetched.
     @Override
     public TDomainInfo fetchInfo() {
         if (isInfoFetched()) {
-            return this.info;
+            return this.cachedInfo().get();
         }
 
         // Attempt to fetch info, since it hasn't been successfully fetched yet.
-        Result<TDomainInfo> result = this.fetchInfoResult();
-        if (result instanceof Result.Failure) {
+        Result<TDomainInfo> fetchResult = this.fetchInfoResult();
+        this.updateFetchInfoResult(fetchResult);
+        if (fetchResult instanceof Result.Failure) {
             context.log.d(this,"fetchInfoResult() FAILED for " +
                     "class: " + this.getClass().getName() + ", " +
                     "id: " + this.id.toString());
@@ -272,14 +280,15 @@ public abstract class Role<TDomainInfo extends DomainInfo>
         }
 
         // Fetch was successful, so set info and return it.
-        this.info = ((Result.Success<TDomainInfo>) result).value();
-        return this.info;
+        return Info.super.updateCachedInfo(
+            ((Result.Success<TDomainInfo>) fetchResult).value()
+        );
     }
 
-    // Returns reason for failure of last fetchInfo() call, or null if was successful.
+    // Returns reason for failure of most recent `fetchInfo()` call, or `null` if was successful.
     // - Used as a convenient error guard for methods that require the {Domain}Info to be loaded.
-    // - If Info is not fetched, it attempts to fetch it.
-    // - The "returning null" behavior is to make the call site error handling code smaller.
+    // - If `Info` is not fetched, it attempts to fetch it.
+    // - BOOP Exception: The "returning null" behavior is to make the call site error handling code smaller.
     @Override
     public String fetchInfoFailureReason() {
         if (!isInfoFetched()) {
@@ -293,7 +302,7 @@ public abstract class Role<TDomainInfo extends DomainInfo>
 
     @Override
     public boolean isInfoFetched() {
-        return this.info != null;
+        return this.cachedInfo().get() != null;
     }
 
     // Forces refresh of Info from server
@@ -303,10 +312,20 @@ public abstract class Role<TDomainInfo extends DomainInfo>
                 "class: " + this.getClass().getName() + ", " +
                 "id: " + this.id.toString());
 
-        // Exception to the no-null rule. This is only when forcing a re-fetch of the info.
+        // Exception to the no-null rule. This is only done when forcing a re-fetch of the info.
         // todo should we leave the data stale?
-        this.info = null;
+        Info.super.updateCachedInfo(null);
 
         return this.fetchInfoResult();
+    }
+
+    public void updateFetchInfoResult(Result<TDomainInfo> updatedInfoResult) {
+        this.infoResult.getAndSet(updatedInfoResult);
+
+        if(updatedInfoResult instanceof Result.Success) {
+            Info.super.updateCachedInfo(
+                ((Result.Success<TDomainInfo>) updatedInfoResult).value()
+            );
+        }
     }
 }

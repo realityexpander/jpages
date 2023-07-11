@@ -8,6 +8,7 @@ import org.elegantobjects.jpages.LibraryApp.domain.Context;
 import org.elegantobjects.jpages.LibraryApp.domain.account.Account;
 import org.elegantobjects.jpages.LibraryApp.domain.account.data.AccountInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.book.Book;
+import org.elegantobjects.jpages.LibraryApp.domain.book.data.BookInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.common.Role;
 import org.elegantobjects.jpages.LibraryApp.domain.library.Library;
 import org.elegantobjects.jpages.LibraryApp.domain.user.data.UserInfo;
@@ -120,8 +121,10 @@ public class User extends Role<UserInfo> implements IUUID2 {
     public String toString() {
         String str = "User (" + this.id().toString() + ") - ";
 
-        if (null != this.info)
-            str += "info=" + this.info.toPrettyJson(context);
+//        if (null != this.info)
+//            str += "info=" + this.info.toPrettyJson(context);
+        if (null != this.info())
+            str += "info=" + this.info().toPrettyJson(context);
         else
             str += "info=null";
 
@@ -135,7 +138,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
 
     @Override
     public String toJson() {
-        Pair<UserInfo, AccountInfo> pair = new Pair<>(info, account.info());
+//        Pair<UserInfo, AccountInfo> pair = new Pair<>(info, account.info());
+        Pair<UserInfo, AccountInfo> pair = new Pair<>(info(), account.info());
         return context.gson.toJson(pair);
     }
 
@@ -147,33 +151,18 @@ public class User extends Role<UserInfo> implements IUUID2 {
     public Result<UserInfo> fetchInfoResult() {
         // context.log.d(this,"User (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
-        infoResult = this.repo.fetchUserInfo(this.id());
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        // Success, so update self.
-        this.info = ((Result.Success<UserInfo>) infoResult).value();
-
-        return infoResult;
+        return this.repo.fetchUserInfo(this.id());
     }
 
     @Override
     public Result<UserInfo> updateInfo(@NotNull UserInfo updatedUserInfo) {
         context.log.d(this,"User (" + this.id() + "),  userInfo: " + updatedUserInfo);
 
-        // Update self optimistically
-        super.updateInfo(updatedUserInfo);
+        // Optimistically Update the cached UserInfo
+        super.updateFetchInfoResult(new Result.Success<>(updatedUserInfo));
 
-        // Update the repo
-        Result<UserInfo> infoResult = this.repo.updateUserInfo(updatedUserInfo);
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        // Update self with the Repo result
-        this.info = ((Result.Success<UserInfo>) infoResult).value();
-        return infoResult;
+        // Update the Repo
+        return this.repo.updateUserInfo(updatedUserInfo);
     }
 
     @Override
@@ -201,14 +190,16 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if(hasReachedMaxAmountOfAcceptedPublicLibraryBooks()) return new Result.Failure<>(new Exception("User (" + this.id() + ") has reached maximum amount of accepted Library Books"));
 
         Result<ArrayList<UUID2<Book>>> acceptResult =
-                this.info.acceptBook(
+//                this.info.acceptBook(
+                this.info().acceptBook(
                     book.id(),
                     book.sourceLibrary().id()
                 );
         if(acceptResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) acceptResult).exception());
 
-        Result<UserInfo> result = this.updateInfo(this.info);
+//        Result<UserInfo> result = this.updateInfo(this.info);
+        Result<UserInfo> result = this.updateInfo(this.info());
         if (result instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
 
@@ -219,12 +210,14 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id() + "), bookId: " + book.id());
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<ArrayList<UUID2<Book>>> unacceptResult = this.info.unacceptBook(book.id());
+//        Result<ArrayList<UUID2<Book>>> unacceptResult = this.info.unacceptBook(book.id());
+        Result<ArrayList<UUID2<Book>>> unacceptResult = this.info().unacceptBook(book.id());
         if(unacceptResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) unacceptResult).exception());
         }
 
-        Result<UserInfo> result = this.updateInfo(this.info);
+//        Result<UserInfo> result = this.updateInfo(this.info);
+        Result<UserInfo> result = this.updateInfo(this.info());
         if (result instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<UserInfo>) result).exception());
         }
@@ -259,7 +252,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
             return false;
         }
 
-        int numPublicLibraryBooksAccepted = this.info.calculateAmountOfAcceptedPublicLibraryBooks();
+//        int numPublicLibraryBooksAccepted = this.info.calculateAmountOfAcceptedPublicLibraryBooks();
+        int numPublicLibraryBooksAccepted = this.info().calculateAmountOfAcceptedPublicLibraryBooks();
 
         // Note: This User Role Object delegates to its internal Account Role Object.
         return accountInfo.hasReachedMaxAmountOfAcceptedLibraryBooks(numPublicLibraryBooksAccepted);
@@ -269,7 +263,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id() + "), book: " + book.id());
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookIdAcceptedByThisUser(book.id());
+//        return this.info.isBookIdAcceptedByThisUser(book.id());
+        return this.info().isBookIdAcceptedByThisUser(book.id());
     }
 
     public Result<ArrayList<Book>> findAllAcceptedBooks() {
@@ -279,7 +274,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
         // Create the list of Domain Books from the list of Accepted Book ids
         ArrayList<Book> books = new ArrayList<>();
         for (Map.Entry<UUID2<Book>, UUID2<Library>> entry :
-                this.info.findAllAcceptedBookIdToLibraryIdMap().entrySet()
+//                this.info.findAllAcceptedBookIdToLibraryIdMap().entrySet()
+                this.info().findAllAcceptedBookIdToLibraryIdMap().entrySet()
         ) {
             UUID2<Book> bookId = entry.getKey();
             UUID2<Library> libraryId = entry.getValue();
@@ -301,7 +297,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Check this User has the Book
-        if (!this.info.isBookIdAcceptedByThisUser(book.id()))
+//        if (!this.info.isBookIdAcceptedByThisUser(book.id()))
+        if (!this.info().isBookIdAcceptedByThisUser(book.id()))
             return new Result.Failure<>(new Exception("User (" + this.id() + ") does not have book (" + book.id() + ")"));
 
         // Have Library Swap the checkout of Book from this User to the receiving User
@@ -340,7 +337,8 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         // Update Info, since we modified data for this Library
-        Result<UserInfo> updateInfoResult = this.updateInfo(this.info);
+//        Result<UserInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<UserInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UserInfo>) updateInfoResult).exception());
 

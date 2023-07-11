@@ -119,21 +119,21 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
         // Automatically upsert the User into the Library's User Register
         // - Private libraries are open to all users, so we don't need to check if the user is registered.
-        Result<UUID2<User>> addRegisteredUserResult = this.info.registerUser(user.id());
+        Result<UUID2<User>> addRegisteredUserResult = this.info().registerUser(user.id());
         if (addRegisteredUserResult instanceof Result.Failure)
             return new Result.Failure<>(new Exception("Failed to register User in Library, userId: " + user.id()));
 
         if (!isForOnlyOneBook) {
             // note: PrivateLibraries bypass all normal Library User Account checks
-            return super.info.checkOutPrivateLibraryBookToUser(book, user);
+            return super.info().checkOutPrivateLibraryBookToUser(book, user);
         }
 
         // Orphan Libraries can only check out 1 Book to 1 User.
-        if (this.info.findAllKnownBookIds().size() != 1)
+        if (this.info().findAllKnownBookIds().size() != 1)
             return new Result.Failure<>(new Exception("Orphan Private Library can only check-out 1 Book to Users, bookId: " + book.id()));
 
         // Only allow check out if the Book Id matches the initial Book Id that created this Orphan Library.
-        Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
+        Set<UUID2<Book>> bookIds = this.info().findAllKnownBookIds();
         @SuppressWarnings("unchecked")
         UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0];  // there should only be 1 bookId
         if (!firstBookId.equals(book.id()))
@@ -144,7 +144,7 @@ public class PrivateLibrary extends Library implements IUUID2 {
             return new Result.Failure<>(new Exception("Failed to check-out Book from Private Library, bookId: " + book.id()));
 
         // Update the Info
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return checkOutResult;
@@ -157,14 +157,14 @@ public class PrivateLibrary extends Library implements IUUID2 {
 
         if (!isForOnlyOneBook) {
             // note: we bypass all normal Library User Account checking
-            return super.info.checkInPrivateLibraryBookFromUser(book, user);
+            return super.info().checkInPrivateLibraryBookFromUser(book, user);
         }
 
         // Orphan Libraries can only check in 1 Book from Users.
-        if (this.info.findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id()));
+        if (this.info().findAllKnownBookIds().size() != 0) return new Result.Failure<>(new Exception("Orphan Private Library can only check-in 1 Book from Users, bookId: " + book.id()));
 
         // Only allow checkIn if the BookId matches the initial BookId that created this Orphan PrivateLibrary.
-        Set<UUID2<Book>> bookIds = this.info.findAllKnownBookIds();
+        Set<UUID2<Book>> bookIds = this.info().findAllKnownBookIds();
         @SuppressWarnings("unchecked")
         UUID2<Book> firstBookId = (UUID2<Book>) bookIds.toArray()[0]; // there should only be 1 BookId
         if (!firstBookId.equals(book.id())) {
@@ -172,11 +172,11 @@ public class PrivateLibrary extends Library implements IUUID2 {
         }
 
         // note: we bypass all normal Library User Account checking
-        Result<Book> checkInResult = super.info.checkInPrivateLibraryBookFromUser(book, user);
+        Result<Book> checkInResult = super.info().checkInPrivateLibraryBookFromUser(book, user);
         if (checkInResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInResult).exception());
 
         // Update the Info
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return checkInResult;

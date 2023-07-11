@@ -142,6 +142,11 @@ public class Book extends Role<BookInfo> implements IUUID2 {
         return sourceLibrary;
     }
 
+    @Override
+    public String toString() {
+        return this.info().toPrettyJson(context);
+    }
+
     /////////////////////////////////////
     // IRole/UUID2 Required Overrides  //
     /////////////////////////////////////
@@ -150,30 +155,18 @@ public class Book extends Role<BookInfo> implements IUUID2 {
     public Result<BookInfo> fetchInfoResult() {
         // context.log.d(this,"Book (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
-        infoResult = this.repo.fetchBookInfo(this.id());
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        this.info = ((Result.Success<BookInfo>) infoResult).value();
-
-        return infoResult;
+        return this.repo.fetchBookInfo(this.id());
     }
 
     @Override
     public Result<BookInfo> updateInfo(@NotNull BookInfo updatedInfo) {
-        // Update self optimistically
-        super.updateInfo(updatedInfo);
+        // context.log.d(this,"Book (" + this.id.toString() + ") - updateInfo"); // LEAVE for debugging
 
-        // Update the repo
-        Result<BookInfo> infoResult = this.repo.updateBookInfo(updatedInfo);
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
+        // Optimistically Update the Cached Book
+        super.updateFetchInfoResult(new Result.Success<>(updatedInfo));
 
-        // Update self with the Repo Result
-        this.info = ((Result.Success<BookInfo>) infoResult).value();
-        return infoResult;
+        // Update the Repo
+        return this.repo.updateBookInfo(updatedInfo);
     }
 
     @Override

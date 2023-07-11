@@ -4,6 +4,7 @@ import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.IUUID2;
 import org.elegantobjects.jpages.LibraryApp.common.util.Result;
 import org.elegantobjects.jpages.LibraryApp.common.util.uuid2.UUID2;
 import org.elegantobjects.jpages.LibraryApp.domain.account.data.AccountInfo;
+import org.elegantobjects.jpages.LibraryApp.domain.common.data.info.Info;
 import org.elegantobjects.jpages.LibraryApp.domain.library.data.LibraryInfo;
 import org.elegantobjects.jpages.LibraryApp.domain.library.data.LibraryInfoRepo;
 import org.elegantobjects.jpages.LibraryApp.domain.user.User;
@@ -111,32 +112,18 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
     public Result<LibraryInfo> fetchInfoResult() {
         // context.log.d(this,"Library (" + this.id.toString() + ") - fetchInfoResult"); // LEAVE for debugging
 
-        infoResult = this.repo.fetchLibraryInfo(this.id());
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        this.info = ((Result.Success<LibraryInfo>) infoResult).value();
-
-        return infoResult;
+        return this.repo.fetchLibraryInfo(this.id());
     }
 
     @Override
     public Result<LibraryInfo> updateInfo(@NotNull LibraryInfo updatedInfo) {
         // context.log.d(this,"Library (" + this.id.toString() + ") - updateInfo, newInfo: " + newInfo.toString());  // LEAVE for debugging
 
-        // Update self optimistically
-        super.updateInfo(updatedInfo);
+        // Optimistically Update the Cached LibraryInfo
+        super.updateFetchInfoResult(new Result.Success<>(updatedInfo));
 
         // Update the Repo
-        Result<LibraryInfo> infoResult = this.repo.updateLibraryInfo(updatedInfo);
-        if (infoResult instanceof Result.Failure) {
-            return infoResult;
-        }
-
-        // Update self with the Repo result
-        super.updateInfo(((Result.Success<LibraryInfo>) infoResult).value());
-        return infoResult;
+        return this.repo.updateLibraryInfo(updatedInfo);
     }
 
     @Override
@@ -179,12 +166,12 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("User has exceeded maximum fines, userId: " + user.id()));
 
         // Check out Book to User
-        Result<Book> checkOutBookResult = this.info.checkOutPublicLibraryBookToUser(book, user);
+        Result<Book> checkOutBookResult = this.info().checkOutPublicLibraryBookToUser(book, user);
         if (checkOutBookResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<Book>) checkOutBookResult).exception());
 
         // Update Info, since we modified data for this Library
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
@@ -197,11 +184,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         if (isUnableToFindOrRegisterUser(user)) return new Result.Failure<>(new Exception("User is not known, id: " + user.id()));
 
-        Result<Book> checkInBookResult = this.info.checkInPublicLibraryBookFromUser(book, user);
+        Result<Book> checkInBookResult = this.info().checkInPublicLibraryBookFromUser(book, user);
         if (checkInBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkInBookResult).exception());
 
         // Update Info, since we modified data for this Library
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
@@ -223,7 +210,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (checkOutBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) checkOutBookResult).exception());
 
         // Update Info, since we modified data for this Library
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(bookToTransfer);
@@ -248,23 +235,23 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("Book's Source Library is not known, bookId: " + bookToTransfer.id()));
 
         // Check if Book is known at `from` Source Library
-        if(!fromSourceLibrary.info.isKnownBook(bookToTransfer))
+        if(!fromSourceLibrary.info().isKnownBook(bookToTransfer))
             return new Result.Failure<>(new Exception("Book is not known at from Source Library, bookId: " + bookToTransfer.id()));
 
 
         // Remove Book from Library Inventory of Books at `from` Source Library
-        Result<UUID2<Book>> removeBookResult = fromSourceLibrary.info.removeTransferringBookFromInventory(bookToTransfer);
+        Result<UUID2<Book>> removeBookResult = fromSourceLibrary.info().removeTransferringBookFromInventory(bookToTransfer);
         if (removeBookResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<Book>>) removeBookResult).exception());
 
         // Update `from` Source Library Info, bc data was modified for `from` Source Library
-        Result<LibraryInfo> updateInfoResult = fromSourceLibrary.updateInfo(fromSourceLibrary.info);
+        Result<LibraryInfo> updateInfoResult = fromSourceLibrary.updateInfo(fromSourceLibrary.info());
         if (updateInfoResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
 
         // Add Book to this Library's Inventory of Books
-        Result<UUID2<Book>> addBookResult = this.info.addTransferringBookToInventory(bookToTransfer);
+        Result<UUID2<Book>> addBookResult = this.info().addTransferringBookToInventory(bookToTransfer);
         if (addBookResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<Book>>) addBookResult).exception());
 
@@ -275,7 +262,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(((Result.Failure<Book>) transferredBookResult).exception());
 
         // Update Info, bc data was modified for this Library
-        Result<LibraryInfo> updateInfoResult2 = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult2 = this.updateInfo(this.info());
         if (updateInfoResult2 instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult2).exception());
 
@@ -299,11 +286,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
 
         // Automatically register a new User entry in the Library (if not already known)
         // Note: todo - In a real system, this would be a separate step, and the User would have to confirm their registration.
-        Result<UUID2<User>> addRegisteredUserResult = this.info.registerUser(user.id());
+        Result<UUID2<User>> addRegisteredUserResult = this.info().registerUser(user.id());
         if (addRegisteredUserResult instanceof Result.Failure) return true;
 
         // Update Info, bc data was modified for this Library
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return true;
 
         return false;
@@ -313,7 +300,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library(%s) Book id: %s\n", this.id(), book.id()));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isKnownBook(book);
+        return this.info().isKnownBook(book);
     }
     public boolean isUnknownBook(@NotNull Book book) {
         return !isKnownBook(book);
@@ -323,21 +310,21 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) User id: %s", this.id(), user.id()));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isKnownUser(user);
+        return this.info().isKnownUser(user);
     }
 
     public boolean isBookAvailable(@NotNull Book book) {
         context.log.d(this, format("Library (%s) Book id: %s\n", this.id(), book.id()));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookAvailableToCheckout(book);
+        return this.info().isBookAvailableToCheckout(book);
     }
 
     public boolean isBookCheckedOutByAnyUser(@NotNull Book book) {  // todo return Result<>?
         context.log.d(this, format("Library (%s) Book id: %s", this.id(), book.id()));
         if (fetchInfoFailureReason() != null) return false;
 
-        return this.info.isBookIdCheckedOutByAnyUser(book.id());
+        return this.info().isBookIdCheckedOutByAnyUser(book.id());
     }
 
     public Result<User> getUserOfCheckedOutBook(@NotNull Book book) {
@@ -346,7 +333,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // get the User's id from the Book checkout record
-        Result<UUID2<User>> userIdResult = this.info.findUserIdOfCheckedOutBook(book);
+        Result<UUID2<User>> userIdResult = this.info().findUserIdOfCheckedOutBook(book);
         if (userIdResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UUID2<User>>) userIdResult).exception());
         UUID2<User> userId = ((Result.Success<UUID2<User>>) userIdResult).value();
@@ -372,7 +359,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
             return new Result.Failure<>(new Exception("User is not known, userId: " + user.id()));
         }
 
-        Result<ArrayList<UUID2<Book>>> entriesResult = this.info.findAllCheckedOutBookIdsByUserId(user.id());
+        Result<ArrayList<UUID2<Book>>> entriesResult = this.info().findAllCheckedOutBookIdsByUserId(user.id());
         if (entriesResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<ArrayList<UUID2<Book>>>) entriesResult).exception());
         }
@@ -391,7 +378,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, "Library (" + this.id() + ")");
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<HashMap<UUID2<Book>, Long>> entriesResult = this.info.calculateAvailableBookIdToCountOfAvailableBooksMap();
+        Result<HashMap<UUID2<Book>, Long>> entriesResult = this.info().calculateAvailableBookIdToCountOfAvailableBooksMap();
         if (entriesResult instanceof Result.Failure) {
             return new Result.Failure<>(((Result.Failure<HashMap<UUID2<Book>, Long>>) entriesResult).exception());
         }
@@ -425,11 +412,11 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         context.log.d(this, format("Library (%s) book: %s, count: %s", this.id(), book, count));
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
-        Result<UUID2<Book>> addBookResult =  this.info.addTestBook(book.id(), count);
+        Result<UUID2<Book>> addBookResult =  this.info().addTestBook(book.id(), count);
         if (addBookResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<UUID2<Book>>) addBookResult).exception());
 
         // Update the Info
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
@@ -449,7 +436,7 @@ public class Library extends Role<LibraryInfo> implements IUUID2 {
         if (transferResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<Book>) transferResult).exception());
 
         // Update the Info
-        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info);
+        Result<LibraryInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure) return new Result.Failure<>(((Result.Failure<LibraryInfo>) updateInfoResult).exception());
 
         return new Result.Success<>(book);
