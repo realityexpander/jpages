@@ -27,8 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 0.11
 **/
 public interface Info<TInfo extends Model> {
-    // Note: Requires a field named `info` of type `AtomicReference<TInfo>` (todo is there a way to enforce this in java?)
-    // private final AtomicReference<TInfo> info;
+    // Note: Implementation requires a `AtomicReference<TInfo>` field named `info` (todo is there a way to enforce this in java?)
+    // private final AtomicReference<TInfo> info;   // <-- this is *REQUIRED* in the Role superclass
 
     UUID2<?> id();                        // Return the UUID2 of the Info object.
     TInfo fetchInfo();                    // Fetch data for the Info from server/DB.
