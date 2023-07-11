@@ -113,6 +113,7 @@ advantages and disadvantages.
  
 ### Some Useful Design Choice Departures from Strict BOOP
 
+- Use of a Model and DTO/Entity layer to separate the Domain layer from the Data layer and manage `Info` data transfer.
 - Some constructors use code for validation and importing JSON and will throw exceptions when not valid. These are the exceptional cases and not normal happy path.
 - Some constructors accept `null` values to indicate “use a default value here” but not used anywhere else in the App. All values passed around the Domain layer must be non-null.
 - I had to make `id` of objects public and mutable to work with Gson json importing, I don’t know a workaround for it.
