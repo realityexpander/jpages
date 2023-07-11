@@ -19,9 +19,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Book Role Object - Only interacts with its own repository, Context, and other Role Objects<br>
  * <br>
- * Note: Use of <b>@Nullable</b> for <b>sourceLibrary</b> indicates to <i>"use default value"</i><br>
- * <br>
- * Look at this.pickSourceLibrary() for more information.
+ * Note: Use of <b>@Nullable</b> for <b>sourceLibrary</b> indicates to <i>"use default value."</i><br>
+ * Look at <b>{@code Book.pickSourceLibrary()}</b> for more information.
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11

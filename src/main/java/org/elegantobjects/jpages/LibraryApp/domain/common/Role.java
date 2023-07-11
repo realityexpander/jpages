@@ -320,8 +320,10 @@ public abstract class Role<TDomainInfo extends DomainInfo>
     }
 
     public void updateFetchInfoResult(Result<TDomainInfo> updatedInfoResult) {
+        // Save the result of the fetch for later use
         this.infoResult.getAndSet(updatedInfoResult);
 
+        // Update the cached info if the fetch was successful
         if(updatedInfoResult instanceof Result.Success) {
             Info.super.updateCachedInfo(
                 ((Result.Success<TDomainInfo>) updatedInfoResult).value()
