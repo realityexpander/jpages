@@ -50,13 +50,13 @@ public class AccountInfo extends DomainInfo
 
     public
     AccountInfo(
-            @NotNull UUID2<Account> id,  // UUID should match User's UUID
-            @NotNull String name,
-            @NotNull AccountStatus accountStatus,
-            int currentFinePennies,
-            int maxAcceptedBooks,
-            int maxFinePennies,
-            @NotNull HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap
+        @NotNull UUID2<Account> id,  // UUID should match User's UUID
+        @NotNull String name,
+        @NotNull AccountStatus accountStatus,
+        int currentFinePennies,
+        int maxAcceptedBooks,
+        int maxFinePennies,
+        @NotNull HashMap<Long, AccountAuditLogItem> timeStampToAccountAuditLogItemMap
     ) {
         super(id);
         this.userId = new UUID2<>(id); // set the Accounts' User UUID to match the Account's UUID
@@ -79,7 +79,8 @@ public class AccountInfo extends DomainInfo
             new HashMap<>()
         );
     }
-    public AccountInfo(@NotNull AccountInfo accountInfo) {
+    public
+    AccountInfo(@NotNull AccountInfo accountInfo) {
         this(
             accountInfo.id(),
             accountInfo.name,

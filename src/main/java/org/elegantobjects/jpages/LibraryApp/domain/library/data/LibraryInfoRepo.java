@@ -14,7 +14,9 @@ import java.util.Objects;
 /**
  * LibraryInfoRepo is a repository for LibraryInfo objects.<br>
  * <br>
- * Holds Library info for all the libraries in the system (simple CRUD operations).<br>
+ * Holds Library info for all the libraries in the system (simple CRUD operations).
+ * <br>
+ * Simulates a database on a server via in-memory HashMap.<br>
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11

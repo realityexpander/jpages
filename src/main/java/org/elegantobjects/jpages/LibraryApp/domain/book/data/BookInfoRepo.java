@@ -18,6 +18,8 @@ import java.util.Map;
  * BookInfoRepo is a repository for the BookInfo class.<br>
  * <br>
  * Business logic for Book Repo (simple CRUD operations; converts to/from DTOs/Entities/Domains)
+ * <br>
+ * Simulates a database on a server via in-memory HashMap.<br>
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11

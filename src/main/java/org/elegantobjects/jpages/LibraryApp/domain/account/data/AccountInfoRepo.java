@@ -10,7 +10,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * AccountInfoRepo is a Repo for AccountInfo objects.<br>
  * <br>
- * Holds Account info for all the users in the system (simple CRUD operations)
+ * Holds Account info for all the users in the system (simple CRUD operations)<br>
+ * <br>
+ * Simulates a database on a server via in-memory HashMap.<br>
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11

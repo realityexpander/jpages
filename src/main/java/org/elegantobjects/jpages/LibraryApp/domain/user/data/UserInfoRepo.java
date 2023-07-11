@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
  * UserInfoRepo is a repository for UserInfo objects.<br>
  * <br>
  * Holds User info for all the users in the system (simple CRUD operations).<br>
+ * <br>
+ * Simulates a database on a server via in-memory HashMap.<br>
  *
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
