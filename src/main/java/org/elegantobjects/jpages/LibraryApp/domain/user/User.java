@@ -245,7 +245,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
             return false;
         }
 
-//        int numPublicLibraryBooksAccepted = this.info.calculateAmountOfAcceptedPublicLibraryBooks();
         int numPublicLibraryBooksAccepted = this.info().calculateAmountOfAcceptedPublicLibraryBooks();
 
         // Note: This User Role Object delegates to its internal Account Role Object.
@@ -256,7 +255,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         context.log.d(this,"User (" + this.id() + "), book: " + book.id());
         if (fetchInfoFailureReason() != null) return false;
 
-//        return this.info.isBookIdAcceptedByThisUser(book.id());
         return this.info().isBookIdAcceptedByThisUser(book.id());
     }
 
@@ -267,7 +265,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         // Create the list of Domain Books from the list of Accepted Book ids
         ArrayList<Book> books = new ArrayList<>();
         for (Map.Entry<UUID2<Book>, UUID2<Library>> entry :
-//                this.info.findAllAcceptedBookIdToLibraryIdMap().entrySet()
                 this.info().findAllAcceptedBookIdToLibraryIdMap().entrySet()
         ) {
             UUID2<Book> bookId = entry.getKey();
@@ -290,7 +287,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         if (fetchInfoFailureReason() != null) return new Result.Failure<>(new Exception(fetchInfoFailureReason()));
 
         // Check this User has the Book
-//        if (!this.info.isBookIdAcceptedByThisUser(book.id()))
         if (!this.info().isBookIdAcceptedByThisUser(book.id()))
             return new Result.Failure<>(new Exception("User (" + this.id() + ") does not have book (" + book.id() + ")"));
 
@@ -330,7 +326,6 @@ public class User extends Role<UserInfo> implements IUUID2 {
         }
 
         // Update Info, since we modified data for this Library
-//        Result<UserInfo> updateInfoResult = this.updateInfo(this.info);
         Result<UserInfo> updateInfoResult = this.updateInfo(this.info());
         if (updateInfoResult instanceof Result.Failure)
             return new Result.Failure<>(((Result.Failure<UserInfo>) updateInfoResult).exception());
