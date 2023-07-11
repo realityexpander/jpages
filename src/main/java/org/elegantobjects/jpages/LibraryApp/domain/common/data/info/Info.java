@@ -16,11 +16,12 @@ import java.util.concurrent.atomic.AtomicReference;
     to/from the Domain to/from Database/Api.<br>
  <ul>
    <li>The <b>{@code Info}</b> interface defines the logic to update and fetch the {Domain}Info object.</li>
+   <li>It is the "single source of truth" for the Domain object's mutable data.</li>
+   <br>
    <li><b>{@code TInfo}</b> - A required {Domain}Info subclass that contains all business logic to mutate
        the 'Info' object, ie: <b>{@code BookInfo}</b> or <b>{@code EntityLibraryInfo}</b>.</li>
    <li><b>{@code AtomicReference<TInfo> info}</b> - Is a required thread-safe cache object for the Role's "Info"
           and is usually defined in the Role superclass.</li>
-   <li>It is the "single source of truth" for the Domain object's mutable data.</li>
  </ul>
  * @author Chris Athanas (realityexpanderdev@gmail.com)
  * @since 0.11
