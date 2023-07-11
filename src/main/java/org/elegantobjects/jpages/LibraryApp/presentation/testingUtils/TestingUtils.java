@@ -36,9 +36,62 @@ public class TestingUtils {
         this.context = context;
     }
 
+    ///////////////////////////
+    // Book Repo, DB and API //
+    ///////////////////////////
+
     public void populateFakeBookInfoInBookRepoDBandAPI() {
         populateDBWithFakeBookInfo();
         populateApiWithFakeBookInfo();
+    }
+
+    public void populateDBWithFakeBookInfo() {
+        for (int i = 0; i < 10; i++) {
+            final int id = 1000+i*100;
+
+            Result<BookInfo> result = context.bookInfoRepo()
+                    .upsertTestEntityBookInfoToDB(
+                            new EntityBookInfo(
+                                    UUID2.createFakeUUID2(id, Book.class),
+                                    "Title " + id,
+                                    "Author " + id,
+                                    "Description " + id,
+                                    "Some extra info from the Entity" + id,
+                                    Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                                    Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                                    false
+                            )
+                    );
+
+            if (result instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<BookInfo>) result).exception();
+                context.log.d(this, exception.getMessage());
+            }
+        }
+    }
+
+    public void populateApiWithFakeBookInfo() {
+        for (int i = 0; i < 10; i++) {
+            final int id = 1000+i*100;
+
+            Result<BookInfo> result = context.bookInfoRepo().upsertTestDTOBookInfoToApi(
+                    new DTOBookInfo(
+                            UUID2.createFakeUUID2(id, Book.class),
+                            "Title " + id,
+                            "Author " + id,
+                            "Description " + id,
+                            "Some extra info from the DTO" + id,
+                            Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                            Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                            false
+                    )
+            );
+
+            if (result instanceof Result.Failure) {
+                Exception exception = ((Result.Failure<BookInfo>) result).exception();
+                context.log.d(this, exception.getMessage());
+            }
+        }
     }
 
     public void printBookInfoDBandAPIEntries() {
@@ -53,49 +106,34 @@ public class TestingUtils {
         System.out.print("\n");
     }
 
-    public Result<LibraryInfo> createFakeLibraryInfoInLibraryInfoRepo(
-        final Integer id
-    ) {
-        Integer someNumber = id;
-        if (someNumber == null) someNumber = 1;
-
-        return context.libraryInfoRepo()
-            .upsertLibraryInfo(
-                new LibraryInfo(
-                    UUID2.createFakeUUID2(someNumber, Library.class), // uses DOMAIN id
-                    "Library " + someNumber
-                )
-            );
+    public Result<BookInfo> addFakeBookInfoToBookInfoRepo(final Integer id) {
+        final BookInfo bookInfo = createFakeBookInfo(id);
+        return context.bookInfoRepo().upsertBookInfo(bookInfo);
     }
 
+    public BookInfo createFakeBookInfo(final Integer id) {
+        Integer fakeId = id;
+        if (fakeId == null) fakeId = 1;
 
-    public @Nullable Result<AccountInfo> createFakeAccountInfoInAccountRepo(
-        final Integer id
-    ) {
-        Integer someNumber = id;
-        if (someNumber == null) someNumber = 1;
+        UUID2<Book> uuid2;
+        uuid2 = UUID2.createFakeUUID2(fakeId, Book.class);
 
-        Result<AccountInfo> accountInfoResult = context.accountInfoRepo()
-            .upsertAccountInfo(
-                new AccountInfo(
-                    UUID2.createFakeUUID2(someNumber, Account.class), // uses DOMAIN id
-                    "Account for User " + someNumber
-                )
-            );
-
-        if (accountInfoResult instanceof Result.Failure) {
-            context.log.d(this,"Account Error: " + ((Result.Failure<AccountInfo>) accountInfoResult).exception().getMessage());
-            return null;
-        }
-
-        AccountInfo accountInfo = ((Result.Success<AccountInfo>) accountInfoResult).value();
-        accountInfo.addTestAuditLogMessage("AccountInfo created for User " + someNumber);
-
-        return accountInfoResult;
+        return new BookInfo(
+                uuid2,
+                "Book " + fakeId,
+                "Author " + fakeId,
+                "Description " + fakeId,
+                Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
+                false
+        );
     }
-    public @Nullable Result<UserInfo> createFakeUserInfoInUserInfoRepo(
-        final Integer id
-    ) {
+
+    ////////////////
+    // User Repo  //
+    ////////////////
+
+    public @Nullable Result<UserInfo> createFakeUserInfoInUserInfoRepo(final Integer id) {
         Integer someNumber = id;
         if (someNumber == null) someNumber = 1;
 
@@ -116,76 +154,31 @@ public class TestingUtils {
         return upsertUserInfoResult;
     }
 
-    public Result<BookInfo> addFakeBookInfoToBookInfoRepo(final Integer id) {
-        final BookInfo bookInfo = createFakeBookInfo(id);
-        return context.bookInfoRepo().upsertBookInfo(bookInfo);
-    }
+    ///////////////////
+    // Account Repo  //
+    ///////////////////
 
-    public BookInfo createFakeBookInfo(final Integer id) {
-        Integer fakeId = id;
-        if (fakeId == null) fakeId = 1;
+    public @Nullable Result<AccountInfo> createFakeAccountInfoInAccountRepo(final Integer id) {
+        Integer someNumber = id;
+        if (someNumber == null) someNumber = 1;
 
-        UUID2<Book> uuid2;
-        uuid2 = UUID2.createFakeUUID2(fakeId, Book.class);
+        Result<AccountInfo> accountInfoResult = context.accountInfoRepo()
+                .upsertAccountInfo(
+                        new AccountInfo(
+                                UUID2.createFakeUUID2(someNumber, Account.class), // uses DOMAIN id
+                                "Account for User " + someNumber
+                        )
+                );
 
-        return new BookInfo(
-            uuid2,
-            "Book " + fakeId,
-            "Author " + fakeId,
-            "Description " + fakeId,
-            Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
-            Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
-            false
-        );
-    }
-
-    public void populateDBWithFakeBookInfo() {
-        for (int i = 0; i < 10; i++) {
-            final int id = 1000+i*100;
-
-            Result<BookInfo> result = context.bookInfoRepo()
-                .upsertTestEntityBookInfoToDB(
-                    new EntityBookInfo(
-                        UUID2.createFakeUUID2(id, Book.class),
-                        "Title " + id,
-                        "Author " + id,
-                        "Description " + id,
-                        "Some extra info from the Entity" + id,
-                        Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
-                        Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
-                    false
-                    )
-            );
-
-            if (result instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<BookInfo>) result).exception();
-                context.log.d(this, exception.getMessage());
-            }
+        if (accountInfoResult instanceof Result.Failure) {
+            context.log.d(this,"Account Error: " + ((Result.Failure<AccountInfo>) accountInfoResult).exception().getMessage());
+            return null;
         }
-    }
 
-    public void populateApiWithFakeBookInfo() {
-        for (int i = 0; i < 10; i++) {
-            final int id = 1000+i*100;
+        AccountInfo accountInfo = ((Result.Success<AccountInfo>) accountInfoResult).value();
+        accountInfo.addTestAuditLogMessage("AccountInfo created for User " + someNumber);
 
-            Result<BookInfo> result = context.bookInfoRepo().upsertTestDTOBookInfoToApi(
-                new DTOBookInfo(
-                    UUID2.createFakeUUID2(id, Book.class),
-                    "Title " + id,
-                    "Author " + id,
-                    "Description " + id,
-                    "Some extra info from the DTO" + id,
-                    Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
-                    Instant.parse("2023-01-01T00:00:00.00Z").toEpochMilli(),
-                    false
-                )
-            );
-
-            if (result instanceof Result.Failure) {
-                Exception exception = ((Result.Failure<BookInfo>) result).exception();
-                context.log.d(this, exception.getMessage());
-            }
-        }
+        return accountInfoResult;
     }
 
     public void populateAccountWithFakeAuditMessages(@NotNull UUID2<Account> accountId, int numberOfMessagesToCreate) {
@@ -202,6 +195,23 @@ public class TestingUtils {
                     "Test Audit message " + i + " for account: " + accountInfo.id()
             );
         }
+    }
+
+    ///////////////////
+    // Library Repo  //
+    ///////////////////
+
+    public Result<LibraryInfo> createFakeLibraryInfoInLibraryInfoRepo(final Integer id) {
+        Integer someNumber = id;
+        if (someNumber == null) someNumber = 1;
+
+        return context.libraryInfoRepo()
+                .upsertLibraryInfo(
+                        new LibraryInfo(
+                                UUID2.createFakeUUID2(someNumber, Library.class), // uses DOMAIN id
+                                "Library " + someNumber
+                        )
+                );
     }
 
     public void populateLibraryWithFakeBooks(@NotNull UUID2<Library> libraryId, int numberOfBooksToCreate) {
