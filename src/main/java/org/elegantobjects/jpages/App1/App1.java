@@ -7,9 +7,11 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public final class App1 extends IOException {
 
@@ -53,7 +55,7 @@ public final class App1 extends IOException {
                 final StringBuilderOutput output1 = new StringBuilderOutput(builder);
                 final StringOutput output = new StringOutput("");
 
-                // Make the request
+                // Make the request - simple echo for now
                 resource.printTo(output);
 
                 //return builder.toString();

@@ -96,9 +96,9 @@ public class LibraryInfo extends DomainInfo
         if (checkedOutUUID2Book instanceof Result.Failure)
             return new Result.Failure<>(new Exception(((Result.Failure<UUID2<Book>>) checkedOutUUID2Book).exception().getMessage()));
 
-        Result<ArrayList<Book>> unacceptBookResult = user.acceptBook(book);
-        if (unacceptBookResult instanceof Result.Failure)
-            return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<Book>>) unacceptBookResult).exception().getMessage()));
+        Result<ArrayList<Book>> acceptBookResult = user.acceptBook(book);
+        if (acceptBookResult instanceof Result.Failure)
+            return new Result.Failure<>(new Exception(((Result.Failure<ArrayList<Book>>) acceptBookResult).exception().getMessage()));
 
         return new Result.Success<>(book);
     }
